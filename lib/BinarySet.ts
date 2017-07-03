@@ -67,7 +67,7 @@ export class BinarySet implements Set<BinaryValue> {
     }
 
     keys(): IterableIterator<BinaryValue> {
-        return this._values[Symbol.iterator]();
+        return this[Symbol.iterator]();
     }
 
     get size(): number {
@@ -75,7 +75,7 @@ export class BinarySet implements Set<BinaryValue> {
     }
 
     values(): IterableIterator<BinaryValue> {
-        return this._values[Symbol.iterator]();
+        return this[Symbol.iterator]();
     }
 
     [Symbol.iterator](): IterableIterator<BinaryValue> {
