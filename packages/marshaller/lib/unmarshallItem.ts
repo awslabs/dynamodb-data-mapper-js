@@ -16,6 +16,15 @@ import {
 } from "aws-sdk/clients/dynamodb";
 import {InvalidSchemaError} from "./InvalidSchemaError";
 
+/**
+ * Unmarshall a DynamoDB item into a JavaScript value.
+ *
+ * @param schema            Metadata outlining the types to be expected
+ *                          throughout the input
+ * @param input             The value to unmarshall
+ * @param valueConstructor  A zero-argument constructor used to create the
+ *                          object onto which the input should be unmarshalled
+ */
 export function unmarshallItem<T = {[key: string]: any}>(
     schema: Schema,
     input: AttributeMap,

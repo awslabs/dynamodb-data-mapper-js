@@ -9,6 +9,12 @@ import {
 } from "aws-sdk/clients/dynamodb";
 import {BinarySet} from "./BinarySet";
 
+/**
+ * Converts a JavaScript object into a DynamoDB Item.
+ *
+ * @param schema Metadata explaining how the provided input is to be marshalled
+ * @param input JavaScript object to convert
+ */
 export function marshallItem(
     schema: Schema,
     input: {[key: string]: any}
@@ -29,7 +35,17 @@ export function marshallItem(
     return marshalled;
 }
 
-function marshallValue(schemaType: SchemaType, input: any): AttributeValue {
+/**
+ * Converts a value into a DynamoDB AttributeValue.
+ *
+ * @param schemaType    Metadata outlining how the value is to be understood and
+ *                      converted
+ * @param input         Value to convert
+ */
+export function marshallValue(
+    schemaType: SchemaType,
+    input: any
+): AttributeValue {
     if (schemaType.type === 'Binary') {
         if (input.byteLength === 0) {
             return {NULL: true};

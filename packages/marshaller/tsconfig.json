@@ -12,6 +12,7 @@
     "strict": true,
     "declaration": true,
     "stripInternal": true,
-    "sourceMap": true
+    "inlineSources": true,
+    "inlineSourceMap": true
   }
 }
