@@ -150,6 +150,51 @@ describe('isSchemaType', () => {
         });
     });
 
+    describe('Document types', () => {
+        it('should accept Document types', () => {
+            expect(isSchemaType({
+                type: 'Document',
+                members: {
+                    str: {type: 'String'}
+                },
+            })).toBe(true);
+        });
+
+        it('should reject Document types with non-SchemaType members', () => {
+            expect(isSchemaType({
+                type: 'Document',
+                members: {
+                    foo: 'bar',
+                },
+            })).toBe(false);
+        });
+
+        it('should reject Document types without declared members', () => {
+            expect(isSchemaType({
+                type: 'Document'
+            })).toBe(false);
+        });
+
+        it('should accept Document types with a valueConstructor', () => {
+            expect(isSchemaType({
+                type: 'Document',
+                members: {},
+                valueConstructor: Date,
+            })).toBe(true);
+        });
+
+        it(
+            'should reject Document types with a non-function valueConstructor',
+            () => {
+                expect(isSchemaType({
+                    type: 'Document',
+                    members: {},
+                    valueConstructor: 'foo',
+                })).toBe(false);
+            }
+        );
+    });
+
     describe('List types', () => {
         it('should accept List types', () => {
             expect(isSchemaType({

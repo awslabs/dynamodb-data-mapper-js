@@ -107,9 +107,14 @@ export interface DateType extends BaseType {
     type: 'Date';
 }
 
+export interface ZeroArgumentsConstructor<T = any> {
+    new (): T;
+}
+
 export interface DocumentType extends BaseType {
     type: 'Document';
     members: Schema;
+    valueConstructor?: ZeroArgumentsConstructor;
 }
 
 export interface HashType extends BaseType {
@@ -179,19 +184,40 @@ export function isSchemaType(arg: any): arg is SchemaType {
             case 'Custom':
                 return typeof (arg as CustomType<any>).marshall === 'function'
                     && typeof (arg as CustomType<any>).unmarshall === 'function';
-            case 'List':
+            case 'Document': {
+                const {valueConstructor, members} = arg as DocumentType;
+                if (!members || typeof members !== 'object') {
+                    return false;
+                }
+
+                for (let key of Object.keys(members)) {
+                    if (!isSchemaType(members[key])) {
+                        return false;
+                    }
+                }
+
+                return ['function', 'undefined']
+                    .indexOf(typeof valueConstructor) > -1;
+            } case 'List':
             case 'Map':
                 return isSchemaType((arg as ListType).memberType);
             case 'Number':
-                return isKeyableType(arg) && ['boolean', 'undefined'].indexOf(
-                    typeof (arg as NumberType).versionAttribute
-                ) > -1;
-            case 'Tuple':
+                return isKeyableType(arg) && ['boolean', 'undefined']
+                    .indexOf(typeof (arg as NumberType).versionAttribute) > -1;
+            case 'Tuple': {
                 const {members} = arg as TupleType;
-                return Array.isArray(members)
-                    && members.filter(member => !isSchemaType(member))
-                        .length === 0;
-            default:
+                if (!Array.isArray(members)) {
+                    return false;
+                }
+
+                for (let member of members) {
+                    if (!isSchemaType(member)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            } default:
                 return true;
         }
     }

@@ -1,36 +1,11 @@
 import {marshallItem} from "../lib/marshallItem";
 import {Schema} from "../lib/Schema";
-import {CustomType} from "../lib/SchemaType";
+import {CustomType, SchemaType} from "../lib/SchemaType";
 import objectContaining = jasmine.objectContaining;
 import {BinarySet} from "../lib/BinarySet";
 
 describe('marshallItem', () => {
-    it('should marshall fields of scalar types', () => {
-        const scalarFields: Schema = {
-            binary: {type: 'Binary'},
-            boolean: {type: 'Boolean'},
-            'null': {type: 'Null'},
-            number: {type: 'Number'},
-            string: {type: 'String'},
-        };
-        const document = {
-            binary: new ArrayBuffer(15),
-            boolean: false,
-            'null': null,
-            number: 123,
-            string: 'string',
-        };
-
-        expect(marshallItem(scalarFields, document)).toEqual({
-            binary: {B: new Uint8Array(15)},
-            boolean: {BOOL: false},
-            'null': {NULL: true},
-            number: {N: '123'},
-            string: {S: 'string'},
-        });
-    });
-
-    it('should serialize fields to their attributeName if available', () => {
+    it('should serialize fields to their attributeName if provided', () => {
         const schema: Schema = {
             boolean: {
                 type: 'Boolean',
