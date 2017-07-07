@@ -1,0 +1,21 @@
+{
+  "name": "dynamodb-data-mapper-generator",
+  "version": "0.0.0",
+  "main": "index.js",
+  "scripts": {
+    "prepublishOnly": "tsc",
+    "pretest": "tsc",
+    "test": "jest"
+  },
+  "author": "eskewj@amazon.com",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/jest": "^20.0.2",
+    "@types/node": "^8.0.4",
+    "jest": "^20.0.4",
+    "typescript": "^2.3"
+  },
+  "dependencies": {
+    "dynamodb-data-mapper-marshaller": "^0.0.0"
+  }
+}
