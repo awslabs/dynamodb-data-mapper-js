@@ -1,7 +1,6 @@
 {
-  "name": "dynamodb-data-mapper",
+  "name": "dynamodb-data-mapper-omnibus",
   "private": true,
-  "description": "A schema-based data mapper for Amazon DynamoDB",
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "pretest": "tsc -p tsconfig.test.json",
@@ -13,7 +12,7 @@
     "@types/jest": "^20.0.2",
     "@types/node": "^8.0.4",
     "jest": "^20.0.4",
-    "lerna": "^2.0.0-rc.5",
+    "lerna": "^2.0.0",
     "typescript": "^2.3"
   },
   "dependencies": {

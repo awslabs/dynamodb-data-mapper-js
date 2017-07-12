@@ -1,6 +1,6 @@
 import {marshallItem} from "../lib/marshallItem";
 import {Schema} from "../lib/Schema";
-import {CustomType, SchemaType} from "../lib/SchemaType";
+import {CustomType} from "../lib/SchemaType";
 import objectContaining = jasmine.objectContaining;
 import {BinarySet} from "../lib/BinarySet";
 

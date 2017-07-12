@@ -1,4 +1,4 @@
-import {ZeroArgumentsConstructor} from "../../../marshaller/lib/SchemaType";
+import {ZeroArgumentsConstructor} from "../../../mapper/lib/SchemaType";
 import 'reflect-metadata';
 
 export function table<T>(constructor: ZeroArgumentsConstructor<T>): void {

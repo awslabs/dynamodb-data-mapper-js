@@ -1,4 +1,5 @@
-import {Schema} from "dynamodb-data-mapper-marshaller";
+import {Schema} from "dynamodb-data-mapper";
+
 export class Entity {
     constructor(
         private readonly name: string,
@@ -20,6 +21,6 @@ export interface ${this.name} {
     }
 
     private get members(): string {
-
+        return '';
     }
 }

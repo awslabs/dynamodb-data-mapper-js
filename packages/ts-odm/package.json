@@ -17,7 +17,7 @@
     "typescript": "^2.3"
   },
   "dependencies": {
-    "dynamodb-data-mapper-marshaller": "^0.0.0",
+    "dynamodb-data-mapper": "^0.0.0",
     "reflect-metadata": "^0.1.10"
   }
 }
