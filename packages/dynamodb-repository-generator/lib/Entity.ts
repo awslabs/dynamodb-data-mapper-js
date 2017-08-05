@@ -1,4 +1,4 @@
-import {Schema} from "dynamodb-data-mapper";
+import {Schema} from "@aws/dynamodb-data-marshaller";
 
 export class Entity {
     constructor(

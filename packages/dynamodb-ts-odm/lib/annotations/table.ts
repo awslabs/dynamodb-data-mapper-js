@@ -1,4 +1,4 @@
-import {ZeroArgumentsConstructor} from "../../../mapper/lib/SchemaType";
+import {ZeroArgumentsConstructor} from "../../../dynamodb-data-marshaller/lib/SchemaType";
 import 'reflect-metadata';
 
 export function table<T>(constructor: ZeroArgumentsConstructor<T>): void {
