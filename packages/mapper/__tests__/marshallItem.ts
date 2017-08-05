@@ -2,7 +2,7 @@ import {marshallItem} from "../lib/marshallItem";
 import {Schema} from "../lib/Schema";
 import {CustomType} from "../lib/SchemaType";
 import objectContaining = jasmine.objectContaining;
-import {BinarySet} from "../lib/BinarySet";
+import {BinarySet} from "@aws/dynamodb-auto-marshaller";
 
 describe('marshallItem', () => {
     it('should serialize fields to their attributeName if provided', () => {

@@ -5,7 +5,8 @@ import {
     SchemaType, TupleType,
     ZeroArgumentsConstructor,
 } from "./SchemaType";
-import {BinarySet} from "./BinarySet";
+import {InvalidSchemaError} from "./InvalidSchemaError";
+import {BinarySet} from "@aws/dynamodb-auto-marshaller";
 import {
     AttributeMap,
     AttributeValue,
@@ -14,7 +15,6 @@ import {
     NumberSetAttributeValue,
     StringSetAttributeValue,
 } from "aws-sdk/clients/dynamodb";
-import {InvalidSchemaError} from "./InvalidSchemaError";
 
 /**
  * Unmarshall a DynamoDB item into a JavaScript value.

@@ -5,9 +5,6 @@
     "module": "commonjs",
     "strict": true,
     "declaration": true,
-    "stripInternal": true,
-    "inlineSources": true,
-    "inlineSourceMap": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   }

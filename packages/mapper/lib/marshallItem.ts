@@ -7,7 +7,7 @@ import {
     AttributeValue,
     Converter
 } from "aws-sdk/clients/dynamodb";
-import {BinarySet} from "./BinarySet";
+import {BinarySet} from "@aws/dynamodb-auto-marshaller";
 
 /**
  * Converts a JavaScript object into a DynamoDB Item.

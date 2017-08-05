@@ -1,6 +1,6 @@
 import {unmarshallItem} from "../lib/unmarshallItem";
 import {Schema} from "../lib/Schema";
-import {BinarySet} from "../lib/BinarySet";
+import {BinarySet} from "@aws/dynamodb-auto-marshaller";
 import * as AWS from 'aws-sdk';
 
 describe('unmarshallItem', () => {

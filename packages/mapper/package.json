@@ -1,7 +1,7 @@
 {
-  "name": "dynamodb-data-mapper",
+  "name": "@aws/dynamodb-data-marshaller",
   "version": "0.0.0",
-  "description": "A schema-based data mapper for Amazon DynamoDB",
+  "description": "A schema-based data marshaller for Amazon DynamoDB",
   "main": "index.js",
   "scripts": {
     "prepublishOnly": "tsc",
@@ -17,6 +17,7 @@
     "typescript": "^2.3"
   },
   "dependencies": {
+    "@aws/dynamodb-auto-marshaller": "^0.0.0",
     "aws-sdk": "^2.77.0"
   }
 }

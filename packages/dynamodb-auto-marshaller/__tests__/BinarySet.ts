@@ -19,6 +19,7 @@ describe('BinarySet', () => {
             const set = new BinarySet([
                 new Uint8Array([0xde, 0xad]),
                 new Uint8Array([0xbe, 0xef]),
+                new Uint8Array(0),
             ]);
             expect(set.has(new Uint8Array([0xfa, 0xce]))).toBe(false);
 
@@ -166,6 +167,17 @@ describe('BinarySet', () => {
             }
 
             expect(iterations).toBe(set.size);
+        });
+    });
+
+    describe('#[Symbol.toStringTag]', () => {
+        it('should return a static value of "Set"', () => {
+            expect(new BinarySet()[Symbol.toStringTag]).toBe('Set');
+        });
+
+        it('should cause toString to return a Set-identifying string', () => {
+            expect(Object.prototype.toString.call(new BinarySet()))
+                .toBe('[object Set]');
         });
     });
 });

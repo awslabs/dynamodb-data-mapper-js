@@ -1,6 +1,7 @@
 {
-  "name": "@aws/dynamodb-repository-generator",
+  "name": "@aws/dynamodb-auto-marshaller",
   "version": "0.0.0",
+  "description": "A data marshaller that converts JavaScript types into Amazon DynamoDB AttributeValues",
   "main": "index.js",
   "scripts": {
     "prepublishOnly": "tsc",
@@ -16,6 +17,6 @@
     "typescript": "^2.3"
   },
   "dependencies": {
-    "@aws/dynamodb-data-marshaller": "^0.0.0"
+    "aws-sdk": "^2.77.0"
   }
 }

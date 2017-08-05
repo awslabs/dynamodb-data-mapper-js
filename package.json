@@ -16,8 +16,7 @@
     "typescript": "^2.3"
   },
   "dependencies": {
-    "aws-sdk": "^2.77.0",
-    "reflect-metadata": "^0.1.10"
+    "aws-sdk": "^2.77.0"
   },
   "jest": {
     "mapCoverage": true,

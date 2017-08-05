@@ -148,6 +148,10 @@ export class BinarySet implements Set<BinaryValue> {
     [Symbol.iterator](): IterableIterator<BinaryValue> {
         return this._values[Symbol.iterator]();
     }
+
+    get [Symbol.toStringTag](): 'Set' {
+        return 'Set';
+    }
 }
 
 function binaryEquals(a: DataView, b: DataView): boolean {

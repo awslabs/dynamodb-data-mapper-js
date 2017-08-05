@@ -10,9 +10,6 @@
     "downlevelIteration": true,
     "module": "commonjs",
     "strict": true,
-    "declaration": true,
-    "stripInternal": true,
-    "inlineSources": true,
-    "inlineSourceMap": true
+    "declaration": true
   }
 }
