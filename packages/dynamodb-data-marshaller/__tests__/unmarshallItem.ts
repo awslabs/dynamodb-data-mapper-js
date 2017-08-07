@@ -1,7 +1,6 @@
 import {unmarshallItem} from "../lib/unmarshallItem";
 import {Schema} from "../lib/Schema";
 import {BinarySet} from "@aws/dynamodb-auto-marshaller";
-import * as AWS from 'aws-sdk';
 
 describe('unmarshallItem', () => {
     it('should unmarshall fields from their attributeName if provided', () => {
@@ -123,9 +122,9 @@ describe('unmarshallItem', () => {
                 mixedList: [
                     'string',
                     123,
-                    new (AWS as any).util.Buffer(12),
+                    new Uint8Array(12),
                     {foo: 'bar'},
-                    ['one string', 234, new (AWS as any).util.Buffer(5)],
+                    ['one string', 234, new Uint8Array(5)],
                 ]
             });
         });
@@ -262,9 +261,9 @@ describe('unmarshallItem', () => {
                 mixedHash: {
                     foo: 'string',
                     bar: 123,
-                    baz: new (AWS as any).util.Buffer(12),
+                    baz: new Uint8Array(12),
                     fizz: {foo: 'bar'},
-                    buzz: ['one string', 234, new (AWS as any).util.Buffer(5)],
+                    buzz: ['one string', 234, new Uint8Array(5)],
                 }
             });
         });

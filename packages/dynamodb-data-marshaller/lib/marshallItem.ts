@@ -2,12 +2,8 @@ import {Schema} from "./Schema";
 import {SchemaType} from "./SchemaType";
 import {InvalidValueError} from "./InvalidValueError";
 import {InvalidSchemaError} from "./InvalidSchemaError";
-import {
-    AttributeMap,
-    AttributeValue,
-    Converter
-} from "aws-sdk/clients/dynamodb";
-import {BinarySet} from "@aws/dynamodb-auto-marshaller";
+import {AttributeMap, AttributeValue} from "aws-sdk/clients/dynamodb";
+import {BinarySet, Marshaller} from "@aws/dynamodb-auto-marshaller";
 
 /**
  * Converts a JavaScript object into a DynamoDB Item.
@@ -76,11 +72,17 @@ export function marshallValue(
     }
 
     if (schemaType.type === 'Collection') {
+        const autoMarshaller = new Marshaller({
+            onEmpty: 'nullify',
+            onInvalid: 'omit',
+        });
+
         const collected: Array<AttributeValue> = [];
         for (let element of input) {
-            collected.push(
-                Converter.input(element, {convertEmptyValues: true})
-            );
+            const marshalled = autoMarshaller.marshallValue(element);
+            if (marshalled) {
+                collected.push(marshalled);
+            }
         }
 
         return {L: collected};
@@ -109,7 +111,12 @@ export function marshallValue(
     }
 
     if (schemaType.type === 'Hash') {
-        return {M: Converter.marshall(input, {convertEmptyValues: true})};
+        const autoMarshaller = new Marshaller({
+            onEmpty: 'nullify',
+            onInvalid: 'omit',
+        });
+
+        return {M: autoMarshaller.marshallItem(input)};
     }
 
     if (schemaType.type === 'List') {

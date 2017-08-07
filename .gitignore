@@ -1,7 +1,9 @@
 *.d.ts
 *.js
 *.js.map
+
 yarn.lock
+package-lock.json
 
 # Created by .ignore support plugin (hsz.mobi)
 logs

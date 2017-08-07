@@ -2,16 +2,16 @@ import {Schema} from "./Schema";
 import {
     ListType,
     MapType,
-    SchemaType, TupleType,
+    SchemaType,
+    TupleType,
     ZeroArgumentsConstructor,
 } from "./SchemaType";
 import {InvalidSchemaError} from "./InvalidSchemaError";
-import {BinarySet} from "@aws/dynamodb-auto-marshaller";
+import {BinarySet, Marshaller} from "@aws/dynamodb-auto-marshaller";
 import {
     AttributeMap,
     AttributeValue,
     AttributeValueList,
-    Converter,
     NumberSetAttributeValue,
     StringSetAttributeValue,
 } from "aws-sdk/clients/dynamodb";
@@ -67,7 +67,11 @@ function unmarshallValue(schemaType: SchemaType, input: AttributeValue): any {
             return input.BOOL;
         case 'Collection':
         case 'Hash':
-            return Converter.output(input);
+            const autoMarshaller = new Marshaller({
+                onEmpty: 'nullify',
+                onInvalid: 'omit',
+            });
+            return autoMarshaller.unmarshallValue(input);
         case 'Custom':
             return schemaType.unmarshall(input);
         case 'Date':

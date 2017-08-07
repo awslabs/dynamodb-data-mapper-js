@@ -185,6 +185,7 @@ describe('marshallItem', () => {
                 mixedList: [
                     'string',
                     123,
+                    undefined,
                     new ArrayBuffer(12),
                     {foo: 'bar'},
                     ['one string', 234, new ArrayBuffer(5)],
@@ -288,7 +289,14 @@ describe('marshallItem', () => {
                     bar: 123,
                     baz: new ArrayBuffer(12),
                     fizz: {foo: 'bar'},
-                    buzz: ['one string', 234, new ArrayBuffer(5)],
+                    buzz: ['one string', 234, new Uint8Array(5)],
+                    snap: new Set(['foo', 'foo', 'bar', 'bar', 'baz']),
+                    crackle: new Set([0, 1, 2, 3, 0, 1, 2, 3]),
+                    pop: new BinarySet([
+                        new Uint8Array(1),
+                        new Uint8Array(2),
+                        new Uint8Array(3),
+                    ])
                 }
             };
 
@@ -303,9 +311,16 @@ describe('marshallItem', () => {
                             L: [
                                 {S: 'one string'},
                                 {N: '234'},
-                                {B: new ArrayBuffer(5)},
+                                {B: new Uint8Array(5)},
                             ]
                         },
+                        snap: {SS: ['foo', 'bar', 'baz']},
+                        crackle: {NS: ['0', '1', '2', '3']},
+                        pop: {BS: [
+                            new Uint8Array(1),
+                            new Uint8Array(2),
+                            new Uint8Array(3),
+                        ]}
                     },
                 },
             });
