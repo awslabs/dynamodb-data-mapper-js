@@ -34,7 +34,7 @@ export function unmarshallItem<T = {[key: string]: any}>(
         ? new valueConstructor()
         : Object.create(null);
 
-    for (let key of Object.keys(schema)) {
+    for (const key of Object.keys(schema)) {
         const {attributeName = key} = schema[key];
         if (attributeName in input) {
             (unmarshalled as {[key: string]: any})[key] = unmarshallValue(
@@ -117,7 +117,7 @@ function unmarshallList(
     input: AttributeValueList
 ): Array<any> {
     const list: Array<any> = [];
-    for (let element of input) {
+    for (const element of input) {
         list.push(unmarshallValue(schemaType.memberType, element));
     }
 
@@ -129,7 +129,7 @@ function unmarshallMap(
     input: AttributeMap
 ): Map<string, any> {
     const map = new Map<string, any>();
-    for (let key of Object.keys(input)) {
+    for (const key of Object.keys(input)) {
         map.set(key, unmarshallValue(schemaType.memberType, input[key]));
     }
 
@@ -138,7 +138,7 @@ function unmarshallMap(
 
 function unmarshallNumberSet(input: NumberSetAttributeValue): Set<number> {
     const set = new Set<number>();
-    for (let number of input) {
+    for (const number of input) {
         set.add(Number(number));
     }
 
@@ -147,7 +147,7 @@ function unmarshallNumberSet(input: NumberSetAttributeValue): Set<number> {
 
 function unmarshallStringSet(input: StringSetAttributeValue): Set<string> {
     const set = new Set<string>();
-    for (let string of input) {
+    for (const string of input) {
         set.add(string);
     }
 

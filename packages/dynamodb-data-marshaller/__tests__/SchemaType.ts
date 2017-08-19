@@ -24,34 +24,22 @@ describe('isSchemaType', () => {
     describe('keyable types', () => {
         for (let dataType of ['Binary', 'Number', 'String']) {
             it(
-                `should accept ${dataType} type declarations with a keyConfiguration`,
+                `should accept ${dataType} type declarations with a keyType`,
                 () => {
                     expect(isSchemaType({
                         type: dataType,
-                        keyConfiguration: {type: 'HASH'},
+                        keyType: 'HASH',
                     })).toBe(true);
                 }
             );
 
             it(
-                `should reject ${dataType} type declarations with a keyConfiguration without a 'type' property`,
+                `should reject ${dataType} type declarations with an unrecognized keyType`,
                 () => {
                     expect(isSchemaType({
                         type: dataType,
-                        keyConfiguration: {foo: 'HASH'},
+                        keyType: 'foo',
                     })).toBe(false);
-                }
-            );
-
-            it(
-                `should reject ${dataType} type declarations with a scalar keyConfiguration`,
-                () => {
-                    for (let scalar of ['string', 123, null, true]) {
-                        expect(isSchemaType({
-                            type: dataType,
-                            keyConfiguration: scalar,
-                        })).toBe(false);
-                    }
                 }
             );
 

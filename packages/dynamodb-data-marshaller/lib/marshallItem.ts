@@ -17,7 +17,7 @@ export function marshallItem(
 ): AttributeMap {
     const marshalled: AttributeMap = {};
 
-    for (let key of Object.keys(input)) {
+    for (const key of Object.keys(input)) {
         if (key in schema) {
             if (input[key] === undefined) {
                 continue;
@@ -78,7 +78,7 @@ export function marshallValue(
         });
 
         const collected: Array<AttributeValue> = [];
-        for (let element of input) {
+        for (const element of input) {
             const marshalled = autoMarshaller.marshallValue(element);
             if (marshalled) {
                 collected.push(marshalled);
@@ -121,7 +121,7 @@ export function marshallValue(
 
     if (schemaType.type === 'List') {
         const elements = [];
-        for (let member of input) {
+        for (const member of input) {
             elements.push(marshallValue(schemaType.memberType, member));
         }
         return {L: elements};
@@ -134,7 +134,7 @@ export function marshallValue(
                 marshalled[key] = marshallValue(schemaType.memberType, value);
             }
         } else if (typeof input === 'object') {
-            for (let key of Object.keys(input)) {
+            for (const key of Object.keys(input)) {
                 marshalled[key] = marshallValue(
                     schemaType.memberType,
                     input[key]
@@ -239,7 +239,7 @@ function marshallSet<InputType, MarshalledElementType>(
     setTag: 'BS'|'NS'|'SS'
 ): AttributeValue {
     const collected: Array<MarshalledElementType> = [];
-    for (let member of value) {
+    for (const member of value) {
         const marshalled = marshaller(member);
         if (isEmpty(marshalled)) {
             // DynamoDB sets cannot contain empty values
