@@ -17,14 +17,11 @@ export function marshallItem(
 ): AttributeMap {
     const marshalled: AttributeMap = {};
 
-    for (const key of Object.keys(input)) {
-        if (key in schema) {
-            if (input[key] === undefined) {
-                continue;
-            }
-
+    for (const key of Object.keys(schema)) {
+        const value = input[key];
+        if (value !== undefined) {
             const {attributeName = key} = schema[key];
-            marshalled[attributeName] = marshallValue(schema[key], input[key]);
+            marshalled[attributeName] = marshallValue(schema[key], value);
         }
     }
 

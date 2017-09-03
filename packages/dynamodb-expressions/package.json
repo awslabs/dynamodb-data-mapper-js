@@ -1,8 +1,9 @@
 {
-  "name": "@aws/dynamodb-data-marshaller",
+  "name": "@aws/dynamodb-expressions",
   "version": "0.0.0",
-  "description": "A schema-based data marshaller for Amazon DynamoDB",
-  "main": "index.js",
+  "description": "Composable expression objects for Amazon DynamoDB",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
   "scripts": {
     "prepublishOnly": "tsc",
     "pretest": "tsc -p tsconfig.test.json",
@@ -16,9 +17,6 @@
     "jest": "^20.0.4",
     "typescript": "^2.5.2",
     "aws-sdk": "^2.7.0"
-  },
-  "dependencies": {
-    "@aws/dynamodb-auto-marshaller": "^0.0.0"
   },
   "peerDependencies": {
     "aws-sdk": "^2.7.0"

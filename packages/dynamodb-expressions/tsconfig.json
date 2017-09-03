@@ -12,8 +12,7 @@
     "module": "commonjs",
     "strict": true,
     "declaration": true,
-    "stripInternal": true,
-    "inlineSourceMap": true,
-    "inlineSources": true
+    "sourceRoot": "./src",
+    "outDir": "./build"
   }
 }
