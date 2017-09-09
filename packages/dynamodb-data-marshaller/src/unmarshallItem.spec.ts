@@ -1,5 +1,5 @@
-import {unmarshallItem} from "../lib/unmarshallItem";
-import {Schema} from "../lib/Schema";
+import {unmarshallItem} from "./unmarshallItem";
+import {Schema} from "./Schema";
 import {BinarySet} from "@aws/dynamodb-auto-marshaller";
 
 describe('unmarshallItem', () => {

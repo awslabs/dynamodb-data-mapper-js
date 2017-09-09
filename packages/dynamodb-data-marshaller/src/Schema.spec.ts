@@ -1,4 +1,4 @@
-import {isSchema} from "../lib/Schema";
+import {isSchema} from "./Schema";
 
 describe('isSchema', () => {
     it('should reject scalar values', () => {

@@ -2,7 +2,8 @@
   "name": "@aws/dynamodb-data-marshaller",
   "version": "0.0.0",
   "description": "A schema-based data marshaller for Amazon DynamoDB",
-  "main": "index.js",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
   "scripts": {
     "prepublishOnly": "tsc",
     "pretest": "tsc -p tsconfig.test.json",
@@ -18,7 +19,8 @@
     "aws-sdk": "^2.7.0"
   },
   "dependencies": {
-    "@aws/dynamodb-auto-marshaller": "^0.0.0"
+    "@aws/dynamodb-auto-marshaller": "^0.0.0",
+    "@aws/dynamodb-expressions": "^0.0.0"
   },
   "peerDependencies": {
     "aws-sdk": "^2.7.0"

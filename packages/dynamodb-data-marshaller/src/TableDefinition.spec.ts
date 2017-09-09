@@ -1,4 +1,4 @@
-import {isTableDefinition} from "../lib/TableDefinition";
+import {isTableDefinition} from "./TableDefinition";
 
 describe('isTableDefinition', () => {
     it('should accept valid table definitions', () => {
