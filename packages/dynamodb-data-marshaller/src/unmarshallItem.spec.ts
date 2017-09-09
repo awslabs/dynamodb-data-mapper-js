@@ -1,6 +1,10 @@
 import {unmarshallItem} from "./unmarshallItem";
 import {Schema} from "./Schema";
-import {BinarySet} from "@aws/dynamodb-auto-marshaller";
+import {
+    BinarySet,
+    NumberValue,
+    NumberValueSet,
+} from "@aws/dynamodb-auto-marshaller";
 
 describe('unmarshallItem', () => {
     it('should unmarshall fields from their attributeName if provided', () => {
@@ -121,10 +125,10 @@ describe('unmarshallItem', () => {
             expect(unmarshallItem(schema, input)).toEqual({
                 mixedList: [
                     'string',
-                    123,
+                    new NumberValue('123'),
                     new Uint8Array(12),
                     {foo: 'bar'},
-                    ['one string', 234, new Uint8Array(5)],
+                    ['one string', new NumberValue('234'), new Uint8Array(5)],
                 ]
             });
         });
@@ -245,14 +249,24 @@ describe('unmarshallItem', () => {
                         foo: {S: 'string'},
                         bar: {N: '123'},
                         baz: {B: new Uint8Array(12)},
+                        quux: {
+                            BS: [
+                                new Uint8Array(1),
+                                new Uint8Array(2),
+                                new Uint8Array(3),
+                            ]
+                        },
                         fizz: {M: {foo: {S: 'bar'}}},
                         buzz: {
                             L: [
                                 {S: 'one string'},
                                 {N: '234'},
                                 {B: new Uint8Array(5)},
-                            ]
+                            ],
                         },
+                        pop: {
+                            NS: ['123', '234', '345'],
+                        }
                     },
                 },
             };
@@ -260,10 +274,24 @@ describe('unmarshallItem', () => {
             expect(unmarshallItem(schema, input)).toEqual({
                 mixedHash: {
                     foo: 'string',
-                    bar: 123,
+                    bar: new NumberValue('123'),
                     baz: new Uint8Array(12),
+                    quux: new BinarySet([
+                        new Uint8Array(1),
+                        new Uint8Array(2),
+                        new Uint8Array(3),
+                    ]),
                     fizz: {foo: 'bar'},
-                    buzz: ['one string', 234, new Uint8Array(5)],
+                    buzz: [
+                        'one string',
+                        new NumberValue('234'),
+                        new Uint8Array(5)
+                    ],
+                    pop: new NumberValueSet([
+                        new NumberValue('123'),
+                        new NumberValue('234'),
+                        new NumberValue('345'),
+                    ]),
                 }
             });
         });

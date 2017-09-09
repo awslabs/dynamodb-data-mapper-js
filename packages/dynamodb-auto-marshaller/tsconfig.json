@@ -11,6 +11,8 @@
     "downlevelIteration": true,
     "module": "commonjs",
     "strict": true,
-    "declaration": true
+    "declaration": true,
+    "sourceRoot": "./src",
+    "outDir": "./build"
   }
 }

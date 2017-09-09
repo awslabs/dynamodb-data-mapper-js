@@ -31,33 +31,33 @@ export interface UnmarshalledMapAttributeValue {
 export interface MarshallingOptions {
     onEmpty?: EmptyHandlingStrategy;
     onInvalid?: InvalidHandlingStrategy;
-    wrapNumbers?: boolean;
+    unwrapNumbers?: boolean;
 }
 
 export class Marshaller {
     private readonly onEmpty: EmptyHandlingStrategy;
     private readonly onInvalid: InvalidHandlingStrategy;
-    private readonly wrapNumbers: boolean;
+    private readonly unwrapNumbers: boolean;
 
     constructor({
         onEmpty = 'leave',
         onInvalid = 'throw',
-        wrapNumbers = false
+        unwrapNumbers = false
     }: MarshallingOptions = {}) {
         this.onEmpty = onEmpty;
         this.onInvalid = onInvalid;
-        this.wrapNumbers = wrapNumbers;
+        this.unwrapNumbers = unwrapNumbers;
     }
 
     public marshallItem(item: {[key: string]: any}): AttributeMap {
-        const {M} = this.marshallValue(item) || {M: undefined};
-        if (!M && this.onInvalid === 'throw') {
+        const value = this.marshallValue(item);
+        if (!(value && value.M) && this.onInvalid === 'throw') {
             throw new Error(
                 `Cannot serialize ${typeof item} as an attribute map`
             );
         }
 
-        return M || {};
+        return value && value.M ? value.M : {};
     }
 
     public marshallValue(value: any): AttributeValue|undefined {
@@ -93,9 +93,9 @@ export class Marshaller {
         }
 
         if (item.N !== undefined) {
-            return this.wrapNumbers
-                ? new NumberValue(item.N)
-                : Number(item.N);
+            return this.unwrapNumbers
+                ? Number(item.N)
+                : new NumberValue(item.N);
         }
 
         if (item.B !== undefined) {
@@ -119,17 +119,17 @@ export class Marshaller {
         }
 
         if (item.NS !== undefined) {
-            if (this.wrapNumbers) {
-                return new NumberValueSet(
-                    item.NS.map(numberString => new NumberValue(numberString))
-                );
+            if (this.unwrapNumbers) {
+                const set = new Set<number>();
+                for (let member of item.NS) {
+                    set.add(Number(member));
+                }
+                return set;
             }
 
-            const set = new Set<number>();
-            for (let member of item.NS) {
-                set.add(Number(member));
-            }
-            return set;
+            return new NumberValueSet(
+                item.NS.map(numberString => new NumberValue(numberString))
+            );
         }
 
         if (item.BS !== undefined) {
@@ -151,14 +151,19 @@ export class Marshaller {
     }
 
     private marshallComplexType(
-        value: Set<number|string|BinaryValue> |
+        value: Set<number|NumberValue|string|BinaryValue> |
             Map<string, any> |
             Iterable<any> |
             {[key: string]: any} |
-            null
+            null |
+            NumberValue
     ): AttributeValue|undefined {
         if (value === null) {
             return {NULL: true};
+        }
+
+        if (NumberValue.isNumberValue(value)) {
+            return {N: value.toString()};
         }
 
         if (isBinaryValue(value)) {
@@ -311,6 +316,10 @@ function getSetType(arg: any): SetType|'undefined'|'unknown' {
         return type;
     }
 
+    if (NumberValue.isNumberValue(arg)) {
+        return 'number';
+    }
+
     if (ArrayBuffer.isView(arg) || isArrayBuffer(arg)) {
         return 'binary';
     }
@@ -348,6 +357,6 @@ function isStringEmpty(arg: string): boolean {
     return arg.length === 0;
 }
 
-function stringifyNumber(arg: number): string {
+function stringifyNumber(arg: number|NumberValue): string {
     return arg.toString();
 }

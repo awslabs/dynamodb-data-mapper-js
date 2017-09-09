@@ -1,4 +1,4 @@
-import {isArrayBuffer} from "../lib/isArrayBuffer";
+import {isArrayBuffer} from "./isArrayBuffer";
 
 describe('isArrayBuffer', () => {
     const arrayBufferConstructor = ArrayBuffer;

@@ -1,7 +1,7 @@
-import {Marshaller} from "../lib/Marshaller";
-import {BinarySet} from "../lib/BinarySet";
-import {NumberValue} from "../lib/NumberValue";
-import {NumberValueSet} from "../lib/NumberValueSet";
+import {Marshaller} from "./Marshaller";
+import {BinarySet} from "./BinarySet";
+import {NumberValue} from "./NumberValue";
+import {NumberValueSet} from "./NumberValueSet";
 
 describe('Marshaller', () => {
     describe('#marshallItem', () => {
@@ -41,15 +41,15 @@ describe('Marshaller', () => {
         });
 
         it(
-            'should return an empty attribute map when the provided invalid input and the onInvalid option is set to "omit"',
+            'should return an empty attribute map when provided invalid input and the onInvalid option is set to "omit"',
             () => {
                 const marshaller = new Marshaller({onInvalid: "omit"});
                 expect(marshaller.marshallItem('string' as any)).toEqual({});
             }
         );
 
-        it('should throw otherwise', () => {
-            const marshaller = new Marshaller();
+        it('should throw when provided invalid input and the onInvalid option is set to "throw"', () => {
+            const marshaller = new Marshaller({onInvalid: 'throw'});
             expect(() => marshaller.marshallItem('string' as any)).toThrow();
         });
     });
@@ -129,6 +129,12 @@ describe('Marshaller', () => {
             it('should convert numbers to NumberAttributeValues', () => {
                 expect((new Marshaller()).marshallValue(42))
                     .toEqual({N: '42'});
+            });
+
+            it('should convert NumberValues to NumberAttributeValues', () => {
+                expect(
+                    (new Marshaller()).marshallValue(new NumberValue('123'))
+                ).toEqual({N: '123'});
             });
         });
 
@@ -440,6 +446,20 @@ describe('Marshaller', () => {
                         ).toEqual({NS: ['1', '2', '3']});
                     }
                 );
+
+                it(
+                    'should convert NumberValueSet objects into NumberSetAttributeValues',
+                    () => {
+                        expect(
+                            (new Marshaller())
+                                .marshallValue(new NumberValueSet([
+                                    new NumberValue('1'),
+                                    new NumberValue('2'),
+                                    new NumberValue('3'),
+                                ]))
+                        ).toEqual({NS: ['1', '2', '3']});
+                    }
+                );
             });
 
             describe('binary sets', () => {
@@ -560,7 +580,7 @@ describe('Marshaller', () => {
 
     describe('#unmarshallItem', () => {
         it('should convert DynamoDB items to plain vanilla JS objects', function() {
-            var unmarshalled = (new Marshaller()).unmarshallItem({
+            var unmarshalled = (new Marshaller({unwrapNumbers: true})).unmarshallItem({
                 string: {S: 'foo'},
                 list: {L: [{S: 'fizz'}, {S: 'buzz'}, {S: 'pop'}]},
                 map: {
@@ -609,17 +629,20 @@ describe('Marshaller', () => {
         });
 
         describe('numbers', () => {
-            it('should convert NumberAttributeValues to numbers', () => {
-                expect(marshaller.unmarshallValue({N: '42'})).toEqual(42);
-            });
-
             it(
-                'should convert NumberAttributeValues to NumberValues when wrapNumbers is true',
+                'should convert NumberAttributeValues to NumberValues',
                 () => {
-                    const marshaller = new Marshaller({wrapNumbers: true});
                     const unsafeInteger = '9007199254740991000';
                     const converted = marshaller.unmarshallValue({N: unsafeInteger}) as NumberValue;
                     expect(converted.toString()).toBe(unsafeInteger);
+                }
+            );
+
+            it(
+                'should convert NumberAttributeValues to numbers when unwrapNumbers is true',
+                () => {
+                    const marshaller = new Marshaller({unwrapNumbers: true});
+                    expect(marshaller.unmarshallValue({N: '42'})).toEqual(42);
                 }
             );
         });
@@ -650,7 +673,7 @@ describe('Marshaller', () => {
                     {BOOL: true},
                     {NULL: true},
                     {M: {}}
-                ]})).toEqual(['a', 1, true, null, {}]);
+                ]})).toEqual(['a', new NumberValue('1'), true, null, {}]);
             });
         });
 
@@ -668,7 +691,13 @@ describe('Marshaller', () => {
                         d: {NULL: true},
                         e: {L: [{S: 's'}]}
                     }
-                })).toEqual({a: 'a', b: 1, c: true, d: null, e: ['s']});
+                })).toEqual({
+                    a: 'a',
+                    b: new NumberValue('1'),
+                    c: true,
+                    d: null,
+                    e: ['s'],
+                });
             });
         });
 
@@ -684,17 +713,8 @@ describe('Marshaller', () => {
 
         describe('number sets', () => {
             it(
-                'should convert NumberSetAttributeValues into sets with numbers',
-                () => {
-                    expect(marshaller.unmarshallValue({NS: ['1', '2', '3']}))
-                        .toEqual(new Set([1, 2, 3]));
-                }
-            );
-
-            it(
-                'should convert NumberSetAttributeValues into sets with NumberValues when wrapNumbers is true',
+                'should convert NumberSetAttributeValues into sets with NumberValues',
                 function() {
-                    const marshaller = new Marshaller({wrapNumbers: true});
                     const unsafeInteger = '900719925474099100';
                     const converted = marshaller.unmarshallValue({NS: [
                         unsafeInteger + '1',
@@ -707,6 +727,15 @@ describe('Marshaller', () => {
                         new NumberValue(unsafeInteger + '2'),
                         new NumberValue(unsafeInteger + '3'),
                     ]));
+                }
+            );
+
+            it(
+                'should convert NumberSetAttributeValues into sets with numbers when unwrapNumbers is true',
+                () => {
+                    const marshaller = new Marshaller({unwrapNumbers: true});
+                    expect(marshaller.unmarshallValue({NS: ['1', '2', '3']}))
+                        .toEqual(new Set([1, 2, 3]));
                 }
             );
         });

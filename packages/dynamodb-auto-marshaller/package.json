@@ -2,7 +2,8 @@
   "name": "@aws/dynamodb-auto-marshaller",
   "version": "0.0.0",
   "description": "A data marshaller that converts JavaScript types into Amazon DynamoDB AttributeValues",
-  "main": "index.js",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
   "scripts": {
     "prepublishOnly": "tsc",
     "pretest": "tsc -p tsconfig.test.json",
