@@ -1,25 +1,16 @@
 import {AttributeName} from './AttributeName';
 import {ExpressionAttributes} from './ExpressionAttributes';
 
-export interface ProjectionExpressionConfiguration {
-    attributes?: ExpressionAttributes;
-}
+export type ProjectionExpression = Array<AttributeName>;
 
-export class ProjectionExpression {
-    readonly attributes: ExpressionAttributes;
-    private readonly attributesInExpression: Array<string> = [];
-
-    constructor({
-        attributes = new ExpressionAttributes()
-    }: ProjectionExpressionConfiguration = {}) {
-        this.attributes = attributes;
+export function serializeProjectionExpression(
+    projection: ProjectionExpression,
+    attributes: ExpressionAttributes
+): string {
+    const serialized: Array<string> = [];
+    for (const projected of projection) {
+        serialized.push(attributes.addName(projected));
     }
 
-    addAttribute(name: AttributeName): void {
-        this.attributesInExpression.push(this.attributes.addName(name));
-    }
-
-    toString() {
-        return this.attributesInExpression.join(', ');
-    }
+    return serialized.join(', ');
 }
