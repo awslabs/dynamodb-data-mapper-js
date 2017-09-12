@@ -9,31 +9,85 @@ import {
 export type ComparisonOperand = AttributePath|any;
 
 export interface BinaryComparisonPredicate {
-    comparedAgainst: ComparisonOperand;
+    object: ComparisonOperand;
 }
 
 export interface EqualityExpressionPredicate extends BinaryComparisonPredicate {
     type: 'Equals';
 }
 
+export function equals(
+    operand: ComparisonOperand
+): EqualityExpressionPredicate {
+    return {
+        type: 'Equals',
+        object: operand,
+    };
+}
+
 export interface InequalityExpressionPredicate extends BinaryComparisonPredicate {
     type: 'NotEquals';
+}
+
+export function notEquals(
+    operand: ComparisonOperand
+): InequalityExpressionPredicate {
+    return {
+        type: 'NotEquals',
+        object: operand,
+    }
 }
 
 export interface LessThanExpressionPredicate extends BinaryComparisonPredicate {
     type: 'LessThan';
 }
 
+export function lessThan(
+    operand: ComparisonOperand
+): LessThanExpressionPredicate {
+    return {
+        type: 'LessThan',
+        object: operand,
+    }
+}
+
 export interface LessThanOrEqualToExpressionPredicate extends BinaryComparisonPredicate {
     type: 'LessThanOrEqualTo';
+}
+
+export function lessThanOrEqualTo(
+    operand: ComparisonOperand
+): LessThanOrEqualToExpressionPredicate {
+    return {
+        type: 'LessThanOrEqualTo',
+        object: operand,
+    }
 }
 
 export interface GreaterThanExpressionPredicate extends BinaryComparisonPredicate {
     type: 'GreaterThan';
 }
 
+export function greaterThan(
+    operand: ComparisonOperand
+): GreaterThanExpressionPredicate {
+    return {
+        type: 'GreaterThan',
+        object: operand,
+    }
+}
+
 export interface GreaterThanOrEqualToExpressionPredicate extends BinaryComparisonPredicate {
     type: 'GreaterThanOrEqualTo';
+}
+
+export function greaterThanOrEqualTo(
+    operand: ComparisonOperand
+): GreaterThanOrEqualToExpressionPredicate {
+    return {
+        type: 'GreaterThanOrEqualTo',
+        object: operand,
+    }
 }
 
 export interface BetweenExpressionPredicate {
@@ -42,9 +96,29 @@ export interface BetweenExpressionPredicate {
     upperBound: ComparisonOperand;
 }
 
+export function between(
+    lowerBound: ComparisonOperand,
+    upperBound: ComparisonOperand
+): BetweenExpressionPredicate {
+    return {
+        type: 'Between',
+        lowerBound,
+        upperBound,
+    }
+}
+
 export interface MembershipExpressionPredicate {
     type: 'Membership';
     values: Array<ComparisonOperand>;
+}
+
+export function inList(
+    ...operands: Array<ComparisonOperand>
+): MembershipExpressionPredicate {
+    return {
+        type: 'Membership',
+        values: operands,
+    }
 }
 
 export type ConditionExpressionPredicate =
@@ -57,6 +131,23 @@ export type ConditionExpressionPredicate =
     GreaterThanOrEqualToExpressionPredicate |
     BetweenExpressionPredicate |
     MembershipExpressionPredicate;
+
+export function isConditionExpressionPredicate(
+    arg: any
+): arg is ConditionExpressionPredicate {
+    return Boolean(arg)
+        && typeof arg === 'object'
+        && [
+            'Equals',
+            'NotEquals',
+            'LessThan',
+            'LessThanOrEqualTo',
+            'GreaterThan',
+            'GreaterThanOrEqualTo',
+            'Between',
+            'Membership',
+        ].indexOf(arg.type) > -1;
+}
 
 export interface ConditionExpressionSubject {
     subject: AttributePath|string;
@@ -140,7 +231,7 @@ function serializeBinaryComparison(
     return `${
         attributes.addName(cond.subject)
     } ${comparator} ${
-        serializeOperand(cond.comparedAgainst, attributes)
+        serializeOperand(cond.object, attributes)
     }`;
 }
 

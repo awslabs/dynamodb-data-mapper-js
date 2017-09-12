@@ -1,6 +1,93 @@
-import {serializeConditionExpression} from "./ConditionExpression";
+import {
+    equals,
+    notEquals,
+    lessThan,
+    lessThanOrEqualTo,
+    greaterThan,
+    greaterThanOrEqualTo,
+    between,
+    inList,
+    isConditionExpressionPredicate,
+    serializeConditionExpression,
+} from "./ConditionExpression";
 import {ExpressionAttributes} from "./ExpressionAttributes";
 import {AttributePath} from "./AttributePath";
+
+describe('equals', () => {
+    it('should return an equality condition predicate', () => {
+        const pred = equals(new AttributePath('foo'));
+        expect(isConditionExpressionPredicate(pred)).toBe(true);
+        expect(pred.type).toBe('Equals');
+    });
+});
+
+describe('notEquals', () => {
+    it('should return an inequality condition predicate', () => {
+        const pred = notEquals(new AttributePath('foo'));
+        expect(isConditionExpressionPredicate(pred)).toBe(true);
+        expect(pred.type).toBe('NotEquals');
+    });
+});
+
+describe('lessThan', () => {
+    it('should return an < condition predicate', () => {
+        const pred = lessThan(new AttributePath('foo'));
+        expect(isConditionExpressionPredicate(pred)).toBe(true);
+        expect(pred.type).toBe('LessThan');
+    });
+});
+
+describe('lessThanOrEqualTo', () => {
+    it('should return an <= condition predicate', () => {
+        const pred = lessThanOrEqualTo(new AttributePath('foo'));
+        expect(isConditionExpressionPredicate(pred)).toBe(true);
+        expect(pred.type).toBe('LessThanOrEqualTo');
+    });
+});
+
+describe('greaterThan', () => {
+    it('should return an > condition predicate', () => {
+        const pred = greaterThan(new AttributePath('foo'));
+        expect(isConditionExpressionPredicate(pred)).toBe(true);
+        expect(pred.type).toBe('GreaterThan');
+    });
+});
+
+describe('greaterThanOrEqualTo', () => {
+    it('should return an >= condition predicate', () => {
+        const pred = greaterThanOrEqualTo(new AttributePath('foo'));
+        expect(isConditionExpressionPredicate(pred)).toBe(true);
+        expect(pred.type).toBe('GreaterThanOrEqualTo');
+    });
+});
+
+describe('between', () => {
+    it('should return a bounded condition predicate', () => {
+        const pred = between(1, 10);
+        expect(isConditionExpressionPredicate(pred)).toBe(true);
+        expect(pred).toEqual({
+            type: 'Between',
+            lowerBound: 1,
+            upperBound: 10,
+        });
+    });
+});
+
+describe('inList', () => {
+    it('should return a membership condition predicate', () => {
+        const pred = inList('foo', 'bar', 'baz', 'quux');
+        expect(isConditionExpressionPredicate(pred)).toBe(true);
+        expect(pred).toEqual({
+            type: 'Membership',
+            values: [
+                'foo',
+                'bar',
+                'baz',
+                'quux',
+            ]
+        });
+    });
+});
 
 describe('serializeConditionExpression', () => {
     it('should serialize equality expressions', () => {
@@ -9,7 +96,7 @@ describe('serializeConditionExpression', () => {
             {
                 type: 'Equals',
                 subject: 'foo',
-                comparedAgainst: 'bar',
+                object: 'bar',
             },
             attributes
         );
@@ -22,7 +109,7 @@ describe('serializeConditionExpression', () => {
     it('should serialize inequality expressions', () => {
         const attributes = new ExpressionAttributes();
         const serialized = serializeConditionExpression(
-            {type: 'NotEquals', subject: 'foo', comparedAgainst: 'bar'},
+            {type: 'NotEquals', subject: 'foo', object: 'bar'},
             attributes
         );
 
@@ -34,7 +121,7 @@ describe('serializeConditionExpression', () => {
     it('should serialize less than expressions', () => {
         const attributes = new ExpressionAttributes();
         const serialized = serializeConditionExpression(
-            {type: 'LessThan', subject: 'foo', comparedAgainst: 'bar'},
+            {type: 'LessThan', subject: 'foo', object: 'bar'},
             attributes
         );
 
@@ -49,7 +136,7 @@ describe('serializeConditionExpression', () => {
             {
                 type: 'GreaterThan',
                 subject: 'foo',
-                comparedAgainst: 'bar',
+                object: 'bar',
             },
             attributes
         );
@@ -65,7 +152,7 @@ describe('serializeConditionExpression', () => {
             {
                 type: 'LessThanOrEqualTo',
                 subject: 'foo',
-                comparedAgainst: 'bar',
+                object: 'bar',
             },
             attributes
         );
@@ -81,7 +168,7 @@ describe('serializeConditionExpression', () => {
             {
                 type: 'GreaterThanOrEqualTo',
                 subject: 'foo',
-                comparedAgainst: new AttributePath('bar'),
+                object: new AttributePath('bar'),
             },
             attributes
         );
@@ -170,17 +257,17 @@ describe('serializeConditionExpression', () => {
                     {
                         type: 'GreaterThanOrEqualTo',
                         subject: 'foo',
-                        comparedAgainst: 1,
+                        object: 1,
                     },
                     {
                         type: 'LessThan',
                         subject: 'foo',
-                        comparedAgainst: 10,
+                        object: 10,
                     },
                     {
                         type: 'Equals',
                         subject: 'fizz',
-                        comparedAgainst: 'buzz',
+                        object: 'buzz',
                     }
                 ]
             },
@@ -208,12 +295,12 @@ describe('serializeConditionExpression', () => {
                     {
                         type: 'GreaterThanOrEqualTo',
                         subject: 'foo',
-                        comparedAgainst: 10,
+                        object: 10,
                     },
                     {
                         type: 'LessThan',
                         subject: 'foo',
-                        comparedAgainst: 1,
+                        object: 1,
                     }
                 ]
             },
