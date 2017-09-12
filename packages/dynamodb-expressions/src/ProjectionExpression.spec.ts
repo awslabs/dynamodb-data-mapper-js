@@ -1,3 +1,4 @@
+import {AttributePath} from "./AttributePath";
 import {ExpressionAttributes} from "./ExpressionAttributes";
 import {
     ProjectionExpression,
@@ -24,7 +25,7 @@ describe('ProjectionExpression', () => {
         const attributes = new ExpressionAttributes();
 
         expect(serializeProjectionExpression(
-            [{listAttributeName: 'foo', index: 2}],
+            [new AttributePath('foo[2]')],
             attributes
         )).toBe('#attr0[2]');
         expect(attributes.names).toEqual({
@@ -36,7 +37,7 @@ describe('ProjectionExpression', () => {
         const attributes = new ExpressionAttributes();
 
         expect(serializeProjectionExpression(
-            [{mapAttributeName: 'foo', propertyAttributeName: 'bar'}],
+            [new AttributePath('foo.bar')],
             attributes
         )).toBe('#attr0.#attr1');
         expect(attributes.names).toEqual({
@@ -49,34 +50,10 @@ describe('ProjectionExpression', () => {
         'should allow the nesting of complex attributes to an arbitrary depth',
         () => {
             const attributes = new ExpressionAttributes();
-            const toGet = [
-                {
-                    mapAttributeName: {
-                        listAttributeName: {
-                            mapAttributeName: {
-                                listAttributeName: {
-                                    mapAttributeName: {
-                                        listAttributeName: {
-                                            mapAttributeName: 'snap',
-                                            propertyAttributeName: 'foo'
-                                        },
-                                        index: 2,
-                                    },
-                                    propertyAttributeName: 'bar',
-                                },
-                                index: 3,
-                            },
-                            propertyAttributeName: 'baz',
-                        },
-                        index: 4,
-                    },
-                    propertyAttributeName: 'quux',
-                }
-            ];
-
-            expect(
-                serializeProjectionExpression(toGet, attributes)
-            ).toBe('#attr0.#attr1[2].#attr2[3].#attr3[4].#attr4');
+            expect(serializeProjectionExpression(
+                [new AttributePath('snap.foo[2].bar[3].baz[4].quux')],
+                attributes
+            )).toBe('#attr0.#attr1[2].#attr2[3].#attr3[4].#attr4');
             expect(attributes.names).toEqual({
                 '#attr0': 'snap',
                 '#attr1': 'foo',

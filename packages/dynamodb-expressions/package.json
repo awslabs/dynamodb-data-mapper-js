@@ -20,5 +20,8 @@
   },
   "peerDependencies": {
     "aws-sdk": "^2.7.0"
+  },
+  "dependencies": {
+    "@aws/dynamodb-auto-marshaller": "^0.0.0"
   }
 }

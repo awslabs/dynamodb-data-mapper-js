@@ -1,5 +1,6 @@
 import {ExpressionAttributes} from "./ExpressionAttributes";
 import {ExpressionAttributeValueMap} from 'aws-sdk/clients/dynamodb';
+import {AttributePath} from "./AttributePath";
 
 describe('ExpressionAttributes', () => {
     describe('#addName', () => {
@@ -47,10 +48,7 @@ describe('ExpressionAttributes', () => {
 
         it('should allow the addition of list index dereferences', () => {
             const attributes = new ExpressionAttributes();
-            attributes.addName({
-                listAttributeName: 'foo',
-                index: 2,
-            });
+            attributes.addName(new AttributePath('foo[2]'));
 
             expect(attributes.names).toEqual({
                 '#attr0': 'foo',
@@ -59,10 +57,7 @@ describe('ExpressionAttributes', () => {
 
         it('should allow the addition of nested attributes', () => {
             const attributes = new ExpressionAttributes();
-            attributes.addName({
-                mapAttributeName: 'foo',
-                propertyAttributeName: 'bar',
-            });
+            attributes.addName(new AttributePath('foo.bar'));
 
             expect(attributes.names).toEqual({
                 '#attr0': 'foo',
@@ -74,34 +69,7 @@ describe('ExpressionAttributes', () => {
             'should allow the nesting of complex attributes to an arbitrary depth',
             () => {
                 const attributes = new ExpressionAttributes();
-                attributes.addName({
-                    mapAttributeName: {
-                        listAttributeName: {
-                            mapAttributeName: {
-                                listAttributeName: {
-                                    mapAttributeName: 'foo',
-                                    propertyAttributeName: 'bar',
-                                },
-                                index: 3,
-                            },
-                            propertyAttributeName: 'baz',
-                        },
-                        index: 4,
-                    },
-                    propertyAttributeName: {
-                        mapAttributeName: 'quux',
-                        propertyAttributeName: {
-                            mapAttributeName: 'snap',
-                            propertyAttributeName: {
-                                mapAttributeName: 'crackle',
-                                propertyAttributeName: {
-                                    listAttributeName: 'pop',
-                                    index: 2
-                                }
-                            }
-                        }
-                    },
-                });
+                attributes.addName(new AttributePath('foo.bar[3].baz[4].quux.snap.crackle.pop[2][1][0]'));
 
                 expect(attributes.names).toEqual({
                     '#attr0': 'foo',
@@ -120,7 +88,7 @@ describe('ExpressionAttributes', () => {
         it('should provide expression-safe aliases for values', () => {
             const ea = new ExpressionAttributes();
             for (const reservedWord of DDB_RESERVED_WORDS) {
-                const alias = ea.addValue({S: reservedWord});
+                const alias = ea.addValue(reservedWord);
                 expect(alias).toMatch(/^:[A-Za-z0-9]+$/);
             }
         });
@@ -131,7 +99,7 @@ describe('ExpressionAttributes', () => {
                 const expected: ExpressionAttributeValueMap = {};
                 const ea = new ExpressionAttributes();
                 for (const reservedWord of DDB_RESERVED_WORDS) {
-                    const alias = ea.addValue({S: reservedWord});
+                    const alias = ea.addValue(reservedWord);
                     expected[alias] = {S: reservedWord};
                 }
 

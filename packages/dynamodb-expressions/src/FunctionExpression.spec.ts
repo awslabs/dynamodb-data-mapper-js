@@ -4,13 +4,14 @@ import {
     serializeFunctionExpression,
 } from "./FunctionExpression";
 import {ExpressionAttributes} from "./ExpressionAttributes";
+import {AttributePath} from "./AttributePath";
 
 describe('FunctionExpression', () => {
     const basicFunctionExpression: FunctionExpression = {
         name: 'foo',
         arguments: [
-            'bar',
-            {'S': 'baz'},
+            new AttributePath('bar'),
+            'baz',
         ],
     };
 
@@ -32,7 +33,6 @@ describe('FunctionExpression', () => {
                 new Uint8Array(12),
                 {foo: 'bar'},
                 {name: 'foo', arguments: 'bar'},
-                {name: 'foo', arguments: ['bar', void 0]}
             ]) {
                 expect(isFunctionExpression(notFunctionExpression)).toBe(false);
             }
@@ -44,7 +44,15 @@ describe('FunctionExpression', () => {
             const attributes = new ExpressionAttributes();
             expect(
                 serializeFunctionExpression(basicFunctionExpression, attributes)
-            ).toBe('foo(#attr0, :val1)')
+            ).toBe('foo(#attr0, :val1)');
+
+            expect(attributes.names).toEqual({
+                '#attr0': 'bar',
+            });
+
+            expect(attributes.values).toEqual({
+                ':val1': {S: 'baz'},
+            });
         });
     });
 });

@@ -1,11 +1,16 @@
 import {serializeConditionExpression} from "./ConditionExpression";
 import {ExpressionAttributes} from "./ExpressionAttributes";
+import {AttributePath} from "./AttributePath";
 
 describe('serializeConditionExpression', () => {
     it('should serialize equality expressions', () => {
         const attributes = new ExpressionAttributes();
         const serialized = serializeConditionExpression(
-            {type: 'Equals', subject: 'foo', comparedAgainst: {S: 'bar'}},
+            {
+                type: 'Equals',
+                subject: 'foo',
+                comparedAgainst: 'bar',
+            },
             attributes
         );
 
@@ -17,7 +22,7 @@ describe('serializeConditionExpression', () => {
     it('should serialize inequality expressions', () => {
         const attributes = new ExpressionAttributes();
         const serialized = serializeConditionExpression(
-            {type: 'NotEquals', subject: 'foo', comparedAgainst: {S: 'bar'}},
+            {type: 'NotEquals', subject: 'foo', comparedAgainst: 'bar'},
             attributes
         );
 
@@ -29,7 +34,7 @@ describe('serializeConditionExpression', () => {
     it('should serialize less than expressions', () => {
         const attributes = new ExpressionAttributes();
         const serialized = serializeConditionExpression(
-            {type: 'LessThan', subject: 'foo', comparedAgainst: {S: 'bar'}},
+            {type: 'LessThan', subject: 'foo', comparedAgainst: 'bar'},
             attributes
         );
 
@@ -44,7 +49,7 @@ describe('serializeConditionExpression', () => {
             {
                 type: 'GreaterThan',
                 subject: 'foo',
-                comparedAgainst: {S: 'bar'},
+                comparedAgainst: 'bar',
             },
             attributes
         );
@@ -60,7 +65,7 @@ describe('serializeConditionExpression', () => {
             {
                 type: 'LessThanOrEqualTo',
                 subject: 'foo',
-                comparedAgainst: {S: 'bar'},
+                comparedAgainst: 'bar',
             },
             attributes
         );
@@ -76,14 +81,17 @@ describe('serializeConditionExpression', () => {
             {
                 type: 'GreaterThanOrEqualTo',
                 subject: 'foo',
-                comparedAgainst: {S: 'bar'},
+                comparedAgainst: new AttributePath('bar'),
             },
             attributes
         );
 
-        expect(serialized).toBe('#attr0 >= :val1');
-        expect(attributes.names).toEqual({'#attr0': 'foo'});
-        expect(attributes.values).toEqual({':val1': {S: 'bar'}});
+        expect(serialized).toBe('#attr0 >= #attr1');
+        expect(attributes.names).toEqual({
+            '#attr0': 'foo',
+            '#attr1': 'bar',
+        });
+        expect(attributes.values).toEqual({});
     });
 
     it('should serialize bounding expressions', () => {
@@ -92,8 +100,8 @@ describe('serializeConditionExpression', () => {
             {
                 type: 'Between',
                 subject: 'foo',
-                lowerBound: {N: '1'},
-                upperBound: {N: '10'},
+                lowerBound: 1,
+                upperBound: 10,
             },
             attributes
         );
@@ -113,9 +121,9 @@ describe('serializeConditionExpression', () => {
                 type: 'Membership',
                 subject: 'foo',
                 values: [
-                    {N: '1'},
-                    {N: '10'},
-                    {N: '100'},
+                    1,
+                    10,
+                    100,
                 ],
             },
             attributes
@@ -138,8 +146,8 @@ describe('serializeConditionExpression', () => {
                 condition: {
                     type: 'Between',
                     subject: 'foo',
-                    lowerBound: {N: '1'},
-                    upperBound: {N: '10'},
+                    lowerBound: 1,
+                    upperBound: 10,
                 }
             },
             attributes
@@ -162,17 +170,17 @@ describe('serializeConditionExpression', () => {
                     {
                         type: 'GreaterThanOrEqualTo',
                         subject: 'foo',
-                        comparedAgainst: {N: '1'},
+                        comparedAgainst: 1,
                     },
                     {
                         type: 'LessThan',
                         subject: 'foo',
-                        comparedAgainst: {N: '10'},
+                        comparedAgainst: 10,
                     },
                     {
                         type: 'Equals',
                         subject: 'fizz',
-                        comparedAgainst: {S: 'buzz'},
+                        comparedAgainst: 'buzz',
                     }
                 ]
             },
@@ -200,12 +208,12 @@ describe('serializeConditionExpression', () => {
                     {
                         type: 'GreaterThanOrEqualTo',
                         subject: 'foo',
-                        comparedAgainst: {N: '10'},
+                        comparedAgainst: 10,
                     },
                     {
                         type: 'LessThan',
                         subject: 'foo',
-                        comparedAgainst: {N: '1'},
+                        comparedAgainst: 1,
                     }
                 ]
             },
@@ -228,8 +236,8 @@ describe('serializeConditionExpression', () => {
             {
                 name: 'attribute_type',
                 arguments: [
-                    'foo',
-                    {S: 'S'}
+                    new AttributePath('foo'),
+                    'S'
                 ]
             },
             attributes

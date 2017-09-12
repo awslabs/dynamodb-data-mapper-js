@@ -1,8 +1,5 @@
-import {
-    AttributeName,
-    isListIndexAttributeName,
-    isMapPropertyAttributeName,
-} from './AttributeName';
+import {AttributePath} from "./AttributePath";
+import {Marshaller} from "@aws/dynamodb-auto-marshaller";
 import {
     AttributeValue,
     ExpressionAttributeNameMap,
@@ -12,35 +9,41 @@ import {
 export class ExpressionAttributes {
     readonly names: ExpressionAttributeNameMap = {};
     readonly values: ExpressionAttributeValueMap = {};
+    readonly marshaller = new Marshaller();
 
     private readonly nameMap: {[attributeName: string]: string} = {};
     private _ctr = 0;
 
-    addName(attributeName: AttributeName): string {
-        if (isListIndexAttributeName(attributeName)) {
-            return `${
-                this.addName(attributeName.listAttributeName)
-            }[${attributeName.index}]`;
+    addName(path: AttributePath|string): string {
+        if (AttributePath.isAttributePath(path)) {
+            let escapedPath = '';
+            for (const element of path.elements) {
+                if (element.type === 'AttributeName') {
+                    escapedPath += `.${this.addAttributeName(element.name)}`;
+                } else {
+                    escapedPath += `[${element.index}]`;
+                }
+            }
+
+            return escapedPath.substring(1);
         }
 
-        if (isMapPropertyAttributeName(attributeName)) {
-            return `${
-                this.addName(attributeName.mapAttributeName)
-            }.${this.addName(attributeName.propertyAttributeName)}`;
-        }
+        return this.addName(new AttributePath(path));
+    }
 
+    addValue(value: any): string {
+        const substitution = `:val${this._ctr++}`;
+        this.values[substitution] = this.marshaller.marshallValue(value) as AttributeValue;
+
+        return substitution;
+    }
+
+    private addAttributeName(attributeName: string): string {
         if (!(attributeName in this.nameMap)) {
             this.nameMap[attributeName] = `#attr${this._ctr++}`;
             this.names[this.nameMap[attributeName]] = attributeName;
         }
 
         return this.nameMap[attributeName];
-    }
-
-    addValue(value: AttributeValue): string {
-        const substitution = `:val${this._ctr++}`;
-        this.values[substitution] = value;
-
-        return substitution;
     }
 }

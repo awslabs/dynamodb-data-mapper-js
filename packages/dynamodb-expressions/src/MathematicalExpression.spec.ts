@@ -9,7 +9,7 @@ describe('MathematicalExpression', () => {
     const basicMathematicalExpression: MathematicalExpression = {
         leftHandSide: 'foo',
         operator: '+',
-        rightHandSide: {'N': '1'},
+        rightHandSide: 1,
     };
 
     describe('isMathematicalExpression', () => {
@@ -43,7 +43,15 @@ describe('MathematicalExpression', () => {
             expect(serializeMathematicalExpression(
                 basicMathematicalExpression,
                 attributes
-            )).toBe('#attr0 + :val1')
+            )).toBe('#attr0 + :val1');
+
+            expect(attributes.names).toEqual({
+                '#attr0': 'foo',
+            });
+
+            expect(attributes.values).toEqual({
+                ':val1': {N: '1'},
+            });
         });
     });
 });

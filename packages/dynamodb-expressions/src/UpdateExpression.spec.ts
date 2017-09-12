@@ -1,11 +1,12 @@
 import {UpdateExpression} from "./UpdateExpression";
 import {ExpressionAttributes} from "./ExpressionAttributes";
+import {AttributePath} from "./AttributePath";
 
 describe('UpdateExpression', () => {
     it('should serialize ADD clauses', () => {
         const expr = new UpdateExpression();
-        expr.add('foo', {SS: ['bar', 'baz']});
-        expr.add('fizz', {N: '1'});
+        expr.add('foo', new Set(['bar', 'baz']));
+        expr.add('fizz', 1);
 
         expect(expr.toString()).toBe('ADD #attr0 :val1, #attr2 :val3');
         expect(expr.attributes.names).toEqual({
@@ -20,8 +21,8 @@ describe('UpdateExpression', () => {
 
     it('should serialize DELETE clauses', () => {
         const expr = new UpdateExpression();
-        expr.delete('foo', {SS: ['bar', 'baz']});
-        expr.delete('fizz', {N: '1'});
+        expr.delete('foo', new Set(['bar', 'baz']));
+        expr.delete('fizz', 1);
 
         expect(expr.toString()).toBe('DELETE #attr0 :val1, #attr2 :val3');
         expect(expr.attributes.names).toEqual({
@@ -49,8 +50,8 @@ describe('UpdateExpression', () => {
 
     it('should serialize SET clauses', () => {
         const expr = new UpdateExpression();
-        expr.set('foo', {SS: ['bar', 'baz']});
-        expr.set('fizz', {N: '1'});
+        expr.set('foo', new Set(['bar', 'baz']));
+        expr.set('fizz', 1);
 
         expect(expr.toString()).toBe('SET #attr0 = :val1, #attr2 = :val3');
         expect(expr.attributes.names).toEqual({
@@ -68,8 +69,8 @@ describe('UpdateExpression', () => {
         expr.set('foo', {
             name: 'list_append',
             arguments: [
-                'foo',
-                {S: 'bar'}
+                new AttributePath('foo'),
+                'bar'
             ]
         });
 
@@ -85,9 +86,9 @@ describe('UpdateExpression', () => {
     it('should serialize SET clauses with mathematical expressions', () => {
         const expr = new UpdateExpression();
         expr.set('foo', {
-            leftHandSide: 'foo',
+            leftHandSide: new AttributePath('foo'),
             operator: '+',
-            rightHandSide: {N: '1'}
+            rightHandSide: 1
         });
 
         expect(expr.toString()).toBe('SET #attr0 = #attr0 + :val1');
@@ -101,10 +102,10 @@ describe('UpdateExpression', () => {
 
     it('should serialize expressions with multiple clauses', () => {
         const expr = new UpdateExpression();
-        expr.add('foo', {SS: ['baz']});
-        expr.delete('foo', {SS: ['quux']});
+        expr.add('foo', new Set(['baz']));
+        expr.delete('foo', new Set(['quux']));
         expr.remove('fizz');
-        expr.set('buzz', {S: 'pop'});
+        expr.set('buzz', new Set(['pop']));
 
         expect(expr.toString()).toBe('ADD #attr0 :val1 DELETE #attr0 :val2 SET #attr4 = :val5 REMOVE #attr3');
         expect(expr.attributes.names).toEqual({
@@ -115,7 +116,7 @@ describe('UpdateExpression', () => {
         expect(expr.attributes.values).toEqual({
             ':val1': {SS: ['baz']},
             ':val2': {SS: ['quux']},
-            ':val5': {S: 'pop'},
+            ':val5': {SS: ['pop']},
         });
     });
 

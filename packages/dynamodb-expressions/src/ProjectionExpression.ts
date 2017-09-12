@@ -1,7 +1,7 @@
-import {AttributeName} from './AttributeName';
+import {AttributePath} from "./AttributePath";
 import {ExpressionAttributes} from './ExpressionAttributes';
 
-export type ProjectionExpression = Array<AttributeName>;
+export type ProjectionExpression = Array<AttributePath|string>;
 
 export function serializeProjectionExpression(
     projection: ProjectionExpression,

@@ -3,6 +3,7 @@ const EXPECTED_TAG = `[object ${NUMBER_VALUE_TAG}]`;
 
 export class NumberValue {
     public readonly value: string;
+    public readonly [Symbol.toStringTag] = NUMBER_VALUE_TAG;
 
     constructor(value: string|number) {
         this.value = value.toString().trim();
@@ -18,10 +19,6 @@ export class NumberValue {
 
     valueOf(): number {
         return Number(this.value);
-    }
-
-    get [Symbol.toStringTag](): string {
-        return NUMBER_VALUE_TAG;
     }
 
     static isNumberValue(arg: any): arg is NumberValue {

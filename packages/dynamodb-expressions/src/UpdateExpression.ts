@@ -1,8 +1,8 @@
+import {AttributePath} from "./AttributePath";
 import {ExpressionAttributes} from "./ExpressionAttributes";
-import {AttributeName} from "./AttributeName";
-import {AttributeValue} from "aws-sdk/clients/dynamodb";
 import {
-    FunctionExpression, isFunctionExpression,
+    FunctionExpression,
+    isFunctionExpression,
     serializeFunctionExpression
 } from "./FunctionExpression";
 import {
@@ -28,23 +28,23 @@ export class UpdateExpression {
         this.attributes = attributes;
     }
 
-    add(path: AttributeName, value: AttributeValue): void {
+    add(path: AttributePath|string, value: any): void {
         this.toAdd[this.attributes.addName(path)]
             = this.attributes.addValue(value);
     }
 
-    delete(path: AttributeName, value: AttributeValue): void {
+    delete(path: AttributePath|string, value: any): void {
         this.toDelete[this.attributes.addName(path)]
             = this.attributes.addValue(value);
     }
 
-    remove(path: AttributeName): void {
+    remove(path: AttributePath|string): void {
         this.toRemove.add(this.attributes.addName(path));
     }
 
     set(
-        path: AttributeName,
-        value: AttributeValue|FunctionExpression|MathematicalExpression
+        path: AttributePath|string,
+        value: FunctionExpression|MathematicalExpression|any
     ): void {
         const lhs = this.attributes.addName(path);
         let rhs: string;

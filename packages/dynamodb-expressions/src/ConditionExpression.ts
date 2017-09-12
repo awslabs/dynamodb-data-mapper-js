@@ -1,13 +1,12 @@
-import {AttributeName, isAttributeName} from "./AttributeName";
+import {AttributePath} from "./AttributePath";
 import {ExpressionAttributes} from "./ExpressionAttributes";
 import {
     FunctionExpression,
     isFunctionExpression,
     serializeFunctionExpression,
 } from "./FunctionExpression";
-import {AttributeValue} from "aws-sdk/clients/dynamodb";
 
-export type ComparisonOperand = AttributeName|AttributeValue;
+export type ComparisonOperand = AttributePath|any;
 
 export interface BinaryComparisonPredicate {
     comparedAgainst: ComparisonOperand;
@@ -60,7 +59,7 @@ export type ConditionExpressionPredicate =
     MembershipExpressionPredicate;
 
 export interface ConditionExpressionSubject {
-    subject: ComparisonOperand;
+    subject: AttributePath|string;
 }
 
 export type ConditionExpression =
@@ -108,7 +107,7 @@ export function serializeConditionExpression(
             return serializeBinaryComparison(condition, attributes, '>=');
         case 'Between':
             return `${
-                serializeOperand(condition.subject, attributes)
+                attributes.addName(condition.subject)
             } BETWEEN ${
                 serializeOperand(condition.lowerBound, attributes)
             } AND ${
@@ -116,7 +115,7 @@ export function serializeConditionExpression(
             }`;
         case 'Membership':
             return `${
-                serializeOperand(condition.subject, attributes)
+                attributes.addName(condition.subject)
             } IN (${
                 condition.values.map(val => serializeOperand(val, attributes))
                     .join(', ')
@@ -138,19 +137,18 @@ function serializeBinaryComparison(
     attributes: ExpressionAttributes,
     comparator: string
 ): string {
-    const args: Array<string> = [];
-    for (const arg of [cond.subject, cond.comparedAgainst]) {
-        args.push(serializeOperand(arg, attributes));
-    }
-
-    return `${args[0]} ${comparator} ${args[1]}`;
+    return `${
+        attributes.addName(cond.subject)
+    } ${comparator} ${
+        serializeOperand(cond.comparedAgainst, attributes)
+    }`;
 }
 
 function serializeOperand(
     operand: ComparisonOperand,
     attributes: ExpressionAttributes
 ): string {
-    return isAttributeName(operand)
+    return AttributePath.isAttributePath(operand)
         ? attributes.addName(operand)
         : attributes.addValue(operand);
 }

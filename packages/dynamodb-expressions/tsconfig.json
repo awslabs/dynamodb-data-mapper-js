@@ -12,6 +12,7 @@
     "module": "commonjs",
     "strict": true,
     "declaration": true,
+    "sourceMap": true,
     "sourceRoot": "./src",
     "outDir": "./build"
   }

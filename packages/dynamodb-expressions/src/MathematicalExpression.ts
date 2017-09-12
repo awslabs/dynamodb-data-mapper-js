@@ -1,11 +1,11 @@
-import {AttributeName, isAttributeName} from "./AttributeName";
 import {AttributeValue} from "aws-sdk/clients/dynamodb";
 import {ExpressionAttributes} from "./ExpressionAttributes";
+import {AttributePath} from "./AttributePath";
 
 export class MathematicalExpression {
-    leftHandSide: AttributeName|AttributeValue;
+    leftHandSide: AttributePath|string|number;
     operator: '+'|'-';
-    rightHandSide: AttributeName|AttributeValue;
+    rightHandSide: AttributePath|string|number;
 }
 
 export function isMathematicalExpression(
@@ -18,8 +18,9 @@ export function isMathematicalExpression(
         && isNameOrValue(arg.rightHandSide);
 }
 
-function isNameOrValue(arg: any): arg is AttributeName|AttributeValue {
-    return (Boolean(arg) && typeof arg === 'object') || isAttributeName(arg);
+function isNameOrValue(arg: any): arg is AttributePath|AttributeValue {
+    return ['string', 'number'].indexOf(typeof arg) > -1
+        || AttributePath.isAttributePath(arg);
 }
 
 export function serializeMathematicalExpression(
@@ -27,7 +28,7 @@ export function serializeMathematicalExpression(
     attributes: ExpressionAttributes
 ): string {
     const expressionSafeArgs = [leftHandSide, rightHandSide].map(
-        arg => isAttributeName(arg)
+        arg => AttributePath.isAttributePath(arg) || typeof arg === 'string'
             ? attributes.addName(arg)
             : attributes.addValue(arg)
     );

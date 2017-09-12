@@ -1,4 +1,5 @@
-export * from './AttributeName';
+// export * from './AttributeName';
+export * from './AttributePath';
 export * from './ConditionExpression';
 export * from './ExpressionAttributes';
 export * from './FunctionExpression';

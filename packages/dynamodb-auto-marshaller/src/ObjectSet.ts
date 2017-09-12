@@ -1,4 +1,10 @@
 export abstract class ObjectSet<T> implements Set<T> {
+    /**
+     * Returns the string literal 'Set' for use by Object.prototype.toString.
+     * This allows for identifying Sets without checking constructor identity.
+     */
+    public readonly [Symbol.toStringTag]: 'Set' = 'Set';
+
     protected _values: Array<T> = [];
 
     /**
@@ -109,13 +115,5 @@ export abstract class ObjectSet<T> implements Set<T> {
      */
     [Symbol.iterator](): IterableIterator<T> {
         return this._values[Symbol.iterator]();
-    }
-
-    /**
-     * Returns the string literal 'Set' for use by Object.prototype.toString.
-     * This allows for identifying Sets without checking constructor identity.
-     */
-    get [Symbol.toStringTag](): 'Set' {
-        return 'Set';
     }
 }
