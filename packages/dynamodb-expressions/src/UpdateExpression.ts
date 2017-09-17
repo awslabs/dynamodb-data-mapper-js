@@ -1,14 +1,8 @@
 import {AttributePath} from "./AttributePath";
+import {AttributeValue} from './AttributeValue';
 import {ExpressionAttributes} from "./ExpressionAttributes";
-import {
-    FunctionExpression,
-    isFunctionExpression,
-    serializeFunctionExpression
-} from "./FunctionExpression";
-import {
-    isMathematicalExpression,
-    MathematicalExpression, serializeMathematicalExpression
-} from "./MathematicalExpression";
+import {FunctionExpression} from "./FunctionExpression";
+import {MathematicalExpression} from "./MathematicalExpression";
 
 export interface UpdateExpressionConfiguration {
     attributes?: ExpressionAttributes;
@@ -44,20 +38,15 @@ export class UpdateExpression {
 
     set(
         path: AttributePath|string,
-        value: FunctionExpression|MathematicalExpression|any
+        value: AttributeValue|FunctionExpression|MathematicalExpression|any
     ): void {
         const lhs = this.attributes.addName(path);
         let rhs: string;
-        if (isFunctionExpression(value)) {
-            rhs = serializeFunctionExpression(
-                value,
-                this.attributes,
-            );
-        } else if (isMathematicalExpression(value)) {
-            rhs = serializeMathematicalExpression(
-                value,
-                this.attributes
-            );
+        if (
+            FunctionExpression.isFunctionExpression(value) ||
+                MathematicalExpression.isMathematicalExpression(value)
+        ) {
+            rhs = value.serialize(this.attributes);
         } else {
             rhs = this.attributes.addValue(value);
         }

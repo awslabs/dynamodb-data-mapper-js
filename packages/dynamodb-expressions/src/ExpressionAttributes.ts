@@ -1,7 +1,8 @@
 import {AttributePath} from "./AttributePath";
+import {AttributeValue} from './AttributeValue';
 import {Marshaller} from "@aws/dynamodb-auto-marshaller";
 import {
-    AttributeValue,
+    AttributeValue as AttributeValueModel,
     ExpressionAttributeNameMap,
     ExpressionAttributeValueMap,
 } from 'aws-sdk/clients/dynamodb';
@@ -32,8 +33,12 @@ export class ExpressionAttributes {
     }
 
     addValue(value: any): string {
+        const modeledAttrValue = AttributeValue.isAttributeValue(value)
+                ? value.marshalled as AttributeValueModel
+                : this.marshaller.marshallValue(value) as AttributeValueModel;
+
         const substitution = `:val${this._ctr++}`;
-        this.values[substitution] = this.marshaller.marshallValue(value) as AttributeValue;
+        this.values[substitution] = modeledAttrValue;
 
         return substitution;
     }

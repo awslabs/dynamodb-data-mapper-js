@@ -7,11 +7,14 @@ import {
     greaterThanOrEqualTo,
     between,
     inList,
+    isConditionExpression,
     isConditionExpressionPredicate,
+    isConditionExpressionSubject,
     serializeConditionExpression,
 } from "./ConditionExpression";
 import {ExpressionAttributes} from "./ExpressionAttributes";
 import {AttributePath} from "./AttributePath";
+import {FunctionExpression} from "./FunctionExpression";
 
 describe('equals', () => {
     it('should return an equality condition predicate', () => {
@@ -86,6 +89,154 @@ describe('inList', () => {
                 'quux',
             ]
         });
+    });
+});
+
+describe('isConditionExpressionPredicate', () => {
+    it('should return true for a valid predicate', () => {
+        expect(isConditionExpressionPredicate({type: 'Equals', object: 0}))
+            .toBe(true);
+    });
+
+    it('should reject non-matching values', () => {
+        for (const notPredicate of [
+            false,
+            true,
+            null,
+            void 0,
+            'string',
+            123,
+            [],
+            {},
+            new Uint8Array(12),
+            {foo: 'bar'},
+            {name: 'foo', arguments: 'bar'},
+            {S: 'string'}
+        ]) {
+            expect(isConditionExpressionPredicate(notPredicate)).toBe(false);
+        }
+    });
+});
+
+describe('isConditionExpressionSubject', () => {
+    it('should return true for a string subject', () => {
+        expect(isConditionExpressionSubject({subject: 'foo'})).toBe(true);
+    });
+
+    it('should return true for an AttributePath subject', () => {
+        expect(isConditionExpressionSubject({
+            subject: new AttributePath('foo.bar[3]'),
+        })).toBe(true);
+    });
+
+    it('should reject non-matching values', () => {
+        for (const notSubject of [
+            false,
+            true,
+            null,
+            void 0,
+            'string',
+            123,
+            [],
+            {},
+            new Uint8Array(12),
+            {foo: 'bar'},
+            {name: 'foo', arguments: 'bar'},
+            {S: 'string'},
+            {subject: 123},
+        ]) {
+            expect(isConditionExpressionSubject(notSubject)).toBe(false);
+        }
+    });
+});
+
+describe('isConditionExpression', () => {
+    it('should return true for valid expressions', () => {
+        expect(isConditionExpression({
+            type: 'Equals',
+            subject: 'foo',
+            object: 'bar',
+        })).toBe(true);
+    });
+
+    it('should return true for function expressions', () => {
+        expect(isConditionExpression(
+            new FunctionExpression('attribute_not_exists', 'foo')
+        )).toBe(true);
+    });
+
+    it('should return true for negation expressions', () => {
+        expect(isConditionExpression({
+            type: 'Not',
+            condition: {
+                type: 'Between',
+                subject: 'foo',
+                lowerBound: 100,
+                upperBound: 200,
+            }
+        })).toBe(true);
+    });
+
+    it('should return true for compound expressions', () => {
+        for (const type of ['And', 'Or']) {
+            expect(isConditionExpression({
+                type,
+                conditions: [
+                    {
+                        type: 'Between',
+                        subject: 'foo',
+                        lowerBound: 100,
+                        upperBound: 200,
+                    },
+                    {
+                        type: 'Between',
+                        subject: 'foo',
+                        lowerBound: 400,
+                        upperBound: 600,
+                    },
+                ]
+            })).toBe(true);
+        }
+    });
+
+    it('should reject compound expressions without a conditions list', () => {
+        for (const type of ['And', 'Or']) {
+            expect(isConditionExpression({type})).toBe(false);
+        }
+    });
+
+    it(
+        'should reject compound expressions whose list contains invalid members',
+        () => {
+
+            for (const type of ['And', 'Or']) {
+                expect(isConditionExpression({
+                    type,
+                    conditions: ['foo', 123],
+                })).toBe(false);
+            }
+        }
+    );
+
+    it('should reject non-matching values', () => {
+        for (const notExpression of [
+            false,
+            true,
+            null,
+            void 0,
+            'string',
+            123,
+            [],
+            {},
+            new Uint8Array(12),
+            {foo: 'bar'},
+            {name: 'foo', arguments: 'bar'},
+            {S: 'string'},
+            {subject: 'foo', object: 'bar'},
+            {type: 'UnknownType', subject: 'foo', object: 'bar'},
+        ]) {
+            expect(isConditionExpression(notExpression)).toBe(false);
+        }
     });
 });
 
@@ -320,13 +471,11 @@ describe('serializeConditionExpression', () => {
     it('should serialize function expressions', () => {
         const attributes = new ExpressionAttributes();
         const serialized = serializeConditionExpression(
-            {
-                name: 'attribute_type',
-                arguments: [
-                    new AttributePath('foo'),
-                    'S'
-                ]
-            },
+            new FunctionExpression(
+                'attribute_type',
+                new AttributePath('foo'),
+                'S'
+            ),
             attributes
         );
 

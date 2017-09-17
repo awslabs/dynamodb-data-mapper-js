@@ -1,21 +1,20 @@
-import {
-    isMathematicalExpression,
-    MathematicalExpression,
-    serializeMathematicalExpression,
-} from "./MathematicalExpression";
+import {AttributePath} from "./AttributePath";
 import {ExpressionAttributes} from "./ExpressionAttributes";
+import {MathematicalExpression} from "./MathematicalExpression";
 
 describe('MathematicalExpression', () => {
-    const basicMathematicalExpression: MathematicalExpression = {
-        leftHandSide: 'foo',
-        operator: '+',
-        rightHandSide: 1,
-    };
+    const basicMathematicalExpression = new MathematicalExpression(
+        new AttributePath('foo'),
+        '+',
+        1
+    );
 
-    describe('isMathematicalExpression', () => {
+    describe('::isMathematicalExpression', () => {
         it('should accept valid mathematical expressions', () => {
-            expect(isMathematicalExpression(basicMathematicalExpression))
-                .toBe(true);
+            expect(
+                MathematicalExpression
+                    .isMathematicalExpression(basicMathematicalExpression)
+            ).toBe(true);
         });
 
         it('should reject non-matching values', () => {
@@ -31,19 +30,19 @@ describe('MathematicalExpression', () => {
                 new Uint8Array(12),
                 {foo: 'bar'},
             ]) {
-                expect(isMathematicalExpression(notMathematicalExpression))
-                    .toBe(false);
+                expect(
+                    MathematicalExpression
+                        .isMathematicalExpression(notMathematicalExpression)
+                ).toBe(false);
             }
         });
     });
 
-    describe('serializeMathematicalExpression', () => {
+    describe('#serialize', () => {
         it('should serialize basic mathematical expressions', () => {
             const attributes = new ExpressionAttributes();
-            expect(serializeMathematicalExpression(
-                basicMathematicalExpression,
-                attributes
-            )).toBe('#attr0 + :val1');
+            expect(basicMathematicalExpression.serialize(attributes))
+                .toBe('#attr0 + :val1');
 
             expect(attributes.names).toEqual({
                 '#attr0': 'foo',

@@ -1,6 +1,9 @@
 import {UpdateExpression} from "./UpdateExpression";
 import {ExpressionAttributes} from "./ExpressionAttributes";
 import {AttributePath} from "./AttributePath";
+import {FunctionExpression} from "./FunctionExpression";
+import {MathematicalExpression} from "./MathematicalExpression";
+import {AttributeValue} from "./AttributeValue";
 
 describe('UpdateExpression', () => {
     it('should serialize ADD clauses', () => {
@@ -66,13 +69,11 @@ describe('UpdateExpression', () => {
 
     it('should serialize SET clauses with function expressions', () => {
         const expr = new UpdateExpression();
-        expr.set('foo', {
-            name: 'list_append',
-            arguments: [
-                new AttributePath('foo'),
-                'bar'
-            ]
-        });
+        expr.set('foo', new FunctionExpression(
+            'list_append',
+            new AttributePath('foo'),
+            'bar'
+        ));
 
         expect(expr.toString()).toBe('SET #attr0 = list_append(#attr0, :val1)');
         expect(expr.attributes.names).toEqual({
@@ -85,11 +86,11 @@ describe('UpdateExpression', () => {
 
     it('should serialize SET clauses with mathematical expressions', () => {
         const expr = new UpdateExpression();
-        expr.set('foo', {
-            leftHandSide: new AttributePath('foo'),
-            operator: '+',
-            rightHandSide: 1
-        });
+        expr.set('foo', new MathematicalExpression(
+            new AttributePath('foo'),
+            '+',
+            1
+        ));
 
         expect(expr.toString()).toBe('SET #attr0 = #attr0 + :val1');
         expect(expr.attributes.names).toEqual({
@@ -97,6 +98,22 @@ describe('UpdateExpression', () => {
         });
         expect(expr.attributes.values).toEqual({
             ':val1': {N: '1'},
+        });
+    });
+
+    it('should serialize SET clauses with marshalled AttributeValues', () => {
+        const expr = new UpdateExpression();
+        expr.set('foo', new AttributeValue({SS: ['bar', 'baz']}));
+        expr.set('fizz', new AttributeValue({N: '1'}));
+
+        expect(expr.toString()).toBe('SET #attr0 = :val1, #attr2 = :val3');
+        expect(expr.attributes.names).toEqual({
+            '#attr0': 'foo',
+            '#attr2': 'fizz',
+        });
+        expect(expr.attributes.values).toEqual({
+            ':val1': {SS: ['bar', 'baz']},
+            ':val3': {N: '1'},
         });
     });
 

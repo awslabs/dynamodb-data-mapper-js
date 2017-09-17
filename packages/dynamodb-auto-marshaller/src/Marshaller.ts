@@ -156,7 +156,8 @@ export class Marshaller {
             Iterable<any> |
             {[key: string]: any} |
             null |
-            NumberValue
+            NumberValue |
+            BinaryValue
     ): AttributeValue|undefined {
         if (value === null) {
             return {NULL: true};

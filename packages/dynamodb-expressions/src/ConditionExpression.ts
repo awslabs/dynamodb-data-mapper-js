@@ -1,10 +1,6 @@
 import {AttributePath} from "./AttributePath";
 import {ExpressionAttributes} from "./ExpressionAttributes";
-import {
-    FunctionExpression,
-    isFunctionExpression,
-    serializeFunctionExpression,
-} from "./FunctionExpression";
+import {FunctionExpression} from "./FunctionExpression";
 
 export type ComparisonOperand = AttributePath|any;
 
@@ -135,22 +131,36 @@ export type ConditionExpressionPredicate =
 export function isConditionExpressionPredicate(
     arg: any
 ): arg is ConditionExpressionPredicate {
-    return Boolean(arg)
-        && typeof arg === 'object'
-        && [
-            'Equals',
-            'NotEquals',
-            'LessThan',
-            'LessThanOrEqualTo',
-            'GreaterThan',
-            'GreaterThanOrEqualTo',
-            'Between',
-            'Membership',
-        ].indexOf(arg.type) > -1;
+    if (arg && typeof arg === 'object') {
+        switch (arg.type) {
+            case 'Equals':
+            case 'NotEquals':
+            case 'LessThan':
+            case 'LessThanOrEqualTo':
+            case 'GreaterThan':
+            case 'GreaterThanOrEqualTo':
+                return arg.object !== undefined;
+            case 'Between':
+                return arg.lowerBound !== undefined
+                    && arg.upperBound !== undefined;
+            case 'Membership':
+                return Array.isArray(arg.values);
+        }
+    }
+
+    return false;
 }
 
 export interface ConditionExpressionSubject {
     subject: AttributePath|string;
+}
+
+export function isConditionExpressionSubject(
+    arg: any
+): arg is ConditionExpressionSubject {
+    return Boolean(arg)
+        && typeof arg === 'object'
+        && (typeof arg.subject === 'string' || AttributePath.isAttributePath(arg.subject));
 }
 
 export type ConditionExpression =
@@ -175,12 +185,43 @@ export interface NotExpression {
     condition: ConditionExpression;
 }
 
+export function isConditionExpression(arg: any): arg is ConditionExpression {
+    if (FunctionExpression.isFunctionExpression(arg)) {
+        return true;
+    }
+
+    if (Boolean(arg) && typeof arg === 'object') {
+        switch (arg.type) {
+            case 'Not':
+                return isConditionExpression(arg.condition);
+            case 'And':
+            case 'Or':
+                if (Array.isArray(arg.conditions)) {
+                    for (const condition of arg.conditions) {
+                        if (!isConditionExpression(condition)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+
+                return false;
+            default:
+                return isConditionExpressionSubject(arg)
+                    && isConditionExpressionPredicate(arg);
+        }
+    }
+
+    return false;
+}
+
 export function serializeConditionExpression(
     condition: ConditionExpression,
     attributes: ExpressionAttributes
 ): string {
-    if (isFunctionExpression(condition)) {
-        return serializeFunctionExpression(condition, attributes);
+    if (FunctionExpression.isFunctionExpression(condition)) {
+        return condition.serialize(attributes);
     }
 
     switch (condition.type) {

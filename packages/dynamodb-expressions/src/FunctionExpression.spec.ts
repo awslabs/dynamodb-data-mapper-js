@@ -1,23 +1,19 @@
-import {
-    FunctionExpression,
-    isFunctionExpression,
-    serializeFunctionExpression,
-} from "./FunctionExpression";
+import {FunctionExpression} from "./FunctionExpression";
 import {ExpressionAttributes} from "./ExpressionAttributes";
 import {AttributePath} from "./AttributePath";
 
 describe('FunctionExpression', () => {
-    const basicFunctionExpression: FunctionExpression = {
-        name: 'foo',
-        arguments: [
-            new AttributePath('bar'),
-            'baz',
-        ],
-    };
+    const basicFunctionExpression = new FunctionExpression(
+        'foo',
+        new AttributePath('bar'),
+        'baz'
+    );
 
-    describe('isFunctionExpression', () => {
+    describe('::isFunctionExpression', () => {
         it('should accept valid function expressions', () => {
-            expect(isFunctionExpression(basicFunctionExpression)).toBe(true);
+            expect(
+                FunctionExpression.isFunctionExpression(basicFunctionExpression)
+            ).toBe(true);
         });
 
         it('should reject non-matching values', () => {
@@ -34,16 +30,18 @@ describe('FunctionExpression', () => {
                 {foo: 'bar'},
                 {name: 'foo', arguments: 'bar'},
             ]) {
-                expect(isFunctionExpression(notFunctionExpression)).toBe(false);
+                expect(
+                    FunctionExpression.isFunctionExpression(notFunctionExpression)
+                ).toBe(false);
             }
         });
     });
 
-    describe('serializeFunctionExpression', () => {
+    describe('#serialize', () => {
         it('should serialize basic function expressions', () => {
             const attributes = new ExpressionAttributes();
             expect(
-                serializeFunctionExpression(basicFunctionExpression, attributes)
+                basicFunctionExpression.serialize(attributes)
             ).toBe('foo(#attr0, :val1)');
 
             expect(attributes.names).toEqual({

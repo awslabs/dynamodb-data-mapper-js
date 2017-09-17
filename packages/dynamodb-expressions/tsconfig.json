@@ -13,7 +13,7 @@
     "strict": true,
     "declaration": true,
     "sourceMap": true,
-    "sourceRoot": "./src",
+    "rootDir": "./src",
     "outDir": "./build"
   }
 }

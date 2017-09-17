@@ -1,36 +1,31 @@
-import {AttributeValue} from "aws-sdk/clients/dynamodb";
 import {ExpressionAttributes} from "./ExpressionAttributes";
 import {AttributePath} from "./AttributePath";
 
+export type MathematicalExpressionOperand = AttributePath|string|number;
+
+const MATHEMATICAL_EXPRESSION_TAG = 'AmazonDynamoDbMathematicalExpression';
+const EXPECTED_TOSTRING = `[object ${MATHEMATICAL_EXPRESSION_TAG}]`;
+
 export class MathematicalExpression {
-    leftHandSide: AttributePath|string|number;
-    operator: '+'|'-';
-    rightHandSide: AttributePath|string|number;
-}
+    readonly [Symbol.toStringTag] = MATHEMATICAL_EXPRESSION_TAG;
 
-export function isMathematicalExpression(
-    arg: any
-): arg is MathematicalExpression {
-    return Boolean(arg)
-        && typeof arg === 'object'
-        && ['-', '+'].indexOf(arg.operator) > 0
-        && isNameOrValue(arg.leftHandSide)
-        && isNameOrValue(arg.rightHandSide);
-}
+    constructor(
+        readonly lhs: MathematicalExpressionOperand,
+        readonly operator: '+'|'-',
+        readonly rhs: MathematicalExpressionOperand
+    ) {}
 
-function isNameOrValue(arg: any): arg is AttributePath|AttributeValue {
-    return ['string', 'number'].indexOf(typeof arg) > -1
-        || AttributePath.isAttributePath(arg);
-}
+    serialize(attributes: ExpressionAttributes) {
+        const safeArgs = [this.lhs, this.rhs].map(
+            arg => AttributePath.isAttributePath(arg) || typeof arg === 'string'
+                ? attributes.addName(arg)
+                : attributes.addValue(arg)
+        );
+        return `${safeArgs[0]} ${this.operator} ${safeArgs[1]}`;
+    }
 
-export function serializeMathematicalExpression(
-    {leftHandSide, operator, rightHandSide}: MathematicalExpression,
-    attributes: ExpressionAttributes
-): string {
-    const expressionSafeArgs = [leftHandSide, rightHandSide].map(
-        arg => AttributePath.isAttributePath(arg) || typeof arg === 'string'
-            ? attributes.addName(arg)
-            : attributes.addValue(arg)
-    );
-    return `${expressionSafeArgs[0]} ${operator} ${expressionSafeArgs[1]}`;
+    static isMathematicalExpression(arg: any): arg is MathematicalExpression {
+        return arg instanceof MathematicalExpression
+            || Object.prototype.toString.call(arg) === EXPECTED_TOSTRING;
+    }
 }

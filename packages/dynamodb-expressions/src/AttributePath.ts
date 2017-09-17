@@ -1,4 +1,4 @@
-const ATTRIBUTE_PATH_TAG = 'AttributePath';
+const ATTRIBUTE_PATH_TAG = 'AmazonDynamoDbAttributePath';
 const EXPECTED_TAG = `[object ${ATTRIBUTE_PATH_TAG}]`;
 
 export class AttributePath {
