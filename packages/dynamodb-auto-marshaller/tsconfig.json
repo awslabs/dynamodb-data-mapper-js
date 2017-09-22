@@ -12,7 +12,7 @@
     "module": "commonjs",
     "strict": true,
     "declaration": true,
-    "sourceRoot": "./src",
+    "rootDir": "./src",
     "outDir": "./build"
   }
 }

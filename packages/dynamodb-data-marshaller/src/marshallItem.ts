@@ -3,7 +3,12 @@ import {SchemaType} from "./SchemaType";
 import {InvalidValueError} from "./InvalidValueError";
 import {InvalidSchemaError} from "./InvalidSchemaError";
 import {AttributeMap, AttributeValue} from "aws-sdk/clients/dynamodb";
-import {BinarySet, Marshaller} from "@aws/dynamodb-auto-marshaller";
+import {
+    BinarySet,
+    EmptyHandlingStrategy,
+    InvalidHandlingStrategy,
+    Marshaller,
+} from "@aws/dynamodb-auto-marshaller";
 
 /**
  * Converts a JavaScript object into a DynamoDB Item.
@@ -70,8 +75,8 @@ export function marshallValue(
 
     if (schemaType.type === 'Collection') {
         const autoMarshaller = new Marshaller({
-            onEmpty: 'nullify',
-            onInvalid: 'omit',
+            onEmpty: EmptyHandlingStrategy.Nullify,
+            onInvalid: InvalidHandlingStrategy.Omit,
         });
 
         const collected: Array<AttributeValue> = [];
@@ -109,8 +114,8 @@ export function marshallValue(
 
     if (schemaType.type === 'Hash') {
         const autoMarshaller = new Marshaller({
-            onEmpty: 'nullify',
-            onInvalid: 'omit',
+            onEmpty: EmptyHandlingStrategy.Nullify,
+            onInvalid: InvalidHandlingStrategy.Omit,
         });
 
         return {M: autoMarshaller.marshallItem(input)};

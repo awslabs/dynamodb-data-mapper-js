@@ -67,10 +67,7 @@ function unmarshallValue(schemaType: SchemaType, input: AttributeValue): any {
             return input.BOOL;
         case 'Collection':
         case 'Hash':
-            const autoMarshaller = new Marshaller({
-                onEmpty: 'nullify',
-                onInvalid: 'omit',
-            });
+            const autoMarshaller = new Marshaller();
             return autoMarshaller.unmarshallValue(input);
         case 'Custom':
             return schemaType.unmarshall(input);
