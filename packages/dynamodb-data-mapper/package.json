@@ -1,0 +1,28 @@
+{
+  "name": "@aws/dynamodb-data-mapper",
+  "version": "0.0.0",
+  "description": "A schema-based data mapper for Amazon DynamoDB",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "scripts": {
+    "prepublishOnly": "tsc",
+    "pretest": "tsc -p tsconfig.test.json",
+    "test": "jest"
+  },
+  "author": "eskewj@amazon.com",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/jest": "^20.0.2",
+    "@types/node": "^8.0.4",
+    "jest": "^20.0.4",
+    "typescript": "^2.5.2",
+    "aws-sdk": "^2.7.0"
+  },
+  "dependencies": {
+    "@aws/dynamodb-data-marshaller": "^0.0.0",
+    "@aws/dynamodb-expressions": "^0.0.0"
+  },
+  "peerDependencies": {
+    "aws-sdk": "^2.7.0"
+  }
+}

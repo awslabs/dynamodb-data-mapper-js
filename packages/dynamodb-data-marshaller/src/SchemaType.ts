@@ -192,7 +192,7 @@ export interface CustomType<JsType> extends BaseType, KeyableType {
  *
  * Timezone information is not persisted.
  */
-export interface DateType extends BaseType {
+export interface DateType extends BaseType, KeyableType {
     type: 'Date';
 }
 

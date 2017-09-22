@@ -258,6 +258,13 @@ export function serializeConditionExpression(
             })`;
         case 'And':
         case 'Or':
+            if (condition.conditions.length === 1) {
+                return serializeConditionExpression(
+                    condition.conditions[0],
+                    attributes
+                );
+            }
+
             return condition.conditions
                 .map(cond => `(${serializeConditionExpression(cond, attributes)})`)
                 .join(` ${condition.type.toUpperCase()} `);
