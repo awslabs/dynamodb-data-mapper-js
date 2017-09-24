@@ -8,6 +8,9 @@ export interface UpdateExpressionConfiguration {
     attributes?: ExpressionAttributes;
 }
 
+/**
+ * An object representing a DynamoDB update expression.
+ */
 export class UpdateExpression {
     readonly attributes: ExpressionAttributes;
 
@@ -22,20 +25,32 @@ export class UpdateExpression {
         this.attributes = attributes;
     }
 
+    /**
+     * Add a directive to the expression's `add` clause.
+     */
     add(path: AttributePath|string, value: any): void {
         this.toAdd[this.attributes.addName(path)]
             = this.attributes.addValue(value);
     }
 
+    /**
+     * Add a directive to the expression's `delete` clause.
+     */
     delete(path: AttributePath|string, value: any): void {
         this.toDelete[this.attributes.addName(path)]
             = this.attributes.addValue(value);
     }
 
+    /**
+     * Add a directive to the expression's `remove` clause.
+     */
     remove(path: AttributePath|string): void {
         this.toRemove.add(this.attributes.addName(path));
     }
 
+    /**
+     * Add a directive to the expression's `set` clause.
+     */
     set(
         path: AttributePath|string,
         value: AttributeValue|FunctionExpression|MathematicalExpression|any
@@ -54,6 +69,9 @@ export class UpdateExpression {
         this.toSet[lhs] = rhs;
     }
 
+    /**
+     * Convert the expression to the string format expected by DynamoDB.
+     */
     toString(): string {
         const clauses: Array<string> = [];
         for (const [mapping, verb] of [

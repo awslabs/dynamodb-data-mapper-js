@@ -6,6 +6,9 @@ export type MathematicalExpressionOperand = AttributePath|string|number;
 const MATHEMATICAL_EXPRESSION_TAG = 'AmazonDynamoDbMathematicalExpression';
 const EXPECTED_TOSTRING = `[object ${MATHEMATICAL_EXPRESSION_TAG}]`;
 
+/**
+ * An object representing a DynamoDB function expression.
+ */
 export class MathematicalExpression {
     readonly [Symbol.toStringTag] = MATHEMATICAL_EXPRESSION_TAG;
 
@@ -15,6 +18,12 @@ export class MathematicalExpression {
         readonly rhs: MathematicalExpressionOperand
     ) {}
 
+    /**
+     * Convert the mathematical expression represented by this object into the
+     * string format expected by DynamoDB. Any attribute names and values
+     * will be replaced with substitutions supplied by the provided
+     * ExpressionAttributes object.
+     */
     serialize(attributes: ExpressionAttributes) {
         const safeArgs = [this.lhs, this.rhs].map(
             arg => AttributePath.isAttributePath(arg) || typeof arg === 'string'
@@ -24,6 +33,9 @@ export class MathematicalExpression {
         return `${safeArgs[0]} ${this.operator} ${safeArgs[1]}`;
     }
 
+    /**
+     * Evaluate whether the provided value is a MathematicalExpression object.
+     */
     static isMathematicalExpression(arg: any): arg is MathematicalExpression {
         return arg instanceof MathematicalExpression
             || Object.prototype.toString.call(arg) === EXPECTED_TOSTRING;

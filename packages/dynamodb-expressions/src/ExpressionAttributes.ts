@@ -7,6 +7,9 @@ import {
     ExpressionAttributeValueMap,
 } from 'aws-sdk/clients/dynamodb';
 
+/**
+ * An object that manages expression attribute name and value substitution.
+ */
 export class ExpressionAttributes {
     readonly names: ExpressionAttributeNameMap = {};
     readonly values: ExpressionAttributeValueMap = {};
@@ -15,6 +18,13 @@ export class ExpressionAttributes {
     private readonly nameMap: {[attributeName: string]: string} = {};
     private _ctr = 0;
 
+    /**
+     * Add an attribute path to this substitution context.
+     *
+     * @returns The substitution value to use in the expression. The same
+     * attribute name will always be converted to the same substitution value
+     * when supplied to the same ExpressionAttributes object multiple times.
+     */
     addName(path: AttributePath|string): string {
         if (AttributePath.isAttributePath(path)) {
             let escapedPath = '';
@@ -32,6 +42,11 @@ export class ExpressionAttributes {
         return this.addName(new AttributePath(path));
     }
 
+    /**
+     * Add an attribute value to this substitution context.
+     *
+     * @returns The substitution value to use in the expression.
+     */
     addValue(value: any): string {
         const modeledAttrValue = AttributeValue.isAttributeValue(value)
                 ? value.marshalled as AttributeValueModel

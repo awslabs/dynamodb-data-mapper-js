@@ -1,6 +1,14 @@
 const ATTRIBUTE_PATH_TAG = 'AmazonDynamoDbAttributePath';
 const EXPECTED_TAG = `[object ${ATTRIBUTE_PATH_TAG}]`;
 
+/**
+ * The path to an attribute of a DynamoDB item or to a property
+ * or member thereof. Supports map property access (`map.property`)
+ * and list member access (`list[1]`). 
+ *
+ * Control characters that are part of the property identifier may be
+ * used when escaped with a backslash (`\`) character.
+ */
 export class AttributePath {
     readonly elements: Array<PathElement>;
     readonly [Symbol.toStringTag] = ATTRIBUTE_PATH_TAG;
@@ -13,17 +21,29 @@ export class AttributePath {
         }
     }
 
+    /**
+     * Determine if the provided value is an AttributePath object.
+     * Compatible with AttributePath objects generated in other iframes
+     * or Node VMs.
+     */
     static isAttributePath(arg: any): arg is AttributePath {
         return arg instanceof AttributePath
             || Object.prototype.toString.call(arg) === EXPECTED_TAG;
     }
 }
 
+/**
+ * A string identifying a top-level property of a DynamoDB item or
+ * of a MapAttributeValue.
+ */
 export interface AttributeName {
     type: 'AttributeName';
     name: string;
 }
 
+/**
+ * The index of a particular member of a ListAttributeValue.
+ */
 export interface ListIndex {
     type: 'ListIndex';
     index: number;
@@ -41,7 +61,7 @@ const RIGHT_BRACKET = ']';
 const PATH_DELIMITER = '.';
 const ESCAPE_CHARACTER = '\\';
 
-export function parsePath(path: string): Array<PathElement> {
+function parsePath(path: string): Array<PathElement> {
     const elements: Array<PathElement> = [];
     let state: ParseState = ParseState.identifier;
     let collected = '';

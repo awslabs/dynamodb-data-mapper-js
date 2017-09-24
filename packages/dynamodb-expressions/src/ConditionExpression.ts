@@ -1,17 +1,28 @@
 import {AttributePath} from "./AttributePath";
+import {AttributeValue} from "./AttributeValue";
 import {ExpressionAttributes} from "./ExpressionAttributes";
 import {FunctionExpression} from "./FunctionExpression";
 
-export type ComparisonOperand = AttributePath|any;
+export type ComparisonOperand = AttributePath|AttributeValue|any;
 
 export interface BinaryComparisonPredicate {
+    /**
+     * The value against which the comparison subject will be compared.
+     */
     object: ComparisonOperand;
 }
 
+/**
+ * A comparison predicate asserting that the subject and object are equal.
+ */
 export interface EqualityExpressionPredicate extends BinaryComparisonPredicate {
     type: 'Equals';
 }
 
+/**
+ * Create an expression predicate asserting that the subject is equal to the
+ * predicate.
+ */
 export function equals(
     operand: ComparisonOperand
 ): EqualityExpressionPredicate {
@@ -21,6 +32,9 @@ export function equals(
     };
 }
 
+/**
+ * A comparison predicate asserting that the subject and object are not equal.
+ */
 export interface InequalityExpressionPredicate extends BinaryComparisonPredicate {
     type: 'NotEquals';
 }
@@ -34,6 +48,9 @@ export function notEquals(
     }
 }
 
+/**
+ * A comparison predicate asserting that the subject is less than the object.
+ */
 export interface LessThanExpressionPredicate extends BinaryComparisonPredicate {
     type: 'LessThan';
 }
@@ -47,6 +64,10 @@ export function lessThan(
     }
 }
 
+/**
+ * A comparison predicate asserting that the subject is less than or equal to
+ * the object.
+ */
 export interface LessThanOrEqualToExpressionPredicate extends BinaryComparisonPredicate {
     type: 'LessThanOrEqualTo';
 }
@@ -60,6 +81,9 @@ export function lessThanOrEqualTo(
     }
 }
 
+/**
+ * A comparison predicate asserting that the subject is greater than the object.
+ */
 export interface GreaterThanExpressionPredicate extends BinaryComparisonPredicate {
     type: 'GreaterThan';
 }
@@ -73,6 +97,10 @@ export function greaterThan(
     }
 }
 
+/**
+ * A comparison predicate asserting that the subject is greater than or equal
+ * to the object.
+ */
 export interface GreaterThanOrEqualToExpressionPredicate extends BinaryComparisonPredicate {
     type: 'GreaterThanOrEqualTo';
 }
@@ -86,6 +114,9 @@ export function greaterThanOrEqualTo(
     }
 }
 
+/**
+ * A comparison predicate asserting that the subject is between two bounds.
+ */
 export interface BetweenExpressionPredicate {
     type: 'Between';
     lowerBound: ComparisonOperand;
@@ -103,6 +134,10 @@ export function between(
     }
 }
 
+/**
+ * A comparison predicate asserting that the subject is equal to any member of
+ * the provided list of values.
+ */
 export interface MembershipExpressionPredicate {
     type: 'Membership';
     values: Array<ComparisonOperand>;
@@ -128,6 +163,9 @@ export type ConditionExpressionPredicate =
     BetweenExpressionPredicate |
     MembershipExpressionPredicate;
 
+/**
+ * Evaluate whether the provided value is a condition expression predicate.
+ */
 export function isConditionExpressionPredicate(
     arg: any
 ): arg is ConditionExpressionPredicate {
@@ -152,6 +190,9 @@ export function isConditionExpressionPredicate(
 }
 
 export interface ConditionExpressionSubject {
+    /**
+     * The path to the item attribute containing the subject of the comparison.
+     */
     subject: AttributePath|string;
 }
 
@@ -170,21 +211,35 @@ export type ConditionExpression =
     NotExpression |
     FunctionExpression;
 
+/**
+ * A comparison expression asserting that all conditions in the provided list
+ * are true.
+ */
 export interface AndExpression {
     type: 'And';
     conditions: Array<ConditionExpression>;
 }
 
+/**
+ * A comparison expression asserting that one or more conditions in the provided
+ * list are true.
+ */
 export interface OrExpression {
     type: 'Or';
     conditions: Array<ConditionExpression>;
 }
 
+/**
+ * A comparison expression asserting that the provided condition is not true.
+ */
 export interface NotExpression {
     type: 'Not';
     condition: ConditionExpression;
 }
 
+/**
+ * Evaluates whether the provided value is a condition expression.
+ */
 export function isConditionExpression(arg: any): arg is ConditionExpression {
     if (FunctionExpression.isFunctionExpression(arg)) {
         return true;
@@ -216,6 +271,11 @@ export function isConditionExpression(arg: any): arg is ConditionExpression {
     return false;
 }
 
+/**
+ * Convert the provided condition expression object to a string, escaping any
+ * values and attributes to expression-safe placeholders whose expansion value
+ * will be managed by the provided ExpressionAttributes object.
+ */
 export function serializeConditionExpression(
     condition: ConditionExpression,
     attributes: ExpressionAttributes
