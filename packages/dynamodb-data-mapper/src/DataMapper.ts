@@ -46,6 +46,14 @@ require('./asyncIteratorSymbolPolyfill');
 
 export type StringToAnyObjectMap = {[key: string]: any};
 
+/**
+ * Object mapper for domain object interaction with DynamoDB.
+ *
+ * To use, define a schema that describes how an item is represented in a
+ * DynamoDB table. This schema will be used to marshall a native JavaScript
+ * object into its desired persisted form. Attributes present on the object
+ * but not in the schema will be ignored.
+ */
 export class DataMapper {
     private readonly client: DynamoDB;
     private readonly readConsistency: ReadConsistency;
@@ -64,6 +72,9 @@ export class DataMapper {
         this.tableNamePrefix = tableNamePrefix;
     }
 
+    /**
+     * Perform a DeleteItem operation using the supplied {TableDefinition}.
+     */
     async delete<T extends StringToAnyObjectMap = StringToAnyObjectMap>({
         condition,
         item,
@@ -121,6 +132,9 @@ export class DataMapper {
         }
     }
 
+    /**
+     * Perform a GetItem operation using the supplied {TableDefinition}.
+     */
     async get<T extends object = StringToAnyObjectMap>({
         item,
         projection,
@@ -161,6 +175,9 @@ export class DataMapper {
         throw new ItemNotFoundException(operationInput);
     }
 
+    /**
+     * Perform a PutItem operation using the supplied {TableDefinition}.
+     */
     async put<T extends object = StringToAnyObjectMap>({
         item,
         condition,
@@ -219,6 +236,12 @@ export class DataMapper {
         }
     }
 
+    /**
+     * Perform a Query operation using the supplied {TableDefinition}.
+     *
+     * @return An asynchronous iterator that yields query results. Intended
+     * to be consumed with a `for await ... of` loop.
+     */
     async *query<T extends object = StringToAnyObjectMap>({
         filter,
         indexName,
@@ -282,6 +305,12 @@ export class DataMapper {
         } while (result.LastEvaluatedKey !== undefined);
     }
 
+    /**
+     * Perform a Scan operation using the supplied {TableDefinition}.
+     *
+     * @return An asynchronous iterator that yields scan results. Intended
+     * to be consumed with a `for await ... of` loop.
+     */
     async *scan<T extends object = StringToAnyObjectMap>({
         filter,
         indexName,
@@ -334,6 +363,9 @@ export class DataMapper {
         } while (result.LastEvaluatedKey !== undefined);
     }
 
+    /**
+     * Perform an UpdateItem operation using the supplied {TableDefinition}.
+     */
     async update<T extends object = StringToAnyObjectMap>({
         item,
         condition,
