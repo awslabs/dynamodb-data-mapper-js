@@ -1747,13 +1747,13 @@ describe('DataMapper', () => {
                             Key: {
                                 fizz: {S: 'key'}
                             },
-                            ConditionExpression: 'attribute_not_exists(#attr2)',
+                            ConditionExpression: 'attribute_not_exists(#attr0)',
                             ExpressionAttributeNames: {
-                                '#attr0': 'buzz',
-                                '#attr2': 'baz',
+                                '#attr0': 'baz',
+                                '#attr1': 'buzz',
                             },
                             ExpressionAttributeValues: {
-                                ':val1': {
+                                ':val2': {
                                     L: [
                                         {N: '1'},
                                         {B: Uint8Array.from([0xde, 0xad, 0xbe, 0xef])}
@@ -1761,7 +1761,7 @@ describe('DataMapper', () => {
                                 },
                                 ':val3': {N: '0'},
                             },
-                            UpdateExpression: 'SET #attr0 = :val1, #attr2 = :val3',
+                            UpdateExpression: 'SET #attr1 = :val2, #attr0 = :val3',
                         });
                 }
             );
@@ -1784,22 +1784,22 @@ describe('DataMapper', () => {
                             Key: {
                                 fizz: {S: 'key'}
                             },
-                            ConditionExpression: '#attr2 = :val4',
+                            ConditionExpression: '#attr0 = :val1',
                             ExpressionAttributeNames: {
-                                '#attr0': 'buzz',
-                                '#attr2': 'baz',
+                                '#attr0': 'baz',
+                                '#attr2': 'buzz',
                             },
                             ExpressionAttributeValues: {
-                                ':val1': {
+                                ':val1': {N: '10'},
+                                ':val3': {
                                     L: [
                                         {N: '1'},
                                         {B: Uint8Array.from([0xde, 0xad, 0xbe, 0xef])}
                                     ],
                                 },
-                                ':val3': {N: '1'},
-                                ':val4': {N: '10'},
+                                ':val4': {N: '1'},
                             },
-                            UpdateExpression: 'SET #attr0 = :val1, #attr2 = #attr2 + :val3',
+                            UpdateExpression: 'SET #attr2 = :val3, #attr0 = #attr0 + :val4',
                         });
                 }
             );
@@ -1899,15 +1899,15 @@ describe('DataMapper', () => {
 
                     expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
                         .toMatchObject({
-                            ConditionExpression: '(#attr2 < :val3) AND (#attr0 = :val4)',
+                            ConditionExpression: '(#attr0 < :val1) AND (#attr2 = :val3)',
                             ExpressionAttributeNames: {
-                                '#attr0': 'pop',
-                                '#attr2': 'quux',
+                                '#attr0': 'quux',
+                                '#attr2': 'pop',
                             },
                             ExpressionAttributeValues: {
-                                ':val1': {N: '1'},
-                                ':val3': {N: '600000'},
-                                ':val4': {N: '21'},
+                                ':val1': {N: '600000'},
+                                ':val3': {N: '21'},
+                                ':val4': {N: '1'},
                             },
                         });
                 }

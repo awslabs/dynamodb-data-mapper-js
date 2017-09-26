@@ -437,6 +437,35 @@ describe('serializeConditionExpression', () => {
         });
     });
 
+    it('should serialize single-clause and expressions as the underlying expression type', () => {
+        const attributes = new ExpressionAttributes();
+        const serialized = serializeConditionExpression(
+            {
+                type: 'And',
+                conditions: [
+                    {
+                        type: 'Membership',
+                        subject: 'foo',
+                        values: [
+                            1,
+                            10,
+                            100,
+                        ],
+                    },
+                ]
+            },
+            attributes
+        );
+
+        expect(serialized).toBe('#attr0 IN (:val1, :val2, :val3)');
+        expect(attributes.names).toEqual({'#attr0': 'foo'});
+        expect(attributes.values).toEqual({
+            ':val1': {N: '1'},
+            ':val2': {N: '10'},
+            ':val3': {N: '100'},
+        });
+    });
+
     it('should serialize or expressions', () => {
         const attributes = new ExpressionAttributes();
         const serialized = serializeConditionExpression(

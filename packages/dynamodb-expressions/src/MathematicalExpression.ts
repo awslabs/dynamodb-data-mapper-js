@@ -1,5 +1,6 @@
-import {ExpressionAttributes} from "./ExpressionAttributes";
+import {AttributeBearingExpression} from "./AttributeBearingExpression";
 import {AttributePath} from "./AttributePath";
+import {ExpressionAttributes} from "./ExpressionAttributes";
 
 export type MathematicalExpressionOperand = AttributePath|string|number;
 
@@ -9,7 +10,7 @@ const EXPECTED_TOSTRING = `[object ${MATHEMATICAL_EXPRESSION_TAG}]`;
 /**
  * An object representing a DynamoDB function expression.
  */
-export class MathematicalExpression {
+export class MathematicalExpression implements AttributeBearingExpression {
     readonly [Symbol.toStringTag] = MATHEMATICAL_EXPRESSION_TAG;
 
     constructor(
@@ -18,12 +19,6 @@ export class MathematicalExpression {
         readonly rhs: MathematicalExpressionOperand
     ) {}
 
-    /**
-     * Convert the mathematical expression represented by this object into the
-     * string format expected by DynamoDB. Any attribute names and values
-     * will be replaced with substitutions supplied by the provided
-     * ExpressionAttributes object.
-     */
     serialize(attributes: ExpressionAttributes) {
         const safeArgs = [this.lhs, this.rhs].map(
             arg => AttributePath.isAttributePath(arg) || typeof arg === 'string'

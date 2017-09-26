@@ -374,7 +374,7 @@ export class DataMapper {
         skipVersionCheck = this.skipVersionCheck,
     }: UpdateParameters & DataMapperParameters): Promise<T> {
         const attributes = new ExpressionAttributes();
-        const expr = new UpdateExpression({attributes});
+        const expr = new UpdateExpression();
         const req: UpdateItemInput = {
             TableName: this.tableNamePrefix + tableName,
             ReturnValues: 'ALL_NEW',
@@ -427,7 +427,7 @@ export class DataMapper {
             );
         }
 
-        req.UpdateExpression = expr.toString();
+        req.UpdateExpression = expr.serialize(attributes);
         req.ExpressionAttributeNames = attributes.names;
         req.ExpressionAttributeValues = attributes.values;
 

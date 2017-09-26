@@ -1,5 +1,6 @@
-import {ExpressionAttributes} from "./ExpressionAttributes";
+import {AttributeBearingExpression} from "./AttributeBearingExpression";
 import {AttributePath} from "./AttributePath";
+import {ExpressionAttributes} from "./ExpressionAttributes";
 
 const FUNCTION_EXPRESSION_TAG = 'AmazonDynamoDbFunctionExpression';
 const EXPECTED_TOSTRING = `[object ${FUNCTION_EXPRESSION_TAG}]`;
@@ -7,7 +8,7 @@ const EXPECTED_TOSTRING = `[object ${FUNCTION_EXPRESSION_TAG}]`;
 /**
  * An object representing a DynamoDB function expression.
  */
-export class FunctionExpression {
+export class FunctionExpression implements AttributeBearingExpression {
     readonly [Symbol.toStringTag] = FUNCTION_EXPRESSION_TAG;
     readonly args: Array<AttributePath|any>;
 
@@ -18,12 +19,6 @@ export class FunctionExpression {
         this.args = args;
     }
 
-    /**
-     * Convert the function expression represented by this object into the
-     * string format expected by DynamoDB. Any attribute names and values
-     * will be replaced with substitutions supplied by the provided
-     * ExpressionAttributes object.
-     */
     serialize(attributes: ExpressionAttributes) {
         const expressionSafeArgs = this.args.map(
             arg => AttributePath.isAttributePath(arg)

@@ -1,51 +1,40 @@
+import {AttributeBearingExpression} from "./AttributeBearingExpression";
 import {AttributePath} from "./AttributePath";
 import {AttributeValue} from './AttributeValue';
 import {ExpressionAttributes} from "./ExpressionAttributes";
 import {FunctionExpression} from "./FunctionExpression";
 import {MathematicalExpression} from "./MathematicalExpression";
 
-export interface UpdateExpressionConfiguration {
-    attributes?: ExpressionAttributes;
-}
+type UpdateExpressionClause = Map<AttributePath|string, any>;
 
 /**
  * An object representing a DynamoDB update expression.
  */
-export class UpdateExpression {
-    readonly attributes: ExpressionAttributes;
-
-    private readonly toAdd: {[key: string]: string} = {};
-    private readonly toDelete: {[key: string]: string} = {};
-    private readonly toRemove = new Set<string>();
-    private readonly toSet: {[key: string]: string} = {};
-
-    constructor({
-        attributes = new ExpressionAttributes()
-    }: UpdateExpressionConfiguration = {}) {
-        this.attributes = attributes;
-    }
+export class UpdateExpression implements AttributeBearingExpression {
+    private readonly toAdd: UpdateExpressionClause = new Map();
+    private readonly toDelete: UpdateExpressionClause = new Map();
+    private readonly toRemove = new Set<AttributePath|string>();
+    private readonly toSet: UpdateExpressionClause = new Map();
 
     /**
      * Add a directive to the expression's `add` clause.
      */
     add(path: AttributePath|string, value: any): void {
-        this.toAdd[this.attributes.addName(path)]
-            = this.attributes.addValue(value);
+        this.toAdd.set(path, value);
     }
 
     /**
      * Add a directive to the expression's `delete` clause.
      */
     delete(path: AttributePath|string, value: any): void {
-        this.toDelete[this.attributes.addName(path)]
-            = this.attributes.addValue(value);
+        this.toDelete.set(path, value);
     }
 
     /**
      * Add a directive to the expression's `remove` clause.
      */
     remove(path: AttributePath|string): void {
-        this.toRemove.add(this.attributes.addName(path));
+        this.toRemove.add(path);
     }
 
     /**
@@ -55,46 +44,45 @@ export class UpdateExpression {
         path: AttributePath|string,
         value: AttributeValue|FunctionExpression|MathematicalExpression|any
     ): void {
-        const lhs = this.attributes.addName(path);
-        let rhs: string;
-        if (
-            FunctionExpression.isFunctionExpression(value) ||
-                MathematicalExpression.isMathematicalExpression(value)
-        ) {
-            rhs = value.serialize(this.attributes);
-        } else {
-            rhs = this.attributes.addValue(value);
-        }
-
-        this.toSet[lhs] = rhs;
+        this.toSet.set(path, value);
     }
 
-    /**
-     * Convert the expression to the string format expected by DynamoDB.
-     */
-    toString(): string {
+    serialize(attributes: ExpressionAttributes): string {
         const clauses: Array<string> = [];
+        const phrases: Array<string> = [];
         for (const [mapping, verb] of [
             [this.toAdd, 'ADD'],
             [this.toDelete, 'DELETE'],
-        ] as Array<[{[key: string]: string}, string]>) {
-            const keys = Object.keys(mapping);
-            if (keys.length > 0) {
-                clauses.push(`${verb} ${
-                    keys.map(key => `${key} ${mapping[key]}`).join(', ')
-                }`);
+        ] as Array<[UpdateExpressionClause, string]>) {
+            for (const [key, value] of mapping.entries()) {
+                phrases.push(
+                    `${attributes.addName(key)} ${attributes.addValue(value)}`
+                );
+            }
+
+            if (phrases.length > 0) {
+                clauses.push(`${verb} ${phrases.join(', ')}`);
+                phrases.length = 0;
             }
         }
 
-        const keys = Object.keys(this.toSet);
-        if (keys.length > 0) {
-            clauses.push(`SET ${
-                keys.map(key => `${key} = ${this.toSet[key]}`).join(', ')
+        for (const [key, value] of this.toSet.entries()) {
+            phrases.push(`${attributes.addName(key)} = ${
+                FunctionExpression.isFunctionExpression(value) || MathematicalExpression.isMathematicalExpression(value)
+                    ? value.serialize(attributes) : attributes.addValue(value)
             }`);
         }
+        if (phrases.length > 0) {
+            clauses.push(`SET ${phrases.join(', ')}`);
+            phrases.length = 0;
+        }
 
-        if (this.toRemove.size > 0) {
-            clauses.push(`REMOVE ${[...this.toRemove].join(', ')}`);
+        for (const keyToRemove of this.toRemove) {
+            phrases.push(attributes.addName(keyToRemove));
+        }
+        if (phrases.length > 0) {
+            clauses.push(`REMOVE ${phrases.join(', ')}`);
+            phrases.length = 0;
         }
 
         return clauses.join(' ');
