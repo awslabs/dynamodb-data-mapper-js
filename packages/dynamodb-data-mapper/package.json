@@ -5,7 +5,9 @@
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "scripts": {
-    "prepublishOnly": "tsc",
+    "build": "tsc",
+    "integ": "npm run pretest && jest --config=jest.integration.js",
+    "prepublishOnly": "npm run build",
     "pretest": "tsc -p tsconfig.test.json",
     "test": "jest"
   },

@@ -4,7 +4,7 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "pretest": "lerna run pretest",
-    "test": "jest --coverage"
+    "test": "jest"
   },
   "author": "eskewj@amazon.com",
   "license": "UNLICENSED",

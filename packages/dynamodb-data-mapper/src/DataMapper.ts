@@ -1,22 +1,26 @@
-import DynamoDB = require('aws-sdk/clients/dynamodb');
 import {OnMissingStrategy, ReadConsistency} from "./constants";
 import {ItemNotFoundException} from "./ItemNotFoundException";
 import {
     DataMapperConfiguration,
-    DataMapperParameters,
     DeleteParameters,
     GetParameters,
     PutParameters,
     QueryParameters,
     ScanParameters,
+    StringToAnyObjectMap,
     UpdateParameters,
 } from './namedParameters';
+import {
+    DynamoDbSchema,
+    DynamoDbTable,
+} from './protocols';
 import {
     marshallItem,
     marshallValue,
     Schema,
     SchemaType,
     unmarshallItem,
+    ZeroArgumentsConstructor,
 } from "@aws/dynamodb-data-marshaller";
 import {
     AttributePath,
@@ -42,9 +46,9 @@ import {
     ScanOutput,
     UpdateItemInput,
 } from "aws-sdk/clients/dynamodb";
-require('./asyncIteratorSymbolPolyfill');
+import DynamoDB = require('aws-sdk/clients/dynamodb');
 
-export type StringToAnyObjectMap = {[key: string]: any};
+require('./asyncIteratorSymbolPolyfill');
 
 /**
  * Object mapper for domain object interaction with DynamoDB.
@@ -73,17 +77,20 @@ export class DataMapper {
     }
 
     /**
-     * Perform a DeleteItem operation using the supplied {TableDefinition}.
+     * Perform a DeleteItem operation using the schema accessible via the
+     * {DynamoDbSchema} method and the table name accessible via the
+     * {DynamoDbTable} method on the item supplied.
      */
     async delete<T extends StringToAnyObjectMap = StringToAnyObjectMap>({
         condition,
         item,
-        tableDefinition: {tableName, schema},
         returnValues = 'ALL_OLD',
         skipVersionCheck = this.skipVersionCheck,
-    }: DeleteParameters<T> & DataMapperParameters): Promise<T|undefined> {
+    }: DeleteParameters<T>): Promise<T|undefined> {
+        const schema = getSchema(item);
+
         const operationInput: DeleteItemInput = {
-            TableName: this.tableNamePrefix + tableName,
+            TableName: this.tableNamePrefix + getTableName(item),
             Key: {},
             ReturnValues: returnValues,
         };
@@ -128,21 +135,27 @@ export class DataMapper {
 
         const response = await this.client.deleteItem(operationInput).promise();
         if (response.Attributes) {
-            return unmarshallItem<T>(schema, response.Attributes);
+            return unmarshallItem<T>(
+                schema,
+                response.Attributes,
+                item.constructor as ZeroArgumentsConstructor<T>
+            );
         }
     }
 
     /**
-     * Perform a GetItem operation using the supplied {TableDefinition}.
+     * Perform a GetItem operation using the schema accessible via the
+     * {DynamoDbSchema} method and the table name accessible via the
+     * {DynamoDbTable} method on the item supplied.
      */
-    async get<T extends object = StringToAnyObjectMap>({
+    async get<T extends StringToAnyObjectMap = StringToAnyObjectMap>({
         item,
         projection,
-        tableDefinition: {tableName, schema},
         readConsistency = this.readConsistency,
-    }: GetParameters & DataMapperParameters): Promise<T> {
+    }: GetParameters<T>): Promise<T> {
+        const schema = getSchema(item);
         const operationInput: GetItemInput = {
-            TableName: this.tableNamePrefix + tableName,
+            TableName: this.tableNamePrefix + getTableName(item),
             Key: {},
             ConsistentRead: readConsistency === ReadConsistency.StronglyConsistent,
         };
@@ -169,24 +182,30 @@ export class DataMapper {
 
         const rawResponse = await this.client.getItem(operationInput).promise();
         if (rawResponse.Item) {
-            return unmarshallItem<T>(schema, rawResponse.Item);
+            return unmarshallItem<T>(
+                schema,
+                rawResponse.Item,
+                item.constructor as ZeroArgumentsConstructor<T>
+            );
         }
 
         throw new ItemNotFoundException(operationInput);
     }
 
     /**
-     * Perform a PutItem operation using the supplied {TableDefinition}.
+     * Perform a PutItem operation using the schema accessible via the
+     * {DynamoDbSchema} method and the table name accessible via the
+     * {DynamoDbTable} method on the item supplied.
      */
-    async put<T extends object = StringToAnyObjectMap>({
+    async put<T extends StringToAnyObjectMap = StringToAnyObjectMap>({
         item,
         condition,
         returnValues = 'ALL_OLD',
         skipVersionCheck = this.skipVersionCheck,
-        tableDefinition: {tableName, schema},
-    }: PutParameters & DataMapperParameters): Promise<T|undefined> {
+    }: PutParameters<T>): Promise<T|undefined> {
+        const schema = getSchema(item);
         const req: PutItemInput = {
-            TableName: this.tableNamePrefix + tableName,
+            TableName: this.tableNamePrefix + getTableName(item),
             Item: marshallItem(schema, item),
             ReturnValues: returnValues,
         };
@@ -237,12 +256,14 @@ export class DataMapper {
     }
 
     /**
-     * Perform a Query operation using the supplied {TableDefinition}.
+     * Perform a Query operation using the schema accessible via the
+     * {DynamoDbSchema} method and the table name accessible via the
+     * {DynamoDbTable} method on the prototype of the constructor supplied.
      *
      * @return An asynchronous iterator that yields query results. Intended
      * to be consumed with a `for await ... of` loop.
      */
-    async *query<T extends object = StringToAnyObjectMap>({
+    async *query<T extends StringToAnyObjectMap = StringToAnyObjectMap>({
         filter,
         indexName,
         keyCondition,
@@ -251,15 +272,17 @@ export class DataMapper {
         readConsistency = this.readConsistency,
         scanIndexForward,
         startKey,
-        tableDefinition: {tableName, schema},
-    }: QueryParameters & DataMapperParameters) {
+        valueConstructor,
+    }: QueryParameters<T>) {
         const req: QueryInput = {
-            TableName: this.tableNamePrefix + tableName,
+            TableName: this.tableNamePrefix + getTableName(valueConstructor.prototype),
             ConsistentRead: readConsistency === ReadConsistency.StronglyConsistent,
             ScanIndexForward: scanIndexForward,
             Limit: limit,
             IndexName: indexName,
         };
+
+        const schema = getSchema(valueConstructor.prototype);
 
         const attributes = new ExpressionAttributes();
         const mapping = getAttributeNameMapping(schema);
@@ -306,26 +329,30 @@ export class DataMapper {
     }
 
     /**
-     * Perform a Scan operation using the supplied {TableDefinition}.
+     * Perform a Scan operation using the schema accessible via the
+     * {DynamoDbSchema} method and the table name accessible via the
+     * {DynamoDbTable} method on the prototype of the constructor supplied.
      *
      * @return An asynchronous iterator that yields scan results. Intended
      * to be consumed with a `for await ... of` loop.
      */
-    async *scan<T extends object = StringToAnyObjectMap>({
+    async *scan<T extends StringToAnyObjectMap = StringToAnyObjectMap>({
         filter,
         indexName,
         limit,
         projection,
         readConsistency = this.readConsistency,
         startKey,
-        tableDefinition: {tableName, schema},
-    }: ScanParameters & DataMapperParameters) {
+        valueConstructor,
+    }: ScanParameters) {
         const req: ScanInput = {
-            TableName: this.tableNamePrefix + tableName,
+            TableName: this.tableNamePrefix + getTableName(valueConstructor.prototype),
             ConsistentRead: readConsistency === ReadConsistency.StronglyConsistent,
             Limit: limit,
             IndexName: indexName,
         };
+
+        const schema = getSchema(valueConstructor.prototype);
 
         const attributes = new ExpressionAttributes();
         const mapping = getAttributeNameMapping(schema);
@@ -364,22 +391,25 @@ export class DataMapper {
     }
 
     /**
-     * Perform an UpdateItem operation using the supplied {TableDefinition}.
+     * Perform an UpdateItem operation using the schema accessible via the
+     * {DynamoDbSchema} method and the table name accessible via the
+     * {DynamoDbTable} method on the item supplied.
      */
-    async update<T extends object = StringToAnyObjectMap>({
+    async update<T extends StringToAnyObjectMap = StringToAnyObjectMap>({
         item,
         condition,
-        tableDefinition: {tableName, schema},
         onMissing = OnMissingStrategy.Remove,
         skipVersionCheck = this.skipVersionCheck,
-    }: UpdateParameters & DataMapperParameters): Promise<T> {
-        const attributes = new ExpressionAttributes();
-        const expr = new UpdateExpression();
+    }: UpdateParameters<T>): Promise<T> {
         const req: UpdateItemInput = {
-            TableName: this.tableNamePrefix + tableName,
+            TableName: this.tableNamePrefix + getTableName(item),
             ReturnValues: 'ALL_NEW',
             Key: {},
         };
+        const schema = getSchema(item);
+
+        const attributes = new ExpressionAttributes();
+        const expr = new UpdateExpression();
 
         for (const key of Object.keys(schema)) {
             let inputMember = item[key];
@@ -433,7 +463,11 @@ export class DataMapper {
 
         const rawResponse = await this.client.updateItem(req).promise();
         if (rawResponse.Attributes) {
-            return unmarshallItem<T>(schema, rawResponse.Attributes);
+            return unmarshallItem<T>(
+                schema,
+                rawResponse.Attributes,
+                item.constructor as ZeroArgumentsConstructor<T>
+            );
         }
 
         // this branch should not be reached when interacting with DynamoDB, as
@@ -617,4 +651,26 @@ function toSchemaName(
 
         return el;
     }));
+}
+
+function getSchema(item: StringToAnyObjectMap): Schema {
+    if (typeof item[DynamoDbSchema] === 'function') {
+        return item[DynamoDbSchema]();
+    }
+
+    throw new Error(
+        'The provided item did not adhere to the DynamoDbDocument protocol.' +
+        ' No method was found at the `DynamoDbSchema` symbol'
+    );
+}
+
+function getTableName(item: StringToAnyObjectMap): string {
+    if (typeof item[DynamoDbTable] === 'function') {
+        return item[DynamoDbTable]();
+    }
+
+    throw new Error(
+        'The provided item did not adhere to the DynamoDbTable protocol. No' +
+        ' method was found at the `DynamoDbTable` symbol'
+    );
 }

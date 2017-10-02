@@ -1,6 +1,6 @@
 import DynamoDB = require("aws-sdk/clients/dynamodb");
 import {OnMissingStrategy, ReadConsistency} from "./constants";
-import {TableDefinition} from "@aws/dynamodb-data-marshaller";
+import {ZeroArgumentsConstructor} from "@aws/dynamodb-data-marshaller";
 import {
     ConditionExpression,
     ConditionExpressionPredicate,
@@ -8,7 +8,7 @@ import {
 } from "@aws/dynamodb-expressions";
 import {ReturnValue} from 'aws-sdk/clients/dynamodb';
 
-export type StringToAnyObjectMap = {[key: string]: any};
+export interface StringToAnyObjectMap {[key: string]: any;}
 
 export interface DataMapperConfiguration {
     /**
@@ -35,14 +35,7 @@ export interface DataMapperConfiguration {
     tableNamePrefix?: string;
 }
 
-export interface DataMapperParameters {
-    /**
-     * The schema and table name to use for this operation.
-     */
-    tableDefinition: TableDefinition;
-}
-
-export interface DeleteParameters<T extends object = StringToAnyObjectMap> {
+export interface DeleteParameters<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
     /**
      * The item being deleted.
      */
@@ -67,7 +60,7 @@ export interface DeleteParameters<T extends object = StringToAnyObjectMap> {
     skipVersionCheck?: boolean;
 }
 
-export interface GetParameters<T extends object = StringToAnyObjectMap> {
+export interface GetParameters<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
     /**
      * The item being loaded.
      */
@@ -84,7 +77,7 @@ export interface GetParameters<T extends object = StringToAnyObjectMap> {
     projection?: ProjectionExpression;
 }
 
-export interface PutParameters<T extends object = StringToAnyObjectMap> {
+export interface PutParameters<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
     /**
      * The object to be saved.
      */
@@ -109,7 +102,7 @@ export interface PutParameters<T extends object = StringToAnyObjectMap> {
     skipVersionCheck?: boolean;
 }
 
-export interface QueryParameters {
+export interface QueryParameters<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
     /**
      * A string that contains conditions that DynamoDB applies after the Query
      * operation, but before the data is returned to you. Items that do not
@@ -165,9 +158,15 @@ export interface QueryParameters {
      * The primary key of the first item that this operation will evaluate.
      */
     startKey?: {[key: string]: any};
+
+    /**
+     * A constructor that creates objects representing one record returned by
+     * the query operation.
+     */
+    valueConstructor: ZeroArgumentsConstructor<T>;
 }
 
-export interface ScanParameters<T extends object = StringToAnyObjectMap> {
+export interface ScanParameters<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
     /**
      * A string that contains conditions that DynamoDB applies after the Query
      * operation, but before the data is returned to you. Items that do not
@@ -216,9 +215,15 @@ export interface ScanParameters<T extends object = StringToAnyObjectMap> {
      * The primary key of the first item that this operation will evaluate.
      */
     startKey?: {[key: string]: any};
+
+    /**
+     * A constructor that creates objects representing one record returned by
+     * the query operation.
+     */
+    valueConstructor: ZeroArgumentsConstructor<T>;
 }
 
-export interface UpdateParameters<T extends object = StringToAnyObjectMap> {
+export interface UpdateParameters<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
     /**
      * The object to be saved.
      */

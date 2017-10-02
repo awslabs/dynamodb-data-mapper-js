@@ -1,9 +1,11 @@
 import {DataMapper} from "./DataMapper";
 import {OnMissingStrategy, ReadConsistency} from "./constants";
 import {
-    Schema,
-    TableDefinition,
-} from "@aws/dynamodb-data-marshaller";
+    DynamoDbSchema,
+    DynamoDbTable,
+} from "./protocols";
+import {BinaryValue} from '@aws/dynamodb-auto-marshaller';
+import {Schema} from "@aws/dynamodb-data-marshaller";
 import {
     AttributePath,
     between,
@@ -33,11 +35,14 @@ describe('DataMapper', () => {
             async () => {
                 const tableName = 'foo';
                 await mapper.delete({
-                    item: {},
-                    tableDefinition: {
-                        tableName,
-                        schema: {},
-                    }
+                    item: {
+                        [DynamoDbTable]() {
+                            return tableName;
+                        },
+                        [DynamoDbSchema]() {
+                            return {};
+                        },
+                    },
                 });
 
                 expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
@@ -55,11 +60,14 @@ describe('DataMapper', () => {
                 });
                 const tableName = 'foo';
                 await mapper.delete({
-                    item: {},
-                    tableDefinition: {
-                        tableName,
-                        schema: {},
-                    }
+                    item: {
+                        [DynamoDbTable]() {
+                            return tableName;
+                        },
+                        [DynamoDbSchema]() {
+                            return {};
+                        }
+                    },
                 });
 
                 expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
@@ -73,21 +81,23 @@ describe('DataMapper', () => {
                 await mapper.delete({
                     item: {
                         fizz: 'buzz',
-                        pop: new Date(60000)
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {
-                                type: 'String',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Date',
-                                keyType: 'RANGE'
-                            },
+                        pop: new Date(60000),
+                        [DynamoDbTable]() {
+                            return 'foo';
                         },
-                    }
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {
+                                    type: 'String',
+                                    keyType: 'HASH',
+                                },
+                                pop: {
+                                    type: 'Date',
+                                    keyType: 'RANGE'
+                                },
+                            };
+                        },
+                    },
                 });
 
                 expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
@@ -106,20 +116,22 @@ describe('DataMapper', () => {
                 await mapper.delete({
                     item: {
                         fizz: 'buzz',
-                        pop: new Date(60000)
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {
-                                type: 'String',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Date'
-                            },
+                        pop: new Date(60000),
+                        [DynamoDbTable]() {
+                            return 'foo';
                         },
-                    }
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {
+                                    type: 'String',
+                                    keyType: 'HASH',
+                                },
+                                pop: {
+                                    type: 'Date'
+                                },
+                            };
+                        },
+                    },
                 });
 
                 expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
@@ -135,21 +147,23 @@ describe('DataMapper', () => {
                 await mapper.delete({
                     item: {
                         fizz: 'buzz',
-                        pop: new Date(60000)
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {
-                                type: 'String',
-                                attributeName: 'foo',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Date'
-                            },
+                        pop: new Date(60000),
+                        [DynamoDbTable]() {
+                            return 'foo';
                         },
-                    }
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {
+                                    type: 'String',
+                                    attributeName: 'foo',
+                                    keyType: 'HASH',
+                                },
+                                pop: {
+                                    type: 'Date'
+                                },
+                            };
+                        },
+                    },
                 });
 
                 expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
@@ -165,22 +179,24 @@ describe('DataMapper', () => {
                 await mapper.delete({
                     item: {
                         fizz: 'buzz',
-                        pop: 21
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {
-                                type: 'String',
-                                attributeName: 'foo',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Number',
-                                versionAttribute: true,
-                            },
+                        pop: 21,
+                        [DynamoDbTable]() {
+                            return 'foo';
                         },
-                    }
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {
+                                    type: 'String',
+                                    attributeName: 'foo',
+                                    keyType: 'HASH',
+                                },
+                                pop: {
+                                    type: 'Number',
+                                    versionAttribute: true,
+                                },
+                            };
+                        },
+                    },
                 });
 
                 expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
@@ -197,22 +213,24 @@ describe('DataMapper', () => {
             async () => {
                 await mapper.delete({
                     item: {
-                        fizz: 'buzz'
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {
-                                type: 'String',
-                                attributeName: 'foo',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Number',
-                                versionAttribute: true,
-                            },
+                        fizz: 'buzz',
+                        [DynamoDbTable]() {
+                            return 'foo';
                         },
-                    }
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {
+                                    type: 'String',
+                                    attributeName: 'foo',
+                                    keyType: 'HASH',
+                                },
+                                pop: {
+                                    type: 'Number',
+                                    versionAttribute: true,
+                                },
+                            };
+                        },
+                    },
                 });
 
                 expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
@@ -226,20 +244,22 @@ describe('DataMapper', () => {
                 await mapper.delete({
                     item: {
                         fizz: 'buzz',
-                        pop: 21
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {
-                                type: 'String',
-                                attributeName: 'foo',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Number',
-                                versionAttribute: true,
-                            },
+                        pop: 21,
+                        [DynamoDbTable]() {
+                            return 'foo';
+                        },
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {
+                                    type: 'String',
+                                    attributeName: 'foo',
+                                    keyType: 'HASH',
+                                },
+                                pop: {
+                                    type: 'Number',
+                                    versionAttribute: true,
+                                },
+                            };
                         },
                     },
                     skipVersionCheck: true,
@@ -260,20 +280,22 @@ describe('DataMapper', () => {
                 await mapper.delete({
                     item: {
                         fizz: 'buzz',
-                        pop: 21
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {
-                                type: 'String',
-                                attributeName: 'foo',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Number',
-                                versionAttribute: true,
-                            },
+                        pop: 21,
+                        [DynamoDbTable]() {
+                            return 'foo';
+                        },
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {
+                                    type: 'String',
+                                    attributeName: 'foo',
+                                    keyType: 'HASH',
+                                },
+                                pop: {
+                                    type: 'Number',
+                                    versionAttribute: true,
+                                },
+                            };
                         },
                     },
                 });
@@ -289,21 +311,23 @@ describe('DataMapper', () => {
                 await mapper.delete({
                     item: {
                         fizz: 'buzz',
-                        pop: 21
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {
-                                type: 'String',
-                                attributeName: 'foo',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Number',
-                                versionAttribute: true,
-                            },
-                            quux: {type: 'Date'}
+                        pop: 21,
+                        [DynamoDbTable]() {
+                            return 'foo';
+                        },
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {
+                                    type: 'String',
+                                    attributeName: 'foo',
+                                    keyType: 'HASH',
+                                },
+                                pop: {
+                                    type: 'Number',
+                                    versionAttribute: true,
+                                },
+                                quux: {type: 'Date'},
+                            };
                         },
                     },
                     condition: {
@@ -337,23 +361,25 @@ describe('DataMapper', () => {
 
             const result = await mapper.delete({
                 item: {
-                    foo: 'buzz'
-                },
-                tableDefinition: {
-                    tableName: 'foo',
-                    schema: {
-                        foo: {
-                            type: 'String',
-                            attributeName: 'fizz',
-                            keyType: 'HASH',
-                        },
-                        bar: {
-                            type: 'NumberSet',
-                        },
-                        baz: {
-                            type: 'Tuple',
-                            members: [{type: 'Boolean'}, {type: 'Number'}]
-                        },
+                    foo: 'buzz',
+                    [DynamoDbTable]() {
+                        return 'foo';
+                    },
+                    [DynamoDbSchema]() {
+                        return {
+                            foo: {
+                                type: 'String',
+                                attributeName: 'fizz',
+                                keyType: 'HASH',
+                            },
+                            bar: {
+                                type: 'NumberSet',
+                            },
+                            baz: {
+                                type: 'Tuple',
+                                members: [{type: 'Boolean'}, {type: 'Number'}]
+                            },
+                        };
                     },
                 },
                 returnValues: "ALL_OLD"
@@ -387,11 +413,14 @@ describe('DataMapper', () => {
             async () => {
                 const tableName = 'foo';
                 await mapper.get({
-                    item: {},
-                    tableDefinition: {
-                        tableName,
-                        schema: {},
-                    }
+                    item: {
+                        [DynamoDbTable]() {
+                            return tableName;
+                        },
+                        [DynamoDbSchema]() {
+                            return {};
+                        },
+                    },
                 });
 
                 expect(mockDynamoDbClient.getItem.mock.calls[0][0])
@@ -409,11 +438,14 @@ describe('DataMapper', () => {
                 });
                 const tableName = 'foo';
                 await mapper.get({
-                    item: {},
-                    tableDefinition: {
-                        tableName,
-                        schema: {},
-                    }
+                    item: {
+                        [DynamoDbTable]() {
+                            return tableName;
+                        },
+                        [DynamoDbSchema]() {
+                            return {};
+                        },
+                    },
                 });
 
                 expect(mockDynamoDbClient.getItem.mock.calls[0][0])
@@ -427,21 +459,23 @@ describe('DataMapper', () => {
                 await mapper.get({
                     item: {
                         fizz: 'buzz',
-                        pop: new Date(60000)
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {
-                                type: 'String',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Date',
-                                keyType: 'RANGE'
-                            },
+                        pop: new Date(60000),
+                        [DynamoDbTable]() {
+                            return 'foo';
                         },
-                    }
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {
+                                    type: 'String',
+                                    keyType: 'HASH',
+                                },
+                                pop: {
+                                    type: 'Date',
+                                    keyType: 'RANGE'
+                                },
+                            };
+                        },
+                    },
                 });
 
                 expect(mockDynamoDbClient.getItem.mock.calls[0][0])
@@ -460,18 +494,20 @@ describe('DataMapper', () => {
                 await mapper.get({
                     item: {
                         fizz: 'buzz',
-                        pop: new Date(60000)
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {
-                                type: 'String',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Date'
-                            },
+                        pop: new Date(60000),
+                        [DynamoDbTable]() {
+                            return 'foo';
+                        },
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {
+                                    type: 'String',
+                                    keyType: 'HASH',
+                                },
+                                pop: {
+                                    type: 'Date'
+                                },
+                            };
                         },
                     }
                 });
@@ -489,21 +525,23 @@ describe('DataMapper', () => {
                 await mapper.get({
                     item: {
                         fizz: 'buzz',
-                        pop: new Date(60000)
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {
-                                type: 'String',
-                                attributeName: 'foo',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Date'
-                            },
+                        pop: new Date(60000),
+                        [DynamoDbTable]() {
+                            return 'foo';
                         },
-                    }
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {
+                                    type: 'String',
+                                    attributeName: 'foo',
+                                    keyType: 'HASH',
+                                },
+                                pop: {
+                                    type: 'Date'
+                                },
+                            };
+                        },
+                    },
                 });
 
                 expect(mockDynamoDbClient.getItem.mock.calls[0][0])
@@ -517,10 +555,13 @@ describe('DataMapper', () => {
             'should request a consistent read if the readConsistency is StronglyConsistent',
             async () => {
                 await mapper.get({
-                    item: {},
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {},
+                    item: {
+                        [DynamoDbTable]() {
+                            return 'foo';
+                        },
+                        [DynamoDbSchema]() {
+                            return {};
+                        },
                     },
                     readConsistency: ReadConsistency.StronglyConsistent
                 });
@@ -538,11 +579,14 @@ describe('DataMapper', () => {
                     readConsistency: ReadConsistency.StronglyConsistent,
                 });
                 await mapper.get({
-                    item: {},
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {},
-                    }
+                    item: {
+                        [DynamoDbTable]() {
+                            return 'foo';
+                        },
+                        [DynamoDbSchema]() {
+                            return {};
+                        },
+                    },
                 });
 
                 expect(mockDynamoDbClient.getItem.mock.calls[0][0])
@@ -552,18 +596,21 @@ describe('DataMapper', () => {
 
         it('should serialize a provided projection expression', async () => {
             await mapper.get({
-                item: {},
-                tableDefinition: {
-                    tableName: 'foo',
-                    schema: {
-                        fizz: {
-                            type: 'String',
-                            attributeName: 'foo',
-                            keyType: 'HASH',
-                        },
-                        pop: {
-                            type: 'Date'
-                        },
+                item: {
+                    [DynamoDbTable]() {
+                        return 'foo';
+                    },
+                    [DynamoDbSchema]() {
+                        return {
+                            fizz: {
+                                type: 'String',
+                                attributeName: 'foo',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Date'
+                            },
+                        };
                     },
                 },
                 projection: ['fizz', 'pop'],
@@ -587,19 +634,21 @@ describe('DataMapper', () => {
                 return expect(mapper.get({
                     item: {
                         fizz: 'buzz',
-                        pop: new Date(60000)
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {
-                                type: 'String',
-                                attributeName: 'foo',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Date'
-                            },
+                        pop: new Date(60000),
+                        [DynamoDbTable]() {
+                            return 'foo';
+                        },
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {
+                                    type: 'String',
+                                    attributeName: 'foo',
+                                    keyType: 'HASH',
+                                },
+                                pop: {
+                                    type: 'Date'
+                                },
+                            };
                         },
                     },
                     readConsistency: ReadConsistency.StronglyConsistent,
@@ -629,19 +678,21 @@ describe('DataMapper', () => {
 
             const result = await mapper.get({
                 item: {
-                    fizz: 'buzz'
-                },
-                tableDefinition: {
-                    tableName: 'foo',
-                    schema: {
-                        fizz: {
-                            type: 'String',
-                            attributeName: 'foo',
-                            keyType: 'HASH',
-                        },
-                        pop: {
-                            type: 'Date'
-                        },
+                    fizz: 'buzz',
+                    [DynamoDbTable]() {
+                        return 'foo';
+                    },
+                    [DynamoDbSchema]() {
+                        return {
+                            fizz: {
+                                type: 'String',
+                                attributeName: 'foo',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Date'
+                            },
+                        };
                     },
                 },
             });
@@ -673,11 +724,14 @@ describe('DataMapper', () => {
             async () => {
                 const tableName = 'foo';
                 await mapper.put({
-                    item: {},
-                    tableDefinition: {
-                        tableName,
-                        schema: {},
-                    }
+                    item: {
+                        [DynamoDbTable]() {
+                            return tableName;
+                        },
+                        [DynamoDbSchema]() {
+                            return {};
+                        },
+                    },
                 });
 
                 expect(mockDynamoDbClient.putItem.mock.calls[0][0])
@@ -695,11 +749,14 @@ describe('DataMapper', () => {
                 });
                 const tableName = 'foo';
                 await mapper.put({
-                    item: {},
-                    tableDefinition: {
-                        tableName,
-                        schema: {},
-                    }
+                    item: {
+                        [DynamoDbTable]() {
+                            return tableName;
+                        },
+                        [DynamoDbSchema]() {
+                            return {};
+                        },
+                    },
                 });
 
                 expect(mockDynamoDbClient.putItem.mock.calls[0][0])
@@ -715,15 +772,20 @@ describe('DataMapper', () => {
                         fizz: 'buzz',
                         pop: new Date(60000),
                         snap: false,
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {type: 'String'},
-                            pop: {type: 'Date'},
-                            snap: {type: 'Boolean', attributeName: 'crackle'}
+                        [DynamoDbTable]() {
+                            return 'foo';
                         },
-                    }
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {type: 'String'},
+                                pop: {type: 'Date'},
+                                snap: {
+                                    type: 'Boolean',
+                                    attributeName: 'crackle',
+                                }
+                            };
+                        },
+                    },
                 });
 
                 expect(mockDynamoDbClient.putItem.mock.calls[0][0])
@@ -743,22 +805,24 @@ describe('DataMapper', () => {
                 await mapper.put({
                     item: {
                         fizz: 'buzz',
-                        pop: 21
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {
-                                type: 'String',
-                                attributeName: 'foo',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Number',
-                                versionAttribute: true,
-                            },
+                        pop: 21,
+                        [DynamoDbTable]() {
+                            return 'foo';
                         },
-                    }
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {
+                                    type: 'String',
+                                    attributeName: 'foo',
+                                    keyType: 'HASH',
+                                },
+                                pop: {
+                                    type: 'Number',
+                                    versionAttribute: true,
+                                },
+                            };
+                        },
+                    },
                 });
 
                 expect(mockDynamoDbClient.putItem.mock.calls[0][0])
@@ -779,22 +843,24 @@ describe('DataMapper', () => {
             async () => {
                 await mapper.put({
                     item: {
-                        fizz: 'buzz'
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {
-                                type: 'String',
-                                attributeName: 'foo',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Number',
-                                versionAttribute: true,
-                            },
+                        fizz: 'buzz',
+                        [DynamoDbTable]() {
+                            return 'foo';
                         },
-                    }
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {
+                                    type: 'String',
+                                    attributeName: 'foo',
+                                    keyType: 'HASH',
+                                },
+                                pop: {
+                                    type: 'Number',
+                                    versionAttribute: true,
+                                },
+                            };
+                        },
+                    },
                 });
 
                 expect(mockDynamoDbClient.putItem.mock.calls[0][0])
@@ -816,20 +882,22 @@ describe('DataMapper', () => {
                 await mapper.put({
                     item: {
                         fizz: 'buzz',
-                        pop: 21
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {
-                                type: 'String',
-                                attributeName: 'foo',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Number',
-                                versionAttribute: true,
-                            },
+                        pop: 21,
+                        [DynamoDbTable]() {
+                            return 'foo';
+                        },
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {
+                                    type: 'String',
+                                    attributeName: 'foo',
+                                    keyType: 'HASH',
+                                },
+                                pop: {
+                                    type: 'Number',
+                                    versionAttribute: true,
+                                },
+                            };
                         },
                     },
                     skipVersionCheck: true,
@@ -850,20 +918,22 @@ describe('DataMapper', () => {
                 await mapper.put({
                     item: {
                         fizz: 'buzz',
-                        pop: 21
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {
-                                type: 'String',
-                                attributeName: 'foo',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Number',
-                                versionAttribute: true,
-                            },
+                        pop: 21,
+                        [DynamoDbTable]() {
+                            return 'foo';
+                        },
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {
+                                    type: 'String',
+                                    attributeName: 'foo',
+                                    keyType: 'HASH',
+                                },
+                                pop: {
+                                    type: 'Number',
+                                    versionAttribute: true,
+                                },
+                            };
                         },
                     },
                 });
@@ -879,21 +949,23 @@ describe('DataMapper', () => {
                 await mapper.put({
                     item: {
                         fizz: 'buzz',
-                        pop: 21
-                    },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            fizz: {
-                                type: 'String',
-                                attributeName: 'foo',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Number',
-                                versionAttribute: true,
-                            },
-                            quux: {type: 'Date'}
+                        pop: 21,
+                        [DynamoDbTable]() {
+                            return 'foo';
+                        },
+                        [DynamoDbSchema]() {
+                            return {
+                                fizz: {
+                                    type: 'String',
+                                    attributeName: 'foo',
+                                    keyType: 'HASH',
+                                },
+                                pop: {
+                                    type: 'Number',
+                                    versionAttribute: true,
+                                },
+                                quux: {type: 'Date'},
+                            };
                         },
                     },
                     condition: {
@@ -927,23 +999,25 @@ describe('DataMapper', () => {
 
             const result = await mapper.put({
                 item: {
-                    foo: 'buzz'
-                },
-                tableDefinition: {
-                    tableName: 'foo',
-                    schema: {
-                        foo: {
-                            type: 'String',
-                            attributeName: 'fizz',
-                            keyType: 'HASH',
-                        },
-                        bar: {
-                            type: 'NumberSet',
-                        },
-                        baz: {
-                            type: 'Tuple',
-                            members: [{type: 'Boolean'}, {type: 'Number'}]
-                        },
+                    foo: 'buzz',
+                    [DynamoDbTable]() {
+                        return 'foo';
+                    },
+                    [DynamoDbSchema]() {
+                        return {
+                            foo: {
+                                type: 'String',
+                                attributeName: 'fizz',
+                                keyType: 'HASH',
+                            },
+                            bar: {
+                                type: 'NumberSet',
+                            },
+                            baz: {
+                                type: 'Tuple',
+                                members: [{type: 'Boolean'}, {type: 'Number'}]
+                            },
+                        };
                     },
                 },
                 returnValues: "ALL_OLD"
@@ -971,6 +1045,26 @@ describe('DataMapper', () => {
         const mapper = new DataMapper({
             client: mockDynamoDbClient as any,
         });
+
+        class QueryableItem {
+            snap: string;
+            fizz?: Array<string>;
+
+            [DynamoDbTable]() { return 'foo'; }
+            [DynamoDbSchema]() {
+                return {
+                    snap: {
+                        type: 'String',
+                        keyType: 'HASH',
+                    },
+                    fizz: {
+                        type: 'List',
+                        memberType: {type: 'String'},
+                        attributeName: 'fizzes',
+                    },
+                };
+            }
+        }
 
         it(
             'should paginate over results and return a promise for each item',
@@ -1011,22 +1105,24 @@ describe('DataMapper', () => {
                     keyCondition: {
                         foo: 'buzz'
                     },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            foo: {
-                                type: 'String',
-                                attributeName: 'fizz',
-                                keyType: 'HASH',
-                            },
-                            bar: {
-                                type: 'NumberSet',
-                            },
-                            baz: {
-                                type: 'Tuple',
-                                members: [{type: 'Boolean'}, {type: 'Number'}]
-                            },
-                        },
+                    valueConstructor: class {
+                        [DynamoDbTable]() { return 'foo'; }
+                        [DynamoDbSchema]() {
+                            return {
+                                foo: {
+                                    type: 'String',
+                                    attributeName: 'fizz',
+                                    keyType: 'HASH',
+                                },
+                                bar: {
+                                    type: 'NumberSet',
+                                },
+                                baz: {
+                                    type: 'Tuple',
+                                    members: [{type: 'Boolean'}, {type: 'Number'}]
+                                },
+                            };
+                        }
                     }
                 });
 
@@ -1060,15 +1156,7 @@ describe('DataMapper', () => {
             async () => {
                 const results =  mapper.query({
                     keyCondition: {foo: 'bar'},
-                    tableDefinition: {
-                        tableName: 'fizz',
-                        schema: {
-                            foo: {
-                                type: 'String',
-                                keyType: 'HASH',
-                            },
-                        },
-                    },
+                    valueConstructor: QueryableItem,
                     readConsistency: ReadConsistency.StronglyConsistent
                 });
 
@@ -1096,19 +1184,21 @@ describe('DataMapper', () => {
                         )
                     ]
                 },
-                tableDefinition: {
-                    tableName: 'foo',
-                    schema: {
-                        snap: {
-                            type: 'String',
-                            keyType: 'HASH',
-                        },
-                        fizz: {
-                            type: 'String',
-                            keyType: 'RANGE',
-                        },
-                    },
-                }
+                valueConstructor: class {
+                    [DynamoDbTable]() { return 'foo'; }
+                    [DynamoDbSchema]() {
+                        return {
+                            snap: {
+                                type: 'String',
+                                keyType: 'HASH',
+                            },
+                            fizz: {
+                                type: 'String',
+                                keyType: 'RANGE',
+                            },
+                        };
+                    }
+                },
             });
 
             results.next();
@@ -1135,15 +1225,7 @@ describe('DataMapper', () => {
                         snap: 'crackle',
                         pop: between(10, 20),
                     },
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            snap: {
-                                type: 'String',
-                                keyType: 'HASH',
-                            },
-                        },
-                    }
+                    valueConstructor: QueryableItem,
                 });
 
                 results.next();
@@ -1169,20 +1251,7 @@ describe('DataMapper', () => {
                 keyCondition: {
                     snap: 'crackle',
                 },
-                tableDefinition: {
-                    tableName: 'foo',
-                    schema: {
-                        snap: {
-                            type: 'String',
-                            keyType: 'HASH',
-                        },
-                        fizz: {
-                            type: 'List',
-                            memberType: {type: 'String'},
-                            attributeName: 'fizzes',
-                        },
-                    },
-                },
+                valueConstructor: QueryableItem,
                 filter: {
                     subject: 'fizz[1]',
                     ...inList('buzz', 'pop'),
@@ -1211,20 +1280,7 @@ describe('DataMapper', () => {
                 keyCondition: {
                     snap: 'crackle',
                 },
-                tableDefinition: {
-                    tableName: 'foo',
-                    schema: {
-                        snap: {
-                            type: 'String',
-                            keyType: 'HASH',
-                        },
-                        fizz: {
-                            type: 'List',
-                            memberType: {type: 'String'},
-                            attributeName: 'fizzes',
-                        },
-                    },
-                },
+                valueConstructor: QueryableItem,
                 projection: ['snap', 'fizz[1]'],
             });
 
@@ -1248,18 +1304,20 @@ describe('DataMapper', () => {
                 keyCondition: {
                     snap: 'crackle',
                 },
-                tableDefinition: {
-                    tableName: 'foo',
-                    schema: {
-                        snap: {
-                            type: 'String',
-                            keyType: 'HASH',
-                        },
-                        fizz: {
-                            type: 'Number',
-                            keyType: 'RANGE'
-                        },
-                    },
+                valueConstructor: class {
+                    [DynamoDbTable]() { return 'foo'; }
+                    [DynamoDbSchema]() {
+                        return {
+                            snap: {
+                                type: 'String',
+                                keyType: 'HASH',
+                            },
+                            fizz: {
+                                type: 'Number',
+                                keyType: 'RANGE'
+                            },
+                        };
+                    }
                 },
                 startKey: {fizz: 100},
             });
@@ -1289,6 +1347,26 @@ describe('DataMapper', () => {
         const mapper = new DataMapper({
             client: mockDynamoDbClient as any,
         });
+
+        class ScannableItem {
+            snap: string;
+            fizz?: Array<string>;
+
+            [DynamoDbTable]() { return 'foo'; }
+            [DynamoDbSchema]() {
+                return {
+                    snap: {
+                        type: 'String',
+                        keyType: 'HASH',
+                    },
+                    fizz: {
+                        type: 'List',
+                        memberType: {type: 'String'},
+                        attributeName: 'fizzes',
+                    },
+                };
+            }
+        }
 
         it(
             'should paginate over results and return a promise for each item',
@@ -1326,22 +1404,24 @@ describe('DataMapper', () => {
                 promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
 
                 const results = mapper.scan({
-                    tableDefinition: {
-                        tableName: 'foo',
-                        schema: {
-                            foo: {
-                                type: 'String',
-                                attributeName: 'fizz',
-                                keyType: 'HASH',
-                            },
-                            bar: {
-                                type: 'NumberSet',
-                            },
-                            baz: {
-                                type: 'Tuple',
-                                members: [{type: 'Boolean'}, {type: 'Number'}]
-                            },
-                        },
+                    valueConstructor: class {
+                        [DynamoDbTable]() { return 'foo'; }
+                        [DynamoDbSchema]() {
+                            return {
+                                foo: {
+                                    type: 'String',
+                                    attributeName: 'fizz',
+                                    keyType: 'HASH',
+                                },
+                                bar: {
+                                    type: 'NumberSet',
+                                },
+                                baz: {
+                                    type: 'Tuple',
+                                    members: [{type: 'Boolean'}, {type: 'Number'}]
+                                },
+                            };
+                        }
                     }
                 });
 
@@ -1374,15 +1454,7 @@ describe('DataMapper', () => {
             'should request a consistent read if the readConsistency is StronglyConsistent',
             async () => {
                 const results =  mapper.scan({
-                    tableDefinition: {
-                        tableName: 'fizz',
-                        schema: {
-                            foo: {
-                                type: 'String',
-                                keyType: 'HASH',
-                            },
-                        },
-                    },
+                    valueConstructor: ScannableItem,
                     readConsistency: ReadConsistency.StronglyConsistent
                 });
 
@@ -1395,20 +1467,7 @@ describe('DataMapper', () => {
 
         it('should allow a filter expression', () => {
             const results =  mapper.scan({
-                tableDefinition: {
-                    tableName: 'foo',
-                    schema: {
-                        snap: {
-                            type: 'String',
-                            keyType: 'HASH',
-                        },
-                        fizz: {
-                            type: 'List',
-                            memberType: {type: 'String'},
-                            attributeName: 'fizzes',
-                        },
-                    },
-                },
+                valueConstructor: ScannableItem,
                 filter: {
                     type: 'Not',
                     condition: {
@@ -1434,20 +1493,7 @@ describe('DataMapper', () => {
 
         it('should allow a projection expression', () => {
             const results =  mapper.scan({
-                tableDefinition: {
-                    tableName: 'foo',
-                    schema: {
-                        snap: {
-                            type: 'String',
-                            keyType: 'HASH',
-                        },
-                        fizz: {
-                            type: 'List',
-                            memberType: {type: 'String'},
-                            attributeName: 'fizzes',
-                        },
-                    },
-                },
+                valueConstructor: ScannableItem,
                 projection: ['snap', 'fizz[1]'],
             });
 
@@ -1465,18 +1511,20 @@ describe('DataMapper', () => {
 
         it('should allow a start key', () => {
             const results =  mapper.scan({
-                tableDefinition: {
-                    tableName: 'foo',
-                    schema: {
-                        snap: {
-                            type: 'String',
-                            keyType: 'HASH',
-                        },
-                        fizz: {
-                            type: 'Number',
-                            keyType: 'RANGE'
-                        },
-                    },
+                valueConstructor: class {
+                    [DynamoDbTable]() { return 'foo'; }
+                    [DynamoDbSchema]() {
+                        return {
+                            snap: {
+                                type: 'String',
+                                keyType: 'HASH',
+                            },
+                            fizz: {
+                                type: 'Number',
+                                keyType: 'RANGE'
+                            },
+                        };
+                    }
                 },
                 startKey: {fizz: 100},
             });
@@ -1493,32 +1541,53 @@ describe('DataMapper', () => {
     });
 
     describe('#update', () => {
-        const tableDef: TableDefinition = {
-            tableName: 'table',
-            schema: {
-                foo: {
-                    type: 'String',
-                    keyType: 'HASH',
-                    attributeName: 'fizz'
-                },
-                bar: {
-                    type: 'Tuple',
-                    members: [
-                        {type: 'Number'},
-                        {type: 'Binary'},
-                    ],
-                    attributeName: 'buzz',
-                },
-                quux: {
-                    type: 'Document',
-                    members: {
-                        snap: { type: 'String' },
-                        crackle: { type: 'Date' },
-                        pop: { type: 'Hash' },
-                    } as Schema,
-                },
-            },
-        };
+        const tableName = 'foo';
+
+        class EmptyItem {
+            [DynamoDbTable]() {
+                return tableName;
+            }
+
+            [DynamoDbSchema]() {
+                return {};
+            }
+        }
+
+        class ComplexItem extends EmptyItem {
+            foo: string;
+            bar?: [number, BinaryValue];
+            quux?: {
+                snap: string;
+                crackle: Date;
+                pop: {[key: string]: any};
+            };
+
+            [DynamoDbSchema]() {
+                return {
+                    foo: {
+                        type: 'String',
+                        keyType: 'HASH',
+                        attributeName: 'fizz'
+                    },
+                    bar: {
+                        type: 'Tuple',
+                        members: [
+                            {type: 'Number'},
+                            {type: 'Binary'},
+                        ],
+                        attributeName: 'buzz',
+                    },
+                    quux: {
+                        type: 'Document',
+                        members: {
+                            snap: { type: 'String' },
+                            crackle: { type: 'Date' },
+                            pop: { type: 'Hash' },
+                        } as Schema,
+                    },
+                };
+            }
+        }
 
         const promiseFunc = jest.fn();
         const mockDynamoDbClient = {
@@ -1540,13 +1609,7 @@ describe('DataMapper', () => {
             'should use the table name specified in the supplied table definition',
             async () => {
                 const tableName = 'foo';
-                await mapper.update({
-                    item: {},
-                    tableDefinition: {
-                        tableName,
-                        schema: {},
-                    }
-                });
+                await mapper.update({item: new EmptyItem()});
 
                 expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
                     .toMatchObject({TableName: tableName});
@@ -1562,13 +1625,7 @@ describe('DataMapper', () => {
                     tableNamePrefix,
                 });
                 const tableName = 'foo';
-                await mapper.update({
-                    item: {},
-                    tableDefinition: {
-                        tableName,
-                        schema: {},
-                    }
-                });
+                await mapper.update({item: new EmptyItem()});
 
                 expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
                     .toMatchObject({TableName: tableNamePrefix + tableName});
@@ -1576,17 +1633,15 @@ describe('DataMapper', () => {
         );
 
         it('should marshall updates into an UpdateItemInput', async () => {
-            await mapper.update({
-                item: {
-                    foo: 'key',
-                    bar: [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])]
-                },
-                tableDefinition: tableDef,
-            });
+            const item = new ComplexItem();
+            item.foo = 'key';
+            item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
+
+            await mapper.update({item});
 
             expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
                 .toMatchObject({
-                    TableName: 'table',
+                    TableName: tableName,
                     Key: {
                         fizz: {S: 'key'}
                     },
@@ -1609,18 +1664,17 @@ describe('DataMapper', () => {
         it(
             'should not remove missing keys when onMissing is "SKIP"',
             async () => {
+                const item = new ComplexItem();
+                item.foo = 'key';
+                item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
                 await mapper.update({
-                    item: {
-                        foo: 'key',
-                        bar: [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])]
-                    },
-                    tableDefinition: tableDef,
+                    item,
                     onMissing: OnMissingStrategy.Skip
                 });
 
                 expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
                     .toMatchObject({
-                        TableName: 'table',
+                        TableName: tableName,
                         Key: {
                             fizz: {S: 'key'}
                         },
@@ -1649,23 +1703,23 @@ describe('DataMapper', () => {
 
             const result = await mapper.update({
                 item: {
-                    foo: 'buzz'
-                },
-                tableDefinition: {
-                    tableName: 'foo',
-                    schema: {
-                        foo: {
-                            type: 'String',
-                            attributeName: 'fizz',
-                            keyType: 'HASH',
-                        },
-                        bar: {
-                            type: 'NumberSet',
-                        },
-                        baz: {
-                            type: 'Tuple',
-                            members: [{type: 'Boolean'}, {type: 'Number'}]
-                        },
+                    foo: 'buzz',
+                    [DynamoDbTable]() { return 'foo'; },
+                    [DynamoDbSchema]() {
+                        return {
+                            foo: {
+                                type: 'String',
+                                attributeName: 'fizz',
+                                keyType: 'HASH',
+                            },
+                            bar: {
+                                type: 'NumberSet',
+                            },
+                            baz: {
+                                type: 'Tuple',
+                                members: [{type: 'Boolean'}, {type: 'Number'}]
+                            },
+                        };
                     },
                 }
             });
@@ -1682,64 +1736,71 @@ describe('DataMapper', () => {
 
             return expect(mapper.update({
                 item: {
-                    foo: 'buzz'
-                },
-                tableDefinition: {
-                    tableName: 'foo',
-                    schema: {
-                        foo: {
-                            type: 'String',
-                            attributeName: 'fizz',
-                            keyType: 'HASH',
-                        },
-                        bar: {
-                            type: 'NumberSet',
-                        },
-                        baz: {
-                            type: 'Tuple',
-                            members: [{type: 'Boolean'}, {type: 'Number'}]
-                        },
+                    foo: 'buzz',
+                    [DynamoDbTable]() { return 'foo'; },
+                    [DynamoDbSchema]() {
+                        return {
+                            foo: {
+                                type: 'String',
+                                attributeName: 'fizz',
+                                keyType: 'HASH',
+                            },
+                            bar: {
+                                type: 'NumberSet',
+                            },
+                            baz: {
+                                type: 'Tuple',
+                                members: [{type: 'Boolean'}, {type: 'Number'}]
+                            },
+                        };
                     },
-                }
+                },
             })).rejects.toMatchObject({
                 message: 'Update operation completed successfully, but the updated value was not returned'
             });
         });
 
         describe('version attributes', () => {
-            const tableDef: TableDefinition = {
-                tableName: 'table',
-                schema: {
-                    foo: {
-                        type: 'String',
-                        keyType: 'HASH',
-                        attributeName: 'fizz'
-                    },
-                    bar: {
-                        type: 'Tuple',
-                        members: [
-                            {type: 'Number'},
-                            {type: 'Binary'},
-                        ],
-                        attributeName: 'buzz',
-                    },
-                    baz: {
-                        type: 'Number',
-                        versionAttribute: true,
-                    },
-                },
-            };
+            class VersionedItem {
+                foo: string;
+                bar?: [number, Uint8Array];
+                baz?: number;
+
+                [DynamoDbTable]() {
+                    return 'table';
+                }
+
+                [DynamoDbSchema]() {
+                    return {
+                        foo: {
+                            type: 'String',
+                            keyType: 'HASH',
+                            attributeName: 'fizz'
+                        },
+                        bar: {
+                            type: 'Tuple',
+                            members: [
+                                {type: 'Number'},
+                                {type: 'Binary'},
+                            ],
+                            attributeName: 'buzz',
+                        },
+                        baz: {
+                            type: 'Number',
+                            versionAttribute: true,
+                        },
+                    };
+                }
+            }
 
             it(
                 'should inject a conditional expression requiring the absence of the versioning property and set its value to 0 when an object without a value for it is marshalled',
                 async () => {
-                    await mapper.update({
-                        tableDefinition: tableDef,
-                        item: {
-                            foo: 'key',
-                            bar: [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])]
-                        },
-                    });
+                    const item = new VersionedItem();
+                    item.foo = 'key';
+                    item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
+
+                    await mapper.update({item});
 
                     expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
                         .toMatchObject({
@@ -1769,14 +1830,12 @@ describe('DataMapper', () => {
             it(
                 'should inject a conditional expression requiring the known value of the versioning property and set its value to the previous value + 1 when an object with a value for it is marshalled',
                 async () => {
-                    await mapper.update({
-                        tableDefinition: tableDef,
-                        item: {
-                            foo: 'key',
-                            bar: [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])],
-                            baz: 10,
-                        },
-                    });
+                    const item = new VersionedItem();
+                    item.foo = 'key';
+                    item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
+                    item.baz = 10;
+
+                    await mapper.update({item});
 
                     expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
                         .toMatchObject({
@@ -1807,25 +1866,13 @@ describe('DataMapper', () => {
             it(
                 'should not include a condition expression when the skipVersionCheck input parameter is true',
                 async () => {
+                    const item = new VersionedItem();
+                    item.foo = 'key';
+                    item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
+                    item.baz = 10;
+
                     await mapper.update({
-                        item: {
-                            fizz: 'buzz',
-                            pop: 21
-                        },
-                        tableDefinition: {
-                            tableName: 'foo',
-                            schema: {
-                                fizz: {
-                                    type: 'String',
-                                    attributeName: 'foo',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Number',
-                                    versionAttribute: true,
-                                },
-                            },
-                        },
+                        item,
                         skipVersionCheck: true,
                     });
 
@@ -1841,26 +1888,13 @@ describe('DataMapper', () => {
                         client: mockDynamoDbClient as any,
                         skipVersionCheck: true
                     });
-                    await mapper.update({
-                        item: {
-                            fizz: 'buzz',
-                            pop: 21
-                        },
-                        tableDefinition: {
-                            tableName: 'foo',
-                            schema: {
-                                fizz: {
-                                    type: 'String',
-                                    attributeName: 'foo',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Number',
-                                    versionAttribute: true,
-                                },
-                            },
-                        },
-                    });
+
+                    const item = new VersionedItem();
+                    item.foo = 'key';
+                    item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
+                    item.baz = 10;
+
+                    await mapper.update({item});
 
                     expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
                         .not.toHaveProperty('ConditionExpression');
@@ -1870,44 +1904,36 @@ describe('DataMapper', () => {
             it(
                 'should combine the version condition with any other condition expression',
                 async () => {
+                    const item = new VersionedItem();
+                    item.foo = 'key';
+                    item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
+                    item.baz = 10;
+
                     await mapper.update({
-                        item: {
-                            fizz: 'buzz',
-                            pop: 21
-                        },
-                        tableDefinition: {
-                            tableName: 'foo',
-                            schema: {
-                                fizz: {
-                                    type: 'String',
-                                    attributeName: 'foo',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Number',
-                                    versionAttribute: true,
-                                },
-                                quux: {type: 'Date'}
-                            },
-                        },
+                        item,
                         condition: {
                             type: 'LessThan',
-                            subject: 'quux',
+                            subject: 'bar[0]',
                             object: 600000
                         }
                     });
 
                     expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
                         .toMatchObject({
-                            ConditionExpression: '(#attr0 < :val1) AND (#attr2 = :val3)',
+                            ConditionExpression: '(#attr0[0] < :val1) AND (#attr2 = :val3)',
                             ExpressionAttributeNames: {
-                                '#attr0': 'quux',
-                                '#attr2': 'pop',
+                                '#attr0': 'buzz',
+                                '#attr2': 'baz',
                             },
                             ExpressionAttributeValues: {
                                 ':val1': {N: '600000'},
-                                ':val3': {N: '21'},
-                                ':val4': {N: '1'},
+                                ':val3': {N: '10'},
+                                ':val4': {
+                                    L: [
+                                        {N: '1'},
+                                        {B: Uint8Array.from([0xde, 0xad, 0xbe, 0xef])},
+                                    ],
+                                },
                             },
                         });
                 }
