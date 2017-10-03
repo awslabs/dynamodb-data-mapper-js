@@ -27,7 +27,7 @@
  *      }
  *  }
  */
-export const DynamoDbSchema = Symbol.for('@@dynamo_db_members');
+export const DynamoDbSchema = Symbol('DynamoDbSchema');
 
 /**
  * Used to designate that an object represents a row of the named DynamoDB
@@ -47,7 +47,7 @@ export const DynamoDbSchema = Symbol.for('@@dynamo_db_members');
  *      }
  *  }
  */
-export const DynamoDbTable = Symbol.for('@@dynamo_db_table_name');
+export const DynamoDbTable = Symbol('DynamoDbTableName');
 
 /**
  * Used to designate which fields on an object have been changed. The method
@@ -75,4 +75,4 @@ export const DynamoDbTable = Symbol.for('@@dynamo_db_table_name');
  *      }
  *  }
  */
-export const DynamoDbDirtyFields = Symbol.for('@@dynamo_db_dirty_fields');
+export const DynamoDbDirtyFields = Symbol('DynamoDbDirtyFields');

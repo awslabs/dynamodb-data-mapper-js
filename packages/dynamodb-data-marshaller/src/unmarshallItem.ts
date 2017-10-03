@@ -60,14 +60,6 @@ function unmarshallValue(schemaType: SchemaType, input: AttributeValue): any {
             }
 
             return input.B;
-        case 'BinarySet':
-            if (input.NULL) {
-                return new BinarySet();
-            }
-
-            return typeof input.BS !== 'undefined'
-                ? new BinarySet(input.BS as Array<Uint8Array>)
-                : undefined;
         case 'Boolean':
             return input.BOOL;
         case 'Custom':
@@ -89,20 +81,36 @@ function unmarshallValue(schemaType: SchemaType, input: AttributeValue): any {
             return input.NULL ? null : undefined;
         case 'Number':
             return typeof input.N === 'string' ? Number(input.N) : undefined;
-        case 'NumberSet':
-            if (input.NULL) {
-                return new Set<number>();
-            }
+        case 'Set':
+            switch (schemaType.memberType) {
+                case 'Binary':
+                    if (input.NULL) {
+                        return new BinarySet();
+                    }
 
-            return input.NS ? unmarshallNumberSet(input.NS) : undefined;
+                    return typeof input.BS !== 'undefined'
+                        ? new BinarySet(input.BS as Array<Uint8Array>)
+                        : undefined;
+                case 'Number':
+                    if (input.NULL) {
+                        return new Set<number>();
+                    }
+
+                    return input.NS ? unmarshallNumberSet(input.NS) : undefined;
+                case 'String':
+                    if (input.NULL) {
+                        return new Set<string>();
+                    }
+
+                    return input.SS ? unmarshallStringSet(input.SS) : undefined;
+                default:
+                    throw new InvalidSchemaError(
+                        schemaType,
+                        `Unrecognized set member type: ${schemaType.memberType}`
+                    );
+            }
         case 'String':
             return input.NULL ? '' : input.S;
-        case 'StringSet':
-            if (input.NULL) {
-                return new Set<string>();
-            }
-
-            return input.SS ? unmarshallStringSet(input.SS) : undefined;
         case 'Tuple':
             return input.L ? unmarshallTuple(schemaType, input.L) : undefined;
     }

@@ -20,6 +20,7 @@ export const TypeTags = {
     Null: 'Null',
     Number: 'Number',
     NumberSet: 'NumberSet',
+    Set: 'Set',
     String: 'String',
     StringSet: 'StringSet',
     Tuple: 'Tuple',
@@ -300,6 +301,11 @@ export interface NumberSetType extends BaseType<Set<number>> {
     type: 'NumberSet';
 }
 
+export interface SetType extends BaseType<Set<any>> {
+    type: 'Set';
+    memberType: 'String'|'Number'|'Binary';
+}
+
 /**
  * A node used to store a string value.
  */
@@ -331,7 +337,6 @@ export interface TupleType<T extends Array<any> = Array<any>> extends
 export type SchemaType =
     AnyType |
     BinaryType |
-    BinarySetType |
     BooleanType |
     CustomType<any> |
     CollectionType |
@@ -342,9 +347,8 @@ export type SchemaType =
     MapType |
     NullType |
     NumberType |
-    NumberSetType |
+    SetType |
     StringType |
-    StringSetType |
     TupleType;
 
 export function isSchemaType(arg: any): arg is SchemaType {

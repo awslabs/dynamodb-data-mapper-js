@@ -8,6 +8,7 @@ import {
     EmptyHandlingStrategy,
     InvalidHandlingStrategy,
     Marshaller,
+    NumberValueSet,
 } from "@aws/dynamodb-auto-marshaller";
 
 /**
@@ -69,19 +70,6 @@ export function marshallValue(
         }
 
         return {B: marshallBinary(input)};
-    }
-
-    if (schemaType.type === 'BinarySet') {
-        if (!(input instanceof BinarySet)) {
-            input = new BinarySet(input);
-        }
-
-        return marshallSet(
-            input,
-            marshallBinary,
-            (bin: Uint8Array) => bin.byteLength === 0,
-            'BS'
-        );
     }
 
     if (schemaType.type === 'Boolean') {
@@ -181,16 +169,53 @@ export function marshallValue(
         return {N: marshallNumber(input)};
     }
 
-    if (schemaType.type === 'NumberSet') {
-        if (!(input instanceof Set)) {
-            input = new Set<number>(input);
+    if (schemaType.type === 'Set') {
+        if (schemaType.memberType === 'Binary') {
+            if (!(input instanceof BinarySet)) {
+                input = new BinarySet(input);
+            }
+
+            return marshallSet(
+                input,
+                marshallBinary,
+                (bin: Uint8Array) => bin.byteLength === 0,
+                'BS'
+            );
         }
 
-        return marshallSet(
-            input,
-            marshallNumber,
-            () => false,
-            'NS'
+        if (schemaType.memberType === 'Number') {
+            if (!(input instanceof Set)) {
+                input = new NumberValueSet(input)
+            }
+
+            return marshallSet(
+                input,
+                marshallNumber,
+                () => false,
+                'NS'
+            );
+        }
+
+        if (schemaType.memberType === 'String') {
+            if (!(input instanceof Set)) {
+                const original = input;
+                input = new Set<string>();
+                for (const el of original) {
+                    input.add(el);
+                }
+            }
+
+            return marshallSet(
+                input,
+                marshallString,
+                (string: string) => string.length === 0,
+                'SS'
+            );
+        }
+
+        throw new InvalidSchemaError(
+            schemaType,
+            `Unrecognized set member type: ${schemaType.memberType}`
         );
     }
 
@@ -201,19 +226,6 @@ export function marshallValue(
         }
 
         return {S: string};
-    }
-
-    if (schemaType.type === 'StringSet') {
-        if (!(input instanceof Set)) {
-            input = new Set<string>(input);
-        }
-
-        return marshallSet(
-            input,
-            marshallString,
-            (string: string) => string.length === 0,
-            'SS'
-        );
     }
 
     if (schemaType.type === 'Tuple') {

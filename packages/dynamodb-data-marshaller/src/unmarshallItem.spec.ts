@@ -93,7 +93,7 @@ describe('unmarshallItem', () => {
 
     describe('binary set fields', () => {
         const schema: Schema = {
-            binSet: {type: 'BinarySet'},
+            binSet: {type: 'Set', memberType: 'Binary'},
         };
 
         it('should unmarshall binary set fields', () => {
@@ -421,7 +421,7 @@ describe('unmarshallItem', () => {
 
     describe('number set fields', () => {
         const schema: Schema = {
-            numSet: { type: 'NumberSet'},
+            numSet: { type: 'Set', memberType: 'Number'},
         };
 
         it('should unmarshall number set fields', () => {
@@ -444,6 +444,17 @@ describe('unmarshallItem', () => {
         });
     });
 
+    describe('set fields', () => {
+        const schema: Schema = {
+            fooSet: { type: 'Set', memberType: 'foo'} as any,
+        };
+
+        it('should throw an error if the memberType is not recognized', () => {
+            expect(() => unmarshallItem(schema, {fooSet: {NS: ['1', '2', '3']}}))
+                .toThrowError(/Unrecognized set member type/);
+        })
+    });
+
     describe('string fields', () => {
         const schema: Schema = {
             string: {type: 'String'},
@@ -462,7 +473,7 @@ describe('unmarshallItem', () => {
 
     describe('string set fields', () => {
         const schema: Schema = {
-            strSet: { type: 'StringSet'},
+            strSet: { type: 'Set', memberType: 'String'},
         };
 
         it('should unmarshall string set fields', () => {

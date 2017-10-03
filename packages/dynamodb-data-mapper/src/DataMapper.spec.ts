@@ -373,7 +373,8 @@ describe('DataMapper', () => {
                                 keyType: 'HASH',
                             },
                             bar: {
-                                type: 'NumberSet',
+                                type: 'Set',
+                                memberType: 'Number'
                             },
                             baz: {
                                 type: 'Tuple',
@@ -1011,7 +1012,8 @@ describe('DataMapper', () => {
                                 keyType: 'HASH',
                             },
                             bar: {
-                                type: 'NumberSet',
+                                type: 'Set',
+                                memberType: 'Number'
                             },
                             baz: {
                                 type: 'Tuple',
@@ -1115,7 +1117,8 @@ describe('DataMapper', () => {
                                     keyType: 'HASH',
                                 },
                                 bar: {
-                                    type: 'NumberSet',
+                                    type: 'Set',
+                                    memberType: 'Number'
                                 },
                                 baz: {
                                     type: 'Tuple',
@@ -1414,7 +1417,8 @@ describe('DataMapper', () => {
                                     keyType: 'HASH',
                                 },
                                 bar: {
-                                    type: 'NumberSet',
+                                    type: 'Set',
+                                    memberType: 'Number'
                                 },
                                 baz: {
                                     type: 'Tuple',
@@ -1713,7 +1717,8 @@ describe('DataMapper', () => {
                                 keyType: 'HASH',
                             },
                             bar: {
-                                type: 'NumberSet',
+                                type: 'Set',
+                                memberType: 'Number'
                             },
                             baz: {
                                 type: 'Tuple',
@@ -1746,7 +1751,8 @@ describe('DataMapper', () => {
                                 keyType: 'HASH',
                             },
                             bar: {
-                                type: 'NumberSet',
+                                type: 'Set',
+                                memberType: 'Number'
                             },
                             baz: {
                                 type: 'Tuple',

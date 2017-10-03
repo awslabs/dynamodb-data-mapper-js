@@ -99,12 +99,6 @@ describe('isSchemaType', () => {
         });
     });
 
-    describe('BinarySet types', () => {
-        it('should accept BinarySet types', () => {
-            expect(isSchemaType({type: 'BinarySet'})).toBe(true);
-        });
-    });
-
     describe('Boolean types', () => {
         it('should accept Boolean types', () => {
             expect(isSchemaType({type: 'Boolean'})).toBe(true);
@@ -241,21 +235,26 @@ describe('isSchemaType', () => {
         });
     });
 
-    describe('NumberSet types', () => {
+    describe('Set types', () => {
+        it('should accept StringSet types', () => {
+            expect(isSchemaType({type: 'Set', memberType: 'String'}))
+                .toBe(true);
+        });
+
         it('should accept NumberSet types', () => {
-            expect(isSchemaType({type: 'NumberSet'})).toBe(true);
+            expect(isSchemaType({type: 'Set', memberType: 'Number'}))
+                .toBe(true);
+        });
+
+        it('should accept BinarySet types', () => {
+            expect(isSchemaType({type: 'Set', memberType: 'Binary'}))
+                .toBe(true);
         });
     });
 
     describe('String types', () => {
         it('should accept String types', () => {
             expect(isSchemaType({type: 'String'})).toBe(true);
-        });
-    });
-
-    describe('StringSet types', () => {
-        it('should accept StringSet types', () => {
-            expect(isSchemaType({type: 'StringSet'})).toBe(true);
         });
     });
 

@@ -31,6 +31,31 @@ describe('marshallItem', () => {
             .toThrow('Unrecognized schema node');
     });
 
+    describe('default values', () => {
+        it(
+            'should call a defined default provider if the input is undefined',
+            () => {
+                const defaultProvider = jest.fn(() => 'foo');
+                expect(marshallItem(
+                    {foo: {type: 'String', defaultProvider}},
+                    {foo: void 0}
+                )).toEqual({foo: {S: 'foo'}});
+
+                expect(defaultProvider.mock.calls.length).toBe(1);
+            }
+        );
+
+        it('should not call the default provider if the input is defined', () => {
+            const defaultProvider = jest.fn(() => 'foo');
+            expect(marshallItem(
+                {foo: {type: 'String', defaultProvider}},
+                {foo: 'bar'}
+            )).toEqual({foo: {S: 'bar'}});
+
+            expect(defaultProvider.mock.calls.length).toBe(0);
+        });
+    });
+
     describe('"any" (untyped) fields', () => {
         it('should marshall of untyped data', () => {
             const schema: Schema = {mixedList: {type: 'Any'}};
@@ -114,7 +139,7 @@ describe('marshallItem', () => {
 
     describe('binary set fields', () => {
         const schema: Schema = {
-            binSet: { type: 'BinarySet'},
+            binSet: { type: 'Set', memberType: 'Binary'},
         };
 
         it('should serialize BinarySet fields', () => {
@@ -460,7 +485,7 @@ describe('marshallItem', () => {
 
     describe('number set fields', () => {
         const schema: Schema = {
-            numSet: { type: 'NumberSet'},
+            numSet: { type: 'Set', memberType: 'Number'},
         };
 
         it('should serialize NumberSet fields', () => {
@@ -485,6 +510,17 @@ describe('marshallItem', () => {
         });
     });
 
+    describe('set fields', () => {
+        const schema: Schema = {
+            fooSet: { type: 'Set', memberType: 'foo'} as any,
+        };
+
+        it('should throw an error if the memberType is not recognized', () => {
+            expect(() => marshallItem(schema, {fooSet: [1, 2, 3, 1]}))
+                .toThrowError(/Unrecognized set member type/);
+        })
+    });
+
     describe('string fields', () => {
         it('should marshall string fields', () => {
             expect(marshallItem({str: {type: 'String'}}, {str: 'string'}))
@@ -504,7 +540,7 @@ describe('marshallItem', () => {
 
     describe('string set fields', () => {
         const schema: Schema = {
-            strSet: { type: 'StringSet'},
+            strSet: { type: 'Set', memberType: 'String'},
         };
 
         it('should serialize StringSet fields', () => {
