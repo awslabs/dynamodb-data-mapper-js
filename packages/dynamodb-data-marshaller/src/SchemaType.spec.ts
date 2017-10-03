@@ -87,6 +87,12 @@ describe('isSchemaType', () => {
         }
     });
 
+    describe('Any types', () => {
+        it('should accept Any types', () => {
+            expect(isSchemaType({type: 'Any'})).toBe(true);
+        });
+    });
+
     describe('Binary types', () => {
         it('should accept Binary types', () => {
             expect(isSchemaType({type: 'Binary'})).toBe(true);

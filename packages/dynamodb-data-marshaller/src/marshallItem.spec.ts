@@ -31,6 +31,38 @@ describe('marshallItem', () => {
             .toThrow('Unrecognized schema node');
     });
 
+    describe('"any" (untyped) fields', () => {
+        it('should marshall of untyped data', () => {
+            const schema: Schema = {mixedList: {type: 'Any'}};
+            const input = {
+                mixedList: [
+                    'string',
+                    123,
+                    undefined,
+                    new ArrayBuffer(12),
+                    {foo: 'bar'},
+                    ['one string', 234, new ArrayBuffer(5)],
+                ]
+            };
+
+            expect(marshallItem(schema, input)).toEqual({
+                mixedList: {
+                    L: [
+                        {S: 'string'},
+                        {N: '123'},
+                        {B: new ArrayBuffer(12)},
+                        {M: {foo: {S: 'bar'}}},
+                        {L: [
+                            {S: 'one string'},
+                            {N: '234'},
+                            {B: new ArrayBuffer(5)},
+                        ]},
+                    ],
+                },
+            });
+        });
+    });
+
     describe('binary fields', () => {
         it('should serialize fields of binary types from ArrayBuffers', () => {
             const binaryDoc: Schema = {

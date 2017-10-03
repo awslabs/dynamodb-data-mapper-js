@@ -49,6 +49,11 @@ export function unmarshallItem<T = {[key: string]: any}>(
 
 function unmarshallValue(schemaType: SchemaType, input: AttributeValue): any {
     switch (schemaType.type) {
+        case 'Any':
+        case 'Collection':
+        case 'Hash':
+            const autoMarshaller = new Marshaller();
+            return autoMarshaller.unmarshallValue(input);
         case 'Binary':
             if (input.NULL) {
                 return new Uint8Array(0);
@@ -65,10 +70,6 @@ function unmarshallValue(schemaType: SchemaType, input: AttributeValue): any {
                 : undefined;
         case 'Boolean':
             return input.BOOL;
-        case 'Collection':
-        case 'Hash':
-            const autoMarshaller = new Marshaller();
-            return autoMarshaller.unmarshallValue(input);
         case 'Custom':
             return schemaType.unmarshall(input);
         case 'Date':

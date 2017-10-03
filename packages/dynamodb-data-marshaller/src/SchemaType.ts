@@ -5,6 +5,7 @@ import {Schema} from './Schema';
  * The enumeration of types supported by this marshaller package.
  */
 export const TypeTags = {
+    Any: 'Any',
     Binary: 'Binary',
     BinarySet: 'BinarySet',
     Boolean: 'Boolean',
@@ -126,6 +127,17 @@ function isKeyableType(arg: object): boolean {
                 .length === 0
         )
     );
+}
+
+/**
+ * A node used to store values whose type is variable or unknown. The value will
+ * be marshalled an unmarshalled based on runtime type detection, which may
+ * result in data not being precisely round-tripped (e.g., "empty" types such as
+ * zero-length strings, buffers, and sets will be returned from the mapper as
+ * `null` rather than an empty instance of the originally submitted type).
+ */
+export interface AnyType extends BaseType {
+    type: 'Any';
 }
 
 /**
@@ -312,6 +324,7 @@ export interface TupleType extends BaseType {
  * A node in a Schema used by this marshaller package.
  */
 export type SchemaType =
+    AnyType |
     BinaryType |
     BinarySetType |
     BooleanType |

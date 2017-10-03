@@ -44,6 +44,20 @@ export function marshallValue(
     schemaType: SchemaType,
     input: any
 ): AttributeValue {
+    const autoMarshaller = new Marshaller({
+        onEmpty: EmptyHandlingStrategy.Nullify,
+        onInvalid: InvalidHandlingStrategy.Omit,
+    });
+
+    if (schemaType.type === 'Any') {
+        const value = autoMarshaller.marshallValue(input);
+        if (value) {
+            return value;
+        } else {
+            return {NULL: true};
+        }
+    }
+
     if (schemaType.type === 'Binary') {
         if (input.byteLength === 0) {
             return {NULL: true};
@@ -74,11 +88,6 @@ export function marshallValue(
     }
 
     if (schemaType.type === 'Collection') {
-        const autoMarshaller = new Marshaller({
-            onEmpty: EmptyHandlingStrategy.Nullify,
-            onInvalid: InvalidHandlingStrategy.Omit,
-        });
-
         const collected: Array<AttributeValue> = [];
         for (const element of input) {
             const marshalled = autoMarshaller.marshallValue(element);
@@ -113,11 +122,6 @@ export function marshallValue(
     }
 
     if (schemaType.type === 'Hash') {
-        const autoMarshaller = new Marshaller({
-            onEmpty: EmptyHandlingStrategy.Nullify,
-            onInvalid: InvalidHandlingStrategy.Omit,
-        });
-
         return {M: autoMarshaller.marshallItem(input)};
     }
 
