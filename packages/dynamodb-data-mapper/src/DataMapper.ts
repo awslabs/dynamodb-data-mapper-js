@@ -99,11 +99,11 @@ export class DataMapper {
             let inputMember = item[prop];
             const {attributeName = prop, ...fieldSchema} = schema[prop];
 
-            if (isKey(fieldSchema) && item[prop] !== undefined) {
-                operationInput.Key[attributeName] = marshallValue(
-                    fieldSchema,
-                    inputMember
-                );
+            if (isKey(fieldSchema)) {
+                const marshalled = marshallValue(fieldSchema, inputMember);
+                if (marshalled) {
+                    operationInput.Key[attributeName] = marshalled;
+                }
             } else if (
                 !skipVersionCheck &&
                 isVersionAttribute(fieldSchema) &&
@@ -162,11 +162,11 @@ export class DataMapper {
 
         for (const prop of Object.keys(schema)) {
             const {attributeName = prop, ...fieldSchema} = schema[prop];
-            if (isKey(fieldSchema) && item[prop] !== undefined) {
-                operationInput.Key[attributeName] = marshallValue(
-                    fieldSchema,
-                    item[prop]
-                );
+            if (isKey(fieldSchema)) {
+                const marshalled = marshallValue(fieldSchema, item[prop]);
+                if (marshalled) {
+                    operationInput.Key[attributeName] = marshalled;
+                }
             }
         }
 
@@ -419,10 +419,10 @@ export class DataMapper {
             if (isKey(fieldSchema)) {
                 // Marshall keys into the `Keys` property and do not include
                 // them in the update expression
-                req.Key[attributeName] = marshallValue(
-                    fieldSchema,
-                    inputMember
-                );
+                const marshalled = marshallValue(fieldSchema, inputMember);
+                if (marshalled) {
+                    req.Key[attributeName] = marshalled;
+                }
             } else if (isVersionAttribute(fieldSchema)) {
                 const {condition: versionCond, value} = handleVersionAttribute(
                     attributeName,
@@ -440,10 +440,10 @@ export class DataMapper {
                     expr.remove(attributeName);
                 }
             } else {
-                expr.set(
-                    attributeName,
-                    new AttributeValue(marshallValue(fieldSchema, inputMember))
-                );
+                const marshalled = marshallValue(fieldSchema, inputMember);
+                if (marshalled) {
+                    expr.set(attributeName, new AttributeValue(marshalled));
+                }
             }
         }
 

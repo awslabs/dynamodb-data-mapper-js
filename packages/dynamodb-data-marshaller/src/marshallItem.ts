@@ -24,9 +24,10 @@ export function marshallItem(
 
     for (const key of Object.keys(schema)) {
         const value = input[key];
-        if (value !== undefined) {
-            const {attributeName = key} = schema[key];
-            marshalled[attributeName] = marshallValue(schema[key], value);
+        const {attributeName = key} = schema[key];
+        const marshalledValue = marshallValue(schema[key], value);
+        if (marshalledValue) {
+            marshalled[attributeName] = marshalledValue;
         }
     }
 
@@ -43,19 +44,23 @@ export function marshallItem(
 export function marshallValue(
     schemaType: SchemaType,
     input: any
-): AttributeValue {
+): AttributeValue|undefined {
+    if (input === undefined) {
+        const {defaultProvider} = schemaType;
+        if (typeof defaultProvider === 'function') {
+            input = defaultProvider();
+        } else {
+            return undefined;
+        }
+    }
+
     const autoMarshaller = new Marshaller({
         onEmpty: EmptyHandlingStrategy.Nullify,
         onInvalid: InvalidHandlingStrategy.Omit,
     });
 
     if (schemaType.type === 'Any') {
-        const value = autoMarshaller.marshallValue(input);
-        if (value) {
-            return value;
-        } else {
-            return {NULL: true};
-        }
+        return autoMarshaller.marshallValue(input);
     }
 
     if (schemaType.type === 'Binary') {
@@ -128,7 +133,10 @@ export function marshallValue(
     if (schemaType.type === 'List') {
         const elements = [];
         for (const member of input) {
-            elements.push(marshallValue(schemaType.memberType, member));
+            const marshalled = marshallValue(schemaType.memberType, member);
+            if (marshalled) {
+                elements.push(marshalled);
+            }
         }
         return {L: elements};
     }
@@ -137,14 +145,23 @@ export function marshallValue(
         const marshalled: AttributeMap = {};
         if (typeof input[Symbol.iterator] === 'function') {
             for (let [key, value] of input) {
-                marshalled[key] = marshallValue(schemaType.memberType, value);
+                const marshalledValue = marshallValue(
+                    schemaType.memberType,
+                    value
+                );
+                if (marshalledValue) {
+                    marshalled[key] = marshalledValue;
+                }
             }
         } else if (typeof input === 'object') {
             for (const key of Object.keys(input)) {
-                marshalled[key] = marshallValue(
+                const marshalledValue = marshallValue(
                     schemaType.memberType,
                     input[key]
                 );
+                if (marshalledValue) {
+                    marshalled[key] = marshalledValue;
+                }
             }
         } else {
             throw new InvalidValueError(
@@ -201,10 +218,9 @@ export function marshallValue(
 
     if (schemaType.type === 'Tuple') {
         return {
-            L: schemaType.members.map((
-                type: SchemaType,
-                index: number
-            ) => marshallValue(type, input[index])),
+            L: schemaType.members
+                .map((type: SchemaType, index: number) => marshallValue(type, input[index]))
+                .filter((val): val is AttributeValue => val !== undefined)
         }
     }
 

@@ -1,5 +1,6 @@
 import {AttributeValue} from 'aws-sdk/clients/dynamodb';
 import {Schema} from './Schema';
+import {BinaryValue} from "@aws/dynamodb-auto-marshaller";
 
 /**
  * The enumeration of types supported by this marshaller package.
@@ -32,7 +33,7 @@ export type TypeTag = keyof typeof TypeTags;
 /**
  * An abstract base type defining the common characteristics of all SchemaTypes
  */
-export interface BaseType {
+export interface BaseType<T = any> {
     /**
      * The type of node represented by this object.
      */
@@ -44,6 +45,8 @@ export interface BaseType {
      * persisted record.
      */
     attributeName?: string;
+
+    defaultProvider?: () => T;
 }
 
 function isBaseType(arg: any): arg is BaseType {
@@ -144,21 +147,21 @@ export interface AnyType extends BaseType {
  * A node used to store binary data (e.g., Buffer, ArrayBuffer, or
  * ArrayBufferView objects).
  */
-export interface BinaryType extends BaseType, KeyableType {
+export interface BinaryType extends BaseType<BinaryValue>, KeyableType {
     type: 'Binary';
 }
 
 /**
  * A node used to store a set of binary values.
  */
-export interface BinarySetType extends BaseType {
+export interface BinarySetType extends BaseType<Set<BinaryValue>> {
     type: 'BinarySet';
 }
 
 /**
  * A node used to store boolean values.
  */
-export interface BooleanType extends BaseType {
+export interface BooleanType extends BaseType<boolean> {
     type: 'Boolean';
 }
 
@@ -167,7 +170,7 @@ export interface BooleanType extends BaseType {
  * node will be marshalled using run-time type detection and may not be exactly
  * the same when unmarshalled.
  */
-export interface CollectionType extends BaseType {
+export interface CollectionType extends BaseType<Array<any>> {
     type: 'Collection';
 }
 
@@ -176,7 +179,7 @@ export interface CollectionType extends BaseType {
  * `marshall` and `unmarshall` functions defined in this SchemaType. Useful for
  * objects not easily classified using the standard schema taxonomy.
  */
-export interface CustomType<JsType> extends BaseType, KeyableType {
+export interface CustomType<JsType> extends BaseType<JsType>, KeyableType {
     type: 'Custom';
 
     /**
@@ -204,7 +207,7 @@ export interface CustomType<JsType> extends BaseType, KeyableType {
  *
  * Timezone information is not persisted.
  */
-export interface DateType extends BaseType, KeyableType {
+export interface DateType extends BaseType<string|number|Date>, KeyableType {
     type: 'Date';
 }
 
@@ -218,7 +221,7 @@ export interface ZeroArgumentsConstructor<T> {
 /**
  * A node represented by its own full Schema. Marshalled as an embedded map.
  */
-export interface DocumentType<T = {[key: string]: any}>extends BaseType {
+export interface DocumentType<T = {[key: string]: any}>extends BaseType<T> {
     type: 'Document';
 
     /**
@@ -240,7 +243,7 @@ export interface DocumentType<T = {[key: string]: any}>extends BaseType {
  * Values provided for this node will be marshalled using run-time type
  * detection and may not be exactly the same when unmarshalled.
  */
-export interface HashType extends BaseType {
+export interface HashType extends BaseType<{[key: string]: any}> {
     type: 'Hash';
 }
 
@@ -251,7 +254,7 @@ export interface HashType extends BaseType {
  * @see CollectionType For untyped or mixed lists
  * @see TupleType For tuples
  */
-export interface ListType extends BaseType {
+export interface ListType<E = any> extends BaseType<Array<E>> {
     type: 'List';
 
     /**
@@ -268,7 +271,7 @@ export interface ListType extends BaseType {
  * @see HashType For untyped of mixed hashes
  * @see DocumentType For strongly-typed documents
  */
-export interface MapType extends BaseType {
+export interface MapType<E = any> extends BaseType<Map<string, E>> {
     type: 'Map';
     memberType: SchemaType & MemberType;
 }
@@ -276,7 +279,7 @@ export interface MapType extends BaseType {
 /**
  * A node used to store null values.
  */
-export interface NullType extends BaseType {
+export interface NullType extends BaseType<null> {
     type: 'Null';
 }
 
@@ -285,7 +288,7 @@ export interface NullType extends BaseType {
  * 754 double precision floating point values to ensure no precision is lost
  * during (un)marshalling.
  */
-export interface NumberType extends BaseType, KeyableType {
+export interface NumberType extends BaseType<number>, KeyableType {
     type: 'Number';
     versionAttribute?: boolean;
 }
@@ -293,21 +296,21 @@ export interface NumberType extends BaseType, KeyableType {
 /**
  * A node used to store a set of numbers.
  */
-export interface NumberSetType extends BaseType {
+export interface NumberSetType extends BaseType<Set<number>> {
     type: 'NumberSet';
 }
 
 /**
  * A node used to store a string value.
  */
-export interface StringType extends BaseType, KeyableType {
+export interface StringType extends BaseType<string>, KeyableType {
     type: 'String';
 }
 
 /**
  * A node used to store a set of strings.
  */
-export interface StringSetType extends BaseType {
+export interface StringSetType extends BaseType<Set<string>> {
     type: 'StringSet';
 }
 
@@ -315,7 +318,9 @@ export interface StringSetType extends BaseType {
  * A node used to store a fixed-length list of items, each of which may be of
  * a different type, e.g., `[boolean, string]`.
  */
-export interface TupleType extends BaseType {
+export interface TupleType<T extends Array<any> = Array<any>> extends
+    BaseType<T>
+{
     type: 'Tuple';
     members: Array<SchemaType & MemberType>;
 }
