@@ -107,6 +107,8 @@ function metadataToSchemaType(
                 type = 'Document';
                 (rest as DocumentType).members = ctor.prototype[DynamoDbSchema];
                 (rest as DocumentType).valueConstructor = ctor;
+            } else if (isBinaryType(ctor)) {
+                type = 'Binary';
             } else if (ctor === Array || ctor.prototype instanceof Array) {
                 if ('members' in declaration) {
                     type = 'Tuple';
@@ -127,4 +129,32 @@ function metadataToSchemaType(
         ...rest,
         type
     } as SchemaType;
+}
+
+/**
+ * ArrayBuffer.isView will only evaluate if an object instance is an
+ * ArrayBufferView, but TypeScript metadata gives us a reference to the class.
+ *
+ * This function checks if the provided constructor is or extends the built-in
+ * `ArrayBuffer` constructor, the `DataView` constructor, or any `TypedArray`
+ * constructor.
+ *
+ * This function will need to be modified if new binary types are added to
+ * JavaScript (e.g., the `Int64Array` or `Uint64Array` discussed in
+ * {@link https://github.com/tc39/proposal-bigint the BigInt TC39 proposal}.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView
+ */
+function isBinaryType(arg: any): boolean {
+    return arg === Uint8Array || arg.prototype instanceof Uint8Array ||
+        arg === Uint8ClampedArray || arg.prototype instanceof Uint8ClampedArray ||
+        arg === Uint16Array || arg.prototype instanceof Uint16Array ||
+        arg === Uint32Array || arg.prototype instanceof Uint32Array ||
+        arg === Int8Array || arg.prototype instanceof Int8Array ||
+        arg === Int16Array || arg.prototype instanceof Int16Array ||
+        arg === Int32Array || arg.prototype instanceof Int32Array ||
+        arg === Float32Array || arg.prototype instanceof Float32Array ||
+        arg === Float64Array || arg.prototype instanceof Float64Array ||
+        arg === ArrayBuffer || arg.prototype instanceof ArrayBuffer ||
+        arg === DataView || arg.prototype instanceof DataView;
 }
