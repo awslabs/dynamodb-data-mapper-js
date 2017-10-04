@@ -31,17 +31,35 @@ describe('DataMapper', () => {
         });
 
         it(
+            'should throw if the item does not provide a schema per the data mapper protocol',
+            async () => {
+                await expect(mapper.delete({item: {
+                    [DynamoDbTable]: 'foo',
+                }})).rejects.toMatchObject({
+                    message: 'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
+                });
+            }
+        );
+
+        it(
+            'should throw if the item does not provide a table name per the data mapper protocol',
+            async () => {
+                await expect(mapper.delete({item: {
+                    [DynamoDbSchema]: {},
+                }})).rejects.toMatchObject({
+                    message: 'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
+                });
+            }
+        );
+
+        it(
             'should use the table name specified in the supplied table definition',
             async () => {
                 const tableName = 'foo';
                 await mapper.delete({
                     item: {
-                        [DynamoDbTable]() {
-                            return tableName;
-                        },
-                        [DynamoDbSchema]() {
-                            return {};
-                        },
+                        [DynamoDbTable]: tableName,
+                        [DynamoDbSchema]: {},
                     },
                 });
 
@@ -61,12 +79,8 @@ describe('DataMapper', () => {
                 const tableName = 'foo';
                 await mapper.delete({
                     item: {
-                        [DynamoDbTable]() {
-                            return tableName;
-                        },
-                        [DynamoDbSchema]() {
-                            return {};
-                        }
+                        [DynamoDbTable]: tableName,
+                        [DynamoDbSchema]: {},
                     },
                 });
 
@@ -82,20 +96,16 @@ describe('DataMapper', () => {
                     item: {
                         fizz: 'buzz',
                         pop: new Date(60000),
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {
-                                    type: 'String',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Date',
-                                    keyType: 'RANGE'
-                                },
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Date',
+                                keyType: 'RANGE'
+                            },
                         },
                     },
                 });
@@ -117,19 +127,15 @@ describe('DataMapper', () => {
                     item: {
                         fizz: 'buzz',
                         pop: new Date(60000),
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {
-                                    type: 'String',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Date'
-                                },
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Date'
+                            },
                         },
                     },
                 });
@@ -148,20 +154,16 @@ describe('DataMapper', () => {
                     item: {
                         fizz: 'buzz',
                         pop: new Date(60000),
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {
-                                    type: 'String',
-                                    attributeName: 'foo',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Date'
-                                },
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                attributeName: 'foo',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Date'
+                            },
                         },
                     },
                 });
@@ -180,21 +182,17 @@ describe('DataMapper', () => {
                     item: {
                         fizz: 'buzz',
                         pop: 21,
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {
-                                    type: 'String',
-                                    attributeName: 'foo',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Number',
-                                    versionAttribute: true,
-                                },
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                attributeName: 'foo',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Number',
+                                versionAttribute: true,
+                            },
                         },
                     },
                 });
@@ -214,21 +212,17 @@ describe('DataMapper', () => {
                 await mapper.delete({
                     item: {
                         fizz: 'buzz',
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {
-                                    type: 'String',
-                                    attributeName: 'foo',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Number',
-                                    versionAttribute: true,
-                                },
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                attributeName: 'foo',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Number',
+                                versionAttribute: true,
+                            },
                         },
                     },
                 });
@@ -245,21 +239,17 @@ describe('DataMapper', () => {
                     item: {
                         fizz: 'buzz',
                         pop: 21,
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {
-                                    type: 'String',
-                                    attributeName: 'foo',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Number',
-                                    versionAttribute: true,
-                                },
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                attributeName: 'foo',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Number',
+                                versionAttribute: true,
+                            },
                         },
                     },
                     skipVersionCheck: true,
@@ -281,21 +271,17 @@ describe('DataMapper', () => {
                     item: {
                         fizz: 'buzz',
                         pop: 21,
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {
-                                    type: 'String',
-                                    attributeName: 'foo',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Number',
-                                    versionAttribute: true,
-                                },
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                attributeName: 'foo',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Number',
+                                versionAttribute: true,
+                            },
                         },
                     },
                 });
@@ -312,22 +298,18 @@ describe('DataMapper', () => {
                     item: {
                         fizz: 'buzz',
                         pop: 21,
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {
-                                    type: 'String',
-                                    attributeName: 'foo',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Number',
-                                    versionAttribute: true,
-                                },
-                                quux: {type: 'Date'},
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                attributeName: 'foo',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Number',
+                                versionAttribute: true,
+                            },
+                            quux: {type: 'Date'},
                         },
                     },
                     condition: {
@@ -362,11 +344,8 @@ describe('DataMapper', () => {
             const result = await mapper.delete({
                 item: {
                     foo: 'buzz',
-                    [DynamoDbTable]() {
-                        return 'foo';
-                    },
-                    [DynamoDbSchema]() {
-                        return {
+                    [DynamoDbTable]: 'foo',
+                    [DynamoDbSchema]: {
                             foo: {
                                 type: 'String',
                                 attributeName: 'fizz',
@@ -380,7 +359,6 @@ describe('DataMapper', () => {
                                 type: 'Tuple',
                                 members: [{type: 'Boolean'}, {type: 'Number'}]
                             },
-                        };
                     },
                 },
                 returnValues: "ALL_OLD"
@@ -410,17 +388,35 @@ describe('DataMapper', () => {
         });
 
         it(
+            'should throw if the item does not provide a schema per the data mapper protocol',
+            async () => {
+                await expect(mapper.get({item: {
+                    [DynamoDbTable]: 'foo',
+                }})).rejects.toMatchObject({
+                    message: 'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
+                });
+            }
+        );
+
+        it(
+            'should throw if the item does not provide a table name per the data mapper protocol',
+            async () => {
+                await expect(mapper.get({item: {
+                    [DynamoDbSchema]: {},
+                }})).rejects.toMatchObject({
+                    message: 'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
+                });
+            }
+        );
+
+        it(
             'should use the table name specified in the supplied table definition',
             async () => {
                 const tableName = 'foo';
                 await mapper.get({
                     item: {
-                        [DynamoDbTable]() {
-                            return tableName;
-                        },
-                        [DynamoDbSchema]() {
-                            return {};
-                        },
+                        [DynamoDbTable]: tableName,
+                        [DynamoDbSchema]: {},
                     },
                 });
 
@@ -440,12 +436,8 @@ describe('DataMapper', () => {
                 const tableName = 'foo';
                 await mapper.get({
                     item: {
-                        [DynamoDbTable]() {
-                            return tableName;
-                        },
-                        [DynamoDbSchema]() {
-                            return {};
-                        },
+                        [DynamoDbTable]: tableName,
+                        [DynamoDbSchema]: {},
                     },
                 });
 
@@ -461,20 +453,16 @@ describe('DataMapper', () => {
                     item: {
                         fizz: 'buzz',
                         pop: new Date(60000),
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {
-                                    type: 'String',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Date',
-                                    keyType: 'RANGE'
-                                },
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Date',
+                                keyType: 'RANGE'
+                            },
                         },
                     },
                 });
@@ -496,19 +484,15 @@ describe('DataMapper', () => {
                     item: {
                         fizz: 'buzz',
                         pop: new Date(60000),
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {
-                                    type: 'String',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Date'
-                                },
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Date'
+                            },
                         },
                     }
                 });
@@ -527,20 +511,16 @@ describe('DataMapper', () => {
                     item: {
                         fizz: 'buzz',
                         pop: new Date(60000),
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {
-                                    type: 'String',
-                                    attributeName: 'foo',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Date'
-                                },
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                attributeName: 'foo',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Date'
+                            },
                         },
                     },
                 });
@@ -557,12 +537,8 @@ describe('DataMapper', () => {
             async () => {
                 await mapper.get({
                     item: {
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {};
-                        },
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {},
                     },
                     readConsistency: ReadConsistency.StronglyConsistent
                 });
@@ -581,12 +557,8 @@ describe('DataMapper', () => {
                 });
                 await mapper.get({
                     item: {
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {};
-                        },
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {},
                     },
                 });
 
@@ -598,20 +570,16 @@ describe('DataMapper', () => {
         it('should serialize a provided projection expression', async () => {
             await mapper.get({
                 item: {
-                    [DynamoDbTable]() {
-                        return 'foo';
-                    },
-                    [DynamoDbSchema]() {
-                        return {
-                            fizz: {
-                                type: 'String',
-                                attributeName: 'foo',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Date'
-                            },
-                        };
+                    [DynamoDbTable]: 'foo',
+                    [DynamoDbSchema]: {
+                        fizz: {
+                            type: 'String',
+                            attributeName: 'foo',
+                            keyType: 'HASH',
+                        },
+                        pop: {
+                            type: 'Date'
+                        },
                     },
                 },
                 projection: ['fizz', 'pop'],
@@ -636,20 +604,16 @@ describe('DataMapper', () => {
                     item: {
                         fizz: 'buzz',
                         pop: new Date(60000),
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {
-                                    type: 'String',
-                                    attributeName: 'foo',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Date'
-                                },
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                attributeName: 'foo',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Date'
+                            },
                         },
                     },
                     readConsistency: ReadConsistency.StronglyConsistent,
@@ -680,20 +644,16 @@ describe('DataMapper', () => {
             const result = await mapper.get({
                 item: {
                     fizz: 'buzz',
-                    [DynamoDbTable]() {
-                        return 'foo';
-                    },
-                    [DynamoDbSchema]() {
-                        return {
-                            fizz: {
-                                type: 'String',
-                                attributeName: 'foo',
-                                keyType: 'HASH',
-                            },
-                            pop: {
-                                type: 'Date'
-                            },
-                        };
+                    [DynamoDbTable]: 'foo',
+                    [DynamoDbSchema]: {
+                        fizz: {
+                            type: 'String',
+                            attributeName: 'foo',
+                            keyType: 'HASH',
+                        },
+                        pop: {
+                            type: 'Date'
+                        },
                     },
                 },
             });
@@ -721,17 +681,35 @@ describe('DataMapper', () => {
         });
 
         it(
+            'should throw if the item does not provide a schema per the data mapper protocol',
+            async () => {
+                await expect(mapper.put({item: {
+                    [DynamoDbTable]: 'foo',
+                }})).rejects.toMatchObject({
+                    message: 'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
+                });
+            }
+        );
+
+        it(
+            'should throw if the item does not provide a table name per the data mapper protocol',
+            async () => {
+                await expect(mapper.put({item: {
+                    [DynamoDbSchema]: {},
+                }})).rejects.toMatchObject({
+                    message: 'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
+                });
+            }
+        );
+
+        it(
             'should use the table name specified in the supplied table definition',
             async () => {
                 const tableName = 'foo';
                 await mapper.put({
                     item: {
-                        [DynamoDbTable]() {
-                            return tableName;
-                        },
-                        [DynamoDbSchema]() {
-                            return {};
-                        },
+                        [DynamoDbTable]: tableName,
+                        [DynamoDbSchema]: {},
                     },
                 });
 
@@ -751,12 +729,8 @@ describe('DataMapper', () => {
                 const tableName = 'foo';
                 await mapper.put({
                     item: {
-                        [DynamoDbTable]() {
-                            return tableName;
-                        },
-                        [DynamoDbSchema]() {
-                            return {};
-                        },
+                        [DynamoDbTable]: tableName,
+                        [DynamoDbSchema]: {},
                     },
                 });
 
@@ -773,18 +747,14 @@ describe('DataMapper', () => {
                         fizz: 'buzz',
                         pop: new Date(60000),
                         snap: false,
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {type: 'String'},
-                                pop: {type: 'Date'},
-                                snap: {
-                                    type: 'Boolean',
-                                    attributeName: 'crackle',
-                                }
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {type: 'String'},
+                            pop: {type: 'Date'},
+                            snap: {
+                                type: 'Boolean',
+                                attributeName: 'crackle',
+                            }
                         },
                     },
                 });
@@ -807,21 +777,17 @@ describe('DataMapper', () => {
                     item: {
                         fizz: 'buzz',
                         pop: 21,
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {
-                                    type: 'String',
-                                    attributeName: 'foo',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Number',
-                                    versionAttribute: true,
-                                },
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                attributeName: 'foo',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Number',
+                                versionAttribute: true,
+                            },
                         },
                     },
                 });
@@ -845,21 +811,17 @@ describe('DataMapper', () => {
                 await mapper.put({
                     item: {
                         fizz: 'buzz',
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {
-                                    type: 'String',
-                                    attributeName: 'foo',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Number',
-                                    versionAttribute: true,
-                                },
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                attributeName: 'foo',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Number',
+                                versionAttribute: true,
+                            },
                         },
                     },
                 });
@@ -884,21 +846,17 @@ describe('DataMapper', () => {
                     item: {
                         fizz: 'buzz',
                         pop: 21,
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {
-                                    type: 'String',
-                                    attributeName: 'foo',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Number',
-                                    versionAttribute: true,
-                                },
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                attributeName: 'foo',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Number',
+                                versionAttribute: true,
+                            },
                         },
                     },
                     skipVersionCheck: true,
@@ -920,21 +878,17 @@ describe('DataMapper', () => {
                     item: {
                         fizz: 'buzz',
                         pop: 21,
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {
-                                    type: 'String',
-                                    attributeName: 'foo',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Number',
-                                    versionAttribute: true,
-                                },
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                attributeName: 'foo',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Number',
+                                versionAttribute: true,
+                            },
                         },
                     },
                 });
@@ -951,22 +905,18 @@ describe('DataMapper', () => {
                     item: {
                         fizz: 'buzz',
                         pop: 21,
-                        [DynamoDbTable]() {
-                            return 'foo';
-                        },
-                        [DynamoDbSchema]() {
-                            return {
-                                fizz: {
-                                    type: 'String',
-                                    attributeName: 'foo',
-                                    keyType: 'HASH',
-                                },
-                                pop: {
-                                    type: 'Number',
-                                    versionAttribute: true,
-                                },
-                                quux: {type: 'Date'},
-                            };
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                attributeName: 'foo',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Number',
+                                versionAttribute: true,
+                            },
+                            quux: {type: 'Date'},
                         },
                     },
                     condition: {
@@ -1001,25 +951,21 @@ describe('DataMapper', () => {
             const result = await mapper.put({
                 item: {
                     foo: 'buzz',
-                    [DynamoDbTable]() {
-                        return 'foo';
-                    },
-                    [DynamoDbSchema]() {
-                        return {
-                            foo: {
-                                type: 'String',
-                                attributeName: 'fizz',
-                                keyType: 'HASH',
-                            },
-                            bar: {
-                                type: 'Set',
-                                memberType: 'Number'
-                            },
-                            baz: {
-                                type: 'Tuple',
-                                members: [{type: 'Boolean'}, {type: 'Number'}]
-                            },
-                        };
+                    [DynamoDbTable]: 'foo',
+                    [DynamoDbSchema]: {
+                        foo: {
+                            type: 'String',
+                            attributeName: 'fizz',
+                            keyType: 'HASH',
+                        },
+                        bar: {
+                            type: 'Set',
+                            memberType: 'Number'
+                        },
+                        baz: {
+                            type: 'Tuple',
+                            members: [{type: 'Boolean'}, {type: 'Number'}]
+                        },
                     },
                 },
                 returnValues: "ALL_OLD"
@@ -1052,8 +998,8 @@ describe('DataMapper', () => {
             snap: string;
             fizz?: Array<string>;
 
-            [DynamoDbTable]() { return 'foo'; }
-            [DynamoDbSchema]() {
+            get [DynamoDbTable]() { return 'foo'; }
+            get [DynamoDbSchema]() {
                 return {
                     snap: {
                         type: 'String',
@@ -1067,6 +1013,41 @@ describe('DataMapper', () => {
                 };
             }
         }
+
+        it(
+            'should throw if the item does not provide a schema per the data mapper protocol',
+            async () => {
+                const iter = mapper.query({
+                    valueConstructor: class {
+                        get [DynamoDbTable]() { return 'foo'; }
+                    },
+                    keyCondition: {
+                        foo: 'buzz'
+                    },
+                });
+                await expect(iter.next()).rejects.toMatchObject({
+                    message: 'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
+                });
+            }
+        );
+
+        it(
+            'should throw if the item does not provide a table name per the data mapper protocol',
+            async () => {
+                const iter = mapper.query({
+                    valueConstructor: class {
+                        get [DynamoDbSchema]() { return {}; }
+                    },
+                    keyCondition: {
+                        foo: 'buzz'
+                    },
+                });
+
+                await expect(iter.next()).rejects.toMatchObject({
+                    message: 'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
+                });
+            }
+        );
 
         it(
             'should paginate over results and return a promise for each item',
@@ -1108,8 +1089,8 @@ describe('DataMapper', () => {
                         foo: 'buzz'
                     },
                     valueConstructor: class {
-                        [DynamoDbTable]() { return 'foo'; }
-                        [DynamoDbSchema]() {
+                        get [DynamoDbTable]() { return 'foo'; }
+                        get [DynamoDbSchema]() {
                             return {
                                 foo: {
                                     type: 'String',
@@ -1188,8 +1169,8 @@ describe('DataMapper', () => {
                     ]
                 },
                 valueConstructor: class {
-                    [DynamoDbTable]() { return 'foo'; }
-                    [DynamoDbSchema]() {
+                    get [DynamoDbTable]() { return 'foo'; }
+                    get [DynamoDbSchema]() {
                         return {
                             snap: {
                                 type: 'String',
@@ -1308,8 +1289,8 @@ describe('DataMapper', () => {
                     snap: 'crackle',
                 },
                 valueConstructor: class {
-                    [DynamoDbTable]() { return 'foo'; }
-                    [DynamoDbSchema]() {
+                    get [DynamoDbTable]() { return 'foo'; }
+                    get [DynamoDbSchema]() {
                         return {
                             snap: {
                                 type: 'String',
@@ -1355,8 +1336,8 @@ describe('DataMapper', () => {
             snap: string;
             fizz?: Array<string>;
 
-            [DynamoDbTable]() { return 'foo'; }
-            [DynamoDbSchema]() {
+            get [DynamoDbTable]() { return 'foo'; }
+            get [DynamoDbSchema]() {
                 return {
                     snap: {
                         type: 'String',
@@ -1370,6 +1351,35 @@ describe('DataMapper', () => {
                 };
             }
         }
+
+        it(
+            'should throw if the item does not provide a schema per the data mapper protocol',
+            async () => {
+                const iter = mapper.scan({
+                    valueConstructor: class {
+                        get [DynamoDbTable]() { return 'foo'; }
+                    },
+                });
+                await expect(iter.next()).rejects.toMatchObject({
+                    message: 'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
+                });
+            }
+        );
+
+        it(
+            'should throw if the item does not provide a table name per the data mapper protocol',
+            async () => {
+                const iter = mapper.scan({
+                    valueConstructor: class {
+                        get [DynamoDbSchema]() { return {}; }
+                    },
+                });
+
+                await expect(iter.next()).rejects.toMatchObject({
+                    message: 'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
+                });
+            }
+        );
 
         it(
             'should paginate over results and return a promise for each item',
@@ -1408,8 +1418,8 @@ describe('DataMapper', () => {
 
                 const results = mapper.scan({
                     valueConstructor: class {
-                        [DynamoDbTable]() { return 'foo'; }
-                        [DynamoDbSchema]() {
+                        get [DynamoDbTable]() { return 'foo'; }
+                        get [DynamoDbSchema]() {
                             return {
                                 foo: {
                                     type: 'String',
@@ -1516,8 +1526,8 @@ describe('DataMapper', () => {
         it('should allow a start key', () => {
             const results =  mapper.scan({
                 valueConstructor: class {
-                    [DynamoDbTable]() { return 'foo'; }
-                    [DynamoDbSchema]() {
+                    get [DynamoDbTable]() { return 'foo'; }
+                    get [DynamoDbSchema]() {
                         return {
                             snap: {
                                 type: 'String',
@@ -1548,11 +1558,11 @@ describe('DataMapper', () => {
         const tableName = 'foo';
 
         class EmptyItem {
-            [DynamoDbTable]() {
+            get [DynamoDbTable]() {
                 return tableName;
             }
 
-            [DynamoDbSchema]() {
+            get [DynamoDbSchema]() {
                 return {};
             }
         }
@@ -1566,7 +1576,7 @@ describe('DataMapper', () => {
                 pop: {[key: string]: any};
             };
 
-            [DynamoDbSchema]() {
+            get [DynamoDbSchema]() {
                 return {
                     foo: {
                         type: 'String',
@@ -1608,6 +1618,28 @@ describe('DataMapper', () => {
         const mapper = new DataMapper({
             client: mockDynamoDbClient as any,
         });
+
+        it(
+            'should throw if the item does not provide a schema per the data mapper protocol',
+            async () => {
+                await expect(mapper.update({item: {
+                    [DynamoDbTable]: 'foo',
+                }})).rejects.toMatchObject({
+                    message: 'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
+                });
+            }
+        );
+
+        it(
+            'should throw if the item does not provide a table name per the data mapper protocol',
+            async () => {
+                await expect(mapper.update({item: {
+                    [DynamoDbSchema]: {},
+                }})).rejects.toMatchObject({
+                    message: 'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
+                });
+            }
+        );
 
         it(
             'should use the table name specified in the supplied table definition',
@@ -1708,23 +1740,21 @@ describe('DataMapper', () => {
             const result = await mapper.update({
                 item: {
                     foo: 'buzz',
-                    [DynamoDbTable]() { return 'foo'; },
-                    [DynamoDbSchema]() {
-                        return {
-                            foo: {
-                                type: 'String',
-                                attributeName: 'fizz',
-                                keyType: 'HASH',
-                            },
-                            bar: {
-                                type: 'Set',
-                                memberType: 'Number'
-                            },
-                            baz: {
-                                type: 'Tuple',
-                                members: [{type: 'Boolean'}, {type: 'Number'}]
-                            },
-                        };
+                    [DynamoDbTable]: 'foo',
+                    [DynamoDbSchema]: {
+                        foo: {
+                            type: 'String',
+                            attributeName: 'fizz',
+                            keyType: 'HASH',
+                        },
+                        bar: {
+                            type: 'Set',
+                            memberType: 'Number'
+                        },
+                        baz: {
+                            type: 'Tuple',
+                            members: [{type: 'Boolean'}, {type: 'Number'}]
+                        },
                     },
                 }
             });
@@ -1742,23 +1772,21 @@ describe('DataMapper', () => {
             return expect(mapper.update({
                 item: {
                     foo: 'buzz',
-                    [DynamoDbTable]() { return 'foo'; },
-                    [DynamoDbSchema]() {
-                        return {
-                            foo: {
-                                type: 'String',
-                                attributeName: 'fizz',
-                                keyType: 'HASH',
-                            },
-                            bar: {
-                                type: 'Set',
-                                memberType: 'Number'
-                            },
-                            baz: {
-                                type: 'Tuple',
-                                members: [{type: 'Boolean'}, {type: 'Number'}]
-                            },
-                        };
+                    [DynamoDbTable]: 'foo',
+                    [DynamoDbSchema]: {
+                        foo: {
+                            type: 'String',
+                            attributeName: 'fizz',
+                            keyType: 'HASH',
+                        },
+                        bar: {
+                            type: 'Set',
+                            memberType: 'Number'
+                        },
+                        baz: {
+                            type: 'Tuple',
+                            members: [{type: 'Boolean'}, {type: 'Number'}]
+                        },
                     },
                 },
             })).rejects.toMatchObject({
@@ -1772,11 +1800,11 @@ describe('DataMapper', () => {
                 bar?: [number, Uint8Array];
                 baz?: number;
 
-                [DynamoDbTable]() {
+                get [DynamoDbTable]() {
                     return 'table';
                 }
 
-                [DynamoDbSchema]() {
+                get [DynamoDbSchema]() {
                     return {
                         foo: {
                             type: 'String',

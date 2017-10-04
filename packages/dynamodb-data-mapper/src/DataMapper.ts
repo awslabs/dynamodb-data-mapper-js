@@ -654,23 +654,25 @@ function toSchemaName(
 }
 
 function getSchema(item: StringToAnyObjectMap): Schema {
-    if (typeof item[DynamoDbSchema] === 'function') {
-        return item[DynamoDbSchema]();
+    const schema = item[DynamoDbSchema];
+    if (schema && typeof schema === 'object') {
+        return schema;
     }
 
     throw new Error(
         'The provided item did not adhere to the DynamoDbDocument protocol.' +
-        ' No method was found at the `DynamoDbSchema` symbol'
+        ' No object property was found at the `DynamoDbSchema` symbol'
     );
 }
 
 function getTableName(item: StringToAnyObjectMap): string {
-    if (typeof item[DynamoDbTable] === 'function') {
-        return item[DynamoDbTable]();
+    const tableName = item[DynamoDbTable];
+    if (typeof tableName === 'string') {
+        return tableName;
     }
 
     throw new Error(
         'The provided item did not adhere to the DynamoDbTable protocol. No' +
-        ' method was found at the `DynamoDbTable` symbol'
+        ' string property was found at the `DynamoDbTable` symbol'
     );
 }
