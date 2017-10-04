@@ -1,4 +1,5 @@
 import {isSchemaType} from "./SchemaType";
+import {Schema} from "./Schema";
 
 describe('isSchemaType', () => {
     it('should reject scalar values', () => {
@@ -275,6 +276,18 @@ describe('isSchemaType', () => {
                 type: 'Tuple',
                 members: ['Boolean', 'String'],
             })).toBe(false);
+        });
+    });
+
+    describe('recursive schemas', () => {
+        it('should accept valid recursive schemas', () => {
+            const document: Schema = {};
+            document.recursive = {
+                type: "Document",
+                members: document,
+            };
+
+            expect(isSchemaType(document.recursive)).toBe(true);
         });
     });
 });

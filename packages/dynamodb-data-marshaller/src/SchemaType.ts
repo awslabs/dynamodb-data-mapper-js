@@ -153,13 +153,6 @@ export interface BinaryType extends BaseType<BinaryValue>, KeyableType {
 }
 
 /**
- * A node used to store a set of binary values.
- */
-export interface BinarySetType extends BaseType<Set<BinaryValue>> {
-    type: 'BinarySet';
-}
-
-/**
  * A node used to store boolean values.
  */
 export interface BooleanType extends BaseType<boolean> {
@@ -294,13 +287,6 @@ export interface NumberType extends BaseType<number>, KeyableType {
     versionAttribute?: boolean;
 }
 
-/**
- * A node used to store a set of numbers.
- */
-export interface NumberSetType extends BaseType<Set<number>> {
-    type: 'NumberSet';
-}
-
 export interface SetType extends BaseType<Set<any>> {
     type: 'Set';
     memberType: 'String'|'Number'|'Binary';
@@ -311,13 +297,6 @@ export interface SetType extends BaseType<Set<any>> {
  */
 export interface StringType extends BaseType<string>, KeyableType {
     type: 'String';
-}
-
-/**
- * A node used to store a set of strings.
- */
-export interface StringSetType extends BaseType<Set<string>> {
-    type: 'StringSet';
 }
 
 /**
@@ -351,8 +330,16 @@ export type SchemaType =
     StringType |
     TupleType;
 
-export function isSchemaType(arg: any): arg is SchemaType {
+export function isSchemaType(
+    arg: any,
+    alreadyVisited: Set<any> = new Set()
+): arg is SchemaType {
     if (isBaseType(arg)) {
+        if (alreadyVisited.has(arg)) {
+            return true;
+        }
+
+        alreadyVisited.add(arg);
         switch (arg.type) {
             case 'Binary':
             case 'String':
@@ -361,15 +348,18 @@ export function isSchemaType(arg: any): arg is SchemaType {
                 return typeof (arg as CustomType<any>).marshall === 'function'
                     && typeof (arg as CustomType<any>).unmarshall === 'function';
             case 'Document':
-                return isDocumentType(arg);
+                return isDocumentType(arg, alreadyVisited);
             case 'List':
             case 'Map':
-                return isSchemaType((arg as ListType).memberType);
+                return isSchemaType(
+                    (arg as ListType).memberType,
+                    alreadyVisited
+                );
             case 'Number':
                 return isKeyableType(arg) && ['boolean', 'undefined']
                     .indexOf(typeof (arg as NumberType).versionAttribute) > -1;
             case 'Tuple':
-                return isTupleType(arg);
+                return isTupleType(arg, alreadyVisited);
             default:
                 return true;
         }
@@ -378,14 +368,17 @@ export function isSchemaType(arg: any): arg is SchemaType {
     return false;
 }
 
-function isDocumentType(arg: BaseType): arg is DocumentType {
+function isDocumentType(
+    arg: BaseType,
+    alreadyVisited: Set<any>
+): arg is DocumentType {
     const {valueConstructor, members} = arg as DocumentType;
     if (!members || typeof members !== 'object') {
         return false;
     }
 
     for (let key of Object.keys(members)) {
-        if (!isSchemaType(members[key])) {
+        if (!isSchemaType(members[key], alreadyVisited)) {
             return false;
         }
     }
@@ -393,14 +386,17 @@ function isDocumentType(arg: BaseType): arg is DocumentType {
     return ['function', 'undefined',].indexOf(typeof valueConstructor) > -1;
 }
 
-function isTupleType(arg: BaseType): arg is TupleType {
+function isTupleType(
+    arg: BaseType,
+    alreadyVisited: Set<any>
+): arg is TupleType {
     const {members} = arg as TupleType;
     if (!Array.isArray(members)) {
         return false;
     }
 
     for (let member of members) {
-        if (!isSchemaType(member)) {
+        if (!isSchemaType(member, alreadyVisited)) {
             return false;
         }
     }
