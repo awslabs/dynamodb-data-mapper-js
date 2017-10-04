@@ -58,15 +58,6 @@ function isBaseType(arg: any): arg is BaseType {
 }
 
 /**
- * A type used to constrain SchemaTypes that appear in lists and maps. Prohibits
- * the specification of an `attributeName`, which cannot be used in a ListType
- * or MapType node.
- */
-export interface MemberType {
-    attributeName?: undefined;
-}
-
-/**
  * The types of keys a given attribute can represent.
  */
 export const KeyTypes = {
@@ -255,7 +246,7 @@ export interface ListType<E = any> extends BaseType<Array<E>> {
      * The schema node by which each member of the list should be
      * (un)marshalled.
      */
-    memberType: SchemaType & MemberType;
+    memberType: SchemaType;
 }
 
 /**
@@ -267,7 +258,7 @@ export interface ListType<E = any> extends BaseType<Array<E>> {
  */
 export interface MapType<E = any> extends BaseType<Map<string, E>> {
     type: 'Map';
-    memberType: SchemaType & MemberType;
+    memberType: SchemaType;
 }
 
 /**
@@ -307,7 +298,7 @@ export interface TupleType<T extends Array<any> = Array<any>> extends
     BaseType<T>
 {
     type: 'Tuple';
-    members: Array<SchemaType & MemberType>;
+    members: Array<SchemaType>;
 }
 
 /**

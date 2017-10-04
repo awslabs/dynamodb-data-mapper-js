@@ -1,0 +1,32 @@
+{
+  "name": "@aws/dynamodb-data-mapper-annotations",
+  "version": "0.0.0",
+  "description": "Annotations providing easy integration between TypeScript domain objects and the @aws/dynamodb-data-mapper library",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "integ": "npm run pretest && jest --config=jest.integration.js",
+    "prepublishOnly": "npm run build",
+    "pretest": "tsc -p tsconfig.test.json",
+    "test": "jest"
+  },
+  "author": {
+    "name": "AWS SDK for JavaScript Team",
+    "email": "aws-sdk-js@amazon.com"
+  },
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/jest": "^20.0.2",
+    "@types/node": "^8.0.4",
+    "jest": "^20.0.4",
+    "typescript": "^2.5.2",
+    "aws-sdk": "^2.7.0"
+  },
+  "dependencies": {
+    "@aws/dynamodb-auto-marshaller": "^0.0.0",
+    "@aws/dynamodb-data-mapper": "^0.0.0",
+    "@aws/dynamodb-data-marshaller": "^0.0.0",
+    "reflect-metadata": "^0.1.10"
+  }
+}
