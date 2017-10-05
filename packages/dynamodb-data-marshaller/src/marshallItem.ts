@@ -55,9 +55,13 @@ export function marshallValue(
         }
     }
 
-    const marshaller = new Marshaller({onEmpty: 'nullify', onInvalid: 'omit'});
-
     if (schemaType.type === 'Any') {
+        const {
+            onEmpty = 'nullify',
+            onInvalid = 'omit',
+            unwrapNumbers = false,
+        } = schemaType;
+        const marshaller = new Marshaller({onEmpty, onInvalid, unwrapNumbers});
         return marshaller.marshallValue(input);
     }
 
@@ -78,6 +82,13 @@ export function marshallValue(
     }
 
     if (schemaType.type === 'Collection') {
+        const {
+            onEmpty = 'nullify',
+            onInvalid = 'omit',
+            unwrapNumbers = false,
+        } = schemaType;
+        const marshaller = new Marshaller({onEmpty, onInvalid, unwrapNumbers});
+
         const collected: Array<AttributeValue> = [];
         for (const element of input) {
             const marshalled = marshaller.marshallValue(element);
@@ -112,6 +123,13 @@ export function marshallValue(
     }
 
     if (schemaType.type === 'Hash') {
+        const {
+            onEmpty = 'nullify',
+            onInvalid = 'omit',
+            unwrapNumbers = false,
+        } = schemaType;
+        const marshaller = new Marshaller({onEmpty, onInvalid, unwrapNumbers});
+
         return {M: marshaller.marshallItem(input)};
     }
 

@@ -1,5 +1,6 @@
 import {AttributeValue} from 'aws-sdk/clients/dynamodb';
 import {Schema} from './Schema';
+import {MarshallingOptions} from "@aws/dynamodb-auto-marshaller";
 import {BinaryValue} from "@aws/dynamodb-auto-marshaller";
 
 /**
@@ -8,7 +9,6 @@ import {BinaryValue} from "@aws/dynamodb-auto-marshaller";
 export const TypeTags = {
     Any: 'Any',
     Binary: 'Binary',
-    BinarySet: 'BinarySet',
     Boolean: 'Boolean',
     Collection: 'Collection',
     Custom: 'Custom',
@@ -19,10 +19,8 @@ export const TypeTags = {
     Map: 'Map',
     Null: 'Null',
     Number: 'Number',
-    NumberSet: 'NumberSet',
     Set: 'Set',
     String: 'String',
-    StringSet: 'StringSet',
     Tuple: 'Tuple',
 };
 
@@ -131,7 +129,7 @@ function isKeyableType(arg: object): boolean {
  * zero-length strings, buffers, and sets will be returned from the mapper as
  * `null` rather than an empty instance of the originally submitted type).
  */
-export interface AnyType extends BaseType {
+export interface AnyType extends BaseType, MarshallingOptions {
     type: 'Any';
 }
 
@@ -155,7 +153,10 @@ export interface BooleanType extends BaseType<boolean> {
  * node will be marshalled using run-time type detection and may not be exactly
  * the same when unmarshalled.
  */
-export interface CollectionType extends BaseType<Array<any>> {
+export interface CollectionType extends
+    BaseType<Array<any>>,
+    MarshallingOptions
+{
     type: 'Collection';
 }
 
@@ -228,7 +229,10 @@ export interface DocumentType<T = {[key: string]: any}>extends BaseType<T> {
  * Values provided for this node will be marshalled using run-time type
  * detection and may not be exactly the same when unmarshalled.
  */
-export interface HashType extends BaseType<{[key: string]: any}> {
+export interface HashType extends
+    BaseType<{[key: string]: any}>,
+    MarshallingOptions
+{
     type: 'Hash';
 }
 

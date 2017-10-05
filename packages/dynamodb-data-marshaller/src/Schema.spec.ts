@@ -19,20 +19,17 @@ describe('isSchema', () => {
             quux: {
                 type: 'Document',
                 members: {
-                    fizz: {type: 'StringSet'},
+                    fizz: {type: 'Set', memberType: 'String'},
                     buzz: {
                         type: 'Tuple',
                         members: [
                             {
                                 type: 'List',
-                                memberType: {type: 'NumberSet'},
+                                memberType: {type: 'Set', memberType: 'Number'},
                             },
                             {
                                 type: 'Map',
-                                memberType: {
-                                    type: 'Date',
-                                    format: 'epoch',
-                                },
+                                memberType: {type: 'Date'},
                             }
                         ]
                     },
