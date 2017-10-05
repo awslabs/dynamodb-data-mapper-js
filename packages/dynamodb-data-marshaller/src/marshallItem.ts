@@ -55,13 +55,10 @@ export function marshallValue(
         }
     }
 
-    const autoMarshaller = new Marshaller({
-        onEmpty: EmptyHandlingStrategy.Nullify,
-        onInvalid: InvalidHandlingStrategy.Omit,
-    });
+    const marshaller = new Marshaller({onEmpty: 'nullify', onInvalid: 'omit'});
 
     if (schemaType.type === 'Any') {
-        return autoMarshaller.marshallValue(input);
+        return marshaller.marshallValue(input);
     }
 
     if (schemaType.type === 'Binary') {
@@ -83,7 +80,7 @@ export function marshallValue(
     if (schemaType.type === 'Collection') {
         const collected: Array<AttributeValue> = [];
         for (const element of input) {
-            const marshalled = autoMarshaller.marshallValue(element);
+            const marshalled = marshaller.marshallValue(element);
             if (marshalled) {
                 collected.push(marshalled);
             }
@@ -115,7 +112,7 @@ export function marshallValue(
     }
 
     if (schemaType.type === 'Hash') {
-        return {M: autoMarshaller.marshallItem(input)};
+        return {M: marshaller.marshallItem(input)};
     }
 
     if (schemaType.type === 'List') {

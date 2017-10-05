@@ -4,50 +4,55 @@ import {isArrayBuffer} from "./isArrayBuffer";
 import {NumberValue} from "./NumberValue";
 import {NumberValueSet} from "./NumberValueSet";
 
+export const EmptyHandlingStrategies = {
+    omit: 'omit',
+    nullify: 'nullify',
+    leave: 'leave',
+};
+
 /**
  * The behavior the marshaller should exhibit when it encounters "empty"
  * data that would be rejected as invalid by DynamoDB, such as 0-length
  * buffers or the string `''`.
+ *
+ * Possible values:
+ *  * `omit` - Remove the empty value from the marshalled output (i.e., marshall
+ *      this value to `undefined` rather than to an {AttributeValue}).
+ *
+ *  * `nullify` - Convert the value from its detected to data type to `null`.
+ *      This allows marshalled data to preserve a sigil of emptiness in a way
+ *      compatible with DynamoDB.
+ *
+ *      This option will also cause empty strings and buffers to be dropped from
+ *      string and binary sets, respectively.
+ *
+ *  * `leave` - Do not alter the value.
  */
-export enum EmptyHandlingStrategy {
+export type EmptyHandlingStrategy = keyof typeof EmptyHandlingStrategies;
+
+export const InvalidHandlingStrategies = {
     /**
-     * Remove the empty value from the marshalled output (i.e., marshall this
-     * value to `undefined` rather than to an {AttributeValue}).
+     * Remove any invalid values from the serialized output.
      */
-    Omit = 'omit',
+    omit: 'omit',
 
     /**
-     * Convert the value from its detected to data type to `null`. This allows
-     * marshalled data to preserve a sigil of emptiness in a way compatible with
-     * DynamoDB.
-     *
-     * This option will also cause empty strings and buffers to be dropped from
-     * string and binary sets, respectively.
+     * Throw an error when an unserializable value is encountered.
      */
-    Nullify = 'nullify',
-
-    /**
-     * Do not alter the value.
-     */
-    Leave = 'leave',
-}
+    throw: 'throw',
+};
 
 /**
  * The behavior the marshaller should exhibit when it encounters data that
  * cannot be marshalled to a DynamoDB AttributeValue, such as a Symbol or
  * Function object.
+ *
+ * Possible values:
+ *  * `omit` - Remove any invalid values from the serialized output.
+ *
+ *  * `throw` - Throw an error when an unserializable value is encountered.
  */
-export enum InvalidHandlingStrategy {
-    /**
-     * Remove any invalid values from the serialized output.
-     */
-    Omit = 'omit',
-
-    /**
-     * Throw an error when an unserializable value is encountered.
-     */
-    Throw = 'throw',
-}
+export type InvalidHandlingStrategy = keyof typeof InvalidHandlingStrategies;
 
 export type UnmarshalledAttributeValue =
     string |
@@ -102,8 +107,8 @@ export class Marshaller {
     private readonly unwrapNumbers: boolean;
 
     constructor({
-        onEmpty = EmptyHandlingStrategy.Leave,
-        onInvalid = InvalidHandlingStrategy.Throw,
+        onEmpty = 'leave',
+        onInvalid = 'throw',
         unwrapNumbers = false
     }: MarshallingOptions = {}) {
         this.onEmpty = onEmpty;
@@ -117,10 +122,7 @@ export class Marshaller {
      */
     public marshallItem(item: {[key: string]: any}): AttributeMap {
         const value = this.marshallValue(item);
-        if (
-            !(value && value.M) &&
-            this.onInvalid === InvalidHandlingStrategy.Throw
-        ) {
+        if (!(value && value.M) && this.onInvalid === 'throw') {
             throw new Error(
                 `Cannot serialize ${typeof item} as an attribute map`
             );
@@ -150,7 +152,7 @@ export class Marshaller {
             case 'function':
             case 'symbol':
             default:
-                if (this.onInvalid === InvalidHandlingStrategy.Throw) {
+                if (this.onInvalid === 'throw') {
                     throw new Error(
                         `Cannot serialize values of the ${typeof value} type`
                     );
@@ -270,14 +272,11 @@ export class Marshaller {
     }
 
     private marshallBinaryValue(binary: BinaryValue): AttributeValue|undefined {
-        if (
-            binary.byteLength > 0 ||
-            this.onEmpty === EmptyHandlingStrategy.Leave
-        ) {
+        if (binary.byteLength > 0 || this.onEmpty === 'leave') {
             return {B: binary};
         }
 
-        if (this.onEmpty === EmptyHandlingStrategy.Nullify) {
+        if (this.onEmpty === 'nullify') {
             return {NULL: true};
         }
     }
@@ -298,7 +297,7 @@ export class Marshaller {
         const members: {[key: string]: AttributeValue} = {};
         for (let [key, value] of map) {
             if (typeof key !== 'string') {
-                if (this.onInvalid === InvalidHandlingStrategy.Omit) {
+                if (this.onInvalid === 'omit') {
                     continue;
                 }
 
@@ -340,13 +339,13 @@ export class Marshaller {
             case 'string':
                 return this.collectSet(arg, isStringEmpty, 'SS', 'string');
             case 'unknown':
-                if (this.onInvalid === InvalidHandlingStrategy.Throw) {
+                if (this.onInvalid === 'throw') {
                     throw new Error('Sets must be composed of strings,' +
                         ' binary values, or numbers');
                 }
                 return undefined;
             case 'undefined':
-                if (this.onEmpty === EmptyHandlingStrategy.Nullify) {
+                if (this.onEmpty === 'nullify') {
                     return {NULL: true};
                 }
         }
@@ -362,7 +361,7 @@ export class Marshaller {
         const values: Array<T|R> = [];
         for (let element of set) {
             if (getSetType(element) !== elementType) {
-                if (this.onInvalid === InvalidHandlingStrategy.Omit) {
+                if (this.onInvalid === 'omit') {
                     continue;
                 }
 
@@ -373,26 +372,26 @@ export class Marshaller {
 
             if (
                 !isEmpty(element) ||
-                this.onEmpty === EmptyHandlingStrategy.Leave
+                this.onEmpty === 'leave'
             ) {
                 values.push(transform ? transform(element) : element);
             }
         }
 
-        if (values.length > 0 || this.onEmpty === EmptyHandlingStrategy.Leave) {
+        if (values.length > 0 || this.onEmpty === 'leave') {
             return {[tag]: values};
         }
 
-        if (this.onEmpty === EmptyHandlingStrategy.Nullify) {
+        if (this.onEmpty === 'nullify') {
             return {NULL: true};
         }
     }
 
     private handleEmptyString(value: string): AttributeValue|undefined {
         switch (this.onEmpty) {
-            case EmptyHandlingStrategy.Leave:
+            case 'leave':
                 return {S: value};
-            case EmptyHandlingStrategy.Nullify:
+            case 'nullify':
                 return {NULL: true};
         }
     }

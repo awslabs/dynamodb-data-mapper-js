@@ -1,8 +1,4 @@
-import {
-    EmptyHandlingStrategy,
-    InvalidHandlingStrategy,
-    Marshaller,
-} from "./Marshaller";
+import {Marshaller} from "./Marshaller";
 import {BinarySet} from "./BinarySet";
 import {NumberValue} from "./NumberValue";
 import {NumberValueSet} from "./NumberValueSet";
@@ -47,17 +43,13 @@ describe('Marshaller', () => {
         it(
             'should return an empty attribute map when provided invalid input and the onInvalid option is set to "omit"',
             () => {
-                const marshaller = new Marshaller({
-                    onInvalid: InvalidHandlingStrategy.Omit
-                });
+                const marshaller = new Marshaller({onInvalid: 'omit'});
                 expect(marshaller.marshallItem('string' as any)).toEqual({});
             }
         );
 
         it('should throw when provided invalid input and the onInvalid option is set to "throw"', () => {
-            const marshaller = new Marshaller({
-                onInvalid: InvalidHandlingStrategy.Throw
-            });
+            const marshaller = new Marshaller({onInvalid: 'throw'});
             expect(() => marshaller.marshallItem('string' as any)).toThrow();
         });
     });
@@ -73,9 +65,7 @@ describe('Marshaller', () => {
                 'should convert empty strings to null when onEmpty option set to "nullify"',
                 () => {
                     expect(
-                        (new Marshaller({
-                            onEmpty: EmptyHandlingStrategy.Nullify
-                        })).marshallValue('')
+                        (new Marshaller({onEmpty: 'nullify'})).marshallValue('')
                     ).toEqual({NULL: true});
                 }
             );
@@ -84,7 +74,7 @@ describe('Marshaller', () => {
                 'should remove empty strings when onEmpty option set to "omit"',
                 () => {
                     expect(
-                        (new Marshaller({onEmpty: EmptyHandlingStrategy.Omit})).marshallValue('')
+                        (new Marshaller({onEmpty: 'omit'})).marshallValue('')
                     ).toBeUndefined();
                 }
             );
@@ -109,7 +99,7 @@ describe('Marshaller', () => {
                 'should convert empty binary values to null when onEmpty option set to "nullify"',
                 () => {
                     expect(
-                        (new Marshaller({onEmpty: EmptyHandlingStrategy.Nullify}))
+                        (new Marshaller({onEmpty: 'nullify'}))
                             .marshallValue(new Uint8Array(0))
                     ).toEqual({NULL: true});
                 }
@@ -119,7 +109,7 @@ describe('Marshaller', () => {
                 'should omit empty binary values when onEmpty option set to "omit"',
                 () => {
                     expect(
-                        (new Marshaller({onEmpty: EmptyHandlingStrategy.Omit}))
+                        (new Marshaller({onEmpty: 'omit'}))
                             .marshallValue(new Uint8Array(0))
                     ).toBeUndefined();
                 }
@@ -294,7 +284,7 @@ describe('Marshaller', () => {
                 'should omit map members whose keys are not strings when the onInvalid option is "omit"',
                 () => {
                     const marshaller = new Marshaller({
-                        onInvalid: InvalidHandlingStrategy.Omit
+                        onInvalid: 'omit'
                     });
                     const map = new Map<any, any>();
                     map.set('a', 'a');
@@ -325,7 +315,7 @@ describe('Marshaller', () => {
             it(
                 'should omit empty sets when the onEmpty option is "omit"',
                 () => {
-                    const marshaller = new Marshaller({onEmpty: EmptyHandlingStrategy.Omit});
+                    const marshaller = new Marshaller({onEmpty: 'omit'});
                     expect(marshaller.marshallValue(new Set()))
                         .toBeUndefined();
                 }
@@ -334,7 +324,7 @@ describe('Marshaller', () => {
             it(
                 'should convert empty sets to null when the onEmpty option is "nullify"',
                 () => {
-                    const marshaller = new Marshaller({onEmpty: EmptyHandlingStrategy.Nullify});
+                    const marshaller = new Marshaller({onEmpty: 'nullify'});
                     expect(marshaller.marshallValue(new Set()))
                         .toEqual({NULL: true});
                 }
@@ -342,7 +332,7 @@ describe('Marshaller', () => {
             it(
                 'should omit empty sets when the onEmpty option is "leave", as the kind of set cannot be inferred',
                 () => {
-                    const marshaller = new Marshaller({onEmpty: EmptyHandlingStrategy.Leave});
+                    const marshaller = new Marshaller({onEmpty: 'leave'});
                     expect(marshaller.marshallValue(new Set()))
                         .toBeUndefined();
                 }
@@ -352,7 +342,7 @@ describe('Marshaller', () => {
                 'should omit sets with members of an unknown type when the onEmpty option is "omit"',
                 () => {
                     const marshaller = new Marshaller({
-                        onInvalid: InvalidHandlingStrategy.Omit
+                        onInvalid: 'omit'
                     });
                     const set = new Set<object>();
                     set.add({});
@@ -375,7 +365,7 @@ describe('Marshaller', () => {
                 'should drop invalid members when onInvalid option is set to "omit"',
                 () => {
                     const marshaller = new Marshaller({
-                        onInvalid: InvalidHandlingStrategy.Omit
+                        onInvalid: 'omit'
                     });
                     expect(marshaller.marshallValue(new Set(['a', 1, 'c'])))
                         .toEqual({SS: ['a', 'c']});
@@ -392,7 +382,7 @@ describe('Marshaller', () => {
             it(
                 'should return a NullAttributeValue for an emptied set when onEmpty is set to "nullify"',
                 () => {
-                    const marshaller = new Marshaller({onEmpty: EmptyHandlingStrategy.Nullify});
+                    const marshaller = new Marshaller({onEmpty: 'nullify'});
                     expect(marshaller.marshallValue(new Set([''])))
                         .toEqual({NULL: true});
                 }
@@ -401,7 +391,7 @@ describe('Marshaller', () => {
             it(
                 'should return undefined for an emptied set when onEmpty is set to "omit"',
                 () => {
-                    const marshaller = new Marshaller({onEmpty: EmptyHandlingStrategy.Omit});
+                    const marshaller = new Marshaller({onEmpty: 'omit'});
                     expect(marshaller.marshallValue(new Set([''])))
                         .toBeUndefined();
                 }
@@ -428,7 +418,7 @@ describe('Marshaller', () => {
                     'should drop empty members when onEmpty option is set to "nullify"',
                     () => {
                         expect(
-                            (new Marshaller({onEmpty: EmptyHandlingStrategy.Nullify}))
+                            (new Marshaller({onEmpty: 'nullify'}))
                                 .marshallValue(new Set<string>(['a', '', 'c']))
                         ).toEqual({SS: ['a', 'c']});
                     }
@@ -438,7 +428,7 @@ describe('Marshaller', () => {
                     'should drop empty members when onEmpty option is set to "omit"',
                     () => {
                         expect(
-                            (new Marshaller({onEmpty: EmptyHandlingStrategy.Omit}))
+                            (new Marshaller({onEmpty: 'omit'}))
                                 .marshallValue(new Set<string>(['a', '', 'c']))
                         ).toEqual({SS: ['a', 'c']});
                     }
@@ -499,7 +489,7 @@ describe('Marshaller', () => {
                 it(
                     'should drop empty members when the onEmpty option is set to "nullify"',
                     () => {
-                        const marshaller = new Marshaller({onEmpty: EmptyHandlingStrategy.Nullify});
+                        const marshaller = new Marshaller({onEmpty: 'nullify'});
                         const converted = marshaller.marshallValue(new BinarySet([
                             Uint8Array.from([0xde, 0xad]),
                             Uint8Array.from([0xbe, 0xef]).buffer,
@@ -517,7 +507,7 @@ describe('Marshaller', () => {
                 it(
                     'should drop empty members when the onEmpty option is set to "omit"',
                     () => {
-                        const marshaller = new Marshaller({onEmpty: EmptyHandlingStrategy.Omit});
+                        const marshaller = new Marshaller({onEmpty: 'omit'});
                         const converted = marshaller.marshallValue(new BinarySet([
                             Uint8Array.from([0xde, 0xad]),
                             Uint8Array.from([0xbe, 0xef]).buffer,
@@ -562,7 +552,7 @@ describe('Marshaller', () => {
                 'should omit symbols when the onInvalid option is set to "omit"',
                 () => {
                     expect(
-                        (new Marshaller({onInvalid: InvalidHandlingStrategy.Omit})
+                        (new Marshaller({onInvalid: 'omit'})
                             .marshallValue(Symbol.iterator))
                     ).toBeUndefined();
                 }
@@ -580,7 +570,7 @@ describe('Marshaller', () => {
                 'should omit functions when the onInvalid option is set to "omit"',
                 () => {
                     expect(
-                        (new Marshaller({onInvalid: InvalidHandlingStrategy.Omit})
+                        (new Marshaller({onInvalid: 'omit'})
                             .marshallValue(() => {}))
                     ).toBeUndefined();
                 }
