@@ -204,8 +204,11 @@ export function isConditionExpressionSubject(
         && (typeof arg.subject === 'string' || AttributePath.isAttributePath(arg.subject));
 }
 
+export type SimpleConditionExpression = ConditionExpressionSubject &
+    ConditionExpressionPredicate;
+
 export type ConditionExpression =
-    ConditionExpressionSubject & ConditionExpressionPredicate |
+    SimpleConditionExpression |
     AndExpression |
     OrExpression |
     NotExpression |
