@@ -23,7 +23,7 @@ describe('isSchemaType', () => {
     });
 
     describe('keyable types', () => {
-        for (let dataType of ['Binary', 'Number', 'String']) {
+        for (let dataType of ['Binary', 'Date', 'Number', 'String']) {
             it(
                 `should accept ${dataType} type declarations with a keyType`,
                 () => {
@@ -45,31 +45,21 @@ describe('isSchemaType', () => {
             );
 
             it(
-                `should accept ${dataType} type declarations with an array of indexKeyConfigurations`,
+                `should accept ${dataType} type declarations with a hash of indexKeyConfigurations`,
                 () => {
                     expect(isSchemaType({
                         type: dataType,
-                        indexKeyConfigurations: [{type: 'HASH', indexName: 'foo'}],
+                        indexKeyConfigurations: {foo: 'HASH'},
                     })).toBe(true);
                 }
             );
 
             it(
-                `should reject ${dataType} type declarations whose indexKeyConfigurations lack an index name`,
+                `should reject ${dataType} type declarations with a hash of invalid indexKeyConfigurations`,
                 () => {
                     expect(isSchemaType({
                         type: dataType,
-                        indexKeyConfigurations: [{type: 'HASH'}],
-                    })).toBe(false);
-                }
-            );
-
-            it(
-                `should reject ${dataType} type declarations with a single, valid indexKeyConfiguration`,
-                () => {
-                    expect(isSchemaType({
-                        type: dataType,
-                        indexKeyConfigurations: {type: 'HASH', indexName: 'foo'},
+                        indexKeyConfigurations: {foo: 'bar', fizz: 'buzz'},
                     })).toBe(false);
                 }
             );
@@ -77,10 +67,10 @@ describe('isSchemaType', () => {
             it(
                 `should reject ${dataType} type declarations with scalar indexKeyConfiguration`,
                 () => {
-                    for (let scalar of ['string', 123, null, true, void 0]) {
+                    for (let scalar of ['string', 123, null, true]) {
                         expect(isSchemaType({
                             type: dataType,
-                            indexKeyConfigurations: [scalar],
+                            indexKeyConfigurations: scalar,
                         })).toBe(false);
                     }
                 }
