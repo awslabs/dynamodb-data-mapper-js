@@ -11,7 +11,7 @@ Amazon DynamoDB (such as numbers of arbitrary size) with minimal tradeoffs.
 ## Getting started
 
 To use the `Marshaller` to convert a JavaScript object to the data type expected
-by AmazonDynamoDB, simply create an instance of the marshaller and call
+by Amazon DynamoDB, simply create an instance of the marshaller and call
 `marshallItem`:
 
 ```typescript

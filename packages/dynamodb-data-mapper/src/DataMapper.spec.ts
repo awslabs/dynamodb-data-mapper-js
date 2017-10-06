@@ -1,5 +1,4 @@
 import {DataMapper} from "./DataMapper";
-import {OnMissingStrategy, ReadConsistency} from "./constants";
 import {
     DynamoDbSchema,
     DynamoDbTable,
@@ -540,7 +539,7 @@ describe('DataMapper', () => {
                         [DynamoDbTable]: 'foo',
                         [DynamoDbSchema]: {},
                     },
-                    readConsistency: ReadConsistency.StronglyConsistent
+                    readConsistency: 'strong'
                 });
 
                 expect(mockDynamoDbClient.getItem.mock.calls[0][0])
@@ -553,7 +552,7 @@ describe('DataMapper', () => {
             async () => {
                 const mapper = new DataMapper({
                     client: mockDynamoDbClient as any,
-                    readConsistency: ReadConsistency.StronglyConsistent,
+                    readConsistency: 'strong',
                 });
                 await mapper.get({
                     item: {
@@ -616,7 +615,7 @@ describe('DataMapper', () => {
                             },
                         },
                     },
-                    readConsistency: ReadConsistency.StronglyConsistent,
+                    readConsistency: 'strong',
                     projection: ['fizz', 'pop'],
                 })).rejects.toMatchObject({
                     itemSought: {
@@ -1141,7 +1140,7 @@ describe('DataMapper', () => {
                 const results =  mapper.query({
                     keyCondition: {foo: 'bar'},
                     valueConstructor: QueryableItem,
-                    readConsistency: ReadConsistency.StronglyConsistent
+                    readConsistency: 'strong'
                 });
 
                 results.next();
@@ -1469,7 +1468,7 @@ describe('DataMapper', () => {
             async () => {
                 const results =  mapper.scan({
                     valueConstructor: ScannableItem,
-                    readConsistency: ReadConsistency.StronglyConsistent
+                    readConsistency: 'strong'
                 });
 
                 results.next();
@@ -1705,7 +1704,7 @@ describe('DataMapper', () => {
                 item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
                 await mapper.update({
                     item,
-                    onMissing: OnMissingStrategy.Skip
+                    onMissing: 'skip'
                 });
 
                 expect(mockDynamoDbClient.updateItem.mock.calls[0][0])

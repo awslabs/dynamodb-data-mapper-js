@@ -18,7 +18,7 @@ export interface DataMapperConfiguration {
 
     /**
      * The default read consistency to use when loading items. If not specified,
-     * {ReadConsistency.EventuallyConsistent} will be used.
+     * 'eventual' will be used.
      */
     readConsistency?: ReadConsistency;
 
@@ -104,9 +104,9 @@ export interface PutParameters<T extends StringToAnyObjectMap = StringToAnyObjec
 
 export interface QueryParameters<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
     /**
-     * A string that contains conditions that DynamoDB applies after the Query
-     * operation, but before the data is returned to you. Items that do not
-     * satisfy the FilterExpression criteria are not returned.
+     * A condition expression that DynamoDB applies after the Query operation,
+     * but before the data is returned to you. Items that do not satisfy the
+     * FilterExpression criteria are not returned.
      *
      * A FilterExpression does not allow key attributes. You cannot define a
      * filter expression based on a partition key or a sort key.
@@ -240,11 +240,6 @@ export interface UpdateParameters<T extends StringToAnyObjectMap = StringToAnyOb
      * a directive to remove the property from the item.
      */
     onMissing?: OnMissingStrategy;
-
-    /**
-     * The values to return from this operation.
-     */
-    returnValues?: ReturnValue;
 
     /**
      * Whether this operation should NOT honor the version attribute specified

@@ -1,4 +1,4 @@
-import {OnMissingStrategy, ReadConsistency} from "./constants";
+import {ReadConsistency} from "./constants";
 import {ItemNotFoundException} from "./ItemNotFoundException";
 import {
     DataMapperConfiguration,
@@ -66,7 +66,7 @@ export class DataMapper {
 
     constructor({
         client,
-        readConsistency = ReadConsistency.EventuallyConsistent,
+        readConsistency = 'eventual',
         skipVersionCheck = false,
         tableNamePrefix = ''
     }: DataMapperConfiguration) {
@@ -157,7 +157,7 @@ export class DataMapper {
         const operationInput: GetItemInput = {
             TableName: this.tableNamePrefix + getTableName(item),
             Key: {},
-            ConsistentRead: readConsistency === ReadConsistency.StronglyConsistent,
+            ConsistentRead: readConsistency === 'strong',
         };
 
         for (const prop of Object.keys(schema)) {
@@ -276,7 +276,7 @@ export class DataMapper {
     }: QueryParameters<T>) {
         const req: QueryInput = {
             TableName: this.tableNamePrefix + getTableName(valueConstructor.prototype),
-            ConsistentRead: readConsistency === ReadConsistency.StronglyConsistent,
+            ConsistentRead: readConsistency === 'strong',
             ScanIndexForward: scanIndexForward,
             Limit: limit,
             IndexName: indexName,
@@ -347,7 +347,7 @@ export class DataMapper {
     }: ScanParameters) {
         const req: ScanInput = {
             TableName: this.tableNamePrefix + getTableName(valueConstructor.prototype),
-            ConsistentRead: readConsistency === ReadConsistency.StronglyConsistent,
+            ConsistentRead: readConsistency === 'strong',
             Limit: limit,
             IndexName: indexName,
         };
@@ -398,7 +398,7 @@ export class DataMapper {
     async update<T extends StringToAnyObjectMap = StringToAnyObjectMap>({
         item,
         condition,
-        onMissing = OnMissingStrategy.Remove,
+        onMissing = 'remove',
         skipVersionCheck = this.skipVersionCheck,
     }: UpdateParameters<T>): Promise<T> {
         const req: UpdateItemInput = {
@@ -436,7 +436,7 @@ export class DataMapper {
                         : versionCond;
                 }
             } else if (inputMember === undefined) {
-                if (onMissing === OnMissingStrategy.Remove) {
+                if (onMissing === 'remove') {
                     expr.remove(attributeName);
                 }
             } else {

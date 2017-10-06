@@ -1,9 +1,13 @@
-export enum ReadConsistency {
-    EventuallyConsistent = 'EventuallyConsistent',
-    StronglyConsistent = 'StronglyConsistent',
-}
+export const ReadConsistencies = {
+    eventual: true,
+    strong: true,
+};
 
-export enum OnMissingStrategy {
-    Remove = 'Remove',
-    Skip = 'Skip',
-}
+export type ReadConsistency = keyof typeof ReadConsistencies;
+
+export const OnMissingStrategies = {
+    remove: true,
+    skip: true,
+};
+
+export type OnMissingStrategy = keyof typeof OnMissingStrategies;
