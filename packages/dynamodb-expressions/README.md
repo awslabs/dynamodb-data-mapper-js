@@ -32,7 +32,7 @@ not to marshall the value further.
 
 DynamoDB condition expressions may come in the form of a function call or as the
 combination of values and infix operators. This library therefore defines a
-`ConditionExpression` as the union of [`FunctionExpression`][#function-expressions]
+`ConditionExpression` as the union of [`FunctionExpression`](#function-expressions)
 and a tagged union of the expression operator types. Expressions may be compound
 or simple.
 
@@ -93,7 +93,7 @@ const notExpression: ConditionExpression = {
 
 These expressions make an assertion about a property in a DynamoDB object known
 as the expression's `subject`. The `subject` must be a string or an [attribute
-path][#attribute-paths].
+path](#attribute-paths).
 
 The particular assertion used is referred to in this library as a
 `ConditionExpressionPredicate`. A predicate may be declared separately from its
@@ -129,8 +129,8 @@ const equalsExpression: ConditionExpression = {
 };
 ```
 
-`object` may be an [attribute path][#attribute-paths], an [attribute
-value][#attribute-values], or another type. If the lattermost type is received,
+`object` may be an [attribute path](#attribute-paths), an [attribute
+value](#attribute-values), or another type. If the lattermost type is received,
 it will be serialized using the `@aws/dynamodb-auto-marshaller` package.
 
 #### `NotEquals` expression predicate
@@ -162,8 +162,8 @@ const equalsExpression: ConditionExpression = {
 };
 ```
 
-`object` may be an [attribute path][#attribute-paths], an [attribute
-value][#attribute-values], or another type. If the lattermost type is received,
+`object` may be an [attribute path](#attribute-paths), an [attribute
+value](#attribute-values), or another type. If the lattermost type is received,
 it will be serialized using the `@aws/dynamodb-auto-marshaller` package.
 
 #### `LessThan` expression predicate
@@ -195,8 +195,8 @@ const equalsExpression: ConditionExpression = {
 };
 ```
 
-`object` may be an [attribute path][#attribute-paths], an [attribute
-value][#attribute-values], or another type. If the lattermost type is received,
+`object` may be an [attribute path](#attribute-paths), an [attribute
+value](#attribute-values), or another type. If the lattermost type is received,
 it will be serialized using the `@aws/dynamodb-auto-marshaller` package.
 
 #### `LessThanOrEqualTo` expression predicate
@@ -228,8 +228,8 @@ const equalsExpression: ConditionExpression = {
 };
 ```
 
-`object` may be an [attribute path][#attribute-paths], an [attribute
-value][#attribute-values], or another type. If the lattermost type is received,
+`object` may be an [attribute path](#attribute-paths), an [attribute
+value](#attribute-values), or another type. If the lattermost type is received,
 it will be serialized using the `@aws/dynamodb-auto-marshaller` package.
 
 #### `GreaterThan` expression predicate
@@ -261,8 +261,8 @@ const equalsExpression: ConditionExpression = {
 };
 ```
 
-`object` may be an [attribute path][#attribute-paths], an [attribute
-value][#attribute-values], or another type. If the lattermost type is received,
+`object` may be an [attribute path](#attribute-paths), an [attribute
+value](#attribute-values), or another type. If the lattermost type is received,
 it will be serialized using the `@aws/dynamodb-auto-marshaller` package.
 
 #### `GreaterThanOrEqualTo` expression predicate
@@ -294,8 +294,8 @@ const equalsExpression: ConditionExpression = {
 };
 ```
 
-`object` may be an [attribute path][#attribute-paths], an [attribute
-value][#attribute-values], or another type. If the lattermost type is received,
+`object` may be an [attribute path](#attribute-paths), an [attribute
+value](#attribute-values), or another type. If the lattermost type is received,
 it will be serialized using the `@aws/dynamodb-auto-marshaller` package.
 
 #### `Between` expression predicate
@@ -329,8 +329,8 @@ const equalsExpression: ConditionExpression = {
 };
 ```
 
-`lowerBound` and `upperBound` may both be an [attribute path][#attribute-paths],
-an [attribute value][#attribute-values], or another type. If the lattermost type
+`lowerBound` and `upperBound` may both be an [attribute path](#attribute-paths),
+an [attribute value](#attribute-values), or another type. If the lattermost type
 is received, it will be serialized using the `@aws/dynamodb-auto-marshaller`
 package.
 
@@ -363,8 +363,8 @@ const equalsExpression: ConditionExpression = {
 };
 ```
 
-Each value in the `values` array may be an [attribute path][#attribute-paths],
-an [attribute value][#attribute-values], or another type. If the lattermost type
+Each value in the `values` array may be an [attribute path](#attribute-paths),
+an [attribute value](#attribute-values), or another type. If the lattermost type
 is received, it will be serialized using the `@aws/dynamodb-auto-marshaller`
 package.
 

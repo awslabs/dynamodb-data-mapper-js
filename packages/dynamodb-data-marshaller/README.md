@@ -104,7 +104,7 @@ DynamoDB tables must define a hash key and may optionally define a range key. In
 DynamoDB documentation, these keys are sometimes referred to as *partition* and
 *sort* keys, respectively. To declare a property to be a key, add a `keyType`
 property to its property schema (example taken from the [DynamoDB developer
-guide][gsi-dev-guide]):
+guide](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html)):
 
 ```javascript
 // Table model taken from http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html
@@ -131,7 +131,8 @@ and `'Binary'` properties, it may be used on `'Date'` and `'Custom'` properties.
 Index keys are specified using an object mapping index names to the key type as
 which the value is used in a given index. To continue with the `gameScores`
 example given above, you could add the index key declarations described in [the 
-DynamoDB Global Secondary Index developer guide][gsi-dev-guide] as follows:
+DynamoDB Global Secondary Index developer guide](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html)
+as follows:
 
 ```javascript
 const gameScores = {
@@ -416,5 +417,3 @@ const tupleProperty = {
     ]
 };
 ```
-
-[gsi-dev-guide][http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html]
