@@ -124,6 +124,69 @@ describe('annotations', () => {
         expect(commentSchema.replies.memberType.members).toBe(commentSchema);
     });
 
+    it('should support branching inheritance', () => {
+        abstract class Foo {
+            @attribute()
+            prop: string;
+        }
+
+        class Bar extends Foo {
+            @attribute()
+            otherProp: number;
+        }
+
+        class Baz extends Foo {
+            @attribute()
+            yetAnotherProp: boolean;
+        }
+
+        const bar = new Bar();
+        expect((bar as any)[DynamoDbSchema]).toEqual({
+            prop: {type: 'String'},
+            otherProp: {type: 'Number'},
+        });
+
+        const baz = new Baz();
+        expect((baz as any)[DynamoDbSchema]).toEqual({
+            prop: {type: 'String'},
+            yetAnotherProp: {type: 'Boolean'},
+        });
+    });
+
+    it('should support multiple inheritance levels', () => {
+        class Foo {
+            @attribute()
+            prop: string;
+        }
+
+        class Bar extends Foo {
+            @attribute()
+            otherProp: number;
+        }
+
+        class Baz extends Bar {
+            @attribute()
+            yetAnotherProp: boolean;
+        }
+
+        const foo = new Foo();
+        expect((foo as any)[DynamoDbSchema]).toEqual({
+            prop: {type: 'String'},
+        });
+        const bar = new Bar();
+        expect((bar as any)[DynamoDbSchema]).toEqual({
+            prop: {type: 'String'},
+            otherProp: {type: 'Number'},
+        });
+
+        const baz = new Baz();
+        expect((baz as any)[DynamoDbSchema]).toEqual({
+            prop: {type: 'String'},
+            otherProp: {type: 'Number'},
+            yetAnotherProp: {type: 'Boolean'},
+        });
+    });
+
     it('should marshall a full object graph according to the schema', async () => {
         const promiseFunc = jest.fn(() => Promise.resolve({Item: {}}));
         const mockDynamoDbClient = {

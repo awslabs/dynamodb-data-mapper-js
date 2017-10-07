@@ -1,8 +1,13 @@
 import 'reflect-metadata';
 import {METADATA_TYPE_KEY} from './constants';
 import {BinarySet, NumberValueSet} from "@aws/dynamodb-auto-marshaller";
-import {DocumentType, SchemaType, SetType} from "@aws/dynamodb-data-marshaller";
 import {DynamoDbSchema} from '@aws/dynamodb-data-mapper';
+import {
+    DocumentType,
+    Schema,
+    SchemaType,
+    SetType
+} from "@aws/dynamodb-data-marshaller";
 
 /**
  * Declare a property in a TypeScript class to be part of a DynamoDB schema.
@@ -52,7 +57,11 @@ import {DynamoDbSchema} from '@aws/dynamodb-data-mapper';
 export function attribute(parameters: Partial<SchemaType> = {}) {
     return (target: Object, propertyKey: string|symbol): void => {
         if (!Object.prototype.hasOwnProperty.call(target, DynamoDbSchema)) {
-            (target as any)[DynamoDbSchema] = {};
+            Object.defineProperty(
+                target,
+                DynamoDbSchema as any, // TypeScript complains about the use of symbols here, though it should be allowed
+                {value: deriveBaseSchema(target)}
+            );
         }
 
         (target as any)[DynamoDbSchema][propertyKey] = metadataToSchemaType(
@@ -60,6 +69,22 @@ export function attribute(parameters: Partial<SchemaType> = {}) {
             parameters
         );
     };
+}
+
+function deriveBaseSchema(target: any): Schema {
+    if (target && typeof target === 'object') {
+        const prototype = Object.getPrototypeOf(target);
+        if (prototype) {
+            return {
+                ...deriveBaseSchema(prototype),
+                ...Object.prototype.hasOwnProperty.call(prototype, DynamoDbSchema)
+                    ? prototype[DynamoDbSchema]
+                    : {}
+            };
+        }
+    }
+
+    return {};
 }
 
 function metadataToSchemaType(
