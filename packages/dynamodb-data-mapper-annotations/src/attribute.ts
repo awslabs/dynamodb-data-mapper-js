@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import {METADATA_TYPE_KEY} from './constants';
+import {PropertyAnnotation} from './annotationShapes';
 import {BinarySet, NumberValueSet} from "@aws/dynamodb-auto-marshaller";
 import {DynamoDbSchema} from '@aws/dynamodb-data-mapper';
 import {
@@ -54,8 +55,10 @@ import {
  *      binary?: Uint8Array;
  *  }
  */
-export function attribute(parameters: Partial<SchemaType> = {}) {
-    return (target: Object, propertyKey: string|symbol): void => {
+export function attribute(
+    parameters: Partial<SchemaType> = {}
+): PropertyAnnotation {
+    return (target, propertyKey) => {
         if (!Object.prototype.hasOwnProperty.call(target, DynamoDbSchema)) {
             Object.defineProperty(
                 target,
