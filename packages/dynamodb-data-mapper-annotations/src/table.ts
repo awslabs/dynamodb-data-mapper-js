@@ -1,3 +1,4 @@
+import {ClassAnnotation} from './annotationShapes';
 import {DynamoDbTable} from '@aws/dynamodb-data-mapper';
 import {ZeroArgumentsConstructor} from "@aws/dynamodb-data-marshaller";
 
@@ -10,8 +11,8 @@ import {ZeroArgumentsConstructor} from "@aws/dynamodb-data-marshaller";
  * @see https://www.typescriptlang.org/docs/handbook/decorators.html
  * @see https://www.typescriptlang.org/docs/handbook/compiler-options.html
  */
-export function table(tableName: string) {
-    return (constructor: ZeroArgumentsConstructor<any>) => {
+export function table(tableName: string): ClassAnnotation {
+    return constructor => {
         constructor.prototype[DynamoDbTable] = tableName;
     };
 }
