@@ -1,6 +1,6 @@
 {
   "name": "@aws/dynamodb-expressions",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Composable expression objects for Amazon DynamoDB",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",

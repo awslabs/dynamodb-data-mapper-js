@@ -1,6 +1,6 @@
 {
   "name": "@aws/dynamodb-data-mapper-annotations",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Annotations providing easy integration between TypeScript domain objects and the @aws/dynamodb-data-mapper library",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
