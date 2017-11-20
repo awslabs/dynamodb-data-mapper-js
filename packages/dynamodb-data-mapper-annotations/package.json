@@ -25,9 +25,9 @@
     "aws-sdk": "^2.7.0"
   },
   "dependencies": {
-    "@aws/dynamodb-auto-marshaller": "^0.0.0",
-    "@aws/dynamodb-data-mapper": "^0.0.0",
-    "@aws/dynamodb-data-marshaller": "^0.0.0",
+    "@aws/dynamodb-auto-marshaller": "^0.1.0",
+    "@aws/dynamodb-data-mapper": "^0.1.0",
+    "@aws/dynamodb-data-marshaller": "^0.1.0",
     "reflect-metadata": "^0.1.10",
     "uuid": "^3.0.0"
   }

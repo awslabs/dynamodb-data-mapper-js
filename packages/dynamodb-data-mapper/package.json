@@ -24,8 +24,8 @@
     "aws-sdk": "^2.7.0"
   },
   "dependencies": {
-    "@aws/dynamodb-data-marshaller": "^0.0.0",
-    "@aws/dynamodb-expressions": "^0.0.0"
+    "@aws/dynamodb-data-marshaller": "^0.1.0",
+    "@aws/dynamodb-expressions": "^0.1.0"
   },
   "peerDependencies": {
     "aws-sdk": "^2.7.0"
