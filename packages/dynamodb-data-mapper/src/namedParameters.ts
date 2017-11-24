@@ -128,8 +128,15 @@ export interface QueryParameters<T extends StringToAnyObjectMap = StringToAnyObj
 
     /**
      * The maximum number of items to fetch per page of results.
+     *
+     * @deprecated
      */
     limit?: number;
+
+    /**
+     * The maximum number of items to fetch per page of results.
+     */
+    pageSize?: number;
 
     /**
      * The item attributes to get.
@@ -185,8 +192,15 @@ export interface ScanParameters<T extends StringToAnyObjectMap = StringToAnyObje
 
     /**
      * The maximum number of items to fetch per page of results.
+     *
+     * @deprecated
      */
     limit?: number;
+
+    /**
+     * The maximum number of items to fetch per page of results.
+     */
+    pageSize?: number;
 
     /**
      * The item attributes to get.

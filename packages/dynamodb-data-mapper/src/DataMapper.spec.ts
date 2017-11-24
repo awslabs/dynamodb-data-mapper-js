@@ -1551,6 +1551,73 @@ describe('DataMapper', () => {
                     }
                 });
         });
+
+        it('should allow the page size to be set', () => {
+            const results =  mapper.scan({
+                valueConstructor: class {
+                    get [DynamoDbTable]() { return 'foo'; }
+                    get [DynamoDbSchema]() {
+                        return {
+                            snap: {
+                                type: 'String',
+                                keyType: 'HASH',
+                            },
+                        };
+                    }
+                },
+                pageSize: 20
+            });
+
+            results.next();
+
+            expect(mockDynamoDbClient.scan.mock.calls[0][0])
+                .toMatchObject({Limit: 20});
+        });
+
+        it('should allow the page size to be set using the deprecated "limit" parameter', () => {
+            const results =  mapper.scan({
+                valueConstructor: class {
+                    get [DynamoDbTable]() { return 'foo'; }
+                    get [DynamoDbSchema]() {
+                        return {
+                            snap: {
+                                type: 'String',
+                                keyType: 'HASH',
+                            },
+                        };
+                    }
+                },
+                limit: 20
+            });
+
+            results.next();
+
+            expect(mockDynamoDbClient.scan.mock.calls[0][0])
+                .toMatchObject({Limit: 20});
+        });
+
+        it('should prefer the "pageSize" parameter over the "limit" parameter', () => {
+            const results =  mapper.scan({
+                valueConstructor: class {
+                    get [DynamoDbTable]() { return 'foo'; }
+                    get [DynamoDbSchema]() {
+                        return {
+                            snap: {
+                                type: 'String',
+                                keyType: 'HASH',
+                            },
+                        };
+                    }
+                },
+                pageSize: 20,
+                limit: 200,
+            });
+
+            results.next();
+
+            expect(mockDynamoDbClient.scan.mock.calls[0][0])
+                .toMatchObject({Limit: 20});
+        });
     });
 
     describe('#update', () => {

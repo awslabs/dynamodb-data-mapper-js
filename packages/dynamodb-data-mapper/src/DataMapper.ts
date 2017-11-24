@@ -268,6 +268,7 @@ export class DataMapper {
         indexName,
         keyCondition,
         limit,
+        pageSize = limit,
         projection,
         readConsistency = this.readConsistency,
         scanIndexForward,
@@ -278,7 +279,7 @@ export class DataMapper {
             TableName: this.tableNamePrefix + getTableName(valueConstructor.prototype),
             ConsistentRead: readConsistency === 'strong',
             ScanIndexForward: scanIndexForward,
-            Limit: limit,
+            Limit: pageSize,
             IndexName: indexName,
         };
 
@@ -340,6 +341,7 @@ export class DataMapper {
         filter,
         indexName,
         limit,
+        pageSize = limit,
         projection,
         readConsistency = this.readConsistency,
         startKey,
@@ -348,7 +350,7 @@ export class DataMapper {
         const req: ScanInput = {
             TableName: this.tableNamePrefix + getTableName(valueConstructor.prototype),
             ConsistentRead: readConsistency === 'strong',
-            Limit: limit,
+            Limit: pageSize,
             IndexName: indexName,
         };
 
