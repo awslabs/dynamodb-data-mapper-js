@@ -12,9 +12,9 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "@types/jest": "^20.0.2",
+    "@types/jest": "^21",
     "@types/node": "^8.0.4",
-    "jest": "^20.0.4",
+    "jest": "^21",
     "lerna": "^2.5.1",
     "typescript": "^2.6"
   },
