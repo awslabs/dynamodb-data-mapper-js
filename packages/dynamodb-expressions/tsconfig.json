@@ -9,6 +9,7 @@
       "es2015.symbol.wellknown"
     ],
     "downlevelIteration": true,
+    "importHelpers": true,
     "module": "commonjs",
     "strict": true,
     "declaration": true,
