@@ -3,7 +3,6 @@ import {
     DynamoDbSchema,
     DynamoDbTable,
 } from "./protocols";
-import {BinaryValue} from '@aws/dynamodb-auto-marshaller';
 import {Schema} from "@aws/dynamodb-data-marshaller";
 import {
     AttributePath,
@@ -12,6 +11,9 @@ import {
     FunctionExpression,
     inList,
 } from "@aws/dynamodb-expressions";
+import {ItemNotFoundException} from "./ItemNotFoundException";
+
+type BinaryValue = ArrayBuffer|ArrayBufferView;
 
 describe('DataMapper', () => {
     describe('#delete', () => {
@@ -34,9 +36,9 @@ describe('DataMapper', () => {
             async () => {
                 await expect(mapper.delete({item: {
                     [DynamoDbTable]: 'foo',
-                }})).rejects.toMatchObject({
-                    message: 'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
-                });
+                }})).rejects.toMatchObject(new Error(
+                    'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
+                ));
             }
         );
 
@@ -45,9 +47,9 @@ describe('DataMapper', () => {
             async () => {
                 await expect(mapper.delete({item: {
                     [DynamoDbSchema]: {},
-                }})).rejects.toMatchObject({
-                    message: 'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
-                });
+                }})).rejects.toMatchObject(new Error(
+                    'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
+                ));
             }
         );
 
@@ -391,9 +393,9 @@ describe('DataMapper', () => {
             async () => {
                 await expect(mapper.get({item: {
                     [DynamoDbTable]: 'foo',
-                }})).rejects.toMatchObject({
-                    message: 'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
-                });
+                }})).rejects.toMatchObject(new Error(
+                    'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
+                ));
             }
         );
 
@@ -402,9 +404,9 @@ describe('DataMapper', () => {
             async () => {
                 await expect(mapper.get({item: {
                     [DynamoDbSchema]: {},
-                }})).rejects.toMatchObject({
-                    message: 'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
-                });
+                }})).rejects.toMatchObject(new Error(
+                    'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
+                ));
             }
         );
 
@@ -617,18 +619,16 @@ describe('DataMapper', () => {
                     },
                     readConsistency: 'strong',
                     projection: ['fizz', 'pop'],
-                })).rejects.toMatchObject({
-                    itemSought: {
-                        TableName: 'foo',
-                        Key: {foo: {S: 'buzz'}},
-                        ConsistentRead: true,
-                        ProjectionExpression: '#attr0, #attr1',
-                        ExpressionAttributeNames: {
-                            '#attr0': 'foo',
-                            '#attr1': 'pop',
-                        },
-                    }
-                });
+                })).rejects.toMatchObject(new ItemNotFoundException({
+                    TableName: 'foo',
+                    Key: {foo: {S: 'buzz'}},
+                    ConsistentRead: true,
+                    ProjectionExpression: '#attr0, #attr1',
+                    ExpressionAttributeNames: {
+                        '#attr0': 'foo',
+                        '#attr1': 'pop',
+                    },
+                }));
             }
         );
 
@@ -684,9 +684,9 @@ describe('DataMapper', () => {
             async () => {
                 await expect(mapper.put({item: {
                     [DynamoDbTable]: 'foo',
-                }})).rejects.toMatchObject({
-                    message: 'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
-                });
+                }})).rejects.toMatchObject(new Error(
+                    'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
+                ));
             }
         );
 
@@ -695,9 +695,9 @@ describe('DataMapper', () => {
             async () => {
                 await expect(mapper.put({item: {
                     [DynamoDbSchema]: {},
-                }})).rejects.toMatchObject({
-                    message: 'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
-                });
+                }})).rejects.toMatchObject(new Error(
+                    'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
+                ));
             }
         );
 
@@ -1024,9 +1024,9 @@ describe('DataMapper', () => {
                         foo: 'buzz'
                     },
                 });
-                await expect(iter.next()).rejects.toMatchObject({
-                    message: 'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
-                });
+                await expect(iter.next()).rejects.toMatchObject(new Error(
+                    'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
+                ));
             }
         );
 
@@ -1042,9 +1042,9 @@ describe('DataMapper', () => {
                     },
                 });
 
-                await expect(iter.next()).rejects.toMatchObject({
-                    message: 'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
-                });
+                await expect(iter.next()).rejects.toMatchObject(new Error(
+                    'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
+                ));
             }
         );
 
@@ -1359,9 +1359,9 @@ describe('DataMapper', () => {
                         get [DynamoDbTable]() { return 'foo'; }
                     },
                 });
-                await expect(iter.next()).rejects.toMatchObject({
-                    message: 'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
-                });
+                await expect(iter.next()).rejects.toMatchObject(new Error(
+                    'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
+                ));
             }
         );
 
@@ -1374,9 +1374,9 @@ describe('DataMapper', () => {
                     },
                 });
 
-                await expect(iter.next()).rejects.toMatchObject({
-                    message: 'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
-                });
+                await expect(iter.next()).rejects.toMatchObject(new Error(
+                    'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
+                ));
             }
         );
 
@@ -1551,6 +1551,73 @@ describe('DataMapper', () => {
                     }
                 });
         });
+
+        it('should allow the page size to be set', () => {
+            const results =  mapper.scan({
+                valueConstructor: class {
+                    get [DynamoDbTable]() { return 'foo'; }
+                    get [DynamoDbSchema]() {
+                        return {
+                            snap: {
+                                type: 'String',
+                                keyType: 'HASH',
+                            },
+                        };
+                    }
+                },
+                pageSize: 20
+            });
+
+            results.next();
+
+            expect(mockDynamoDbClient.scan.mock.calls[0][0])
+                .toMatchObject({Limit: 20});
+        });
+
+        it('should allow the page size to be set using the deprecated "limit" parameter', () => {
+            const results =  mapper.scan({
+                valueConstructor: class {
+                    get [DynamoDbTable]() { return 'foo'; }
+                    get [DynamoDbSchema]() {
+                        return {
+                            snap: {
+                                type: 'String',
+                                keyType: 'HASH',
+                            },
+                        };
+                    }
+                },
+                limit: 20
+            });
+
+            results.next();
+
+            expect(mockDynamoDbClient.scan.mock.calls[0][0])
+                .toMatchObject({Limit: 20});
+        });
+
+        it('should prefer the "pageSize" parameter over the "limit" parameter', () => {
+            const results =  mapper.scan({
+                valueConstructor: class {
+                    get [DynamoDbTable]() { return 'foo'; }
+                    get [DynamoDbSchema]() {
+                        return {
+                            snap: {
+                                type: 'String',
+                                keyType: 'HASH',
+                            },
+                        };
+                    }
+                },
+                pageSize: 20,
+                limit: 200,
+            });
+
+            results.next();
+
+            expect(mockDynamoDbClient.scan.mock.calls[0][0])
+                .toMatchObject({Limit: 20});
+        });
     });
 
     describe('#update', () => {
@@ -1623,9 +1690,9 @@ describe('DataMapper', () => {
             async () => {
                 await expect(mapper.update({item: {
                     [DynamoDbTable]: 'foo',
-                }})).rejects.toMatchObject({
-                    message: 'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
-                });
+                }})).rejects.toMatchObject(new Error(
+                    'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
+                ));
             }
         );
 
@@ -1634,9 +1701,9 @@ describe('DataMapper', () => {
             async () => {
                 await expect(mapper.update({item: {
                     [DynamoDbSchema]: {},
-                }})).rejects.toMatchObject({
-                    message: 'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
-                });
+                }})).rejects.toMatchObject(new Error(
+                    'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
+                ));
             }
         );
 
@@ -1788,9 +1855,9 @@ describe('DataMapper', () => {
                         },
                     },
                 },
-            })).rejects.toMatchObject({
-                message: 'Update operation completed successfully, but the updated value was not returned'
-            });
+            })).rejects.toMatchObject(new Error(
+                'Update operation completed successfully, but the updated value was not returned'
+            ));
         });
 
         describe('version attributes', () => {
