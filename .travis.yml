@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+  - "node"
+  - "lts/*"
+  - "9"
+  - "8"
+  - "6"
+
+sudo: false
+
+before_script:
+  - npm run bootstrap
