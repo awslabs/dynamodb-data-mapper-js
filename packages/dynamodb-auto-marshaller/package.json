@@ -23,5 +23,8 @@
   },
   "peerDependencies": {
     "aws-sdk": "^2.7.0"
+  },
+  "dependencies": {
+    "tslib": "^1.8"
   }
 }

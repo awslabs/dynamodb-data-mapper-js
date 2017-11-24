@@ -10,6 +10,7 @@
       "esnext.asynciterable"
     ],
     "downlevelIteration": true,
+    "importHelpers": true,
     "module": "commonjs",
     "strict": true,
     "declaration": true,
