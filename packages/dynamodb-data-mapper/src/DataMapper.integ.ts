@@ -1,4 +1,5 @@
 import {DataMapper} from './DataMapper';
+import {ItemNotFoundException} from './ItemNotFoundException';
 import {DynamoDbSchema, DynamoDbTable} from './protocols';
 import {hostname} from 'os';
 import {hrtime} from 'process';
@@ -43,20 +44,17 @@ class TestRecord {
     timestamp?: Date;
     data?: NestedDocument;
     tuple?: [boolean, string];
-
-    [DynamoDbSchema]() {
-        return schema;
-    }
-
-    [DynamoDbTable]() {
-        return TableName;
-    }
 }
+
+Object.defineProperties(TestRecord.prototype, {
+    [DynamoDbSchema]: {value: schema},
+    [DynamoDbTable]: {value: TableName},
+});
 
 describe('DataMapper', () => {
     let idx = 0;
     const ddbClient = new DynamoDB();
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
+    jest.setTimeout(60000);
 
     beforeAll(() => {
         return Promise.all([
@@ -115,5 +113,40 @@ describe('DataMapper', () => {
 
         expect(await mapper.get({item}))
             .toEqual(item);
+    });
+
+    it('should delete objects', async () => {
+        const key = idx++;
+        const mapper = new DataMapper({client: ddbClient});
+        const timestamp = new Date();
+        // subsecond precision will not survive the trip through the serializer,
+        // as DynamoDB's ttl fields use unix epoch (second precision) timestamps
+        timestamp.setMilliseconds(0);
+        const item = new TestRecord();
+        item.key = key;
+        item.timestamp = timestamp;
+        item.data = {
+            recursive: {
+                recursive: {
+                    recursive: {
+                        foo: '',
+                    },
+                },
+            },
+        };
+
+        await mapper.put({item});
+
+        await expect(mapper.get({item, readConsistency: 'strong'})).resolves;
+
+        await mapper.delete({item});
+
+        await expect(mapper.get({item, readConsistency: 'strong'}))
+            .rejects
+            .toMatchObject(new ItemNotFoundException({
+                TableName,
+                ConsistentRead: true,
+                Key: {key: {N: key.toString(10)}}
+            }));
     });
 });
