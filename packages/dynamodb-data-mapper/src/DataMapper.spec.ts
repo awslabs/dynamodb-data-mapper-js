@@ -1322,9 +1322,11 @@ describe('DataMapper', () => {
 
         beforeEach(() => {
             promiseFunc.mockClear();
-            promiseFunc.mockImplementation(() => Promise.resolve({Attributes: {}}));
+            promiseFunc.mockImplementation(() => Promise.resolve({Items: []}));
             mockDynamoDbClient.scan.mockClear();
-            mockDynamoDbClient.scan.mockImplementation(() => ({promise: promiseFunc}));
+            mockDynamoDbClient.scan.mockImplementation(() => {
+                return {promise: promiseFunc};
+            });
         });
 
         const mapper = new DataMapper({
@@ -1618,6 +1620,124 @@ describe('DataMapper', () => {
             expect(mockDynamoDbClient.scan.mock.calls[0][0])
                 .toMatchObject({Limit: 20});
         });
+
+        it(
+            'should execute multiple requests in parallel when performing a scan with multiple segments',
+            async () => {
+                const segments = 2;
+                const keys = ['snap', 'crackle', 'pop', 'foo', 'bar', 'baz'];
+                let index = 0;
+
+                // Ensure that the first promise won't resolve immediately. This
+                // would block progress on a sequential scan but should pose no
+                // problem for a parallel one.
+                promiseFunc.mockImplementationOnce(() => new Promise(resolve => {
+                    setTimeout(
+                        resolve.bind(null, {
+                            Items: [
+                                {
+                                    fizz: {S: 'quux'},
+                                    bar: {NS: ['5', '12', '13']},
+                                    baz: {L: [{BOOL: true}, {N: '101'}]},
+                                },
+                            ],
+                        }),
+                        50,
+                    );
+                }
+                ));
+
+                // Enqueue a number of responses that will resolve synchronously
+                for (const key of keys) {
+                    promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                        Items: [
+                            {
+                                fizz: {S: key},
+                                bar: {NS: [
+                                    (++index).toString(10),
+                                    (++index).toString(10),
+                                ]},
+                                baz: {L: [
+                                    {BOOL: index % 2 === 0},
+                                    {N: (++index).toString(10)}
+                                ]},
+                            },
+                        ],
+                        LastEvaluatedKey: {fizz: {S: key}},
+                    }));
+                }
+
+                // Enqueue a final page for this segment
+                promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
+
+                const results = mapper.parallelScan({
+                    valueConstructor: class {
+                        get [DynamoDbTable]() { return 'foo'; }
+                        get [DynamoDbSchema]() {
+                            return {
+                                foo: {
+                                    type: 'String',
+                                    attributeName: 'fizz',
+                                    keyType: 'HASH',
+                                },
+                                bar: {
+                                    type: 'Set',
+                                    memberType: 'Number'
+                                },
+                                baz: {
+                                    type: 'Tuple',
+                                    members: [{type: 'Boolean'}, {type: 'Number'}]
+                                },
+                            };
+                        }
+                    },
+                    segments,
+                });
+
+                const result: Array<any> = [];
+                for await (const res of results) {
+                    result.push(res);
+                }
+
+                expect(result).toEqual([
+                    {
+                        foo: 'snap',
+                        bar: new Set([1, 2]),
+                        baz: [true, 3],
+                    },
+                    {
+                        foo: 'crackle',
+                        bar: new Set([4, 5]),
+                        baz: [false, 6],
+                    },
+                    {
+                        foo: 'pop',
+                        bar: new Set([7, 8]),
+                        baz: [true, 9],
+                    },
+                    {
+                        foo: 'foo',
+                        bar: new Set([10, 11]),
+                        baz: [false, 12],
+                    },
+                    {
+                        foo: 'bar',
+                        bar: new Set([13, 14]),
+                        baz: [true, 15],
+                    },
+                    {
+                        foo: 'baz',
+                        bar: new Set([16, 17]),
+                        baz: [false, 18],
+                    },
+                    {
+                        foo: 'quux',
+                        bar: new Set([5, 12, 13]),
+                        baz: [true, 101],
+                    },
+                ]);
+            }
+        );
     });
 
     describe('#update', () => {

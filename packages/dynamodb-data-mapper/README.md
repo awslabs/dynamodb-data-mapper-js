@@ -4,7 +4,7 @@
 
 This library provides a `DataMapper` class that allows easy interoperability
 between your application's domain classes and their persisted form in Amazon
-DynamoDB. Powered by the `@aws/dynamodb-data-marshaller` and 
+DynamoDB. Powered by the `@aws/dynamodb-data-marshaller` and
 `@aws/dynamodb-expressions` packages, using `DataMapper` lets you define each
 object's persisted representation once and then load, save, scan, and query your
 tables using the vocabulary of your application domain rather than its
@@ -59,7 +59,7 @@ import {DynamoDbTable} from '@aws/dynamodb-data-mapper';
 
 class MyOtherDomainClass {
     id: number;
-    
+
     get [DynamoDbTable]() {
         return this.id % 2 === 0 ? 'evens' : 'odds';
     }
@@ -172,7 +172,7 @@ Removes an item from a DynamoDB table. Supports the following named parameters:
 
 * `skipVersionCheck` - Whether to forgo creating a condition expression based on
     a defined `versionAttribute` in the schema.
-    
+
 ### `get`
 
 Fetches an item from a DynamoDB table. If no item with the specified key was
@@ -183,7 +183,7 @@ following named parameters:
     with a table name accessible via a property identified with the
     `DynamoDbTable` symbol and a schema accessible via a property identified
     with the `DynamoDbSchema` symbol.
-    
+
     The supplied item will **NOT** be updated in place. Rather, a new item of
     the same class with data from the DynamoDB table will be returned.
 
@@ -194,11 +194,11 @@ following named parameters:
     of the fetched item's attributes. Please refer to the documentation for the
     `@aws/dynamodb-expressions` package for guidance on creating projection
     expression objects.
-    
+
 ### `put`
 
 Inserts an item into a DynamoDB table. Supports the following named parameters:
-                                      
+
 * `item` - (**Required**) The item to be inserted. Must be an instance of a
     class with a table name accessible via a property identified with the
     `DynamoDbTable` symbol and a schema accessible via a property identified
@@ -214,7 +214,7 @@ Inserts an item into a DynamoDB table. Supports the following named parameters:
 
 * `skipVersionCheck` - Whether to forgo creating a condition expression based on
     a defined `versionAttribute` in the schema.
-    
+
 ### `query`
 
 Retrieves multiple values from a table based on the primary key attributes.
@@ -234,7 +234,7 @@ for more information.
     to `ConditionExpressionPredicate`s, or a fully composed
     `ConditionExpression`. If a hash is provided, it may contain a mixture of
     condition expression predicates and exact value matches:
-    
+
     ```typescript
     import {between} from '@aws/dynamodb-expressions';
 
@@ -243,7 +243,7 @@ for more information.
         rangeKey: between(10, 99),
     };
     ```
-    
+
     The key condition must target a single value for the partition key.
 
     Please refer to the documentation for the `@aws/dynamodb-expressions`
@@ -254,7 +254,7 @@ for more information.
     accessible via a property identified with the `DynamoDbTable` symbol and a
     schema accessible via a property identified with the `DynamoDbSchema`
     symbol.
-    
+
 * `filter` - A condition expression that DynamoDB applies after the Query
     operation, but before the data is returned to you. Items that do not satisfy
     the `filter` criteria are not returned.
@@ -264,10 +264,10 @@ for more information.
 
     Please refer to the documentation for the `@aws/dynamodb-expressions`
     package for guidance on creating condition expression objects.
-    
+
 * `indexName` - The name of the index against which to execute this query. If
     not specified, the query will be executed against the base table.
-    
+
 * `limit` - The maximum number of items to return.
 
 * `projection` - A projection expression directing DynamoDB to return a subset
@@ -281,7 +281,7 @@ for more information.
 * `scanIndexForward` - Specifies the order for index traversal: If true, the
     traversal is performed in ascending order; if false, the traversal is
     performed in descending order.
-    
+
 * `startKey` - The primary key of the first item that this operation will
     evaluate.
 
@@ -301,7 +301,7 @@ for more information.
     accessible via a property identified with the `DynamoDbTable` symbol and a
     schema accessible via a property identified with the `DynamoDbSchema`
     symbol.
-    
+
 * `filter` - A condition expression that DynamoDB applies after the scan
     operation, but before the data is returned to you. Items that do not satisfy
     the `filter` criteria are not returned.
@@ -311,10 +311,10 @@ for more information.
 
     Please refer to the documentation for the `@aws/dynamodb-expressions`
     package for guidance on creating condition expression objects.
-    
+
 * `indexName` - The name of the index against which to execute this query. If
     not specified, the query will be executed against the base table.
-    
+
 * `limit` - The maximum number of items to return.
 
 * `projection` - A projection expression directing DynamoDB to return a subset
@@ -325,10 +325,59 @@ for more information.
 * `readConsistency` - Specify `'strong'` to perform a strongly consistent read.
     Specify `'eventual'` (the default) to perform an eventually consistent read.
 
-* `scanIndexForward` - Specifies the order for index traversal: If true, the
-    traversal is performed in ascending order; if false, the traversal is
-    performed in descending order.
-    
+* `segment` - The identifier for this segment (if this scan is being performed
+    as part of a parallel scan operation).
+
+* `startKey` - The primary key of the first item that this operation will
+    evaluate.
+
+* `totalSegments` - The number of segments into which this scan has been divided
+    (if this scan is being performed as part of a parallel scan operation).
+
+### `parallelScan`
+
+Retrieves all values in a table by dividing the table into segments, all of
+which are scanned in parallel.
+
+This method is implemented as an async iterator and the results can be consumed
+with a `for-await-of` loop. If you are using TypeScript, you will need to
+include `esnext.asynciterable` in your `lib` declaration (as well as enabling
+`downlevelIteration` if targeting ES5 or lower). Please refer to [the TypeScript
+release notes](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-3.html#async-iteration)
+for more information.
+
+* `valueConstructor` - (**Required**) The constructor to use for any results
+    returned by this operation. Must have a prototype with a table name
+    accessible via a property identified with the `DynamoDbTable` symbol and a
+    schema accessible via a property identified with the `DynamoDbSchema`
+    symbol.
+
+* `segments` - (**Required**) The total number of parallel workers to use to
+    scan the table.
+
+* `filter` - A condition expression that DynamoDB applies after the scan
+    operation, but before the data is returned to you. Items that do not satisfy
+    the `filter` criteria are not returned.
+
+    You cannot define a filter expression based on a partition key or a sort
+    key.
+
+    Please refer to the documentation for the `@aws/dynamodb-expressions`
+    package for guidance on creating condition expression objects.
+
+* `indexName` - The name of the index against which to execute this query. If
+    not specified, the query will be executed against the base table.
+
+* `limit` - The maximum number of items to return.
+
+* `projection` - A projection expression directing DynamoDB to return a subset
+    of any fetched item's attributes. Please refer to the documentation for the
+    `@aws/dynamodb-expressions` package for guidance on creating projection
+    expression objects.
+
+* `readConsistency` - Specify `'strong'` to perform a strongly consistent read.
+    Specify `'eventual'` (the default) to perform an eventually consistent read.
+
 * `startKey` - The primary key of the first item that this operation will
     evaluate.
 
@@ -336,7 +385,7 @@ for more information.
 
 Updates an item in a DynamoDB table. Will leave attributes not defined in the
 schema in place.
-                                      
+
 * `item` - (**Required**) The item with its desired property state. Must be an
     instance of a class with a table name accessible via a property identified
     with the `DynamoDbTable` symbol and a schema accessible via a property

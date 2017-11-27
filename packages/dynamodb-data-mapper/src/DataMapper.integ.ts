@@ -6,6 +6,7 @@ import {hrtime} from 'process';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 import {DocumentType} from "@aws/dynamodb-data-marshaller";
 import {Schema} from "@aws/dynamodb-data-marshaller";
+import {equals} from "@aws/dynamodb-expressions";
 
 const nestedDocumentDef: DocumentType = {
     type: 'Document',
@@ -36,14 +37,16 @@ const schema: Schema = {
             {type: 'Boolean'},
             {type: 'String'},
         ]
-    }
+    },
+    scanIdentifier: {type: 'Number'}
 };
 
 class TestRecord {
-    key?: number;
+    key: number;
     timestamp?: Date;
     data?: NestedDocument;
     tuple?: [boolean, string];
+    scanIdentifier?: number;
 }
 
 Object.defineProperties(TestRecord.prototype, {
@@ -73,8 +76,8 @@ describe('DataMapper', () => {
                     }
                 ],
                 ProvisionedThroughput: {
-                    ReadCapacityUnits: 5,
-                    WriteCapacityUnits: 5,
+                    ReadCapacityUnits: 50,
+                    WriteCapacityUnits: 50,
                 },
             })
                 .promise(),
@@ -148,5 +151,82 @@ describe('DataMapper', () => {
                 ConsistentRead: true,
                 Key: {key: {N: key.toString(10)}}
             }));
+    });
+
+    it('should scan objects', async () => {
+        const keys: Array<number> = [];
+        const mapper = new DataMapper({client: ddbClient});
+        const scanIdentifier = Date.now();
+
+        const puts: Array<Promise<any>> = [];
+        for (let i = 0; i < 10; i++) {
+            const item = new TestRecord();
+            item.key = idx++;
+            item.tuple = [item.key % 2 === 0, 'string'];
+            item.scanIdentifier = scanIdentifier;
+            keys.push(item.key);
+            puts.push(mapper.put({item}));
+        }
+
+        await Promise.all(puts);
+
+        const results: Array<TestRecord> = [];
+        for await (const element of mapper.scan({
+            valueConstructor: TestRecord,
+            readConsistency: 'strong',
+            filter: {
+                ...equals(scanIdentifier),
+                subject: 'scanIdentifier'
+            },
+        })) {
+            results.push(element);
+        }
+
+        expect(results.sort((a, b) => a.key - b.key)).toEqual(keys.map(key => {
+            const record = new TestRecord();
+            record.key = key;
+            record.scanIdentifier = scanIdentifier;
+            record.tuple = [key % 2 === 0, 'string'];
+            return record;
+        }));
+    });
+
+    it('should scan objects in parallel', async () => {
+        const keys: Array<number> = [];
+        const mapper = new DataMapper({client: ddbClient});
+        const scanIdentifier = Date.now();
+
+        const puts: Array<Promise<any>> = [];
+        for (let i = 0; i < 10; i++) {
+            const item = new TestRecord();
+            item.key = idx++;
+            item.tuple = [item.key % 2 === 0, 'string'];
+            item.scanIdentifier = scanIdentifier;
+            keys.push(item.key);
+            puts.push(mapper.put({item}));
+        }
+
+        await Promise.all(puts);
+
+        const results: Array<TestRecord> = [];
+        for await (const element of mapper.parallelScan({
+            valueConstructor: TestRecord,
+            readConsistency: 'strong',
+            segments: 4,
+            filter: {
+                ...equals(scanIdentifier),
+                subject: 'scanIdentifier'
+            },
+        })) {
+            results.push(element);
+        }
+
+        expect(results.sort((a, b) => a.key - b.key)).toEqual(keys.map(key => {
+            const record = new TestRecord();
+            record.key = key;
+            record.scanIdentifier = scanIdentifier;
+            record.tuple = [key % 2 === 0, 'string'];
+            return record;
+        }));
     });
 });

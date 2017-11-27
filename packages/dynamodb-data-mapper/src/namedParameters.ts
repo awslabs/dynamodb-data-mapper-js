@@ -173,7 +173,7 @@ export interface QueryParameters<T extends StringToAnyObjectMap = StringToAnyObj
     valueConstructor: ZeroArgumentsConstructor<T>;
 }
 
-export interface ScanParameters<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
+export interface BaseScanParameters<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
     /**
      * A string that contains conditions that DynamoDB applies after the Query
      * operation, but before the data is returned to you. Items that do not
@@ -213,17 +213,25 @@ export interface ScanParameters<T extends StringToAnyObjectMap = StringToAnyObje
     readConsistency?: ReadConsistency;
 
     /**
-     * Specifies the order for index traversal: If true, the traversal is
-     * performed in ascending order; if false, the traversal is performed in
-     * descending order.
-     *
-     * Items with the same partition key value are stored in sorted order by
-     * sort key. If the sort key data type is Number, the results are stored in
-     * numeric order. For type String, the results are stored in order of ASCII
-     * character code values. For type Binary, DynamoDB treats each byte of the
-     * binary data as unsigned.
+     * A constructor that creates objects representing one record returned by
+     * the query operation.
      */
-    scanIndexForward?: boolean;
+    valueConstructor: ZeroArgumentsConstructor<T>;
+}
+
+export interface BaseSequentialScanParameters<
+    T extends StringToAnyObjectMap = StringToAnyObjectMap
+> extends BaseScanParameters<T> {
+    /**
+     * For a parallel Scan request, Segment identifies an individual segment to
+     * be scanned by an application worker.
+     *
+     * Segment IDs are zero-based, so the first segment is always 0. For
+     * example, if you want to use four application threads to scan a table or
+     * an index, then the first thread specifies a Segment value of 0, the
+     * second thread specifies 1, and so on.
+     */
+    segment?: number;
 
     /**
      * The primary key of the first item that this operation will evaluate.
@@ -231,10 +239,36 @@ export interface ScanParameters<T extends StringToAnyObjectMap = StringToAnyObje
     startKey?: {[key: string]: any};
 
     /**
-     * A constructor that creates objects representing one record returned by
-     * the query operation.
+     * The number of application workers that will perform the scan.
+     *
+     * Must be an integer between 1 and 1,000,000
      */
-    valueConstructor: ZeroArgumentsConstructor<T>;
+    totalSegments?: number;
+}
+
+export interface ScanParameters<
+    T extends StringToAnyObjectMap = StringToAnyObjectMap
+> extends BaseSequentialScanParameters<T> {
+    segment?: undefined;
+    totalSegments?: undefined;
+}
+
+export interface ParallelScanWorkerParameters<
+    T extends StringToAnyObjectMap = StringToAnyObjectMap
+> extends BaseSequentialScanParameters<T> {
+    segment: number;
+    totalSegments: number;
+}
+
+export interface ParallelScanParameters<
+    T extends StringToAnyObjectMap = StringToAnyObjectMap
+> extends BaseScanParameters<T> {
+    /**
+     * The number of application workers that will perform the scan.
+     *
+     * Must be an integer between 1 and 1,000,000
+     */
+    segments: number;
 }
 
 export interface UpdateParameters<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
