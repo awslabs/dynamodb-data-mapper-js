@@ -4,6 +4,8 @@ import {
     DataMapperConfiguration,
     DeleteParameters,
     GetParameters,
+    ParallelScanParameters,
+    ParallelScanWorkerParameters,
     PutParameters,
     QueryParameters,
     ScanParameters,
@@ -337,59 +339,83 @@ export class DataMapper {
      * @return An asynchronous iterator that yields scan results. Intended
      * to be consumed with a `for await ... of` loop.
      */
-    async *scan<T extends StringToAnyObjectMap = StringToAnyObjectMap>({
-        filter,
-        indexName,
-        limit,
-        pageSize = limit,
-        projection,
-        readConsistency = this.readConsistency,
-        startKey,
-        valueConstructor,
-    }: ScanParameters) {
-        const req: ScanInput = {
-            TableName: this.tableNamePrefix + getTableName(valueConstructor.prototype),
-            ConsistentRead: readConsistency === 'strong',
-            Limit: pageSize,
-            IndexName: indexName,
-        };
-
+    async *scan<T extends StringToAnyObjectMap>(
+        parameters: ScanParameters<T>|ParallelScanWorkerParameters<T>
+    ): AsyncIterableIterator<T> {
+        const {valueConstructor} = parameters;
+        const req = this.buildScanInput(parameters);
         const schema = getSchema(valueConstructor.prototype);
 
-        const attributes = new ExpressionAttributes();
-        const mapping = getAttributeNameMapping(schema);
+        yield* this.doSequentialScan(req, schema, valueConstructor);
+    }
 
-        if (filter) {
-            req.FilterExpression = serializeConditionExpression(
-                normalizeConditionExpressionPaths(filter, mapping),
-                attributes
-            );
+    /**
+     * Perform a Scan operation using the schema accessible via the
+     * {DynamoDbSchema} method and the table name accessible via the
+     * {DynamoDbTable} method on the prototype of the constructor supplied.
+     *
+     * This scan will be performed by multiple parallel workers, each of which
+     * will perform a sequential scan of a segment of the table or index. Use
+     * the `segments` parameter to specify the number of workers to be used.
+     *
+     * @return An asynchronous iterator that yields scan results. Intended
+     * to be consumed with a `for await ... of` loop.
+     */
+    async *parallelScan<T extends StringToAnyObjectMap>(
+        {segments, ...parameters}: ParallelScanParameters<T>
+    ): AsyncIterableIterator<T> {
+        const {valueConstructor} = parameters;
+        const req = this.buildScanInput(parameters);
+        const schema = getSchema(valueConstructor.prototype);
+
+        interface PendingResult {
+            iterator: AsyncIterator<T>;
+            result: Promise<{
+                iterator: AsyncIterator<T>;
+                result: IteratorResult<T>
+            }>;
         }
 
-        if (projection) {
-            req.ProjectionExpression = serializeProjectionExpression(
-                projection.map(propName => toSchemaName(propName, mapping)),
-                attributes
-            );
+        const pendingResults: Array<PendingResult> = [];
+        function addToPending(iterator: AsyncIterator<T>): void {
+            const result = iterator.next().then(resolved => ({
+                iterator,
+                result: resolved
+            }));
+            pendingResults.push({iterator, result});
         }
 
-        req.ExpressionAttributeNames = attributes.names;
-        req.ExpressionAttributeValues = attributes.values;
-
-        if (startKey) {
-            req.ExclusiveStartKey = marshallItem(schema, startKey);
+        for (let i = 0; i < segments; i++) {
+            addToPending(this.doSequentialScan(
+                {
+                    ...req,
+                    TotalSegments: segments,
+                    Segment: i
+                },
+                schema,
+                valueConstructor
+            ));
         }
 
-        let result: ScanOutput;
-        do {
-            result = await this.client.scan(req).promise();
-            req.ExclusiveStartKey = result.LastEvaluatedKey;
-            if (result.Items) {
-                for (const item of result.Items) {
-                    yield unmarshallItem<T>(schema, item);
+        while (pendingResults.length > 0) {
+            const {
+                result: {value, done},
+                iterator
+            } = await Promise.race(pendingResults.map(val => val.result));
+
+            for (let i = pendingResults.length - 1; i >= 0; i--) {
+                if (pendingResults[i].iterator === iterator) {
+                    pendingResults.splice(i, 1);
                 }
             }
-        } while (result.LastEvaluatedKey !== undefined);
+
+            if (!done) {
+                addToPending(iterator);
+                yield value;
+            } else if (value !== undefined) {
+                yield value;
+            }
+        }
     }
 
     /**
@@ -481,6 +507,78 @@ export class DataMapper {
         throw new Error(
             'Update operation completed successfully, but the updated value was not returned'
         );
+    }
+
+    private buildScanInput({
+        filter,
+        indexName,
+        limit,
+        pageSize = limit,
+        projection,
+        readConsistency = this.readConsistency,
+        segment,
+        startKey,
+        totalSegments,
+        valueConstructor,
+    }: ScanParameters<any>|ParallelScanWorkerParameters<any>): ScanInput {
+        const req: ScanInput = {
+            TableName: this.tableNamePrefix + getTableName(valueConstructor.prototype),
+            ConsistentRead: readConsistency === 'strong',
+            Limit: pageSize,
+            IndexName: indexName,
+            Segment: segment,
+            TotalSegments: totalSegments,
+        };
+
+        const schema = getSchema(valueConstructor.prototype);
+
+        const attributes = new ExpressionAttributes();
+        const mapping = getAttributeNameMapping(schema);
+
+        if (filter) {
+            req.FilterExpression = serializeConditionExpression(
+                normalizeConditionExpressionPaths(filter, mapping),
+                attributes
+            );
+        }
+
+        if (projection) {
+            req.ProjectionExpression = serializeProjectionExpression(
+                projection.map(propName => toSchemaName(propName, mapping)),
+                attributes
+            );
+        }
+
+        if (Object.keys(attributes.names).length > 0) {
+            req.ExpressionAttributeNames = attributes.names;
+        }
+
+        if (Object.keys(attributes.values).length > 0) {
+            req.ExpressionAttributeValues = attributes.values;
+        }
+
+        if (startKey) {
+            req.ExclusiveStartKey = marshallItem(schema, startKey);
+        }
+
+        return req;
+    }
+
+    private async *doSequentialScan<T>(
+        req: ScanInput,
+        schema: Schema,
+        ctor: ZeroArgumentsConstructor<T>
+    ) {
+        let result: ScanOutput;
+        do {
+            result = await this.client.scan(req).promise();
+            req.ExclusiveStartKey = result.LastEvaluatedKey;
+            if (result.Items) {
+                for (const item of result.Items) {
+                    yield unmarshallItem(schema, item, ctor);
+                }
+            }
+        } while (result.LastEvaluatedKey !== undefined);
     }
 }
 
