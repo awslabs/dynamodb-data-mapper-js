@@ -90,11 +90,6 @@ export interface PutParameters<T extends StringToAnyObjectMap = StringToAnyObjec
     condition?: ConditionExpression;
 
     /**
-     * The values to return from this operation.
-     */
-    returnValues?: 'ALL_OLD'|'NONE';
-
-    /**
      * Whether this operation should NOT honor the version attribute specified
      * in the schema by incrementing the attribute and preventing the operation
      * from taking effect if the local version is out of date.

@@ -940,40 +940,30 @@ describe('DataMapper', () => {
             }
         );
 
-        it('should unmarshall any returned attributes', async () => {
-            promiseFunc.mockImplementation(() => Promise.resolve({Attributes: {
-                fizz: {S: 'buzz'},
-                bar: {NS: ['1', '2', '3']},
-                baz: {L: [{BOOL: true}, {N: '4'}]}
-            }}));
+        it('should return the unmarshalled input', async () => {
+            promiseFunc.mockImplementation(() => Promise.resolve({}));
 
             const result = await mapper.put({
                 item: {
-                    foo: 'buzz',
                     [DynamoDbTable]: 'foo',
                     [DynamoDbSchema]: {
                         foo: {
                             type: 'String',
                             attributeName: 'fizz',
+                            defaultProvider: () => 'keykey',
                             keyType: 'HASH',
                         },
                         bar: {
-                            type: 'Set',
-                            memberType: 'Number'
-                        },
-                        baz: {
-                            type: 'Tuple',
-                            members: [{type: 'Boolean'}, {type: 'Number'}]
+                            type: 'Number',
+                            versionAttribute: true
                         },
                     },
-                },
-                returnValues: "ALL_OLD"
+                }
             });
 
-            expect(result).toEqual({
-                foo: 'buzz',
-                bar: new Set([1, 2, 3]),
-                baz: [true, 4],
+            expect(result).toMatchObject({
+                foo: 'keykey',
+                bar: 0
             })
         });
     });
