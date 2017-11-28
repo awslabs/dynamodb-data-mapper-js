@@ -229,4 +229,22 @@ describe('DataMapper', () => {
             return record;
         }));
     });
+
+    it('should query objects', async () => {
+        const mapper = new DataMapper({client: ddbClient});
+
+        const item = new TestRecord();
+        item.key = idx++;
+        item.tuple = [item.key % 2 === 0, 'string'];
+
+        await mapper.put({item});
+
+        for await (const element of mapper.query({
+            valueConstructor: TestRecord,
+            keyCondition: {key: item.key},
+            readConsistency: 'strong',
+        })) {
+            expect(element).toEqual(item);
+        }
+    });
 });
