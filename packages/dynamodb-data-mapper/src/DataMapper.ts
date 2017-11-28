@@ -202,14 +202,12 @@ export class DataMapper {
     async put<T extends StringToAnyObjectMap = StringToAnyObjectMap>({
         item,
         condition,
-        returnValues = 'ALL_OLD',
         skipVersionCheck = this.skipVersionCheck,
-    }: PutParameters<T>): Promise<T|undefined> {
+    }: PutParameters<T>): Promise<T> {
         const schema = getSchema(item);
         const req: PutItemInput = {
             TableName: this.tableNamePrefix + getTableName(item),
             Item: marshallItem(schema, item),
-            ReturnValues: returnValues,
         };
 
         if (!skipVersionCheck) {
@@ -251,10 +249,13 @@ export class DataMapper {
             req.ExpressionAttributeValues = attributes.values;
         }
 
-        const response = await this.client.putItem(req).promise();
-        if (response.Attributes) {
-            return unmarshallItem<T>(schema, response.Attributes);
-        }
+        await this.client.putItem(req).promise();
+
+        return unmarshallItem<T>(
+            schema,
+            req.Item,
+            item.constructor as ZeroArgumentsConstructor<T>
+        );
     }
 
     /**
