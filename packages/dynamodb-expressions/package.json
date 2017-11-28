@@ -1,6 +1,6 @@
 {
   "name": "@aws/dynamodb-expressions",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Composable expression objects for Amazon DynamoDB",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
@@ -25,7 +25,7 @@
     "aws-sdk": "^2.7.0"
   },
   "dependencies": {
-    "@aws/dynamodb-auto-marshaller": "^0.1.0",
+    "@aws/dynamodb-auto-marshaller": "^0.2.0",
     "tslib": "^1.8"
   }
 }
