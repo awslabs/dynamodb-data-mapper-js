@@ -76,8 +76,8 @@ describe('DataMapper', () => {
                     }
                 ],
                 ProvisionedThroughput: {
-                    ReadCapacityUnits: 50,
-                    WriteCapacityUnits: 50,
+                    ReadCapacityUnits: 5,
+                    WriteCapacityUnits: 5,
                 },
             })
                 .promise(),
@@ -112,9 +112,9 @@ describe('DataMapper', () => {
             },
         };
 
-        await mapper.put({item});
+        expect(await mapper.put({item})).toEqual(item);
 
-        expect(await mapper.get({item}))
+        expect(await mapper.get({item, readConsistency: 'strong'}))
             .toEqual(item);
     });
 
