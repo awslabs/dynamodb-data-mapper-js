@@ -204,6 +204,7 @@ describe('annotations', () => {
     it('should marshall a full object graph according to the schema', async () => {
         const promiseFunc = jest.fn(() => Promise.resolve({Item: {}}));
         const mockDynamoDbClient = {
+            config: {},
             putItem: jest.fn(() => ({promise: promiseFunc})),
         };
 

@@ -1,4 +1,4 @@
-import {ReadConsistency} from "./constants";
+import {ReadConsistency, VERSION} from "./constants";
 import {ItemNotFoundException} from "./ItemNotFoundException";
 import {
     DataMapperConfiguration,
@@ -72,6 +72,7 @@ export class DataMapper {
         skipVersionCheck = false,
         tableNamePrefix = ''
     }: DataMapperConfiguration) {
+        client.config.customUserAgent = ` dynamodb-data-mapper-js/${VERSION}`;
         this.client = client;
         this.readConsistency = readConsistency;
         this.skipVersionCheck = skipVersionCheck;
