@@ -16,9 +16,18 @@ import {ItemNotFoundException} from "./ItemNotFoundException";
 type BinaryValue = ArrayBuffer|ArrayBufferView;
 
 describe('DataMapper', () => {
+    it('should set the customUserAgent config property on the client', () => {
+        const client: any = {config: {}};
+        new DataMapper({client});
+
+        expect(client.config.customUserAgent)
+            .toMatch('dynamodb-data-mapper-js/');
+    });
+
     describe('#delete', () => {
         const promiseFunc = jest.fn(() => Promise.resolve({Item: {}}));
         const mockDynamoDbClient = {
+            config: {},
             deleteItem: jest.fn(() => ({promise: promiseFunc})),
         };
 
@@ -376,6 +385,7 @@ describe('DataMapper', () => {
     describe('#get', () => {
         const promiseFunc = jest.fn(() => Promise.resolve({Item: {}}));
         const mockDynamoDbClient = {
+            config: {},
             getItem: jest.fn(() => ({promise: promiseFunc})),
         };
 
@@ -667,6 +677,7 @@ describe('DataMapper', () => {
     describe('#put', () => {
         const promiseFunc = jest.fn(() => Promise.resolve({Item: {}}));
         const mockDynamoDbClient = {
+            config: {},
             putItem: jest.fn(() => ({promise: promiseFunc})),
         };
 
@@ -970,7 +981,10 @@ describe('DataMapper', () => {
 
     describe('#query', () => {
         const promiseFunc = jest.fn();
-        const mockDynamoDbClient = {query: jest.fn()};
+        const mockDynamoDbClient = {
+            config: {},
+            query: jest.fn()
+        };
 
         beforeEach(() => {
             promiseFunc.mockClear();
@@ -1308,7 +1322,10 @@ describe('DataMapper', () => {
 
     describe('#scan', () => {
         const promiseFunc = jest.fn();
-        const mockDynamoDbClient = {scan: jest.fn()};
+        const mockDynamoDbClient = {
+            config: {},
+            scan: jest.fn()
+        };
 
         beforeEach(() => {
             promiseFunc.mockClear();
@@ -1781,6 +1798,7 @@ describe('DataMapper', () => {
 
         const promiseFunc = jest.fn();
         const mockDynamoDbClient = {
+            config: {},
             updateItem: jest.fn(),
         };
 
