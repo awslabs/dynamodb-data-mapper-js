@@ -246,7 +246,7 @@ describe('annotations', () => {
 
         post.replies[0].replies = [reply];
 
-        await mapper.put({item: post});
+        await mapper.put(post);
 
         expect(mockDynamoDbClient.putItem.mock.calls[0][0])
             .toMatchObject({

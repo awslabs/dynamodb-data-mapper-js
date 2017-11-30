@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "dom",
+      "es5"
+    ],
+    "module": "commonjs",
+    "strict": true
+  },
+  "typedocOptions": {
+    "mode": "file",
+    "out": "./docs",
+    "excludeNotExported": true,
+    "excludePrivate": true,
+    "hideGenerator": true,
+    "name": "Amazon DynamoDB DataMapper For JavaScript"
+  }
+}

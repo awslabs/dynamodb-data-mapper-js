@@ -18,14 +18,15 @@
  * representation in a DynamoDB Table or nested map.
  *
  * @example
- *  class FooDocument {
- *      [DynamoDbSchema]() {
- *          return {
- *              bar: {type: 'String'},
- *              baz: {type: 'Number'},
- *          };
+ *
+ *      class FooDocument {
+ *          [DynamoDbSchema]() {
+ *              return {
+ *                  bar: {type: 'String'},
+ *                  baz: {type: 'Number'},
+ *              };
+ *          }
  *      }
- *  }
  */
 export const DynamoDbSchema = Symbol('DynamoDbSchema');
 
@@ -34,18 +35,19 @@ export const DynamoDbSchema = Symbol('DynamoDbSchema');
  * table. Meant to be used in conjunction with {DynamoDbSchema}.
  *
  * @example
- *  class FooDocument {
- *      [DynamoDbTable]() {
- *          return 'FooTable';
- *      }
  *
- *      [DynamoDbSchema]() {
- *          return {
- *              bar: {type: 'String'},
- *              baz: {type: 'Number'},
- *          };
+ *      class FooDocument {
+ *          [DynamoDbTable]() {
+ *              return 'FooTable';
+ *          }
+ *
+ *          [DynamoDbSchema]() {
+ *              return {
+ *                  bar: {type: 'String'},
+ *                  baz: {type: 'Number'},
+ *              };
+ *          }
  *      }
- *  }
  */
 export const DynamoDbTable = Symbol('DynamoDbTableName');
 
@@ -55,24 +57,25 @@ export const DynamoDbTable = Symbol('DynamoDbTableName');
  * that have been altered.
  *
  * @example
- *  class FooDocument {
- *      constructor() {
- *          this._dirtyFields = new Set();
- *          this._foo = '';
- *      }
  *
- *      get foo() {
- *          return this._foo;
- *      }
+ *      class FooDocument {
+ *          constructor() {
+ *              this._dirtyFields = new Set();
+ *              this._foo = '';
+ *          }
  *
- *      set foo(value) {
- *          this._foo = value;
- *          this._dirtyFields.add('foo');
- *      }
+ *          get foo() {
+ *              return this._foo;
+ *          }
  *
- *      [DynamoDbDirtyFields]() {
- *          return this._dirtyFields.values();
+ *          set foo(value) {
+ *              this._foo = value;
+ *              this._dirtyFields.add('foo');
+ *          }
+ *
+ *          [DynamoDbDirtyFields]() {
+ *              return this._dirtyFields.values();
+ *          }
  *      }
- *  }
  */
 export const DynamoDbDirtyFields = Symbol('DynamoDbDirtyFields');

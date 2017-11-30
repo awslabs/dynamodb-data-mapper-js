@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "es5",
     "lib": [
+      "dom",
       "es5",
       "es2015.iterable",
       "es2015.promise",
@@ -19,5 +20,12 @@
     "emitDecoratorMetadata": true,
     "rootDir": "./src",
     "outDir": "./build"
+  },
+  "typedocOptions": {
+    "mode": "file",
+    "out": "../../docs/packages/dynamodb-data-mapper-annotations",
+    "excludeNotExported": true,
+    "excludePrivate": true,
+    "hideGenerator": true
   }
 }
