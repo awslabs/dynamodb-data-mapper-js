@@ -2,7 +2,7 @@
 
 [![Apache 2 License](https://img.shields.io/github/license/awslabs/dynamodb-data-mapper-js.svg?style=flat)](http://aws.amazon.com/apache-2-0/)
 
-This repository hosts several packages that collectively make up an object to 
+This repository hosts several packages that collectively make up an object to
 document mapper for JavaScript applications using Amazon DynamoDB.
 
 ## Getting started
@@ -16,31 +16,38 @@ DynamoDB by adding a few decorators:
 
 ```typescript
 import {DataMapper} from '@aws/dynamodb-data-mapper';
-import {attribute, table} from '@aws/dynamodb-data-mapper-annotations';
+import {
+    attribute,
+    hashKey,
+    rangeKey,
+    table,
+} from '@aws/dynamodb-data-mapper-annotations';
 
 @table('table_name')
 class MyDomainClass {
-    @attribute({keyType: 'HASH'})
+    @hashKey()
     id: string;
 
-    @attribute()
+    @rangeKey({defaultProvider: () => new Date()})
     createdAt: Date;
+
+    @attribute()
+    completed?: boolean;
 }
 
 // Now you can save instances of this item to DynamoDB
 const myDomainObject = new MyDomainClass();
 myDomainObject.id = 'id';
-myDomainObject.createdAt = new Date();
 const mapper = new DataMapper()
-mapper.put({item: myDomainObject});
+mapper.put(myDomainObject);
 ```
 
 Please refer to the individual packages for more detailed documentation.
 
 ## Constituent packages
 
-* [Amazon DynamoDB Automarshaller](packages/dynamodb-auto-marshaller)
-* [Amazon DynamoDB DataMapper](packages/dynamodb-data-mapper)
-* [Amazon DynamoDB DataMapper Annotations](packages/dynamodb-data-mapper-annotations)
-* [Amazon DynamoDB Data Marshaller](packages/dynamodb-data-marshaller)
-* [Amazon DynamoDB Expressions](packages/dynamodb-expressions)
+* [Amazon DynamoDB Automarshaller](packages/dynamodb-auto-marshaller/)
+* [Amazon DynamoDB DataMapper](packages/dynamodb-data-mapper/)
+* [Amazon DynamoDB DataMapper Annotations](packages/dynamodb-data-mapper-annotations/)
+* [Amazon DynamoDB Data Marshaller](packages/dynamodb-data-marshaller/)
+* [Amazon DynamoDB Expressions](packages/dynamodb-expressions/)

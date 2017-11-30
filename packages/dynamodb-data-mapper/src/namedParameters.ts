@@ -35,12 +35,7 @@ export interface DataMapperConfiguration {
     tableNamePrefix?: string;
 }
 
-export interface DeleteParameters<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
-    /**
-     * The item being deleted.
-     */
-    item: T;
-
+export interface DeleteOptions {
     /**
      * A condition on which this delete operation's completion will be
      * predicated.
@@ -60,12 +55,16 @@ export interface DeleteParameters<T extends StringToAnyObjectMap = StringToAnyOb
     skipVersionCheck?: boolean;
 }
 
-export interface GetParameters<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
+export interface DeleteParameters<
+    T extends StringToAnyObjectMap = StringToAnyObjectMap
+> extends DeleteOptions {
     /**
-     * The item being loaded.
+     * The item being deleted.
      */
     item: T;
+}
 
+export interface GetOptions {
     /**
      * The read consistency to use when loading the requested item.
      */
@@ -77,12 +76,16 @@ export interface GetParameters<T extends StringToAnyObjectMap = StringToAnyObjec
     projection?: ProjectionExpression;
 }
 
-export interface PutParameters<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
+export interface GetParameters<
+    T extends StringToAnyObjectMap = StringToAnyObjectMap
+> extends GetOptions {
     /**
-     * The object to be saved.
+     * The item being loaded.
      */
     item: T;
+}
 
+export interface PutOptions {
     /**
      * A condition on whose evaluation this put operation's completion will be
      * predicated.
@@ -97,7 +100,16 @@ export interface PutParameters<T extends StringToAnyObjectMap = StringToAnyObjec
     skipVersionCheck?: boolean;
 }
 
-export interface QueryParameters<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
+export interface PutParameters<
+    T extends StringToAnyObjectMap = StringToAnyObjectMap
+> extends PutOptions {
+    /**
+     * The object to be saved.
+     */
+    item: T;
+}
+
+export interface QueryOptions {
     /**
      * A condition expression that DynamoDB applies after the Query operation,
      * but before the data is returned to you. Items that do not satisfy the
@@ -113,13 +125,6 @@ export interface QueryParameters<T extends StringToAnyObjectMap = StringToAnyObj
      * index or global secondary index on the table.
      */
     indexName?: string;
-
-    /**
-     * The condition that specifies the key value(s) for items to be retrieved
-     * by the Query action.
-     */
-    keyCondition: ConditionExpression |
-        {[propertyName: string]: ConditionExpressionPredicate|any};
 
     /**
      * The maximum number of items to fetch per page of results.
@@ -160,6 +165,17 @@ export interface QueryParameters<T extends StringToAnyObjectMap = StringToAnyObj
      * The primary key of the first item that this operation will evaluate.
      */
     startKey?: {[key: string]: any};
+}
+
+export interface QueryParameters<
+    T extends StringToAnyObjectMap = StringToAnyObjectMap
+> extends QueryOptions {
+    /**
+     * The condition that specifies the key value(s) for items to be retrieved
+     * by the Query action.
+     */
+    keyCondition: ConditionExpression |
+        {[propertyName: string]: ConditionExpressionPredicate|any};
 
     /**
      * A constructor that creates objects representing one record returned by
@@ -168,7 +184,7 @@ export interface QueryParameters<T extends StringToAnyObjectMap = StringToAnyObj
     valueConstructor: ZeroArgumentsConstructor<T>;
 }
 
-export interface BaseScanParameters<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
+export interface BaseScanOptions {
     /**
      * A string that contains conditions that DynamoDB applies after the Query
      * operation, but before the data is returned to you. Items that do not
@@ -206,7 +222,9 @@ export interface BaseScanParameters<T extends StringToAnyObjectMap = StringToAny
      * The read consistency to use when loading the query results.
      */
     readConsistency?: ReadConsistency;
+}
 
+export interface CtorBearer<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
     /**
      * A constructor that creates objects representing one record returned by
      * the query operation.
@@ -214,9 +232,7 @@ export interface BaseScanParameters<T extends StringToAnyObjectMap = StringToAny
     valueConstructor: ZeroArgumentsConstructor<T>;
 }
 
-export interface BaseSequentialScanParameters<
-    T extends StringToAnyObjectMap = StringToAnyObjectMap
-> extends BaseScanParameters<T> {
+export interface BaseSequentialScanOptions extends BaseScanOptions {
     /**
      * For a parallel Scan request, Segment identifies an individual segment to
      * be scanned by an application worker.
@@ -241,37 +257,36 @@ export interface BaseSequentialScanParameters<
     totalSegments?: number;
 }
 
-export interface ScanParameters<
-    T extends StringToAnyObjectMap = StringToAnyObjectMap
-> extends BaseSequentialScanParameters<T> {
+export interface ScanOptions extends BaseSequentialScanOptions {
     segment?: undefined;
     totalSegments?: undefined;
 }
 
-export interface ParallelScanWorkerParameters<
+export type ScanParameters<
     T extends StringToAnyObjectMap = StringToAnyObjectMap
-> extends BaseSequentialScanParameters<T> {
+> = ScanOptions & CtorBearer<T>;
+
+export interface ParallelScanWorkerOptions extends BaseSequentialScanOptions {
     segment: number;
     totalSegments: number;
 }
 
-export interface ParallelScanParameters<
+export type ParallelScanWorkerParameters<
     T extends StringToAnyObjectMap = StringToAnyObjectMap
-> extends BaseScanParameters<T> {
+> = ParallelScanWorkerOptions & CtorBearer;
+
+export type ParallelScanParameters<
+    T extends StringToAnyObjectMap = StringToAnyObjectMap
+> = BaseScanOptions & CtorBearer<T> & {
     /**
      * The number of application workers that will perform the scan.
      *
      * Must be an integer between 1 and 1,000,000
      */
     segments: number;
-}
+};
 
-export interface UpdateParameters<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
-    /**
-     * The object to be saved.
-     */
-    item: T;
-
+export interface UpdateOptions {
     /**
      * A condition on whose evaluation this update operation's completion will
      * be predicated.
@@ -290,4 +305,13 @@ export interface UpdateParameters<T extends StringToAnyObjectMap = StringToAnyOb
      * from taking effect if the local version is out of date.
      */
     skipVersionCheck?: boolean;
+}
+
+export interface UpdateParameters<
+    T extends StringToAnyObjectMap = StringToAnyObjectMap
+> extends UpdateOptions {
+    /**
+     * The object to be saved.
+     */
+    item: T;
 }

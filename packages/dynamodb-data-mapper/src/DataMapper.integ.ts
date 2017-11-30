@@ -112,9 +112,9 @@ describe('DataMapper', () => {
             },
         };
 
-        expect(await mapper.put({item})).toEqual(item);
+        expect(await mapper.put(item)).toEqual(item);
 
-        expect(await mapper.get({item, readConsistency: 'strong'}))
+        expect(await mapper.get(item, {readConsistency: 'strong'}))
             .toEqual(item);
     });
 
@@ -138,13 +138,13 @@ describe('DataMapper', () => {
             },
         };
 
-        await mapper.put({item});
+        await mapper.put(item);
 
-        await expect(mapper.get({item, readConsistency: 'strong'})).resolves;
+        await expect(mapper.get(item, {readConsistency: 'strong'})).resolves;
 
-        await mapper.delete({item});
+        await mapper.delete(item);
 
-        await expect(mapper.get({item, readConsistency: 'strong'}))
+        await expect(mapper.get(item, {readConsistency: 'strong'}))
             .rejects
             .toMatchObject(new ItemNotFoundException({
                 TableName,
@@ -165,14 +165,13 @@ describe('DataMapper', () => {
             item.tuple = [item.key % 2 === 0, 'string'];
             item.scanIdentifier = scanIdentifier;
             keys.push(item.key);
-            puts.push(mapper.put({item}));
+            puts.push(mapper.put(item));
         }
 
         await Promise.all(puts);
 
         const results: Array<TestRecord> = [];
-        for await (const element of mapper.scan({
-            valueConstructor: TestRecord,
+        for await (const element of mapper.scan(TestRecord, {
             readConsistency: 'strong',
             filter: {
                 ...equals(scanIdentifier),
@@ -203,16 +202,14 @@ describe('DataMapper', () => {
             item.tuple = [item.key % 2 === 0, 'string'];
             item.scanIdentifier = scanIdentifier;
             keys.push(item.key);
-            puts.push(mapper.put({item}));
+            puts.push(mapper.put(item));
         }
 
         await Promise.all(puts);
 
         const results: Array<TestRecord> = [];
-        for await (const element of mapper.parallelScan({
-            valueConstructor: TestRecord,
+        for await (const element of mapper.parallelScan(TestRecord, 4, {
             readConsistency: 'strong',
-            segments: 4,
             filter: {
                 ...equals(scanIdentifier),
                 subject: 'scanIdentifier'
@@ -239,11 +236,11 @@ describe('DataMapper', () => {
 
         await mapper.put({item});
 
-        for await (const element of mapper.query({
-            valueConstructor: TestRecord,
-            keyCondition: {key: item.key},
-            readConsistency: 'strong',
-        })) {
+        for await (const element of mapper.query(
+            TestRecord,
+            {key: item.key},
+            {readConsistency: 'strong'}
+        )) {
             expect(element).toEqual(item);
         }
     });

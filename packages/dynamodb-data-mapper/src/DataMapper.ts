@@ -1,15 +1,23 @@
 import {ReadConsistency, VERSION} from "./constants";
 import {ItemNotFoundException} from "./ItemNotFoundException";
 import {
+    BaseScanOptions,
     DataMapperConfiguration,
+    DeleteOptions,
     DeleteParameters,
+    GetOptions,
     GetParameters,
     ParallelScanParameters,
+    ParallelScanWorkerOptions,
     ParallelScanWorkerParameters,
+    PutOptions,
     PutParameters,
+    QueryOptions,
     QueryParameters,
+    ScanOptions,
     ScanParameters,
     StringToAnyObjectMap,
+    UpdateOptions,
     UpdateParameters,
 } from './namedParameters';
 import {
@@ -83,13 +91,42 @@ export class DataMapper {
      * Perform a DeleteItem operation using the schema accessible via the
      * {DynamoDbSchema} method and the table name accessible via the
      * {DynamoDbTable} method on the item supplied.
+     *
+     * @param item The item to delete
+     * @param options Options to configure the DeleteItem operation
      */
-    async delete<T extends StringToAnyObjectMap = StringToAnyObjectMap>({
-        condition,
-        item,
-        returnValues = 'ALL_OLD',
-        skipVersionCheck = this.skipVersionCheck,
-    }: DeleteParameters<T>): Promise<T|undefined> {
+    delete<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
+        item: T,
+        options?: DeleteOptions
+    ): Promise<T|undefined>;
+
+    /**
+     * @deprecated
+     */
+    delete<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
+        parameters: DeleteParameters<T>
+    ): Promise<T|undefined>;
+
+    async delete<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
+        itemOrParameters: T|DeleteParameters<T>,
+        options: DeleteOptions = {}
+    ): Promise<T|undefined> {
+        let item: T;
+        if (
+            'item' in itemOrParameters &&
+            (itemOrParameters as DeleteParameters<T>).item[DynamoDbTable]
+        ) {
+            item = (itemOrParameters as DeleteParameters<T>).item;
+            options = itemOrParameters as DeleteParameters<T>;
+        } else {
+            item = itemOrParameters as T;
+        }
+        let {
+            condition,
+            returnValues = 'ALL_OLD',
+            skipVersionCheck = this.skipVersionCheck,
+        } = options;
+
         const schema = getSchema(item);
 
         const operationInput: DeleteItemInput = {
@@ -150,12 +187,41 @@ export class DataMapper {
      * Perform a GetItem operation using the schema accessible via the
      * {DynamoDbSchema} method and the table name accessible via the
      * {DynamoDbTable} method on the item supplied.
+     *
+     * @param item The item to get
+     * @param options Options to configure the GetItem operation
      */
-    async get<T extends StringToAnyObjectMap = StringToAnyObjectMap>({
-        item,
-        projection,
-        readConsistency = this.readConsistency,
-    }: GetParameters<T>): Promise<T> {
+    get<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
+        item: T,
+        options?: GetOptions
+    ): Promise<T>;
+
+    /**
+     * @deprecated
+     */
+    get<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
+        parameters: GetParameters<T>
+    ): Promise<T>;
+
+    async get<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
+        itemOrParameters: T|GetParameters<T>,
+        options: GetOptions = {}
+    ): Promise<T|undefined> {
+        let item: T;
+        if (
+            'item' in itemOrParameters &&
+            (itemOrParameters as GetParameters<T>).item[DynamoDbTable]
+        ) {
+            item = (itemOrParameters as GetParameters<T>).item;
+            options = itemOrParameters as GetParameters<T>;
+        } else {
+            item = itemOrParameters as T;
+        }
+        const {
+            projection,
+            readConsistency = this.readConsistency
+        } = options;
+
         const schema = getSchema(item);
         const operationInput: GetItemInput = {
             TableName: this.tableNamePrefix + getTableName(item),
@@ -196,15 +262,140 @@ export class DataMapper {
     }
 
     /**
+     * Perform a Scan operation using the schema accessible via the
+     * {DynamoDbSchema} method and the table name accessible via the
+     * {DynamoDbTable} method on the prototype of the constructor supplied.
+     *
+     * This scan will be performed by multiple parallel workers, each of which
+     * will perform a sequential scan of a segment of the table or index. Use
+     * the `segments` parameter to specify the number of workers to be used.
+     *
+     * @param valueConstructor  The constructor to be used for each item
+     *                          returned by the scan
+     * @param segments          The number of parallel workers to use to perform
+     *                          the scan
+     * @param options           Options to configure the Scan operation
+     *
+     * @return An asynchronous iterator that yields scan results. Intended
+     * to be consumed with a `for await ... of` loop.
+     */
+    parallelScan<T extends StringToAnyObjectMap>(
+        valueConstructor: ZeroArgumentsConstructor<T>,
+        segments: number,
+        options?: BaseScanOptions
+    ): AsyncIterableIterator<T>;
+
+    /**
+     * @deprecated
+     */
+    parallelScan<T extends StringToAnyObjectMap>(
+        parameters: ParallelScanParameters<T>
+    ): AsyncIterableIterator<T>;
+
+    async *parallelScan<T extends StringToAnyObjectMap>(
+        ctorOrParams: ZeroArgumentsConstructor<T>|ParallelScanParameters<T>,
+        segments?: number,
+        options: BaseScanOptions = {}
+    ): AsyncIterableIterator<T> {
+        let valueConstructor: ZeroArgumentsConstructor<T>;
+        if (typeof segments !== 'number') {
+            valueConstructor = (ctorOrParams as ParallelScanParameters<T>).valueConstructor;
+            segments = (ctorOrParams as ParallelScanParameters<T>).segments;
+            options = ctorOrParams as ParallelScanParameters<T>;
+        } else {
+            valueConstructor = ctorOrParams as ZeroArgumentsConstructor<T>;
+        }
+
+        const req = this.buildScanInput(valueConstructor, options);
+        const schema = getSchema(valueConstructor.prototype);
+
+        interface PendingResult {
+            iterator: AsyncIterator<T>;
+            result: Promise<{
+                iterator: AsyncIterator<T>;
+                result: IteratorResult<T>
+            }>;
+        }
+
+        const pendingResults: Array<PendingResult> = [];
+        function addToPending(iterator: AsyncIterator<T>): void {
+            const result = iterator.next().then(resolved => ({
+                iterator,
+                result: resolved
+            }));
+            pendingResults.push({iterator, result});
+        }
+
+        for (let i = 0; i < segments; i++) {
+            addToPending(this.doSequentialScan(
+                {
+                    ...req,
+                    TotalSegments: segments,
+                    Segment: i
+                },
+                schema,
+                valueConstructor
+            ));
+        }
+
+        while (pendingResults.length > 0) {
+            const {
+                result: {value, done},
+                iterator
+            } = await Promise.race(pendingResults.map(val => val.result));
+
+            for (let i = pendingResults.length - 1; i >= 0; i--) {
+                if (pendingResults[i].iterator === iterator) {
+                    pendingResults.splice(i, 1);
+                }
+            }
+
+            if (!done) {
+                addToPending(iterator);
+                yield value;
+            }
+        }
+    }
+
+    /**
      * Perform a PutItem operation using the schema accessible via the
      * {DynamoDbSchema} method and the table name accessible via the
      * {DynamoDbTable} method on the item supplied.
+     *
+     * @param item The item to save to DynamoDB
+     * @param options Options to configure the PutItem operation
      */
-    async put<T extends StringToAnyObjectMap = StringToAnyObjectMap>({
-        item,
-        condition,
-        skipVersionCheck = this.skipVersionCheck,
-    }: PutParameters<T>): Promise<T> {
+    put<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
+        item: T,
+        options?: PutOptions
+    ): Promise<T>;
+
+    /**
+     * @deprecated
+     */
+    put<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
+        parameters: PutParameters<T>
+    ): Promise<T>;
+
+    async put<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
+        itemOrParameters: T|PutParameters<T>,
+        options: PutOptions = {}
+    ): Promise<T> {
+        let item: T;
+        if (
+            'item' in itemOrParameters &&
+            (itemOrParameters as PutParameters<T>).item[DynamoDbTable]
+        ) {
+            item = (itemOrParameters as PutParameters<T>).item;
+            options = itemOrParameters as PutParameters<T>;
+        } else {
+            item = itemOrParameters as T;
+        }
+        let {
+            condition,
+            skipVersionCheck = this.skipVersionCheck,
+        } = options;
+
         const schema = getSchema(item);
         const req: PutItemInput = {
             TableName: this.tableNamePrefix + getTableName(item),
@@ -264,21 +455,53 @@ export class DataMapper {
      * {DynamoDbSchema} method and the table name accessible via the
      * {DynamoDbTable} method on the prototype of the constructor supplied.
      *
+     * @param valueConstructor  The constructor to use for each query result.
+     * @param keyCondition      A condition identifying a particular hash key
+     *                          value.
+     * @param options           Additional options for customizing the Query
+     *                          operation
+     *
      * @return An asynchronous iterator that yields query results. Intended
      * to be consumed with a `for await ... of` loop.
      */
-    async *query<T extends StringToAnyObjectMap = StringToAnyObjectMap>({
-        filter,
-        indexName,
-        keyCondition,
-        limit,
-        pageSize = limit,
-        projection,
-        readConsistency = this.readConsistency,
-        scanIndexForward,
-        startKey,
-        valueConstructor,
-    }: QueryParameters<T>) {
+    query<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
+        valueConstructor: ZeroArgumentsConstructor<T>,
+        keyCondition: ConditionExpression |
+            {[propertyName: string]: ConditionExpressionPredicate|any},
+        options?: QueryOptions
+    ): AsyncIterableIterator<T>;
+
+    /**
+     * @deprecated
+     */
+    query<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
+        parameters: QueryParameters<T>
+    ): AsyncIterableIterator<T>;
+
+    async *query<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
+        valueConstructorOrParameters: ZeroArgumentsConstructor<T>|QueryParameters<T>,
+        keyCondition?: ConditionExpression |
+            {[propertyName: string]: ConditionExpressionPredicate|any},
+        options: QueryOptions = {}
+    ) {
+        let valueConstructor: ZeroArgumentsConstructor<T>;
+        if (!keyCondition) {
+            valueConstructor = (valueConstructorOrParameters as QueryParameters<T>).valueConstructor;
+            keyCondition = (valueConstructorOrParameters as QueryParameters<T>).keyCondition;
+        } else {
+            valueConstructor = valueConstructorOrParameters as ZeroArgumentsConstructor<T>;
+        }
+        let {
+            filter,
+            indexName,
+            limit,
+            pageSize = limit,
+            projection,
+            readConsistency = this.readConsistency,
+            scanIndexForward,
+            startKey,
+        } = options;
+
         const req: QueryInput = {
             TableName: this.tableNamePrefix + getTableName(valueConstructor.prototype),
             ConsistentRead: readConsistency === 'strong',
@@ -338,99 +561,94 @@ export class DataMapper {
      * {DynamoDbSchema} method and the table name accessible via the
      * {DynamoDbTable} method on the prototype of the constructor supplied.
      *
+     * @param valueConstructor  The constructor to use for each item returned by
+     *                          the Scan operation.
+     * @param options           Additional options for customizing the Scan
+     *                          operation
+     *
      * @return An asynchronous iterator that yields scan results. Intended
      * to be consumed with a `for await ... of` loop.
      */
-    async *scan<T extends StringToAnyObjectMap>(
-        parameters: ScanParameters<T>|ParallelScanWorkerParameters<T>
-    ): AsyncIterableIterator<T> {
-        const {valueConstructor} = parameters;
-        const req = this.buildScanInput(parameters);
-        const schema = getSchema(valueConstructor.prototype);
-
-        yield* this.doSequentialScan(req, schema, valueConstructor);
-    }
+    scan<T extends StringToAnyObjectMap>(
+        valueConstructor: ZeroArgumentsConstructor<T>,
+        options?: ScanOptions|ParallelScanWorkerOptions
+    ): AsyncIterableIterator<T>;
 
     /**
-     * Perform a Scan operation using the schema accessible via the
-     * {DynamoDbSchema} method and the table name accessible via the
-     * {DynamoDbTable} method on the prototype of the constructor supplied.
-     *
-     * This scan will be performed by multiple parallel workers, each of which
-     * will perform a sequential scan of a segment of the table or index. Use
-     * the `segments` parameter to specify the number of workers to be used.
-     *
-     * @return An asynchronous iterator that yields scan results. Intended
-     * to be consumed with a `for await ... of` loop.
+     * @deprecated
      */
-    async *parallelScan<T extends StringToAnyObjectMap>(
-        {segments, ...parameters}: ParallelScanParameters<T>
+    scan<T extends StringToAnyObjectMap>(
+        parameters: ScanParameters<T>|ParallelScanWorkerParameters<T>
+    ): AsyncIterableIterator<T>;
+
+    async *scan<T extends StringToAnyObjectMap>(
+        ctorOrParams: ZeroArgumentsConstructor<T> |
+                      ScanParameters<T> |
+                      ParallelScanWorkerParameters<T>,
+        options: ScanOptions|ParallelScanWorkerOptions = {}
     ): AsyncIterableIterator<T> {
-        const {valueConstructor} = parameters;
-        const req = this.buildScanInput(parameters);
+        let valueConstructor: ZeroArgumentsConstructor<T>;
+        if (
+            'valueConstructor' in ctorOrParams &&
+            (ctorOrParams as ScanParameters<T>).valueConstructor.prototype &&
+            (ctorOrParams as ScanParameters<T>).valueConstructor.prototype[DynamoDbTable]
+        ) {
+            valueConstructor = (ctorOrParams as ScanParameters<T>).valueConstructor;
+            options = ctorOrParams as ScanParameters<T>;
+        } else {
+            valueConstructor = ctorOrParams as ZeroArgumentsConstructor<T>;
+        }
+
+        const req = this.buildScanInput(valueConstructor, options);
         const schema = getSchema(valueConstructor.prototype);
 
-        interface PendingResult {
-            iterator: AsyncIterator<T>;
-            result: Promise<{
-                iterator: AsyncIterator<T>;
-                result: IteratorResult<T>
-            }>;
-        }
-
-        const pendingResults: Array<PendingResult> = [];
-        function addToPending(iterator: AsyncIterator<T>): void {
-            const result = iterator.next().then(resolved => ({
-                iterator,
-                result: resolved
-            }));
-            pendingResults.push({iterator, result});
-        }
-
-        for (let i = 0; i < segments; i++) {
-            addToPending(this.doSequentialScan(
-                {
-                    ...req,
-                    TotalSegments: segments,
-                    Segment: i
-                },
-                schema,
-                valueConstructor
-            ));
-        }
-
-        while (pendingResults.length > 0) {
-            const {
-                result: {value, done},
-                iterator
-            } = await Promise.race(pendingResults.map(val => val.result));
-
-            for (let i = pendingResults.length - 1; i >= 0; i--) {
-                if (pendingResults[i].iterator === iterator) {
-                    pendingResults.splice(i, 1);
-                }
-            }
-
-            if (!done) {
-                addToPending(iterator);
-                yield value;
-            } else if (value !== undefined) {
-                yield value;
-            }
-        }
+        yield* this.doSequentialScan(
+            req,
+            schema,
+            valueConstructor as ZeroArgumentsConstructor<T>
+        );
     }
 
     /**
      * Perform an UpdateItem operation using the schema accessible via the
      * {DynamoDbSchema} method and the table name accessible via the
      * {DynamoDbTable} method on the item supplied.
+     *
+     * @param item The item to save to DynamoDB
+     * @param options Options to configure the UpdateItem operation
      */
-    async update<T extends StringToAnyObjectMap = StringToAnyObjectMap>({
-        item,
-        condition,
-        onMissing = 'remove',
-        skipVersionCheck = this.skipVersionCheck,
-    }: UpdateParameters<T>): Promise<T> {
+    update<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
+        item: T,
+        options?: UpdateOptions
+    ): Promise<T>;
+
+    /**
+     * @deprecated
+     */
+    update<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
+        parameters: UpdateParameters<T>
+    ): Promise<T>;
+
+    async update<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
+        itemOrParameters: T|UpdateParameters<T>,
+        options: UpdateOptions = {}
+    ): Promise<T> {
+        let item: T;
+        if (
+            'item' in itemOrParameters &&
+            (itemOrParameters as UpdateParameters<T>).item[DynamoDbTable]
+        ) {
+            item = (itemOrParameters as UpdateParameters<T>).item;
+            options = itemOrParameters as UpdateParameters<T>;
+        } else {
+            item = itemOrParameters as T;
+        }
+        let {
+            condition,
+            onMissing = 'remove',
+            skipVersionCheck = this.skipVersionCheck,
+        } = options;
+
         const req: UpdateItemInput = {
             TableName: this.tableNamePrefix + getTableName(item),
             ReturnValues: 'ALL_NEW',
@@ -511,18 +729,20 @@ export class DataMapper {
         );
     }
 
-    private buildScanInput({
-        filter,
-        indexName,
-        limit,
-        pageSize = limit,
-        projection,
-        readConsistency = this.readConsistency,
-        segment,
-        startKey,
-        totalSegments,
-        valueConstructor,
-    }: ScanParameters<any>|ParallelScanWorkerParameters<any>): ScanInput {
+    private buildScanInput(
+        valueConstructor: ZeroArgumentsConstructor<any>,
+        {
+            filter,
+            indexName,
+            limit,
+            pageSize = limit,
+            projection,
+            readConsistency = this.readConsistency,
+            segment,
+            startKey,
+            totalSegments,
+        }: ScanOptions|ParallelScanWorkerOptions
+    ): ScanInput {
         const req: ScanInput = {
             TableName: this.tableNamePrefix + getTableName(valueConstructor.prototype),
             ConsistentRead: readConsistency === 'strong',
