@@ -116,20 +116,20 @@ Object.defineProperties(MyDomainModel.prototype, {
 // delete an object
 const toDelete = new MyDomainModel();
 toDelete.id = 'DELETE_ME';
-mapper.delete({item: toDelete});
+mapper.delete(toDelete);
 
 // if that's too verbose, you can write the above as a single expression with
 // Object.assign:
-mapper.delete({item: Object.assign(new MyDomainModel(), {id: 'DELETE_ME'})});
+mapper.delete(Object.assign(new MyDomainModel(), {id: 'DELETE_ME'}));
 
 // fetch an object
 const toGet = new MyDomainModel();
 toGet.id = 'ID_TO_FETCH';
-const fetched = await mapper.get({item: toGet});
+const fetched = await mapper.get(toGet);
 
 // this should return a rejected promise, as it's fetching an object that does
 // not exist
-mapper.get({item: toDelete})
+mapper.get(toDelete)
     .catch(err => console.log('I expected this to happen'));
 
 // put something new into the database
@@ -139,15 +139,12 @@ toPut.foo = 'bar';
 toPut.bar = new Set<string>(['fizz', 'buzz', 'pop']);
 toPut.baz = [true, 'quux'];
 
-mapper.put({item: toPut}).then(() => {
+mapper.put(toPut).then((persisted: MyDomainModel) => {
     // now change the record a bit
     const toUpdate = new MyDomainModel();
-    toUpdate.id = toPut.id;
+    toUpdate.id = persisted.id;
     toUpdate.baz = [false, 'beep'];
-    return mapper.update({
-        item: toUpdate,
-        onMissing: 'skip'
-    })
+    return mapper.update(toUpdate, {onMissing: 'skip'});
 });
 ```
 
