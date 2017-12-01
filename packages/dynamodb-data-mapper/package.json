@@ -1,6 +1,6 @@
 {
   "name": "@aws/dynamodb-data-mapper",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A schema-based data mapper for Amazon DynamoDB",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
@@ -21,13 +21,13 @@
     "@types/jest": "^21",
     "@types/node": "^8.0.4",
     "aws-sdk": "^2.7.0",
-    "typedoc": "^0.9.0",
     "jest": "^21",
+    "typedoc": "^0.9.0",
     "typescript": "^2.6"
   },
   "dependencies": {
-    "@aws/dynamodb-data-marshaller": "^0.2.0",
-    "@aws/dynamodb-expressions": "^0.2.0",
+    "@aws/dynamodb-data-marshaller": "^0.2.1",
+    "@aws/dynamodb-expressions": "^0.2.1",
     "tslib": "^1.8"
   },
   "peerDependencies": {
