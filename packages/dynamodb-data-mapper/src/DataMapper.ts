@@ -25,7 +25,9 @@ import {
     DynamoDbTable,
 } from './protocols';
 import {
+    isKey,
     marshallItem,
+    marshallKey,
     marshallValue,
     Schema,
     SchemaType,
@@ -131,32 +133,25 @@ export class DataMapper {
 
         const operationInput: DeleteItemInput = {
             TableName: this.tableNamePrefix + getTableName(item),
-            Key: {},
+            Key: marshallKey(schema, item),
             ReturnValues: returnValues,
         };
 
-        for (const prop of Object.keys(schema)) {
-            let inputMember = item[prop];
-            const {attributeName = prop, ...fieldSchema} = schema[prop];
+        if (!skipVersionCheck) {
+            for (const prop of Object.keys(schema)) {
+                let inputMember = item[prop];
+                const {attributeName = prop, ...fieldSchema} = schema[prop];
 
-            if (isKey(fieldSchema)) {
-                const marshalled = marshallValue(fieldSchema, inputMember);
-                if (marshalled) {
-                    operationInput.Key[attributeName] = marshalled;
+                if (isVersionAttribute(fieldSchema) && inputMember !== undefined) {
+                    const {condition: versionCondition} = handleVersionAttribute(
+                        attributeName,
+                        inputMember
+                    );
+
+                    condition = condition
+                        ? {type: 'And', conditions: [condition, versionCondition]}
+                        : versionCondition;
                 }
-            } else if (
-                !skipVersionCheck &&
-                isVersionAttribute(fieldSchema) &&
-                inputMember !== undefined
-            ) {
-                const {condition: versionCondition} = handleVersionAttribute(
-                    attributeName,
-                    inputMember
-                );
-
-                condition = condition
-                    ? {type: 'And', conditions: [condition, versionCondition]}
-                    : versionCondition;
             }
         }
 
@@ -225,19 +220,9 @@ export class DataMapper {
         const schema = getSchema(item);
         const operationInput: GetItemInput = {
             TableName: this.tableNamePrefix + getTableName(item),
-            Key: {},
+            Key: marshallKey(schema, item),
             ConsistentRead: readConsistency === 'strong',
         };
-
-        for (const prop of Object.keys(schema)) {
-            const {attributeName = prop, ...fieldSchema} = schema[prop];
-            if (isKey(fieldSchema)) {
-                const marshalled = marshallValue(fieldSchema, item[prop]);
-                if (marshalled) {
-                    operationInput.Key[attributeName] = marshalled;
-                }
-            }
-        }
 
         if (projection) {
             const attributes = new ExpressionAttributes();
@@ -649,12 +634,12 @@ export class DataMapper {
             skipVersionCheck = this.skipVersionCheck,
         } = options;
 
+        const schema = getSchema(item);
         const req: UpdateItemInput = {
             TableName: this.tableNamePrefix + getTableName(item),
             ReturnValues: 'ALL_NEW',
-            Key: {},
+            Key: marshallKey(schema, item),
         };
-        const schema = getSchema(item);
 
         const attributes = new ExpressionAttributes();
         const expr = new UpdateExpression();
@@ -665,12 +650,8 @@ export class DataMapper {
             const {attributeName = key} = fieldSchema;
 
             if (isKey(fieldSchema)) {
-                // Marshall keys into the `Keys` property and do not include
-                // them in the update expression
-                const marshalled = marshallValue(fieldSchema, inputMember);
-                if (marshalled) {
-                    req.Key[attributeName] = marshalled;
-                }
+                // Keys must be excluded from the update expression
+                continue;
             } else if (isVersionAttribute(fieldSchema)) {
                 const {condition: versionCond, value} = handleVersionAttribute(
                     attributeName,
@@ -842,16 +823,6 @@ function getAttributeNameMapping(schema: Schema): AttributeNameMapping {
     }
 
     return mapping;
-}
-
-function isKey(fieldSchema: SchemaType): boolean {
-    return (
-        fieldSchema.type === 'Binary' ||
-        fieldSchema.type === 'Custom' ||
-        fieldSchema.type === 'Date' ||
-        fieldSchema.type === 'Number' ||
-        fieldSchema.type === 'String'
-    ) && fieldSchema.keyType !== undefined;
 }
 
 function isVersionAttribute(fieldSchema: SchemaType): boolean {
