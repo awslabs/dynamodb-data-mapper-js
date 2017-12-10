@@ -421,6 +421,18 @@ describe('marshallItem', () => {
                 },
             });
         });
+
+        it('should nullify empty members', () => {
+            expect(marshallItem(schema, {list: ['a', '', 'c']})).toEqual({
+                list: {
+                    L: [
+                        {S: 'a'},
+                        {NULL: true},
+                        {S: 'c'},
+                    ],
+                },
+            });
+        });
     });
 
     describe('map fields', () => {
