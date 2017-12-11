@@ -1,4 +1,9 @@
-import {ReadConsistency, VERSION} from "./constants";
+import {
+    MAX_WRITE_BATCH_SIZE,
+    ReadConsistency,
+    SyncOrAsyncIterable,
+    VERSION,
+} from "./constants";
 import {ItemNotFoundException} from "./ItemNotFoundException";
 import {
     BaseScanOptions,
@@ -49,14 +54,18 @@ import {
     UpdateExpression,
 } from "@aws/dynamodb-expressions";
 import {
+    AttributeMap,
+    BatchWriteItemInput,
     DeleteItemInput,
     GetItemInput,
     PutItemInput,
+    PutRequest,
     QueryInput,
     QueryOutput,
     ScanInput,
     ScanOutput,
     UpdateItemInput,
+    WriteRequest,
 } from "aws-sdk/clients/dynamodb";
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
@@ -87,6 +96,70 @@ export class DataMapper {
         this.readConsistency = readConsistency;
         this.skipVersionCheck = skipVersionCheck;
         this.tableNamePrefix = tableNamePrefix;
+    }
+
+    async batchDelete<T extends StringToAnyObjectMap>(
+        items: SyncOrAsyncIterable<T>
+    ) {
+        const iter = this.batchWrite(
+            async function *mapToDelete(): AsyncIterable<['Delete', T]> {
+                for await (const item of items) {
+                    yield ['Delete', item];
+                }
+            }()
+        );
+
+        for await (const _ of iter) {
+            // nothing is returned for deletes, but the iterator must be
+            // exhausted to ensure all deletions have been submitted
+        }
+    }
+
+    batchPut<T extends StringToAnyObjectMap>(
+        items: SyncOrAsyncIterable<T>
+    ) {
+        return this.batchWrite(
+            async function *mapToPut(): AsyncIterable<['Put', T]> {
+                for await (const item of items) {
+                    yield ['Put', item];
+                }
+            }()
+        );
+    }
+
+    async *batchWrite<T extends StringToAnyObjectMap>(
+        items: SyncOrAsyncIterable<['Put'|'Delete', T]>
+    ) {
+        const pending = new Map<string, PendingWrite<T>>();
+        const throttled = new Set<Promise<void>>();
+
+        for await (const [type, item] of items) {
+            const schema = getSchema(item);
+            const tableName = this.getTableName(item);
+            const marshalled = type === 'Delete'
+                ? marshallKey(schema, item)
+                : marshallItem(schema, item);
+
+            pending.set(`${tableName}::${itemIdentifier(marshalled)}`, {
+                type,
+                tableName,
+                marshalled,
+                schema,
+                constructor: item.constructor as ZeroArgumentsConstructor<T>,
+                attempts: 0
+            });
+
+            if (pending.size === MAX_WRITE_BATCH_SIZE) {
+                yield* this.flushPendingWrites(pending, throttled);
+            }
+        }
+
+        while (pending.size > 0 || throttled.size > 0) {
+            yield* this.flushPendingWrites(pending, throttled);
+            if (throttled.size > 0) {
+                await Promise.race(throttled);
+            }
+        }
     }
 
     /**
@@ -132,7 +205,7 @@ export class DataMapper {
         const schema = getSchema(item);
 
         const operationInput: DeleteItemInput = {
-            TableName: this.tableNamePrefix + getTableName(item),
+            TableName: this.getTableName(item),
             Key: marshallKey(schema, item),
             ReturnValues: returnValues,
         };
@@ -168,11 +241,11 @@ export class DataMapper {
             operationInput.ExpressionAttributeValues = attributes.values;
         }
 
-        const response = await this.client.deleteItem(operationInput).promise();
-        if (response.Attributes) {
+        const {Attributes} = await this.client.deleteItem(operationInput).promise();
+        if (Attributes) {
             return unmarshallItem<T>(
                 schema,
-                response.Attributes,
+                Attributes,
                 item.constructor as ZeroArgumentsConstructor<T>
             );
         }
@@ -219,7 +292,7 @@ export class DataMapper {
 
         const schema = getSchema(item);
         const operationInput: GetItemInput = {
-            TableName: this.tableNamePrefix + getTableName(item),
+            TableName: this.getTableName(item),
             Key: marshallKey(schema, item),
             ConsistentRead: readConsistency === 'strong',
         };
@@ -234,11 +307,11 @@ export class DataMapper {
             operationInput.ExpressionAttributeNames = attributes.names;
         }
 
-        const rawResponse = await this.client.getItem(operationInput).promise();
-        if (rawResponse.Item) {
+        const {Item} = await this.client.getItem(operationInput).promise();
+        if (Item) {
             return unmarshallItem<T>(
                 schema,
-                rawResponse.Item,
+                Item,
                 item.constructor as ZeroArgumentsConstructor<T>
             );
         }
@@ -383,7 +456,7 @@ export class DataMapper {
 
         const schema = getSchema(item);
         const req: PutItemInput = {
-            TableName: this.tableNamePrefix + getTableName(item),
+            TableName: this.getTableName(item),
             Item: marshallItem(schema, item),
         };
 
@@ -488,7 +561,7 @@ export class DataMapper {
         } = options;
 
         const req: QueryInput = {
-            TableName: this.tableNamePrefix + getTableName(valueConstructor.prototype),
+            TableName: this.getTableName(valueConstructor.prototype),
             ConsistentRead: readConsistency === 'strong',
             ScanIndexForward: scanIndexForward,
             Limit: pageSize,
@@ -636,7 +709,7 @@ export class DataMapper {
 
         const schema = getSchema(item);
         const req: UpdateItemInput = {
-            TableName: this.tableNamePrefix + getTableName(item),
+            TableName: this.getTableName(item),
             ReturnValues: 'ALL_NEW',
             Key: marshallKey(schema, item),
         };
@@ -725,7 +798,7 @@ export class DataMapper {
         }: ScanOptions|ParallelScanWorkerOptions
     ): ScanInput {
         const req: ScanInput = {
-            TableName: this.tableNamePrefix + getTableName(valueConstructor.prototype),
+            TableName: this.getTableName(valueConstructor.prototype),
             ConsistentRead: readConsistency === 'strong',
             Limit: pageSize,
             IndexName: indexName,
@@ -783,6 +856,71 @@ export class DataMapper {
             }
         } while (result.LastEvaluatedKey !== undefined);
     }
+
+    private async *flushPendingWrites<T>(
+        pending: Map<string, PendingWrite<T>>,
+        throttled: Set<Promise<void>>
+    ) {
+        const inFlight = new Map<string, PendingWrite<T>>();
+        const operationInput: BatchWriteItemInput = {RequestItems: {}};
+
+        for (const [identifier, data] of pending) {
+            const {type, tableName, marshalled} = data;
+
+            inFlight.set(identifier, data);
+            pending.delete(identifier);
+
+            if (operationInput.RequestItems[tableName] === undefined) {
+                operationInput.RequestItems[tableName] = [];
+            }
+            operationInput.RequestItems[tableName].push(
+                type === 'Delete'
+                    ? {DeleteRequest: {Key: marshalled}}
+                    : {PutRequest: {Item: marshalled}}
+            );
+
+            if (inFlight.size === MAX_WRITE_BATCH_SIZE) {
+                break;
+            }
+        }
+
+        const {UnprocessedItems = {}} = await this.client
+            .batchWriteItem(operationInput).promise();
+
+        for (const table of Object.keys(UnprocessedItems)) {
+            for (const item of UnprocessedItems[table]) {
+                const identifier = `${table}::${requestIdentifier(item)}`;
+                const data = inFlight.get(identifier) as PendingWrite<T>;
+
+                data.attempts++;
+                const promise = new Promise<void>(resolve => {
+                    setTimeout((data) => {
+                        pending.set(identifier, data);
+                        throttled.delete(promise);
+                        resolve();
+                    }, exponentialBackoff(data.attempts), data);
+                });
+                throttled.add(promise);
+                inFlight.delete(identifier);
+            }
+        }
+
+        for (const [_, {schema, constructor, marshalled}] of inFlight) {
+            yield unmarshallItem<T>(schema, marshalled, constructor);
+        }
+    }
+
+    private getTableName(item: StringToAnyObjectMap): string {
+        const tableName = item[DynamoDbTable];
+        if (typeof tableName === 'string') {
+            return this.tableNamePrefix + tableName;
+        }
+
+        throw new Error(
+            'The provided item did not adhere to the DynamoDbTable protocol. No' +
+            ' string property was found at the `DynamoDbTable` symbol'
+        );
+    }
 }
 
 function handleVersionAttribute(
@@ -813,6 +951,22 @@ function handleVersionAttribute(
     return {condition, value};
 }
 
+interface PendingRead<T> {
+    tableName: string;
+    schema: Schema;
+    marshalled: AttributeMap;
+    constructor: ZeroArgumentsConstructor<T>;
+    attempts: number;
+}
+
+interface PendingWrite<T> extends PendingRead<T> {
+    type: 'Put'|'Delete';
+}
+
+function exponentialBackoff(attempts: number) {
+    return Math.floor(Math.random() * Math.pow(2, attempts));
+}
+
 type AttributeNameMapping = {[propName: string]: string};
 function getAttributeNameMapping(schema: Schema): AttributeNameMapping {
     const mapping: AttributeNameMapping = {};
@@ -828,6 +982,28 @@ function getAttributeNameMapping(schema: Schema): AttributeNameMapping {
 function isVersionAttribute(fieldSchema: SchemaType): boolean {
     return fieldSchema.type === 'Number'
         && Boolean(fieldSchema.versionAttribute);
+}
+
+function itemIdentifier(marshalled: AttributeMap): string {
+    const keyAttributes: Array<string> = [];
+    for (const key of Object.keys(marshalled).sort()) {
+        const value = marshalled[key];
+        if (value.B || value.N || value.S) {
+            keyAttributes.push(
+                `${key}=${value.B || value.N || value.S}`
+            );
+        }
+    }
+
+    return keyAttributes.join(':');
+}
+
+function requestIdentifier(request: WriteRequest): string {
+    if (request.DeleteRequest) {
+        return itemIdentifier(request.DeleteRequest.Key);
+    } else {
+        return itemIdentifier((request.PutRequest as PutRequest).Item);
+    }
 }
 
 function normalizeConditionExpressionPaths(
@@ -955,17 +1131,5 @@ function getSchema(item: StringToAnyObjectMap): Schema {
     throw new Error(
         'The provided item did not adhere to the DynamoDbDocument protocol.' +
         ' No object property was found at the `DynamoDbSchema` symbol'
-    );
-}
-
-function getTableName(item: StringToAnyObjectMap): string {
-    const tableName = item[DynamoDbTable];
-    if (typeof tableName === 'string') {
-        return tableName;
-    }
-
-    throw new Error(
-        'The provided item did not adhere to the DynamoDbTable protocol. No' +
-        ' string property was found at the `DynamoDbTable` symbol'
     );
 }

@@ -24,6 +24,241 @@ describe('DataMapper', () => {
             .toMatch('dynamodb-data-mapper-js/');
     });
 
+    describe('#batchDelete', () => {
+        const promiseFunc = jest.fn(() => Promise.resolve({
+            UnprocessedItems: {}
+        }));
+        const mockDynamoDbClient = {
+            config: {},
+            batchWriteItem: jest.fn(() => ({promise: promiseFunc})),
+        };
+
+        beforeEach(() => {
+            promiseFunc.mockClear();
+            mockDynamoDbClient.batchWriteItem.mockClear();
+        });
+
+        const mapper = new DataMapper({
+            client: mockDynamoDbClient as any,
+        });
+
+        class Item {
+            constructor(public fizz?: number) {}
+
+            get [DynamoDbTable](): string {
+                return 'foo';
+            }
+
+            get [DynamoDbSchema](): Schema {
+                return {
+                    fizz: {
+                        type: 'Number',
+                        keyType: 'HASH'
+                    }
+                };
+            }
+        }
+
+        it(
+            'should should partition delete batches into requests with 25 or fewer items',
+            async () => {
+                const deletes: Array<Item> = [];
+                const expected: any = [
+                    [{RequestItems: {foo: []}}],
+                    [{RequestItems: {foo: []}}],
+                    [{RequestItems: {foo: []}}],
+                    [{RequestItems: {foo: []}}],
+                ];
+                for (let i = 0; i < 80; i++) {
+                    deletes.push(new Item(i));
+                    expected[Math.floor(i / 25)][0].RequestItems.foo.push({
+                        DeleteRequest: {
+                            Key: {
+                                fizz: {N: String(i)}
+                            }
+                        }
+                    });
+                }
+
+                await mapper.batchDelete(deletes);
+
+                const {calls} = mockDynamoDbClient.batchWriteItem.mock;
+                expect(calls.length).toBe(4);
+                expect(calls).toEqual(expected);
+            }
+        );
+
+        it('should should retry unprocessed items', async () => {
+            const deletes: Array<Item> = [];
+            const expected: any = [
+                [{RequestItems: {foo: []}}],
+                [{RequestItems: {foo: []}}],
+                [{RequestItems: {foo: []}}],
+                [{RequestItems: {foo: []}}],
+                [{RequestItems: {foo: []}}],
+            ];
+            for (let i = 0; i < 80; i++) {
+                deletes.push(new Item(i));
+                expected[Math.floor(i / 25)][0].RequestItems.foo.push({
+                    DeleteRequest: {
+                        Key: {
+                            fizz: {N: String(i)}
+                        }
+                    }
+                });
+            }
+
+            for (const failureId of ['24', '49', '74']) {
+                const item = {
+                    DeleteRequest: {
+                        Key: {fizz: {N: failureId}}
+                    }
+                };
+                promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                    UnprocessedItems: {foo: [item]}
+                }));
+                expected[4][0].RequestItems.foo.push(item);
+            }
+
+            await mapper.batchDelete(deletes);
+
+            const {calls} = mockDynamoDbClient.batchWriteItem.mock;
+            expect(calls.length).toBe(5);
+            expect(calls).toEqual(expected);
+        });
+    });
+
+    describe('#batchPut', () => {
+        const promiseFunc = jest.fn(() => Promise.resolve({
+            UnprocessedItems: {}
+        }));
+        const mockDynamoDbClient = {
+            config: {},
+            batchWriteItem: jest.fn(() => ({promise: promiseFunc})),
+        };
+
+        beforeEach(() => {
+            promiseFunc.mockClear();
+            mockDynamoDbClient.batchWriteItem.mockClear();
+        });
+
+        const mapper = new DataMapper({
+            client: mockDynamoDbClient as any,
+        });
+
+        let counter = 0;
+        class Item {
+            fizz?: number;
+
+            buzz?: Set<string>;
+
+            get [DynamoDbTable](): string {
+                return 'foo';
+            }
+
+            get [DynamoDbSchema](): Schema {
+                return {
+                    fizz: {
+                        type: 'Number',
+                        keyType: 'HASH',
+                        defaultProvider() {
+                            return counter++;
+                        }
+                    },
+                    buzz: {
+                        type: 'Set',
+                        memberType: 'String'
+                    }
+                };
+            }
+        }
+
+        beforeEach(() => {
+            counter = 0;
+        });
+
+        it(
+            'should should partition put batches into requests with 25 or fewer items',
+            async () => {
+                const puts: Array<Item> = [];
+                const expected: any = [
+                    [{RequestItems: {foo: []}}],
+                    [{RequestItems: {foo: []}}],
+                    [{RequestItems: {foo: []}}],
+                    [{RequestItems: {foo: []}}],
+                ];
+                for (let i = 0; i < 80; i++) {
+                    puts.push(new Item());
+                    expected[Math.floor(i / 25)][0].RequestItems.foo.push({
+                        PutRequest: {
+                            Item: {
+                                fizz: {N: String(i)}
+                            }
+                        }
+                    });
+                }
+
+                for await (const item of mapper.batchPut(puts)) {
+                    expect(item).toBeInstanceOf(Item);
+                    expect(typeof item.fizz).toBe('number');
+                }
+
+                const {calls} = mockDynamoDbClient.batchWriteItem.mock;
+                expect(calls.length).toBe(4);
+                expect(calls).toEqual(expected);
+            }
+        );
+
+        it('should should retry unprocessed items', async () => {
+            const puts: Array<Item> = [];
+            const expected: any = [
+                [{RequestItems: {foo: []}}],
+                [{RequestItems: {foo: []}}],
+                [{RequestItems: {foo: []}}],
+                [{RequestItems: {foo: []}}],
+                [{RequestItems: {foo: []}}],
+            ];
+            for (let i = 0; i < 80; i++) {
+                const item = new Item();
+                item.buzz = new Set<string>(['foo', 'bar', 'baz']);
+                puts.push(item);
+                expected[Math.floor(i / 25)][0].RequestItems.foo.push({
+                    PutRequest: {
+                        Item: {
+                            fizz: {N: String(i)},
+                            buzz: {SS: ['foo', 'bar', 'baz']}
+                        }
+                    }
+                });
+            }
+
+            for (const failureId of ['24', '49', '74']) {
+                const item = {
+                    PutRequest: {
+                        Item: {
+                            fizz: {N: failureId},
+                            buzz: {SS: ['foo', 'bar', 'baz']}
+                        }
+                    }
+                };
+                promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                    UnprocessedItems: {foo: [item]}
+                }));
+                expected[4][0].RequestItems.foo.push(item);
+            }
+
+            for await (const item of mapper.batchPut(puts)) {
+                expect(item).toBeInstanceOf(Item);
+                expect(typeof item.fizz).toBe('number');
+                expect(item.buzz).toBeInstanceOf(Set);
+            }
+
+            const {calls} = mockDynamoDbClient.batchWriteItem.mock;
+            expect(calls.length).toBe(5);
+            expect(calls).toEqual(expected);
+        });
+    });
+
     describe('#delete', () => {
         const promiseFunc = jest.fn(() => Promise.resolve({Item: {}}));
         const mockDynamoDbClient = {

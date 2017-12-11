@@ -1,15 +1,10 @@
 export const VERSION = '0.2.1';
 
-export const ReadConsistencies = {
-    eventual: true,
-    strong: true,
-};
+export const MAX_WRITE_BATCH_SIZE = 25;
 
-export type ReadConsistency = keyof typeof ReadConsistencies;
+export type OnMissingStrategy = 'remove'|'skip';
 
-export const OnMissingStrategies = {
-    remove: true,
-    skip: true,
-};
 
-export type OnMissingStrategy = keyof typeof OnMissingStrategies;
+export type ReadConsistency = 'eventual'|'strong';
+
+export type SyncOrAsyncIterable<T> = Iterable<T>|AsyncIterable<T>;

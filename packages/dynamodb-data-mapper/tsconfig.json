@@ -13,6 +13,7 @@
     "downlevelIteration": true,
     "importHelpers": true,
     "module": "commonjs",
+    "noUnusedLocals": true,
     "strict": true,
     "declaration": true,
     "sourceMap": true,

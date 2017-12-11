@@ -6,7 +6,6 @@ import {
     ConditionExpressionPredicate,
     ProjectionExpression,
 } from "@aws/dynamodb-expressions";
-import {ReturnValue} from 'aws-sdk/clients/dynamodb';
 
 export interface StringToAnyObjectMap {[key: string]: any;}
 
@@ -273,7 +272,7 @@ export interface ParallelScanWorkerOptions extends BaseSequentialScanOptions {
 
 export type ParallelScanWorkerParameters<
     T extends StringToAnyObjectMap = StringToAnyObjectMap
-> = ParallelScanWorkerOptions & CtorBearer;
+> = ParallelScanWorkerOptions & CtorBearer<T>;
 
 export type ParallelScanParameters<
     T extends StringToAnyObjectMap = StringToAnyObjectMap
