@@ -115,6 +115,19 @@ describe('marshallItem', () => {
             });
         });
 
+        it('should serialize binary fields from strings', () => {
+            const binaryDoc: Schema = {
+                binary: {type: 'Binary'},
+            };
+            const document = {
+                binary: '3q2+7w==',
+            };
+
+            expect(marshallItem(binaryDoc, document)).toEqual({
+                binary: {B: Uint8Array.from([0xde, 0xad, 0xbe, 0xef])},
+            });
+        });
+
         it('should convert empty binary values to NULL', () => {
             const binaryDoc: Schema = {
                 binary: {type: 'Binary'},
@@ -133,7 +146,7 @@ describe('marshallItem', () => {
                 binary: {type: 'Binary'},
             };
 
-            expect(() => marshallItem(binaryDoc, {binary: 'foo'})).toThrow();
+            expect(() => marshallItem(binaryDoc, {binary: 24})).toThrow();
         });
     });
 

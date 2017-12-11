@@ -10,6 +10,7 @@ import {
     Marshaller,
     NumberValueSet,
 } from "@aws/dynamodb-auto-marshaller";
+import {toByteArray} from 'base64-js';
 
 /**
  * Converts a JavaScript object into a DynamoDB Item.
@@ -254,7 +255,11 @@ export function marshallValue(
     throw new InvalidSchemaError(schemaType, 'Unrecognized schema node');
 }
 
-function marshallBinary(input: ArrayBuffer|ArrayBufferView): Uint8Array {
+function marshallBinary(input: string|ArrayBuffer|ArrayBufferView): Uint8Array {
+    if (typeof input === 'string') {
+        return toByteArray(input);
+    }
+
     if (ArrayBuffer.isView(input)) {
         return new Uint8Array(
             input.buffer,
