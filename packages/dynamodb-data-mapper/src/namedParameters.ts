@@ -34,6 +34,14 @@ export interface DataMapperConfiguration {
     tableNamePrefix?: string;
 }
 
+export interface BatchGetOptions extends GetOptions {
+    /**
+     * Options to apply to specific tables when performing a batch get operation
+     * that reads from multiple tables.
+     */
+    tableConfiguration?: { [key: string]: GetOptions; }
+}
+
 export interface DeleteOptions {
     /**
      * A condition on which this delete operation's completion will be

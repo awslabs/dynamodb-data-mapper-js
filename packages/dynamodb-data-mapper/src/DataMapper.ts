@@ -36,6 +36,7 @@ import {
     marshallValue,
     Schema,
     SchemaType,
+    toSchemaName,
     unmarshallItem,
     ZeroArgumentsConstructor,
 } from "@aws/dynamodb-data-marshaller";
@@ -231,10 +232,7 @@ export class DataMapper {
         if (condition) {
             const attributes = new ExpressionAttributes();
             operationInput.ConditionExpression = serializeConditionExpression(
-                normalizeConditionExpressionPaths(
-                    condition,
-                    getAttributeNameMapping(schema)
-                ),
+                normalizeConditionExpressionPaths(condition, schema),
                 attributes
             );
             operationInput.ExpressionAttributeNames = attributes.names;
@@ -299,9 +297,8 @@ export class DataMapper {
 
         if (projection) {
             const attributes = new ExpressionAttributes();
-            const mapping = getAttributeNameMapping(schema);
             operationInput.ProjectionExpression = serializeProjectionExpression(
-                projection.map(propName => toSchemaName(propName, mapping)),
+                projection.map(propName => toSchemaName(propName, schema)),
                 attributes
             );
             operationInput.ExpressionAttributeNames = attributes.names;
@@ -489,10 +486,7 @@ export class DataMapper {
         if (condition) {
             const attributes = new ExpressionAttributes();
             req.ConditionExpression = serializeConditionExpression(
-                normalizeConditionExpressionPaths(
-                    condition,
-                    getAttributeNameMapping(schema)
-                ),
+                normalizeConditionExpressionPaths(condition, schema),
                 attributes
             );
             req.ExpressionAttributeNames = attributes.names;
@@ -571,26 +565,24 @@ export class DataMapper {
         const schema = getSchema(valueConstructor.prototype);
 
         const attributes = new ExpressionAttributes();
-        const mapping = getAttributeNameMapping(schema);
-
         req.KeyConditionExpression = serializeConditionExpression(
             normalizeConditionExpressionPaths(
                 normalizeKeyCondition(keyCondition),
-                mapping
+                schema
             ),
             attributes
         );
 
         if (filter) {
             req.FilterExpression = serializeConditionExpression(
-                normalizeConditionExpressionPaths(filter, mapping),
+                normalizeConditionExpressionPaths(filter, schema),
                 attributes
             );
         }
 
         if (projection) {
             req.ProjectionExpression = serializeProjectionExpression(
-                projection.map(propName => toSchemaName(propName, mapping)),
+                projection.map(propName => toSchemaName(propName, schema)),
                 attributes
             );
         }
@@ -753,7 +745,7 @@ export class DataMapper {
             req.ConditionExpression = serializeConditionExpression(
                 normalizeConditionExpressionPaths(
                     condition,
-                    getAttributeNameMapping(schema)
+                    schema
                 ),
                 attributes
             );
@@ -809,18 +801,17 @@ export class DataMapper {
         const schema = getSchema(valueConstructor.prototype);
 
         const attributes = new ExpressionAttributes();
-        const mapping = getAttributeNameMapping(schema);
 
         if (filter) {
             req.FilterExpression = serializeConditionExpression(
-                normalizeConditionExpressionPaths(filter, mapping),
+                normalizeConditionExpressionPaths(filter, schema),
                 attributes
             );
         }
 
         if (projection) {
             req.ProjectionExpression = serializeProjectionExpression(
-                projection.map(propName => toSchemaName(propName, mapping)),
+                projection.map(propName => toSchemaName(propName, schema)),
                 attributes
             );
         }
@@ -967,16 +958,16 @@ function exponentialBackoff(attempts: number) {
     return Math.floor(Math.random() * Math.pow(2, attempts));
 }
 
-type AttributeNameMapping = {[propName: string]: string};
-function getAttributeNameMapping(schema: Schema): AttributeNameMapping {
-    const mapping: AttributeNameMapping = {};
-
-    for (const propName of Object.keys(schema)) {
-        const {attributeName = propName} = schema[propName];
-        mapping[propName] = attributeName;
+function getSchema(item: StringToAnyObjectMap): Schema {
+    const schema = item[DynamoDbSchema];
+    if (schema && typeof schema === 'object') {
+        return schema;
     }
 
-    return mapping;
+    throw new Error(
+        'The provided item did not adhere to the DynamoDbDocument protocol.' +
+        ' No object property was found at the `DynamoDbSchema` symbol'
+    );
 }
 
 function isVersionAttribute(fieldSchema: SchemaType): boolean {
@@ -998,22 +989,14 @@ function itemIdentifier(marshalled: AttributeMap): string {
     return keyAttributes.join(':');
 }
 
-function requestIdentifier(request: WriteRequest): string {
-    if (request.DeleteRequest) {
-        return itemIdentifier(request.DeleteRequest.Key);
-    } else {
-        return itemIdentifier((request.PutRequest as PutRequest).Item);
-    }
-}
-
 function normalizeConditionExpressionPaths(
     expr: ConditionExpression,
-    mapping: AttributeNameMapping
+    schema: Schema
 ): ConditionExpression {
     if (FunctionExpression.isFunctionExpression(expr)) {
         return new FunctionExpression(
             expr.name,
-            ...expr.args.map(arg => normalizeIfPath(arg, mapping))
+            ...expr.args.map(arg => normalizeIfPath(arg, schema))
         );
     }
 
@@ -1026,29 +1009,29 @@ function normalizeConditionExpressionPaths(
         case 'GreaterThanOrEqualTo':
             return {
                 ...expr,
-                subject: toSchemaName(expr.subject, mapping),
-                object: normalizeIfPath(expr.object, mapping),
+                subject: toSchemaName(expr.subject, schema),
+                object: normalizeIfPath(expr.object, schema),
             };
 
         case 'Between':
             return {
                 ...expr,
-                subject: toSchemaName(expr.subject, mapping),
-                lowerBound: normalizeIfPath(expr.lowerBound, mapping),
-                upperBound: normalizeIfPath(expr.upperBound, mapping),
+                subject: toSchemaName(expr.subject, schema),
+                lowerBound: normalizeIfPath(expr.lowerBound, schema),
+                upperBound: normalizeIfPath(expr.upperBound, schema),
             };
         case 'Membership':
             return {
                 ...expr,
-                subject: toSchemaName(expr.subject, mapping),
-                values: expr.values.map(arg => normalizeIfPath(arg, mapping)),
+                subject: toSchemaName(expr.subject, schema),
+                values: expr.values.map(arg => normalizeIfPath(arg, schema)),
             };
         case 'Not':
             return {
                 ...expr,
                 condition: normalizeConditionExpressionPaths(
                     expr.condition,
-                    mapping
+                    schema
                 ),
             };
         case 'And':
@@ -1056,15 +1039,15 @@ function normalizeConditionExpressionPaths(
             return {
                 ...expr,
                 conditions: expr.conditions.map(condition =>
-                    normalizeConditionExpressionPaths(condition, mapping)
+                    normalizeConditionExpressionPaths(condition, schema)
                 ),
             };
     }
 }
 
-function normalizeIfPath(path: any, mapping: AttributeNameMapping): any {
+function normalizeIfPath(path: any, schema: Schema): any {
     if (AttributePath.isAttributePath(path)) {
-        return toSchemaName(path, mapping);
+        return toSchemaName(path, schema);
     }
 
     return path;
@@ -1102,34 +1085,10 @@ function normalizeKeyCondition(
     return {type: 'And', conditions};
 }
 
-function toSchemaName(
-    path: AttributePath|string,
-    mapping: AttributeNameMapping
-): AttributePath|string {
-    if (typeof path === 'string') {
-        path = new AttributePath(path);
+function requestIdentifier(request: WriteRequest): string {
+    if (request.DeleteRequest) {
+        return itemIdentifier(request.DeleteRequest.Key);
+    } else {
+        return itemIdentifier((request.PutRequest as PutRequest).Item);
     }
-
-    return new AttributePath(path.elements.map(el => {
-        if (el.type === 'AttributeName' && el.name in mapping) {
-            return {
-                ...el,
-                name: mapping[el.name],
-            };
-        }
-
-        return el;
-    }));
-}
-
-function getSchema(item: StringToAnyObjectMap): Schema {
-    const schema = item[DynamoDbSchema];
-    if (schema && typeof schema === 'object') {
-        return schema;
-    }
-
-    throw new Error(
-        'The provided item did not adhere to the DynamoDbDocument protocol.' +
-        ' No object property was found at the `DynamoDbSchema` symbol'
-    );
 }
