@@ -2,6 +2,8 @@ export const VERSION = '0.2.1';
 
 export const MAX_WRITE_BATCH_SIZE = 25;
 
+export const MAX_READ_BATCH_SIZE = 25;
+
 export type OnMissingStrategy = 'remove'|'skip';
 
 

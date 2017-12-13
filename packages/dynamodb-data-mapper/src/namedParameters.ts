@@ -34,12 +34,12 @@ export interface DataMapperConfiguration {
     tableNamePrefix?: string;
 }
 
-export interface BatchGetOptions extends GetOptions {
+export interface BatchGetOptions extends ReadConsistencyConfiguration {
     /**
      * Options to apply to specific tables when performing a batch get operation
      * that reads from multiple tables.
      */
-    tableConfiguration?: { [key: string]: GetOptions; }
+    perTableOptions?: { [key: string]: GetOptions; }
 }
 
 export interface DeleteOptions {
@@ -71,12 +71,7 @@ export interface DeleteParameters<
     item: T;
 }
 
-export interface GetOptions {
-    /**
-     * The read consistency to use when loading the requested item.
-     */
-    readConsistency?: ReadConsistency;
-
+export interface GetOptions extends ReadConsistencyConfiguration {
     /**
      * The item attributes to get.
      */
@@ -116,7 +111,7 @@ export interface PutParameters<
     item: T;
 }
 
-export interface QueryOptions {
+export interface QueryOptions extends ReadConsistencyConfiguration {
     /**
      * A condition expression that DynamoDB applies after the Query operation,
      * but before the data is returned to you. Items that do not satisfy the
@@ -149,11 +144,6 @@ export interface QueryOptions {
      * The item attributes to get.
      */
     projection?: ProjectionExpression;
-
-    /**
-     * The read consistency to use when loading the query results.
-     */
-    readConsistency?: ReadConsistency;
 
     /**
      * Specifies the order for index traversal: If true, the traversal is
@@ -191,7 +181,14 @@ export interface QueryParameters<
     valueConstructor: ZeroArgumentsConstructor<T>;
 }
 
-export interface BaseScanOptions {
+export interface ReadConsistencyConfiguration {
+    /**
+     * The read consistency to require when reading from DynamoDB.
+     */
+    readConsistency?: ReadConsistency;
+}
+
+export interface BaseScanOptions extends ReadConsistencyConfiguration {
     /**
      * A string that contains conditions that DynamoDB applies after the Query
      * operation, but before the data is returned to you. Items that do not
@@ -224,11 +221,6 @@ export interface BaseScanOptions {
      * The item attributes to get.
      */
     projection?: ProjectionExpression;
-
-    /**
-     * The read consistency to use when loading the query results.
-     */
-    readConsistency?: ReadConsistency;
 }
 
 export interface CtorBearer<T extends StringToAnyObjectMap = StringToAnyObjectMap> {
