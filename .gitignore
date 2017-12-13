@@ -1,7 +1,3 @@
-*.d.ts
-*.js
-*.js.map
-
 yarn.lock
 package-lock.json
 
@@ -17,6 +13,7 @@ pids
 *.pid.lock
 lib-cov
 coverage
+build
 .nyc_output
 .grunt
 bower_components
