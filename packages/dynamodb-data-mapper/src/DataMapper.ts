@@ -28,8 +28,9 @@ import {
     UpdateParameters,
 } from './namedParameters';
 import {
-    DynamoDbSchema,
     DynamoDbTable,
+    getSchema,
+    getTableName,
 } from './protocols';
 import {
     isKey,
@@ -123,54 +124,50 @@ export class DataMapper {
         items: SyncOrAsyncIterable<T>,
         options: BatchGetOptions = {}
     ) {
-        const pending = new Map<string, PendingRead<T>>();
-        const throttled = new Set<Promise<void>>();
+        const pending: Array<[string, AttributeMap]> = [];
+        const throttled = new Set<Promise<ThrottledTableConfiguration<T, AttributeMap>>>();
         const {
-            readConsistency: defaultReadConsistency,
+            readConsistency = this.readConsistency,
             perTableOptions = {},
         } = options;
-        const tableConfigurations: TableConfigurations<T> = {};
+        const tableConfigurations: {
+            [key: string]: TableConfiguration<T, AttributeMap>
+        } = {};
 
-        for await (const item of items) {
-            const schema = getSchema(item);
-            const tableName = this.getTableName(item);
-            if (!(tableName in tableConfigurations)) {
-                const tableOptions = perTableOptions[tableName] || {};
-                tableConfigurations[tableName] = {
-                    keyProperties: getKeyProperties(schema),
-                    projection: tableOptions.projection,
-                    readConsistency: tableOptions.readConsistency || defaultReadConsistency,
-                    itemConfigurations: {}
-                };
-            }
-
-            const {keyProperties} = tableConfigurations[tableName];
-            const marshalled = marshallItem(schema, item);
-            const identifier = itemIdentifier(marshalled, keyProperties);
-            tableConfigurations[tableName].itemConfigurations[identifier] = {
-                schema,
-                constructor: item.constructor as ZeroArgumentsConstructor<T>,
-
-            };
-
-            pending.set(`${tableName}::${identifier}`, {
-                tableName,
-                marshalled,
-                schema,
-                constructor: item.constructor as ZeroArgumentsConstructor<T>,
-                attempts: 0
-            });
-
-            if (pending.size === MAX_WRITE_BATCH_SIZE) {
-                yield* this.flushPendingReads(pending, throttled);
-            }
+        if (isIterable(items)) {
+            yield* this.batchGetSync(
+                items,
+                pending,
+                throttled,
+                tableConfigurations,
+                perTableOptions,
+                readConsistency
+            );
+        } else {
+            yield* this.batchGetAsync(
+                items,
+                pending,
+                throttled,
+                tableConfigurations,
+                perTableOptions,
+                readConsistency
+            );
         }
 
-        while (pending.size > 0 || throttled.size > 0) {
-            yield* this.flushPendingReads(pending, throttled);
-            if (throttled.size > 0) {
-                await Promise.race(throttled);
+        while (pending.length > 0 || throttled.size > 0) {
+            while (pending.length < MAX_READ_BATCH_SIZE && throttled.size > 0) {
+                this.enqueueThrottledItems(
+                    await Promise.race(throttled),
+                    pending,
+                    throttled
+                );
             }
+
+            yield* this.flushPendingReads(
+                pending,
+                throttled,
+                tableConfigurations
+            );
         }
     }
 
@@ -834,6 +831,103 @@ export class DataMapper {
         );
     }
 
+    private addPendingRead<T>(
+        item: T,
+        pending: Array<[string, AttributeMap]>,
+        tableConfigs: {[key: string]: TableConfiguration<T, AttributeMap>},
+        perTableOptions: {[key: string]: GetOptions},
+        defaultReadConsistency: ReadConsistency
+    ): void {
+        const schema = getSchema(item);
+        const tableName = this.getTableName(item);
+        if (!(tableName in tableConfigs)) {
+            const {
+                projection,
+                readConsistency = defaultReadConsistency,
+            } = perTableOptions[tableName] || {} as GetOptions;
+            tableConfigs[tableName] = {
+                backoffFactor: 0,
+                keyProperties: getKeyProperties(schema),
+                name: tableName,
+                projection,
+                readConsistency,
+                itemConfigurations: {}
+            };
+        }
+
+        const tableData = tableConfigs[tableName];
+        const marshalled = marshallItem(schema, item);
+        const identifier = itemIdentifier(marshalled, tableData.keyProperties);
+        tableData.itemConfigurations[identifier] = {
+            schema,
+            constructor: item.constructor as ZeroArgumentsConstructor<T>,
+
+        };
+
+        if (tableData.tableThrottling) {
+            tableData.tableThrottling.unprocessed.push(marshalled);
+        } else {
+            pending.push([tableName, marshalled]);
+        }
+    }
+
+    private async *batchGetAsync<T>(
+        items: AsyncIterable<T>,
+        pending: Array<[string, AttributeMap]>,
+        throttled: Set<Promise<ThrottledTableConfiguration<T, AttributeMap>>>,
+        tableConfigs: {[tableName: string]: TableConfiguration<T, AttributeMap>},
+        perTableOptions: {[tableName: string]: GetOptions},
+        readConsistency: ReadConsistency
+    ) {
+        const iterator = items[Symbol.asyncIterator]();
+        let next = iterator.next();
+        let done = false;
+
+        while (!done) {
+            const toProcess = await Promise.race([
+                next,
+                Promise.race(throttled)
+            ]);
+
+            if (isIteratorResult(toProcess)) {
+                done = toProcess.done;
+                if (!done) {
+                    this.addPendingRead(
+                        toProcess.value,
+                        pending,
+                        tableConfigs,
+                        perTableOptions,
+                        readConsistency
+                    );
+                    next = iterator.next();
+                }
+            } else {
+                this.enqueueThrottledItems(toProcess, pending, throttled);
+            }
+
+            if (pending.length >= MAX_READ_BATCH_SIZE) {
+                yield* this.flushPendingReads(pending, throttled, tableConfigs);
+            }
+        }
+    }
+
+    private async *batchGetSync<T>(
+        items: Iterable<T>,
+        pending: Array<[string, AttributeMap]>,
+        throttled: Set<Promise<ThrottledTableConfiguration<T, AttributeMap>>>,
+        configs: {[tableName: string]: TableConfiguration<T, AttributeMap>},
+        options: {[tableName: string]: GetOptions},
+        consistency: ReadConsistency
+    ) {
+        for (const item of items) {
+            this.addPendingRead(item, pending, configs, options, consistency);
+
+            if (pending.length === MAX_READ_BATCH_SIZE) {
+                yield* this.flushPendingReads(pending, throttled, configs);
+            }
+        }
+    }
+
     private buildScanInput(
         valueConstructor: ZeroArgumentsConstructor<any>,
         {
@@ -907,9 +1001,29 @@ export class DataMapper {
         } while (result.LastEvaluatedKey !== undefined);
     }
 
+    private enqueueThrottledItems<T, E extends TableConfigurationElement>(
+        table: ThrottledTableConfiguration<T, E>,
+        pending: Array<[string, E]>,
+        throttled: Set<Promise<ThrottledTableConfiguration<T, E>>>
+    ): void {
+        const {
+            tableThrottling: {backoffWaiter, unprocessed}
+        } = table;
+        if (unprocessed.length > 0) {
+            pending.push(...unprocessed.map(
+                attr => [table.name, attr] as [string, E]
+            ));
+            unprocessed.length = 0;
+        }
+
+        throttled.delete(backoffWaiter);
+        delete table.tableThrottling;
+    }
+
     private async *flushPendingReads<T>(
         toFlush: Array<[string, AttributeMap]>,
-        throttled: Set<Promise<void>>
+        throttled: Set<Promise<ThrottledTableConfiguration<T, AttributeMap>>>,
+        tables: {[key: string]: TableConfiguration<T, AttributeMap>}
     ) {
         const operationInput: BatchGetItemInput = {RequestItems: {}};
         let batchSize = 0;
@@ -928,29 +1042,57 @@ export class DataMapper {
             }
         }
 
-        const {Responses = {}, UnprocessedKeys = {}} = await this.client
-            .batchGetItem(operationInput).promise();
+        const {
+            Responses = {},
+            UnprocessedKeys = {},
+        } = await this.client.batchGetItem(operationInput).promise();
 
+        const unprocessedTables = new Set<string>();
         for (const table of Object.keys(UnprocessedKeys)) {
-            for (const item of UnprocessedKeys[table].Keys) {
-                const identifier = `${table}::${itemIdentifier(item)}`;
-                const data = inFlight.get(identifier) as PendingWrite<T>;
+            unprocessedTables.add(table);
+            const tableData = tables[table];
+            tableData.backoffFactor++;
+            let unprocessed = UnprocessedKeys[table].Keys;
+            if (tableData.tableThrottling) {
+                throttled.delete(tableData.tableThrottling.backoffWaiter);
+                unprocessed = tableData.tableThrottling.unprocessed
+                    .concat(unprocessed);
+            }
 
-                data.attempts++;
-                const promise = new Promise<void>(resolve => {
-                    setTimeout((data) => {
-                        pending.set(identifier, data);
-                        throttled.delete(promise);
-                        resolve();
-                    }, exponentialBackoff(data.attempts), data);
-                });
-                throttled.add(promise);
-                inFlight.delete(identifier);
+            tableData.tableThrottling = {
+                unprocessed,
+                backoffWaiter: new Promise(resolve => {
+                    setTimeout(
+                        resolve,
+                        exponentialBackoff(tableData.backoffFactor),
+                        tableData
+                    );
+                })
+            };
+
+            throttled.add(tableData.tableThrottling.backoffWaiter);
+        }
+
+        for (let i = toFlush.length - 1; i > -1; i--) {
+            const [table, marshalled] = toFlush[i];
+            if (unprocessedTables.has(table)) {
+                (tables[table] as ThrottledTableConfiguration<T, AttributeMap>)
+                    .tableThrottling.unprocessed.push(marshalled);
+                toFlush.splice(i, 1);
             }
         }
 
-        for (const [_, {schema, constructor, marshalled}] of inFlight) {
-            yield unmarshallItem<T>(schema, marshalled, constructor);
+        for (const table of Object.keys(Responses)) {
+            const tableData = tables[table];
+            tableData.backoffFactor = Math.max(0, tableData.backoffFactor - 1);
+            for (const item of Responses[table]) {
+                const identifier = itemIdentifier(item, tableData.keyProperties);
+                const {
+                    constructor,
+                    schema,
+                } = tableData.itemConfigurations[identifier];
+                yield unmarshallItem<T>(schema, item, constructor);
+            }
         }
     }
 
@@ -1008,15 +1150,7 @@ export class DataMapper {
     }
 
     private getTableName(item: StringToAnyObjectMap): string {
-        const tableName = item[DynamoDbTable];
-        if (typeof tableName === 'string') {
-            return this.tableNamePrefix + tableName;
-        }
-
-        throw new Error(
-            'The provided item did not adhere to the DynamoDbTable protocol. No' +
-            ' string property was found at the `DynamoDbTable` symbol'
-        );
+        return getTableName(item, this.tableNamePrefix);
     }
 }
 
@@ -1029,19 +1163,33 @@ interface PendingWrite<T> {
     attempts: number;
 }
 
-interface TableConfigurations<T> {
-    [key: string]: {
-        keyProperties: Array<string>;
-        projection?: any;
-        readConsistency?: ReadConsistency;
-        itemConfigurations: {
-            [itemIdentifier: string]: {
-                schema: Schema;
-                constructor: ZeroArgumentsConstructor<T>;
-                attempts: number;
-            }
+interface TableConfiguration<T, E extends TableConfigurationElement> {
+    backoffFactor: number;
+    keyProperties: Array<string>;
+    name: string;
+    projection?: any;
+    readConsistency?: ReadConsistency;
+    tableThrottling?: TableThrottlingTracker<T, E>;
+    itemConfigurations: {
+        [itemIdentifier: string]: {
+            schema: Schema;
+            constructor: ZeroArgumentsConstructor<T>;
         }
     }
+}
+
+type TableConfigurationElement = AttributeMap|['Put'|'Delete', AttributeMap];
+
+interface TableThrottlingTracker<T, E extends TableConfigurationElement> {
+    backoffWaiter: Promise<ThrottledTableConfiguration<T, E>>;
+    unprocessed: Array<E>;
+}
+
+interface ThrottledTableConfiguration<
+    T,
+    E extends TableConfigurationElement
+> extends TableConfiguration<T, E> {
+    tableThrottling: TableThrottlingTracker<T, E>;
 }
 
 function exponentialBackoff(attempts: number) {
@@ -1058,18 +1206,6 @@ function getKeyProperties(schema: Schema): Array<string> {
     }
 
     return keys;
-}
-
-function getSchema(item: StringToAnyObjectMap): Schema {
-    const schema = item[DynamoDbSchema];
-    if (schema && typeof schema === 'object') {
-        return schema;
-    }
-
-    throw new Error(
-        'The provided item did not adhere to the DynamoDbDocument protocol.' +
-        ' No object property was found at the `DynamoDbSchema` symbol'
-    );
 }
 
 function handleVersionAttribute(
@@ -1098,6 +1234,14 @@ function handleVersionAttribute(
     }
 
     return {condition, value};
+}
+
+function isIterable<T>(arg: any): arg is Iterable<T> {
+    return Boolean(arg) && typeof arg[Symbol.iterator] === 'function';
+}
+
+function isIteratorResult<T>(arg: any): arg is IteratorResult<T> {
+    return Boolean(arg) && typeof arg.done === 'boolean';
 }
 
 function isVersionAttribute(fieldSchema: SchemaType): boolean {
@@ -1216,8 +1360,8 @@ function normalizeKeyCondition(
 
 function requestIdentifier(request: WriteRequest): string {
     if (request.DeleteRequest) {
-        return itemIdentifier(request.DeleteRequest.Key);
+        return itemIdentifier(request.DeleteRequest.Key, []);
     } else {
-        return itemIdentifier((request.PutRequest as PutRequest).Item);
+        return itemIdentifier((request.PutRequest as PutRequest).Item, []);
     }
 }
