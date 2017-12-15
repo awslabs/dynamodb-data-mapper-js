@@ -4,6 +4,7 @@ import {
     ReadConsistency,
     SyncOrAsyncIterable,
     VERSION,
+    WriteType,
 } from "./constants";
 import {ItemNotFoundException} from "./ItemNotFoundException";
 import {
@@ -64,13 +65,11 @@ import {
     DeleteItemInput,
     GetItemInput,
     PutItemInput,
-    PutRequest,
     QueryInput,
     QueryOutput,
     ScanInput,
     ScanOutput,
     UpdateItemInput,
-    WriteRequest,
 } from "aws-sdk/clients/dynamodb";
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
@@ -103,13 +102,26 @@ export class DataMapper {
         this.tableNamePrefix = tableNamePrefix;
     }
 
+    /**
+     * Deletes items from DynamoDB in batches of 25 or fewer via one or more
+     * BatchWriteItem operations. The items may be from any number of tables;
+     * tables and schemas for each item are determined using the schema
+     * {DynamoDbSchema} property and the {DynamoDbTable} property on defined on
+     * each item supplied.
+     *
+     * This method will automatically retry any delete requests returned by
+     * DynamoDB as unprocessed. Exponential backoff on unprocessed items is
+     * employed on a per-table basis.
+     *
+     * @param items A synchronous or asynchronous iterable of items to delete.
+     */
     async batchDelete<T extends StringToAnyObjectMap>(
         items: SyncOrAsyncIterable<T>
     ) {
         const iter = this.batchWrite(
-            async function *mapToDelete(): AsyncIterable<['Delete', T]> {
+            async function *mapToDelete(): AsyncIterable<['delete', T]> {
                 for await (const item of items) {
-                    yield ['Delete', item];
+                    yield ['delete', item];
                 }
             }()
         );
@@ -120,6 +132,19 @@ export class DataMapper {
         }
     }
 
+    /**
+     * Retrieves items from DynamoDB in batches of 100 or fewer via one or more
+     * BatchGetItem operations. The items may be from any number of tables;
+     * tables and schemas for each item are determined using the schema
+     * {DynamoDbSchema} property and the {DynamoDbTable} property on defined on
+     * each item supplied.
+     *
+     * This method will automatically retry any get requests returned by
+     * DynamoDB as unprocessed. Exponential backoff on unprocessed items is
+     * employed on a per-table basis.
+     *
+     * @param items A synchronous or asynchronous iterable of items to get.
+     */
     async *batchGet<T extends StringToAnyObjectMap>(
         items: SyncOrAsyncIterable<T>,
         options: BatchGetOptions = {}
@@ -171,58 +196,82 @@ export class DataMapper {
         }
     }
 
+    /**
+     * Puts items into DynamoDB in batches of 25 or fewer via one or more
+     * BatchWriteItem operations. The items may be from any number of tables;
+     * tables and schemas for each item are determined using the schema
+     * {DynamoDbSchema} property and the {DynamoDbTable} property on defined on
+     * each item supplied.
+     *
+     * This method will automatically retry any put requests returned by
+     * DynamoDB as unprocessed. Exponential backoff on unprocessed items is
+     * employed on a per-table basis.
+     *
+     * @param items A synchronous or asynchronous iterable of items to put.
+     */
     batchPut<T extends StringToAnyObjectMap>(
         items: SyncOrAsyncIterable<T>
     ) {
-        return this.batchWrite(
-            async function *mapToPut(): AsyncIterable<['Put', T]> {
-                for await (const item of items) {
-                    yield ['Put', item];
+        const generator: SyncOrAsyncIterable<[WriteType, T]> = isIterable(items)
+            ? function *mapToPut() {
+                for (const item of items) {
+                    yield ['put', item] as [WriteType, T];
                 }
             }()
-        );
+            : async function *mapToPut() {
+                for await (const item of items) {
+                    yield ['put', item] as [WriteType, T];
+                }
+            }();
+
+        return this.batchWrite(generator);
     }
 
+    /**
+     * Puts or deletes items from DynamoDB in batches of 25 or fewer via one or
+     * more BatchWriteItem operations. The items may belong to any number of
+     * tables; tables and schemas for each item are determined using the schema
+     * {DynamoDbSchema} property and the {DynamoDbTable} property on defined on
+     * each item supplied.
+     *
+     * This method will automatically retry any write requests returned by
+     * DynamoDB as unprocessed. Exponential backoff on unprocessed items is
+     * employed on a per-table basis.
+     *
+     * @param items A synchronous or asynchronous iterable of tuples of the
+     * string 'Put'|'Delete' and the item on which to perform the specified
+     * write action.
+     */
     async *batchWrite<T extends StringToAnyObjectMap>(
-        items: SyncOrAsyncIterable<['Put'|'Delete', T]>
+        items: SyncOrAsyncIterable<[WriteType, T]>
     ) {
-        const pending = new Map<string, PendingWrite<T>>();
-        const throttled = new Set<Promise<void>>();
+        const pending: Array<[string, WritePair]> = [];
+        const throttled = new Set<Promise<ThrottledTableConfiguration<T, WritePair>>>();
+        const configs: {[key: string]: TableConfiguration<T, WritePair>} = {};
 
-        for await (const [type, item] of items) {
-            const schema = getSchema(item);
-            const tableName = this.getTableName(item);
-            const keys = getKeyProperties(schema);
-            const marshalled = type === 'Delete'
-                ? marshallKey(schema, item)
-                : marshallItem(schema, item);
-
-            pending.set(`${tableName}::${itemIdentifier(marshalled, keys)}`, {
-                type,
-                tableName,
-                marshalled,
-                schema,
-                constructor: item.constructor as ZeroArgumentsConstructor<T>,
-                attempts: 0
-            });
-
-            if (pending.size === MAX_WRITE_BATCH_SIZE) {
-                yield* this.flushPendingWrites(pending, throttled);
-            }
+        if (isIterable(items)) {
+            yield* this.batchWriteSync(items, pending, throttled, configs);
+        } else {
+            yield* this.batchWriteAsync(items, pending, throttled, configs);
         }
 
-        while (pending.size > 0 || throttled.size > 0) {
-            yield* this.flushPendingWrites(pending, throttled);
-            if (throttled.size > 0) {
-                await Promise.race(throttled);
+        while (pending.length > 0 || throttled.size > 0) {
+            while (pending.length < MAX_WRITE_BATCH_SIZE && throttled.size > 0) {
+                this.enqueueThrottledItems(
+                    await Promise.race(throttled),
+                    pending,
+                    throttled
+                );
             }
+
+            yield* this.flushPendingWrites(pending, throttled, configs);
         }
     }
 
     /**
      * Perform a DeleteItem operation using the schema accessible via the
-     * {DynamoDbSchema} method and the table name accessible via the
-     * {DynamoDbTable} method on the item supplied.
+     * {DynamoDbSchema} property and the table name accessible via the
+     * {DynamoDbTable} property on the item supplied.
      *
      * @param item The item to delete
      * @param options Options to configure the DeleteItem operation
@@ -845,14 +894,23 @@ export class DataMapper {
                 projection,
                 readConsistency = defaultReadConsistency,
             } = perTableOptions[tableName] || {} as GetOptions;
+
             tableConfigs[tableName] = {
                 backoffFactor: 0,
                 keyProperties: getKeyProperties(schema),
                 name: tableName,
-                projection,
                 readConsistency,
                 itemConfigurations: {}
             };
+
+            if (projection) {
+                const attributes = new ExpressionAttributes();
+                tableConfigs[tableName].projection = serializeProjectionExpression(
+                    projection.map(propName => toSchemaName(propName, schema)),
+                    attributes
+                );
+                tableConfigs[tableName].attributeNames = attributes.names;
+            }
         }
 
         const tableData = tableConfigs[tableName];
@@ -861,13 +919,47 @@ export class DataMapper {
         tableData.itemConfigurations[identifier] = {
             schema,
             constructor: item.constructor as ZeroArgumentsConstructor<T>,
-
         };
 
         if (tableData.tableThrottling) {
             tableData.tableThrottling.unprocessed.push(marshalled);
         } else {
             pending.push([tableName, marshalled]);
+        }
+    }
+
+    private addPendingWrite<T>(
+        type: WriteType,
+        item: T,
+        pending: Array<[string, WritePair]>,
+        tableConfigs: {[key: string]: TableConfiguration<T, WritePair>}
+    ): void {
+        const schema = getSchema(item);
+        const tableName = this.getTableName(item);
+        if (!(tableName in tableConfigs)) {
+            tableConfigs[tableName] = {
+                backoffFactor: 0,
+                keyProperties: getKeyProperties(schema),
+                name: tableName,
+                itemConfigurations: {}
+            };
+        }
+
+        const tableData = tableConfigs[tableName];
+        const marshalled = type === 'delete'
+            ? marshallKey(schema, item)
+            : marshallItem(schema, item);
+        const identifier = itemIdentifier(marshalled, tableData.keyProperties);
+        tableData.itemConfigurations[identifier] = {
+            schema,
+            constructor: item.constructor as ZeroArgumentsConstructor<T>,
+
+        };
+
+        if (tableData.tableThrottling) {
+            tableData.tableThrottling.unprocessed.push([type, marshalled]);
+        } else {
+            pending.push([tableName, [type, marshalled]]);
         }
     }
 
@@ -922,8 +1014,56 @@ export class DataMapper {
         for (const item of items) {
             this.addPendingRead(item, pending, configs, options, consistency);
 
-            if (pending.length === MAX_READ_BATCH_SIZE) {
+            if (pending.length >= MAX_READ_BATCH_SIZE) {
                 yield* this.flushPendingReads(pending, throttled, configs);
+            }
+        }
+    }
+
+    private async *batchWriteAsync<T>(
+        items: AsyncIterable<[WriteType, T]>,
+        pending: Array<[string, WritePair]>,
+        throttled: Set<Promise<ThrottledTableConfiguration<T, WritePair>>>,
+        configs: {[tableName: string]: TableConfiguration<T, WritePair>},
+    ) {
+        const iterator = items[Symbol.asyncIterator]();
+        let next = iterator.next();
+        let done = false;
+
+        while (!done) {
+            const toProcess = await Promise.race([
+                next,
+                Promise.race(throttled)
+            ]);
+
+            if (isIteratorResult(toProcess)) {
+                done = toProcess.done;
+                if (!done) {
+                    const [type, item] = toProcess.value;
+                    this.addPendingWrite(type, item, pending, configs);
+                    next = iterator.next();
+                }
+            } else {
+                this.enqueueThrottledItems(toProcess, pending, throttled);
+            }
+
+            if (pending.length >= MAX_WRITE_BATCH_SIZE) {
+                yield* this.flushPendingWrites(pending, throttled, configs);
+            }
+        }
+    }
+
+    private async *batchWriteSync<T>(
+        items: Iterable<[WriteType, T]>,
+        pending: Array<[string, WritePair]>,
+        throttled: Set<Promise<ThrottledTableConfiguration<T, WritePair>>>,
+        configs: {[tableName: string]: TableConfiguration<T, WritePair>},
+    ) {
+        for (const [type, item] of items) {
+            this.addPendingWrite(type, item, pending, configs);
+
+            if (pending.length === MAX_WRITE_BATCH_SIZE) {
+                yield* this.flushPendingWrites(pending, throttled, configs);
             }
         }
     }
@@ -1013,7 +1153,6 @@ export class DataMapper {
             pending.push(...unprocessed.map(
                 attr => [table.name, attr] as [string, E]
             ));
-            unprocessed.length = 0;
         }
 
         throttled.delete(backoffWaiter);
@@ -1025,14 +1164,27 @@ export class DataMapper {
         throttled: Set<Promise<ThrottledTableConfiguration<T, AttributeMap>>>,
         tables: {[key: string]: TableConfiguration<T, AttributeMap>}
     ) {
+        if (toFlush.length === 0) {
+            return;
+        }
+
         const operationInput: BatchGetItemInput = {RequestItems: {}};
         let batchSize = 0;
 
         while (toFlush.length > 0) {
             const [tableName, item] = toFlush.shift() as [string, AttributeMap];
             if (operationInput.RequestItems[tableName] === undefined) {
+                const {
+                    projection,
+                    readConsistency,
+                    attributeNames,
+                } = tables[tableName];
+
                 operationInput.RequestItems[tableName] = {
-                    Keys: []
+                    Keys: [],
+                    ConsistentRead: readConsistency === 'strong',
+                    ProjectionExpression: projection,
+                    ExpressionAttributeNames: attributeNames,
                 };
             }
             operationInput.RequestItems[tableName].Keys.push(item);
@@ -1052,11 +1204,10 @@ export class DataMapper {
             unprocessedTables.add(table);
             const tableData = tables[table];
             tableData.backoffFactor++;
-            let unprocessed = UnprocessedKeys[table].Keys;
+            const unprocessed = UnprocessedKeys[table].Keys;
             if (tableData.tableThrottling) {
                 throttled.delete(tableData.tableThrottling.backoffWaiter);
-                unprocessed = tableData.tableThrottling.unprocessed
-                    .concat(unprocessed);
+                unprocessed.unshift(...tableData.tableThrottling.unprocessed);
             }
 
             tableData.tableThrottling = {
@@ -1097,54 +1248,84 @@ export class DataMapper {
     }
 
     private async *flushPendingWrites<T>(
-        pending: Map<string, PendingWrite<T>>,
-        throttled: Set<Promise<void>>
+        pending: Array<[string, WritePair]>,
+        throttled: Set<Promise<ThrottledTableConfiguration<T, WritePair>>>,
+        tables: {[key: string]: TableConfiguration<T, WritePair>}
     ) {
-        const inFlight = new Map<string, PendingWrite<T>>();
+        const writesInFlight: Array<[string, AttributeMap]> = [];
         const operationInput: BatchWriteItemInput = {RequestItems: {}};
 
-        for (const [identifier, data] of pending) {
-            const {type, tableName, marshalled} = data;
+        let batchSize = 0;
+        while (pending.length > 0) {
+            const [
+                tableName,
+                [type, marshalled]
+            ] = pending.shift() as [string, WritePair];
 
-            inFlight.set(identifier, data);
-            pending.delete(identifier);
+            if (type === 'put') {
+                writesInFlight.push([tableName, marshalled]);
+            }
 
             if (operationInput.RequestItems[tableName] === undefined) {
                 operationInput.RequestItems[tableName] = [];
             }
             operationInput.RequestItems[tableName].push(
-                type === 'Delete'
+                type === 'delete'
                     ? {DeleteRequest: {Key: marshalled}}
                     : {PutRequest: {Item: marshalled}}
             );
 
-            if (inFlight.size === MAX_WRITE_BATCH_SIZE) {
+            if (++batchSize === MAX_WRITE_BATCH_SIZE) {
                 break;
             }
         }
 
         const {UnprocessedItems = {}} = await this.client
             .batchWriteItem(operationInput).promise();
+        const unprocessedTables = new Set<string>();
 
         for (const table of Object.keys(UnprocessedItems)) {
-            for (const item of UnprocessedItems[table]) {
-                const identifier = `${table}::${requestIdentifier(item)}`;
-                const data = inFlight.get(identifier) as PendingWrite<T>;
+            unprocessedTables.add(table);
+            const tableData = tables[table];
+            tableData.backoffFactor++;
 
-                data.attempts++;
-                const promise = new Promise<void>(resolve => {
-                    setTimeout((data) => {
-                        pending.set(identifier, data);
-                        throttled.delete(promise);
-                        resolve();
-                    }, exponentialBackoff(data.attempts), data);
-                });
-                throttled.add(promise);
-                inFlight.delete(identifier);
+            const unprocessed: Array<WritePair> = UnprocessedItems[table]
+                .map(write => {
+                    if (write.DeleteRequest) {
+                        return ['delete', write.DeleteRequest.Key] as WritePair;
+                    } else if (write.PutRequest) {
+                        return ['put', write.PutRequest.Item] as WritePair;
+                    }
+                }).filter(
+                    (el => Boolean(el)) as (arg?: WritePair) => arg is WritePair
+                );
+
+            if (tableData.tableThrottling) {
+                throttled.delete(tableData.tableThrottling.backoffWaiter);
+                unprocessed.unshift(...tableData.tableThrottling.unprocessed);
             }
+
+            tableData.tableThrottling = {
+                unprocessed,
+                backoffWaiter: new Promise(resolve => {
+                    setTimeout(
+                        resolve,
+                        exponentialBackoff(tableData.backoffFactor),
+                        tableData
+                    );
+                })
+            };
+
+            throttled.add(tableData.tableThrottling.backoffWaiter);
         }
 
-        for (const [_, {schema, constructor, marshalled}] of inFlight) {
+        for (const [tableName, marshalled] of writesInFlight) {
+            const {keyProperties, itemConfigurations} = tables[tableName];
+            const {
+                constructor,
+                schema,
+            } = itemConfigurations[itemIdentifier(marshalled, keyProperties)];
+
             yield unmarshallItem<T>(schema, marshalled, constructor);
         }
     }
@@ -1154,20 +1335,12 @@ export class DataMapper {
     }
 }
 
-interface PendingWrite<T> {
-    type: 'Put'|'Delete';
-    tableName: string;
-    schema: Schema;
-    marshalled: AttributeMap;
-    constructor: ZeroArgumentsConstructor<T>;
-    attempts: number;
-}
-
 interface TableConfiguration<T, E extends TableConfigurationElement> {
+    attributeNames?: {[key: string]: string};
     backoffFactor: number;
     keyProperties: Array<string>;
     name: string;
-    projection?: any;
+    projection?: string;
     readConsistency?: ReadConsistency;
     tableThrottling?: TableThrottlingTracker<T, E>;
     itemConfigurations: {
@@ -1178,7 +1351,7 @@ interface TableConfiguration<T, E extends TableConfigurationElement> {
     }
 }
 
-type TableConfigurationElement = AttributeMap|['Put'|'Delete', AttributeMap];
+type TableConfigurationElement = AttributeMap|WritePair;
 
 interface TableThrottlingTracker<T, E extends TableConfigurationElement> {
     backoffWaiter: Promise<ThrottledTableConfiguration<T, E>>;
@@ -1191,6 +1364,8 @@ interface ThrottledTableConfiguration<
 > extends TableConfiguration<T, E> {
     tableThrottling: TableThrottlingTracker<T, E>;
 }
+
+type WritePair = [WriteType, AttributeMap];
 
 function exponentialBackoff(attempts: number) {
     return Math.floor(Math.random() * Math.pow(2, attempts));
@@ -1356,12 +1531,4 @@ function normalizeKeyCondition(
     }
 
     return {type: 'And', conditions};
-}
-
-function requestIdentifier(request: WriteRequest): string {
-    if (request.DeleteRequest) {
-        return itemIdentifier(request.DeleteRequest.Key, []);
-    } else {
-        return itemIdentifier((request.PutRequest as PutRequest).Item, []);
-    }
 }

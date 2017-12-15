@@ -16,6 +16,7 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
+    "@types/base64-js": "^1.2.5",
     "@types/jest": "^21",
     "@types/node": "^8.0.4",
     "aws-sdk": "^2.7.0",
@@ -26,7 +27,6 @@
   "dependencies": {
     "@aws/dynamodb-auto-marshaller": "^0.2.1",
     "@aws/dynamodb-expressions": "^0.2.1",
-    "@types/base64-js": "^1.2.5",
     "base64-js": "^1.2.1",
     "tslib": "^1.8"
   },
