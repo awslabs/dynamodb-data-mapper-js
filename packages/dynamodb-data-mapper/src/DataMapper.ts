@@ -1,12 +1,13 @@
+import { BatchGet } from './BatchGet';
+import { BatchWrite } from './BatchWrite';
 import {
-    MAX_READ_BATCH_SIZE,
-    MAX_WRITE_BATCH_SIZE,
     ReadConsistency,
+    StringToAnyObjectMap,
     SyncOrAsyncIterable,
     VERSION,
     WriteType,
 } from "./constants";
-import {ItemNotFoundException} from "./ItemNotFoundException";
+import { ItemNotFoundException } from "./ItemNotFoundException";
 import {
     BaseScanOptions,
     BatchGetOptions,
@@ -24,7 +25,6 @@ import {
     QueryParameters,
     ScanOptions,
     ScanParameters,
-    StringToAnyObjectMap,
     UpdateOptions,
     UpdateParameters,
 } from './namedParameters';
@@ -59,9 +59,6 @@ import {
     UpdateExpression,
 } from "@aws/dynamodb-expressions";
 import {
-    AttributeMap,
-    BatchGetItemInput,
-    BatchWriteItemInput,
     DeleteItemInput,
     GetItemInput,
     PutItemInput,
@@ -149,50 +146,19 @@ export class DataMapper {
         items: SyncOrAsyncIterable<T>,
         options: BatchGetOptions = {}
     ) {
-        const pending: Array<[string, AttributeMap]> = [];
-        const throttled = new Set<Promise<ThrottledTableConfiguration<T, AttributeMap>>>();
-        const {
-            readConsistency = this.readConsistency,
-            perTableOptions = {},
-        } = options;
-        const tableConfigurations: {
-            [key: string]: TableConfiguration<T, AttributeMap>
-        } = {};
-
-        if (isIterable(items)) {
-            yield* this.batchGetSync(
-                items,
-                pending,
-                throttled,
-                tableConfigurations,
-                perTableOptions,
-                readConsistency
-            );
-        } else {
-            yield* this.batchGetAsync(
-                items,
-                pending,
-                throttled,
-                tableConfigurations,
-                perTableOptions,
-                readConsistency
-            );
-        }
-
-        while (pending.length > 0 || throttled.size > 0) {
-            while (pending.length < MAX_READ_BATCH_SIZE && throttled.size > 0) {
-                this.enqueueThrottledItems(
-                    await Promise.race(throttled),
-                    pending,
-                    throttled
-                );
-            }
-
-            yield* this.flushPendingReads(
-                pending,
-                throttled,
-                tableConfigurations
-            );
+        const batch = new BatchGet(
+            this.client,
+            items,
+            options.readConsistency || this.readConsistency,
+            this.tableNamePrefix,
+            options.perTableOptions
+        );
+        let {done, value} = await batch.next();
+        while (!done) {
+            yield value;
+            const next = await batch.next();
+            done = next.done;
+            value = next.value;
         }
     }
 
@@ -245,26 +211,17 @@ export class DataMapper {
     async *batchWrite<T extends StringToAnyObjectMap>(
         items: SyncOrAsyncIterable<[WriteType, T]>
     ) {
-        const pending: Array<[string, WritePair]> = [];
-        const throttled = new Set<Promise<ThrottledTableConfiguration<T, WritePair>>>();
-        const configs: {[key: string]: TableConfiguration<T, WritePair>} = {};
-
-        if (isIterable(items)) {
-            yield* this.batchWriteSync(items, pending, throttled, configs);
-        } else {
-            yield* this.batchWriteAsync(items, pending, throttled, configs);
-        }
-
-        while (pending.length > 0 || throttled.size > 0) {
-            while (pending.length < MAX_WRITE_BATCH_SIZE && throttled.size > 0) {
-                this.enqueueThrottledItems(
-                    await Promise.race(throttled),
-                    pending,
-                    throttled
-                );
-            }
-
-            yield* this.flushPendingWrites(pending, throttled, configs);
+        const batch = new BatchWrite(
+            this.client,
+            items,
+            this.tableNamePrefix
+        );
+        let {done, value} = await batch.next();
+        while (!done) {
+            yield value;
+            const next = await batch.next();
+            done = next.done;
+            value = next.value;
         }
     }
 
@@ -880,194 +837,6 @@ export class DataMapper {
         );
     }
 
-    private addPendingRead<T>(
-        item: T,
-        pending: Array<[string, AttributeMap]>,
-        tableConfigs: {[key: string]: TableConfiguration<T, AttributeMap>},
-        perTableOptions: {[key: string]: GetOptions},
-        defaultReadConsistency: ReadConsistency
-    ): void {
-        const schema = getSchema(item);
-        const tableName = this.getTableName(item);
-        if (!(tableName in tableConfigs)) {
-            const {
-                projection,
-                readConsistency = defaultReadConsistency,
-            } = perTableOptions[tableName] || {} as GetOptions;
-
-            tableConfigs[tableName] = {
-                backoffFactor: 0,
-                keyProperties: getKeyProperties(schema),
-                name: tableName,
-                readConsistency,
-                itemConfigurations: {}
-            };
-
-            if (projection) {
-                const attributes = new ExpressionAttributes();
-                tableConfigs[tableName].projection = serializeProjectionExpression(
-                    projection.map(propName => toSchemaName(propName, schema)),
-                    attributes
-                );
-                tableConfigs[tableName].attributeNames = attributes.names;
-            }
-        }
-
-        const tableData = tableConfigs[tableName];
-        const marshalled = marshallItem(schema, item);
-        const identifier = itemIdentifier(marshalled, tableData.keyProperties);
-        tableData.itemConfigurations[identifier] = {
-            schema,
-            constructor: item.constructor as ZeroArgumentsConstructor<T>,
-        };
-
-        if (tableData.tableThrottling) {
-            tableData.tableThrottling.unprocessed.push(marshalled);
-        } else {
-            pending.push([tableName, marshalled]);
-        }
-    }
-
-    private addPendingWrite<T>(
-        type: WriteType,
-        item: T,
-        pending: Array<[string, WritePair]>,
-        tableConfigs: {[key: string]: TableConfiguration<T, WritePair>}
-    ): void {
-        const schema = getSchema(item);
-        const tableName = this.getTableName(item);
-        if (!(tableName in tableConfigs)) {
-            tableConfigs[tableName] = {
-                backoffFactor: 0,
-                keyProperties: getKeyProperties(schema),
-                name: tableName,
-                itemConfigurations: {}
-            };
-        }
-
-        const tableData = tableConfigs[tableName];
-        const marshalled = type === 'delete'
-            ? marshallKey(schema, item)
-            : marshallItem(schema, item);
-        const identifier = itemIdentifier(marshalled, tableData.keyProperties);
-        tableData.itemConfigurations[identifier] = {
-            schema,
-            constructor: item.constructor as ZeroArgumentsConstructor<T>,
-
-        };
-
-        if (tableData.tableThrottling) {
-            tableData.tableThrottling.unprocessed.push([type, marshalled]);
-        } else {
-            pending.push([tableName, [type, marshalled]]);
-        }
-    }
-
-    private async *batchGetAsync<T>(
-        items: AsyncIterable<T>,
-        pending: Array<[string, AttributeMap]>,
-        throttled: Set<Promise<ThrottledTableConfiguration<T, AttributeMap>>>,
-        tableConfigs: {[tableName: string]: TableConfiguration<T, AttributeMap>},
-        perTableOptions: {[tableName: string]: GetOptions},
-        readConsistency: ReadConsistency
-    ) {
-        const iterator = items[Symbol.asyncIterator]();
-        let next = iterator.next();
-        let done = false;
-
-        while (!done) {
-            const toProcess = await Promise.race([
-                next,
-                Promise.race(throttled)
-            ]);
-
-            if (isIteratorResult(toProcess)) {
-                done = toProcess.done;
-                if (!done) {
-                    this.addPendingRead(
-                        toProcess.value,
-                        pending,
-                        tableConfigs,
-                        perTableOptions,
-                        readConsistency
-                    );
-                    next = iterator.next();
-                }
-            } else {
-                this.enqueueThrottledItems(toProcess, pending, throttled);
-            }
-
-            if (pending.length >= MAX_READ_BATCH_SIZE) {
-                yield* this.flushPendingReads(pending, throttled, tableConfigs);
-            }
-        }
-    }
-
-    private async *batchGetSync<T>(
-        items: Iterable<T>,
-        pending: Array<[string, AttributeMap]>,
-        throttled: Set<Promise<ThrottledTableConfiguration<T, AttributeMap>>>,
-        configs: {[tableName: string]: TableConfiguration<T, AttributeMap>},
-        options: {[tableName: string]: GetOptions},
-        consistency: ReadConsistency
-    ) {
-        for (const item of items) {
-            this.addPendingRead(item, pending, configs, options, consistency);
-
-            if (pending.length >= MAX_READ_BATCH_SIZE) {
-                yield* this.flushPendingReads(pending, throttled, configs);
-            }
-        }
-    }
-
-    private async *batchWriteAsync<T>(
-        items: AsyncIterable<[WriteType, T]>,
-        pending: Array<[string, WritePair]>,
-        throttled: Set<Promise<ThrottledTableConfiguration<T, WritePair>>>,
-        configs: {[tableName: string]: TableConfiguration<T, WritePair>},
-    ) {
-        const iterator = items[Symbol.asyncIterator]();
-        let next = iterator.next();
-        let done = false;
-
-        while (!done) {
-            const toProcess = await Promise.race([
-                next,
-                Promise.race(throttled)
-            ]);
-
-            if (isIteratorResult(toProcess)) {
-                done = toProcess.done;
-                if (!done) {
-                    const [type, item] = toProcess.value;
-                    this.addPendingWrite(type, item, pending, configs);
-                    next = iterator.next();
-                }
-            } else {
-                this.enqueueThrottledItems(toProcess, pending, throttled);
-            }
-
-            if (pending.length >= MAX_WRITE_BATCH_SIZE) {
-                yield* this.flushPendingWrites(pending, throttled, configs);
-            }
-        }
-    }
-
-    private async *batchWriteSync<T>(
-        items: Iterable<[WriteType, T]>,
-        pending: Array<[string, WritePair]>,
-        throttled: Set<Promise<ThrottledTableConfiguration<T, WritePair>>>,
-        configs: {[tableName: string]: TableConfiguration<T, WritePair>},
-    ) {
-        for (const [type, item] of items) {
-            this.addPendingWrite(type, item, pending, configs);
-
-            if (pending.length === MAX_WRITE_BATCH_SIZE) {
-                yield* this.flushPendingWrites(pending, throttled, configs);
-            }
-        }
-    }
-
     private buildScanInput(
         valueConstructor: ZeroArgumentsConstructor<any>,
         {
@@ -1141,246 +910,9 @@ export class DataMapper {
         } while (result.LastEvaluatedKey !== undefined);
     }
 
-    private enqueueThrottledItems<T, E extends TableConfigurationElement>(
-        table: ThrottledTableConfiguration<T, E>,
-        pending: Array<[string, E]>,
-        throttled: Set<Promise<ThrottledTableConfiguration<T, E>>>
-    ): void {
-        const {
-            tableThrottling: {backoffWaiter, unprocessed}
-        } = table;
-        if (unprocessed.length > 0) {
-            pending.push(...unprocessed.map(
-                attr => [table.name, attr] as [string, E]
-            ));
-        }
-
-        throttled.delete(backoffWaiter);
-        delete table.tableThrottling;
-    }
-
-    private async *flushPendingReads<T>(
-        toFlush: Array<[string, AttributeMap]>,
-        throttled: Set<Promise<ThrottledTableConfiguration<T, AttributeMap>>>,
-        tables: {[key: string]: TableConfiguration<T, AttributeMap>}
-    ) {
-        if (toFlush.length === 0) {
-            return;
-        }
-
-        const operationInput: BatchGetItemInput = {RequestItems: {}};
-        let batchSize = 0;
-
-        while (toFlush.length > 0) {
-            const [tableName, item] = toFlush.shift() as [string, AttributeMap];
-            if (operationInput.RequestItems[tableName] === undefined) {
-                const {
-                    projection,
-                    readConsistency,
-                    attributeNames,
-                } = tables[tableName];
-
-                operationInput.RequestItems[tableName] = {
-                    Keys: [],
-                    ConsistentRead: readConsistency === 'strong',
-                    ProjectionExpression: projection,
-                    ExpressionAttributeNames: attributeNames,
-                };
-            }
-            operationInput.RequestItems[tableName].Keys.push(item);
-
-            if (++batchSize === MAX_READ_BATCH_SIZE) {
-                break;
-            }
-        }
-
-        const {
-            Responses = {},
-            UnprocessedKeys = {},
-        } = await this.client.batchGetItem(operationInput).promise();
-
-        const unprocessedTables = new Set<string>();
-        for (const table of Object.keys(UnprocessedKeys)) {
-            unprocessedTables.add(table);
-            const tableData = tables[table];
-            tableData.backoffFactor++;
-            const unprocessed = UnprocessedKeys[table].Keys;
-            if (tableData.tableThrottling) {
-                throttled.delete(tableData.tableThrottling.backoffWaiter);
-                unprocessed.unshift(...tableData.tableThrottling.unprocessed);
-            }
-
-            tableData.tableThrottling = {
-                unprocessed,
-                backoffWaiter: new Promise(resolve => {
-                    setTimeout(
-                        resolve,
-                        exponentialBackoff(tableData.backoffFactor),
-                        tableData
-                    );
-                })
-            };
-
-            throttled.add(tableData.tableThrottling.backoffWaiter);
-        }
-
-        for (let i = toFlush.length - 1; i > -1; i--) {
-            const [table, marshalled] = toFlush[i];
-            if (unprocessedTables.has(table)) {
-                (tables[table] as ThrottledTableConfiguration<T, AttributeMap>)
-                    .tableThrottling.unprocessed.push(marshalled);
-                toFlush.splice(i, 1);
-            }
-        }
-
-        for (const table of Object.keys(Responses)) {
-            const tableData = tables[table];
-            tableData.backoffFactor = Math.max(0, tableData.backoffFactor - 1);
-            for (const item of Responses[table]) {
-                const identifier = itemIdentifier(item, tableData.keyProperties);
-                const {
-                    constructor,
-                    schema,
-                } = tableData.itemConfigurations[identifier];
-                yield unmarshallItem<T>(schema, item, constructor);
-            }
-        }
-    }
-
-    private async *flushPendingWrites<T>(
-        pending: Array<[string, WritePair]>,
-        throttled: Set<Promise<ThrottledTableConfiguration<T, WritePair>>>,
-        tables: {[key: string]: TableConfiguration<T, WritePair>}
-    ) {
-        const writesInFlight: Array<[string, AttributeMap]> = [];
-        const operationInput: BatchWriteItemInput = {RequestItems: {}};
-
-        let batchSize = 0;
-        while (pending.length > 0) {
-            const [
-                tableName,
-                [type, marshalled]
-            ] = pending.shift() as [string, WritePair];
-
-            if (type === 'put') {
-                writesInFlight.push([tableName, marshalled]);
-            }
-
-            if (operationInput.RequestItems[tableName] === undefined) {
-                operationInput.RequestItems[tableName] = [];
-            }
-            operationInput.RequestItems[tableName].push(
-                type === 'delete'
-                    ? {DeleteRequest: {Key: marshalled}}
-                    : {PutRequest: {Item: marshalled}}
-            );
-
-            if (++batchSize === MAX_WRITE_BATCH_SIZE) {
-                break;
-            }
-        }
-
-        const {UnprocessedItems = {}} = await this.client
-            .batchWriteItem(operationInput).promise();
-        const unprocessedTables = new Set<string>();
-
-        for (const table of Object.keys(UnprocessedItems)) {
-            unprocessedTables.add(table);
-            const tableData = tables[table];
-            tableData.backoffFactor++;
-
-            const unprocessed: Array<WritePair> = UnprocessedItems[table]
-                .map(write => {
-                    if (write.DeleteRequest) {
-                        return ['delete', write.DeleteRequest.Key] as WritePair;
-                    } else if (write.PutRequest) {
-                        return ['put', write.PutRequest.Item] as WritePair;
-                    }
-                }).filter(
-                    (el => Boolean(el)) as (arg?: WritePair) => arg is WritePair
-                );
-
-            if (tableData.tableThrottling) {
-                throttled.delete(tableData.tableThrottling.backoffWaiter);
-                unprocessed.unshift(...tableData.tableThrottling.unprocessed);
-            }
-
-            tableData.tableThrottling = {
-                unprocessed,
-                backoffWaiter: new Promise(resolve => {
-                    setTimeout(
-                        resolve,
-                        exponentialBackoff(tableData.backoffFactor),
-                        tableData
-                    );
-                })
-            };
-
-            throttled.add(tableData.tableThrottling.backoffWaiter);
-        }
-
-        for (const [tableName, marshalled] of writesInFlight) {
-            const {keyProperties, itemConfigurations} = tables[tableName];
-            const {
-                constructor,
-                schema,
-            } = itemConfigurations[itemIdentifier(marshalled, keyProperties)];
-
-            yield unmarshallItem<T>(schema, marshalled, constructor);
-        }
-    }
-
     private getTableName(item: StringToAnyObjectMap): string {
         return getTableName(item, this.tableNamePrefix);
     }
-}
-
-interface TableConfiguration<T, E extends TableConfigurationElement> {
-    attributeNames?: {[key: string]: string};
-    backoffFactor: number;
-    keyProperties: Array<string>;
-    name: string;
-    projection?: string;
-    readConsistency?: ReadConsistency;
-    tableThrottling?: TableThrottlingTracker<T, E>;
-    itemConfigurations: {
-        [itemIdentifier: string]: {
-            schema: Schema;
-            constructor: ZeroArgumentsConstructor<T>;
-        }
-    }
-}
-
-type TableConfigurationElement = AttributeMap|WritePair;
-
-interface TableThrottlingTracker<T, E extends TableConfigurationElement> {
-    backoffWaiter: Promise<ThrottledTableConfiguration<T, E>>;
-    unprocessed: Array<E>;
-}
-
-interface ThrottledTableConfiguration<
-    T,
-    E extends TableConfigurationElement
-> extends TableConfiguration<T, E> {
-    tableThrottling: TableThrottlingTracker<T, E>;
-}
-
-type WritePair = [WriteType, AttributeMap];
-
-function exponentialBackoff(attempts: number) {
-    return Math.floor(Math.random() * Math.pow(2, attempts));
-}
-
-function getKeyProperties(schema: Schema): Array<string> {
-    const keys: Array<string> = [];
-    for (const property of Object.keys(schema).sort()) {
-        const fieldSchema = schema[property];
-        if (isKey(fieldSchema)) {
-            keys.push(fieldSchema.attributeName || property);
-        }
-    }
-
-    return keys;
 }
 
 function handleVersionAttribute(
@@ -1415,26 +947,9 @@ function isIterable<T>(arg: any): arg is Iterable<T> {
     return Boolean(arg) && typeof arg[Symbol.iterator] === 'function';
 }
 
-function isIteratorResult<T>(arg: any): arg is IteratorResult<T> {
-    return Boolean(arg) && typeof arg.done === 'boolean';
-}
-
 function isVersionAttribute(fieldSchema: SchemaType): boolean {
     return fieldSchema.type === 'Number'
         && Boolean(fieldSchema.versionAttribute);
-}
-
-function itemIdentifier(
-    marshalled: AttributeMap,
-    keyProperties: Array<string>
-): string {
-    const keyAttributes: Array<string> = [];
-    for (const key of keyProperties) {
-        const value = marshalled[key];
-        `${key}=${value.B || value.N || value.S}`;
-    }
-
-    return keyAttributes.join(':');
 }
 
 function normalizeConditionExpressionPaths(

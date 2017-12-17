@@ -28,7 +28,7 @@
     "@aws/dynamodb-auto-marshaller": "^0.2.1",
     "@aws/dynamodb-expressions": "^0.2.1",
     "base64-js": "^1.2.1",
-    "tslib": "^1.8"
+    "tslib": "^1.8.1"
   },
   "peerDependencies": {
     "aws-sdk": "^2.7.0"

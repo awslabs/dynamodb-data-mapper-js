@@ -271,6 +271,7 @@ describe('DataMapper', () => {
         it('should allow setting an overall read consistency', async () => {
             const gets = [new Item(0)];
             for await (const _ of mapper.batchGet(gets, {readConsistency: 'strong'})) {
+                console.log(_ === undefined);
                 // pass
             }
 
@@ -534,11 +535,15 @@ describe('DataMapper', () => {
                     }
                 }();
 
+                let itemsReturned = 0;
                 for await (const item of mapper.batchGet(asyncGets)) {
                     expect(item).toBeInstanceOf(Item);
                     expect(item.buzz).toBe(item.fizz % 2 === 0);
                     expect(item.pop).toBe('Goes the weasel');
+                    itemsReturned++;
                 }
+
+                expect(itemsReturned).toBe(325);
 
                 const {calls} = mockDynamoDbClient.batchGetItem.mock;
                 const callCount: {[key: string]: number} = calls.reduce(

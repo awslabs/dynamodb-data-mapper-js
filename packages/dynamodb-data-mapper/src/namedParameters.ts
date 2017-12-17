@@ -1,13 +1,15 @@
 import DynamoDB = require("aws-sdk/clients/dynamodb");
-import {OnMissingStrategy, ReadConsistency} from "./constants";
-import {ZeroArgumentsConstructor} from "@aws/dynamodb-data-marshaller";
+import {
+    OnMissingStrategy,
+    ReadConsistency,
+    StringToAnyObjectMap,
+} from "./constants";
+import { ZeroArgumentsConstructor } from "@aws/dynamodb-data-marshaller";
 import {
     ConditionExpression,
     ConditionExpressionPredicate,
     ProjectionExpression,
 } from "@aws/dynamodb-expressions";
-
-export interface StringToAnyObjectMap {[key: string]: any;}
 
 export interface DataMapperConfiguration {
     /**
