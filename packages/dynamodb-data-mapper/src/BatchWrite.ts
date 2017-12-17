@@ -18,6 +18,16 @@ import {
     BatchWriteItemInput
 } from 'aws-sdk/clients/dynamodb';
 
+/**
+ * Puts or deletes items from DynamoDB in batches of 25 or fewer via one or more
+ * BatchWriteItem operations. The items may belong to any number of tables;
+ * tables and schemas for each item are determined using the {DynamoDbSchema}
+ * property and the {DynamoDbTable} property on defined on each item supplied.
+ *
+ * This method will automatically retry any write requests returned by DynamoDB
+ * as unprocessed. Exponential backoff on unprocessed items is employed on a
+ * per-table basis.
+ */
 export class BatchWrite<T extends StringToAnyObjectMap> extends
     BatchOperation<T, [WriteType, T], WritePair>
 {

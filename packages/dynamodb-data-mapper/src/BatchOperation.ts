@@ -81,10 +81,30 @@ export abstract class BatchOperation<
         return this;
     }
 
+    /**
+     * Execute a single batch request and process the result.
+     */
     protected abstract doBatchRequest(): Promise<void>;
 
-    protected abstract prepareElement(item: Element): PreparedElement<T, E>;
+    /**
+     * Retrieve the DynamoDB table name defined on a domain object, applying any
+     * configured table name prefix as necessary.
+     */
+    protected getTableName(item: StringToAnyObjectMap): string {
+        return getTableName(item, this.tableNamePrefix);
+    }
 
+    /**
+     * Accept an array of unprocessed items belonging to a single table and
+     * re-enqueue it for submission, making sure the appropriate level of
+     * backoff is applied to future operations on the same table.
+     *
+     * @param tableName     The table to which the unprocessed elements belong.
+     * @param unprocessed   Elements returned by DynamoDB as not yet processed.
+     *                      The elements should not be unmarshalled, but they
+     *                      should be reverted to the form used for elements
+     *                      that have not yet been sent.
+     */
     protected handleThrottled(
         tableName: string,
         unprocessed: Array<E>
@@ -129,9 +149,12 @@ export abstract class BatchOperation<
         }
     }
 
-    protected getTableName(item: StringToAnyObjectMap): string {
-        return getTableName(item, this.tableNamePrefix);
-    }
+    /**
+     * Given a single item yielded by the source iterator, marshall it to
+     * DynamoDB's data structure and prepare the necessary table state on this
+     * batch object.
+     */
+    protected abstract prepareElement(item: Element): PreparedElement<T, E>;
 
     private addToSendQueue(item: Element): void {
         const {tableName, tableState, marshalled} = this.prepareElement(item);

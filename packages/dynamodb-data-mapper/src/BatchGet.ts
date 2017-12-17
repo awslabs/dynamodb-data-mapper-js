@@ -26,6 +26,16 @@ import {
 } from 'aws-sdk/clients/dynamodb';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
+/**
+ * Retrieves items from DynamoDB in batches of 100 or fewer via one or more
+ * BatchGetItem operations. The items may be from any number of tables; tables
+ * and schemas for each item are determined using the {DynamoDbSchema} property
+ * and the {DynamoDbTable} property on defined on each item supplied.
+ *
+ * This method will automatically retry any get requests returned by DynamoDB as
+ * unprocessed. Exponential backoff on unprocessed items is employed on a
+ * per-table basis.
+ */
 export class BatchGet<T extends StringToAnyObjectMap> extends
     BatchOperation<T, T, AttributeMap>
 {

@@ -102,7 +102,7 @@ export class DataMapper {
     /**
      * Deletes items from DynamoDB in batches of 25 or fewer via one or more
      * BatchWriteItem operations. The items may be from any number of tables;
-     * tables and schemas for each item are determined using the schema
+     * tables and schemas for each item are determined using the
      * {DynamoDbSchema} property and the {DynamoDbTable} property on defined on
      * each item supplied.
      *
@@ -132,7 +132,7 @@ export class DataMapper {
     /**
      * Retrieves items from DynamoDB in batches of 100 or fewer via one or more
      * BatchGetItem operations. The items may be from any number of tables;
-     * tables and schemas for each item are determined using the schema
+     * tables and schemas for each item are determined using the
      * {DynamoDbSchema} property and the {DynamoDbTable} property on defined on
      * each item supplied.
      *
@@ -165,7 +165,7 @@ export class DataMapper {
     /**
      * Puts items into DynamoDB in batches of 25 or fewer via one or more
      * BatchWriteItem operations. The items may be from any number of tables;
-     * tables and schemas for each item are determined using the schema
+     * tables and schemas for each item are determined using the
      * {DynamoDbSchema} property and the {DynamoDbTable} property on defined on
      * each item supplied.
      *
@@ -196,7 +196,7 @@ export class DataMapper {
     /**
      * Puts or deletes items from DynamoDB in batches of 25 or fewer via one or
      * more BatchWriteItem operations. The items may belong to any number of
-     * tables; tables and schemas for each item are determined using the schema
+     * tables; tables and schemas for each item are determined using the
      * {DynamoDbSchema} property and the {DynamoDbTable} property on defined on
      * each item supplied.
      *
