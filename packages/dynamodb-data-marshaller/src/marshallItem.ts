@@ -10,7 +10,6 @@ import {
     Marshaller,
     NumberValueSet,
 } from "@aws/dynamodb-auto-marshaller";
-import {toByteArray} from 'base64-js';
 
 /**
  * Converts a JavaScript object into a DynamoDB Item.
@@ -67,7 +66,7 @@ export function marshallValue(
     }
 
     if (schemaType.type === 'Binary') {
-        if (input.byteLength === 0) {
+        if (!input || input.length === 0 || input.byteLength === 0) {
             return {NULL: true};
         }
 
@@ -194,7 +193,13 @@ export function marshallValue(
             return marshallSet(
                 input,
                 marshallBinary,
-                (bin: Uint8Array) => bin.byteLength === 0,
+                (bin: Uint8Array|string) => {
+                    if (typeof bin === 'string') {
+                        return bin.length === 0;
+                    }
+
+                    return bin.byteLength === 0;
+                },
                 'BS'
             );
         }
@@ -255,11 +260,9 @@ export function marshallValue(
     throw new InvalidSchemaError(schemaType, 'Unrecognized schema node');
 }
 
-function marshallBinary(input: string|ArrayBuffer|ArrayBufferView): Uint8Array {
-    if (typeof input === 'string') {
-        return toByteArray(input);
-    }
-
+function marshallBinary(
+    input: string|ArrayBuffer|ArrayBufferView
+): string|Uint8Array {
     if (ArrayBuffer.isView(input)) {
         return new Uint8Array(
             input.buffer,
@@ -272,10 +275,7 @@ function marshallBinary(input: string|ArrayBuffer|ArrayBufferView): Uint8Array {
         return new Uint8Array(input);
     }
 
-    throw new InvalidValueError(
-        input,
-        'Unable to serialize provided value as binary'
-    );
+    return input;
 }
 
 function marshallNumber(input: number): string {

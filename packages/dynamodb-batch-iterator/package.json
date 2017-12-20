@@ -1,7 +1,7 @@
 {
-  "name": "@aws/dynamodb-data-marshaller",
+  "name": "@aws/dynamodb-batch-iterator",
   "version": "0.2.1",
-  "description": "A schema-based data marshaller for Amazon DynamoDB",
+  "description": "Abstraction for DynamoDB batch reads and writes for that handles batch splitting and partial retries with exponential backoff",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "scripts": {
@@ -23,12 +23,10 @@
     "typedoc": "^0.9.0",
     "typescript": "^2.6"
   },
-  "dependencies": {
-    "@aws/dynamodb-auto-marshaller": "^0.2.1",
-    "@aws/dynamodb-expressions": "^0.2.1",
-    "tslib": "^1.8.1"
-  },
   "peerDependencies": {
     "aws-sdk": "^2.7.0"
+  },
+  "dependencies": {
+    "tslib": "^1.8.1"
   }
 }

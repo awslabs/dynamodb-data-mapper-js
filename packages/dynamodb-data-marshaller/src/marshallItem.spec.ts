@@ -115,16 +115,16 @@ describe('marshallItem', () => {
             });
         });
 
-        it('should serialize binary fields from strings', () => {
+        it('should allow binary strings to be serialized by the AWS SDK', () => {
             const binaryDoc: Schema = {
                 binary: {type: 'Binary'},
             };
             const document = {
-                binary: '3q2+7w==',
+                binary: 'a string that should be saved as binary',
             };
 
             expect(marshallItem(binaryDoc, document)).toEqual({
-                binary: {B: Uint8Array.from([0xde, 0xad, 0xbe, 0xef])},
+                binary: {B: 'a string that should be saved as binary'},
             });
         });
 
@@ -139,14 +139,6 @@ describe('marshallItem', () => {
             expect(marshallItem(binaryDoc, document)).toEqual({
                 binary: {NULL: true},
             });
-        });
-
-        it('should throw if a non-binary input is received', () => {
-            const binaryDoc: Schema = {
-                binary: {type: 'Binary'},
-            };
-
-            expect(() => marshallItem(binaryDoc, {binary: 24})).toThrow();
         });
     });
 
