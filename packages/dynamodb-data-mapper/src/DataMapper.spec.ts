@@ -60,7 +60,7 @@ describe('DataMapper', () => {
             }
         }
 
-        describe('async iterables', () => {
+        for (const asyncInput of [true, false]) {
             it(
                 'should should partition delete batches into requests with 25 or fewer items',
                 async () => {
@@ -82,48 +82,61 @@ describe('DataMapper', () => {
                         });
                     }
 
-                    const asyncDeletes: AsyncIterable<Item> = async function *() {
+                    const input = asyncInput
+                        ? async function *() {
+                            for (const item of deletes) {
+                                await new Promise(resolve => setTimeout(
+                                    resolve,
+                                    Math.round(Math.random())
+                                ));
+                                yield item;
+                            }
+                        }()
+                        : deletes;
+
+                    for await (const deleted of mapper.batchDelete(input)) {
+                        expect(deleted).toBeInstanceOf(Item);
+                    }
+
+                    const {calls} = mockDynamoDbClient.batchWriteItem.mock;
+                    expect(calls.length).toBe(4);
+                    expect(calls).toEqual(expected);
+                }
+            );
+
+            it('should should retry unprocessed items', async () => {
+                const deletes: Array<Item> = [];
+                for (let i = 0; i < 80; i++) {
+                    deletes.push(new Item(i));
+                }
+
+                const failures = new Set(['24', '42', '60']);
+                for (const failureId of failures) {
+                    const item = {
+                        DeleteRequest: {
+                            Key: {fizz: {N: failureId}}
+                        }
+                    };
+                    promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                        UnprocessedItems: {foo: [item]}
+                    }));
+                }
+
+                const input = asyncInput
+                    ? async function *() {
                         for (const item of deletes) {
+                            await new Promise(resolve => setTimeout(
+                                resolve,
+                                Math.round(Math.random())
+                            ));
                             yield item;
                         }
-                    }();
+                    }()
+                    : deletes;
 
-                    await mapper.batchDelete(asyncDeletes);
-
-                    const {calls} = mockDynamoDbClient.batchWriteItem.mock;
-                    expect(calls.length).toBe(4);
-                    expect(calls).toEqual(expected);
+                for await (const deleted of mapper.batchDelete(input)) {
+                    expect(deleted).toBeInstanceOf(Item);
                 }
-            );
-
-            it('should should retry unprocessed items', async () => {
-                const deletes: Array<Item> = [];
-                for (let i = 0; i < 80; i++) {
-                    deletes.push(new Item(i));
-                }
-
-                const failures = new Set(['24', '42', '60']);
-                for (const failureId of failures) {
-                    const item = {
-                        DeleteRequest: {
-                            Key: {fizz: {N: failureId}}
-                        }
-                    };
-                    promiseFunc.mockImplementationOnce(() => Promise.resolve({
-                        UnprocessedItems: {foo: [item]}
-                    }));
-                }
-
-                const asyncDeletes: AsyncIterable<Item> = async function *() {
-                    let idx = 0;
-                    for (const item of deletes) {
-                        await new Promise(
-                            resolve => setTimeout(resolve, ++idx % 10)
-                        );
-                        yield item;
-                    }
-                }();
-                await mapper.batchDelete(asyncDeletes);
 
                 const {calls} = mockDynamoDbClient.batchWriteItem.mock;
                 expect(calls.length).toBe(4);
@@ -149,83 +162,7 @@ describe('DataMapper', () => {
                     expect(callCount[i]).toBe(failures.has(String(i)) ? 2 : 1);
                 }
             });
-        });
-
-        describe('sync iterables', () => {
-            it(
-                'should should partition delete batches into requests with 25 or fewer items',
-                async () => {
-                    const deletes: Array<Item> = [];
-                    const expected: any = [
-                        [{RequestItems: {foo: []}}],
-                        [{RequestItems: {foo: []}}],
-                        [{RequestItems: {foo: []}}],
-                        [{RequestItems: {foo: []}}],
-                    ];
-                    for (let i = 0; i < 80; i++) {
-                        deletes.push(new Item(i));
-                        expected[Math.floor(i / 25)][0].RequestItems.foo.push({
-                            DeleteRequest: {
-                                Key: {
-                                    fizz: {N: String(i)}
-                                }
-                            }
-                        });
-                    }
-
-                    await mapper.batchDelete(deletes);
-
-                    const {calls} = mockDynamoDbClient.batchWriteItem.mock;
-                    expect(calls.length).toBe(4);
-                    expect(calls).toEqual(expected);
-                }
-            );
-
-            it('should should retry unprocessed items', async () => {
-                const deletes: Array<Item> = [];
-                for (let i = 0; i < 80; i++) {
-                    deletes.push(new Item(i));
-                }
-
-                const failures = new Set(['24', '42', '60']);
-                for (const failureId of failures) {
-                    const item = {
-                        DeleteRequest: {
-                            Key: {fizz: {N: failureId}}
-                        }
-                    };
-                    promiseFunc.mockImplementationOnce(() => Promise.resolve({
-                        UnprocessedItems: {foo: [item]}
-                    }));
-                }
-
-                await mapper.batchDelete(deletes);
-
-                const {calls} = mockDynamoDbClient.batchWriteItem.mock;
-                expect(calls.length).toBe(4);
-                const callCount: {[key: string]: number} = calls.reduce(
-                    (
-                        keyUseCount: {[key: string]: number},
-                        [{RequestItems: {foo}}]
-                    ) => {
-                        for (const {DeleteRequest: {Key: {fizz: {N: key}}}} of foo) {
-                            if (key in keyUseCount) {
-                                keyUseCount[key]++;
-                            } else {
-                                keyUseCount[key] = 1;
-                            }
-                        }
-
-                        return keyUseCount;
-                    },
-                    {}
-                );
-
-                for (let i = 0; i < 80; i++) {
-                    expect(callCount[i]).toBe(failures.has(String(i)) ? 2 : 1);
-                }
-            });
-        });
+        }
     });
 
     describe('#batchGet', () => {
@@ -408,7 +345,7 @@ describe('DataMapper', () => {
             ]);
         });
 
-        describe('async iterables', () => {
+        for (const asyncInput of [true, false]) {
             it(
                 'should should partition get batches into requests with 100 or fewer items',
                 async () => {
@@ -455,13 +392,19 @@ describe('DataMapper', () => {
                         );
                     }
 
-                    const asyncGets: AsyncIterable<Item> = async function *() {
-                        for (const item of gets) {
-                            yield item;
-                        }
-                    }();
+                    const input = asyncInput
+                        ? async function *() {
+                            for (const item of gets) {
+                                await new Promise(resolve => setTimeout(
+                                    resolve,
+                                    Math.round(Math.random())
+                                ));
+                                yield item;
+                            }
+                        }()
+                        : gets;
 
-                    for await (const item of mapper.batchGet(asyncGets)) {
+                    for await (const item of mapper.batchGet(input)) {
                         expect(item).toBeInstanceOf(Item);
                         expect(item.buzz).toBe(item.fizz % 2 === 0);
                         expect(item.pop).toBe('Goes the weasel');
@@ -528,15 +471,20 @@ describe('DataMapper', () => {
                     );
                 }
 
-                const asyncGets: AsyncIterable<Item> = async function *() {
-                    for (const item of gets) {
-                        await new Promise(resolve => setTimeout(resolve, 1));
-                        yield item;
-                    }
-                }();
+                const input = asyncInput
+                    ? async function *() {
+                        for (const item of gets) {
+                            await new Promise(resolve => setTimeout(
+                                resolve,
+                                Math.round(Math.random())
+                            ));
+                            yield item;
+                        }
+                    }()
+                    : gets;
 
                 let itemsReturned = 0;
-                for await (const item of mapper.batchGet(asyncGets)) {
+                for await (const item of mapper.batchGet(input)) {
                     expect(item).toBeInstanceOf(Item);
                     expect(item.buzz).toBe(item.fizz % 2 === 0);
                     expect(item.pop).toBe('Goes the weasel');
@@ -568,152 +516,7 @@ describe('DataMapper', () => {
                     expect(callCount[i]).toBe(failures.has(String(i)) ? 2 : 1);
                 }
             });
-        });
-
-        describe('sync iterables', () => {
-            it(
-                'should should partition get batches into requests with 100 or fewer items',
-                async () => {
-                    const gets: Array<Item> = [];
-                    const expected: any = [
-                        [{RequestItems: {foo: {
-                            Keys: [],
-                            ConsistentRead: false
-                        }}}],
-                        [{RequestItems: {foo: {
-                            Keys: [],
-                            ConsistentRead: false
-                        }}}],
-                        [{RequestItems: {foo: {
-                            Keys: [],
-                            ConsistentRead: false
-                        }}}],
-                        [{RequestItems: {foo: {
-                            Keys: [],
-                            ConsistentRead: false
-                        }}}],
-                    ];
-                    const responses: any = [
-                        {Responses: {foo: []}},
-                        {Responses: {foo: []}},
-                        {Responses: {foo: []}},
-                        {Responses: {foo: []}},
-                    ];
-
-                    for (let i = 0; i < 325; i++) {
-                        gets.push(new Item(i));
-                        responses[Math.floor(i / 100)].Responses.foo.push({
-                            fizz: {N: String(i)},
-                            buzz: {BOOL: i % 2 === 0},
-                            pop: {S: 'Goes the weasel'}
-                        });
-                        expected[Math.floor(i / 100)][0].RequestItems.foo.Keys
-                            .push({fizz: {N: String(i)}});
-                    }
-
-                    for (const response of responses) {
-                        promiseFunc.mockImplementationOnce(
-                            () => Promise.resolve(response)
-                        );
-                    }
-
-                    for await (const item of mapper.batchGet(gets)) {
-                        expect(item).toBeInstanceOf(Item);
-                        expect(item.buzz).toBe(item.fizz % 2 === 0);
-                        expect(item.pop).toBe('Goes the weasel');
-                    }
-
-                    const {calls} = mockDynamoDbClient.batchGetItem.mock;
-                    expect(calls.length).toBe(4);
-                    expect(calls).toEqual(expected);
-                }
-            );
-
-            it('should should retry unprocessed items', async () => {
-                const failures = new Set(['24', '142', '260']);
-
-                const gets: Array<Item> = [];
-                const expected: any = [
-                    [{RequestItems: {foo: {Keys: []}}}],
-                    [{RequestItems: {foo: {Keys: []}}}],
-                    [{RequestItems: {foo: {Keys: []}}}],
-                    [{RequestItems: {foo: {Keys: []}}}],
-                ];
-                const responses: any = [
-                    {
-                        Responses: {foo: []},
-                        UnprocessedKeys: {foo: {Keys: []}}
-                    },
-                    {
-                        Responses: {foo: []},
-                        UnprocessedKeys: {foo: {Keys: []}}
-                    },
-                    {
-                        Responses: {foo: []},
-                        UnprocessedKeys: {foo: {Keys: []}}
-                    },
-                    {
-                        Responses: {foo: []},
-                        UnprocessedKeys: {foo: {Keys: []}}
-                    },
-                ];
-
-                for (let i = 0; i < 325; i++) {
-                    gets.push(new Item(i));
-                    expected[Math.floor(i / 100)][0].RequestItems.foo.Keys
-                        .push({fizz: {N: String(i)}});
-
-                    const response = {
-                        fizz: {N: String(i)},
-                        buzz: {BOOL: i % 2 === 0},
-                        pop: {S: 'Goes the weasel'}
-                    };
-                    if (failures.has(String(i))) {
-                        responses[Math.floor(i / 100)].UnprocessedKeys.foo.Keys
-                            .push({fizz: {N: String(i)}});
-                        responses[3].Responses.foo.push(response);
-                    } else {
-                        responses[Math.floor(i / 100)].Responses.foo
-                            .push(response);
-                    }
-                }
-
-                for (const response of responses) {
-                    promiseFunc.mockImplementationOnce(
-                        () => Promise.resolve(response)
-                    );
-                }
-
-                for await (const item of mapper.batchGet(gets)) {
-                    expect(item).toBeInstanceOf(Item);
-                    expect(item.buzz).toBe(item.fizz % 2 === 0);
-                    expect(item.pop).toBe('Goes the weasel');
-                }
-
-                const {calls} = mockDynamoDbClient.batchGetItem.mock;
-                const callCount: {[key: string]: number} = calls.reduce(
-                    (
-                        keyUseCount: {[key: string]: number},
-                        [{RequestItems: {foo: {Keys}}}]
-                    ) => {
-                        for (const {fizz: {N: key}} of Keys) {
-                            if (key in keyUseCount) {
-                                keyUseCount[key]++;
-                            } else {
-                                keyUseCount[key] = 1;
-                            }
-                        }
-
-                        return keyUseCount;
-                    },
-                    {}
-                );
-
-                for (let i = 0; i < 325; i++) {
-                    expect(callCount[i]).toBe(failures.has(String(i)) ? 2 : 1);
-                }
-            });
-        });
+        }
     });
 
     describe('#batchPut', () => {
@@ -724,11 +527,6 @@ describe('DataMapper', () => {
             config: {},
             batchWriteItem: jest.fn(() => ({promise: promiseFunc})),
         };
-
-        beforeEach(() => {
-            promiseFunc.mockClear();
-            mockDynamoDbClient.batchWriteItem.mockClear();
-        });
 
         const mapper = new DataMapper({
             client: mockDynamoDbClient as any,
@@ -763,9 +561,12 @@ describe('DataMapper', () => {
 
         beforeEach(() => {
             counter = 0;
+            promiseFunc.mockClear();
+            mockDynamoDbClient.batchWriteItem.mockClear();
         });
 
-        describe('async iterables', () => {
+        for (const asyncInput of [true, false]) {
+
             it(
                 'should should partition put batches into requests with 25 or fewer items',
                 async () => {
@@ -787,57 +588,65 @@ describe('DataMapper', () => {
                         });
                     }
 
-                    const asyncPuts: AsyncIterable<Item> = async function *() {
+                    const input = asyncInput
+                        ? async function *() {
+                            for (const item of puts) {
+                                await new Promise(resolve => setTimeout(
+                                    resolve,
+                                    Math.round(Math.random())
+                                ));
+                                yield item;
+                            }
+                        }()
+                        : puts;
+
+                    for await (const item of mapper.batchPut(input)) {
+                        expect(item).toBeInstanceOf(Item);
+                        expect(typeof item.fizz).toBe('number');
+                    }
+
+                    const {calls} = mockDynamoDbClient.batchWriteItem.mock;
+                    expect(calls.length).toBe(4);
+                    expect(calls).toEqual(expected);
+                }
+            );
+
+            it('should should retry unprocessed items', async () => {
+                const puts: Array<Item> = [];
+                for (let i = 0; i < 80; i++) {
+                    const item = new Item();
+                    item.buzz = new Set<string>(['foo', 'bar', 'baz']);
+                    puts.push(item);
+                }
+
+                const failures = new Set(['24', '42', '60']);
+                for (const failureId of failures) {
+                    const item = {
+                        PutRequest: {
+                            Item: {
+                                fizz: {N: failureId},
+                                buzz: {SS: ['foo', 'bar', 'baz']}
+                            }
+                        }
+                    };
+                    promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                        UnprocessedItems: {foo: [item]}
+                    }));
+                }
+
+                const input = asyncInput
+                    ? async function *() {
                         for (const item of puts) {
+                            await new Promise(resolve => setTimeout(
+                                resolve,
+                                Math.round(Math.random())
+                            ));
                             yield item;
                         }
-                    }();
+                    }()
+                    : puts;
 
-                    for await (const item of mapper.batchPut(asyncPuts)) {
-                        expect(item).toBeInstanceOf(Item);
-                        expect(typeof item.fizz).toBe('number');
-                    }
-
-                    const {calls} = mockDynamoDbClient.batchWriteItem.mock;
-                    expect(calls.length).toBe(4);
-                    expect(calls).toEqual(expected);
-                }
-            );
-
-            it('should should retry unprocessed items', async () => {
-                const puts: Array<Item> = [];
-                for (let i = 0; i < 80; i++) {
-                    const item = new Item();
-                    item.buzz = new Set<string>(['foo', 'bar', 'baz']);
-                    puts.push(item);
-                }
-
-                const failures = new Set(['24', '42', '60']);
-                for (const failureId of failures) {
-                    const item = {
-                        PutRequest: {
-                            Item: {
-                                fizz: {N: failureId},
-                                buzz: {SS: ['foo', 'bar', 'baz']}
-                            }
-                        }
-                    };
-                    promiseFunc.mockImplementationOnce(() => Promise.resolve({
-                        UnprocessedItems: {foo: [item]}
-                    }));
-                }
-
-                const asyncPuts: AsyncIterable<Item> = async function *() {
-                    let idx = 0;
-                    for (const item of puts) {
-                        await new Promise(
-                            resolve => setTimeout(resolve, ++idx % 10)
-                        );
-                        yield item;
-                    }
-                }();
-
-                for await (const item of mapper.batchPut(asyncPuts)) {
+                for await (const item of mapper.batchPut(input)) {
                     expect(item).toBeInstanceOf(Item);
                     expect(typeof item.fizz).toBe('number');
                     expect(item.buzz).toBeInstanceOf(Set);
@@ -867,95 +676,7 @@ describe('DataMapper', () => {
                     expect(callCount[i]).toBe(failures.has(String(i)) ? 2 : 1);
                 }
             });
-        });
-
-        describe('sync iterables', () => {
-            it(
-                'should should partition put batches into requests with 25 or fewer items',
-                async () => {
-                    const puts: Array<Item> = [];
-                    const expected: any = [
-                        [{RequestItems: {foo: []}}],
-                        [{RequestItems: {foo: []}}],
-                        [{RequestItems: {foo: []}}],
-                        [{RequestItems: {foo: []}}],
-                    ];
-                    for (let i = 0; i < 80; i++) {
-                        puts.push(new Item());
-                        expected[Math.floor(i / 25)][0].RequestItems.foo.push({
-                            PutRequest: {
-                                Item: {
-                                    fizz: {N: String(i)}
-                                }
-                            }
-                        });
-                    }
-
-                    for await (const item of mapper.batchPut(puts)) {
-                        expect(item).toBeInstanceOf(Item);
-                        expect(typeof item.fizz).toBe('number');
-                    }
-
-                    const {calls} = mockDynamoDbClient.batchWriteItem.mock;
-                    expect(calls.length).toBe(4);
-                    expect(calls).toEqual(expected);
-                }
-            );
-
-            it('should should retry unprocessed items', async () => {
-                const puts: Array<Item> = [];
-                for (let i = 0; i < 80; i++) {
-                    const item = new Item();
-                    item.buzz = new Set<string>(['foo', 'bar', 'baz']);
-                    puts.push(item);
-                }
-
-                const failures = new Set(['24', '42', '60']);
-                for (const failureId of failures) {
-                    const item = {
-                        PutRequest: {
-                            Item: {
-                                fizz: {N: failureId},
-                                buzz: {SS: ['foo', 'bar', 'baz']}
-                            }
-                        }
-                    };
-                    promiseFunc.mockImplementationOnce(() => Promise.resolve({
-                        UnprocessedItems: {foo: [item]}
-                    }));
-                }
-
-                for await (const item of mapper.batchPut(puts)) {
-                    expect(item).toBeInstanceOf(Item);
-                    expect(typeof item.fizz).toBe('number');
-                    expect(item.buzz).toBeInstanceOf(Set);
-                }
-
-                const {calls} = mockDynamoDbClient.batchWriteItem.mock;
-                expect(calls.length).toBe(4);
-                const callCount: {[key: string]: number} = calls.reduce(
-                    (
-                        keyUseCount: {[key: string]: number},
-                        [{RequestItems: {foo}}]
-                    ) => {
-                        for (const {PutRequest: {Item: {fizz: {N: key}}}} of foo) {
-                            if (key in keyUseCount) {
-                                keyUseCount[key]++;
-                            } else {
-                                keyUseCount[key] = 1;
-                            }
-                        }
-
-                        return keyUseCount;
-                    },
-                    {}
-                );
-
-                for (let i = 0; i < 80; i++) {
-                    expect(callCount[i]).toBe(failures.has(String(i)) ? 2 : 1);
-                }
-            });
-        });
+        }
     });
 
     describe('#delete', () => {

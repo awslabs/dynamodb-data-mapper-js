@@ -45,7 +45,7 @@ export interface BatchGetOptions extends ReadConsistencyConfiguration {
      * that reads from multiple tables.
      */
     perTableOptions?: {
-        [key: string]: GetOptions;
+        [tableName: string]: BatchGetTableOptions;
     };
 }
 

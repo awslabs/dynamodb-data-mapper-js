@@ -17,21 +17,23 @@ export interface BatchGetOptions {
 }
 
 export interface PerTableOptions {
-    [tableName: string]: {
-        /**
-         * The read consistency to apply to reads against this table.
-         */
-        ConsistentRead?: ConsistentRead;
+    [tableName: string]: TableOptions;
+}
 
-        /**
-         * One or more substitution tokens for attribute names in an expression.
-         */
-        ExpressionAttributeNames?: ExpressionAttributeNameMap;
+export interface TableOptions {
+    /**
+     * The read consistency to apply to reads against this table.
+     */
+    ConsistentRead?: ConsistentRead;
 
-        /**
-         * A string that identifies one or more attributes to retrieve from the
-         * table.
-         */
-        ProjectionExpression?: ProjectionExpression;
-    }
+    /**
+     * One or more substitution tokens for attribute names in an expression.
+     */
+    ExpressionAttributeNames?: ExpressionAttributeNameMap;
+
+    /**
+     * A string that identifies one or more attributes to retrieve from the
+     * table.
+     */
+    ProjectionExpression?: ProjectionExpression;
 }

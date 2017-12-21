@@ -9,6 +9,7 @@ import { ItemNotFoundException } from "./ItemNotFoundException";
 import {
     BaseScanOptions,
     BatchGetOptions,
+    BatchGetTableOptions,
     DataMapperConfiguration,
     DeleteOptions,
     DeleteParameters,
@@ -31,7 +32,13 @@ import {
     getSchema,
     getTableName,
 } from './protocols';
-import { BatchGet, BatchWrite } from '@aws/dynamodb-batch-iterator';
+import {
+    BatchGet,
+    BatchWrite,
+    PerTableOptions,
+    TableOptions,
+    WriteRequest,
+} from '@aws/dynamodb-batch-iterator';
 import {
     isKey,
     marshallItem,
@@ -58,6 +65,7 @@ import {
     UpdateExpression,
 } from "@aws/dynamodb-expressions";
 import {
+    AttributeMap,
     DeleteItemInput,
     GetItemInput,
     PutItemInput,
@@ -111,7 +119,7 @@ export class DataMapper {
      *
      * @param items A synchronous or asynchronous iterable of items to delete.
      */
-    async batchDelete<T extends StringToAnyObjectMap>(
+    async *batchDelete<T extends StringToAnyObjectMap>(
         items: SyncOrAsyncIterable<T>
     ) {
         const iter = this.batchWrite(
@@ -122,9 +130,8 @@ export class DataMapper {
             }()
         );
 
-        for await (const _ of iter) {
-            // nothing is returned for deletes, but the iterator must be
-            // exhausted to ensure all deletions have been submitted
+        for await (const [_, unmarshalled] of iter) {
+            yield unmarshalled;
         }
     }
 
@@ -143,22 +150,30 @@ export class DataMapper {
      */
     async *batchGet<T extends StringToAnyObjectMap>(
         items: SyncOrAsyncIterable<T>,
-        options: BatchGetOptions = {}
+        {
+            readConsistency = this.readConsistency,
+            perTableOptions = {}
+        }: BatchGetOptions = {}
     ) {
-        
+        const state: BatchState<T> = {};
+        const options: PerTableOptions = {};
+
         const batch = new BatchGet(
             this.client,
-            items,
-            options.readConsistency || this.readConsistency,
-            this.tableNamePrefix,
-            options.perTableOptions
+            this.mapGetBatch(items, state, perTableOptions, options),
+            {
+                ConsistentRead: readConsistency === 'strong',
+                PerTableOptions: options
+            }
         );
-        let {done, value} = await batch.next();
-        while (!done) {
-            yield value;
-            const next = await batch.next();
-            done = next.done;
-            value = next.value;
+
+        for await (const [tableName, marshalled] of batch) {
+            const {keyProperties, itemSchemata} = state[tableName];
+            const {
+                constructor,
+                schema,
+            } = itemSchemata[itemIdentifier(marshalled, keyProperties)];
+            yield unmarshallItem<T>(schema, marshalled, constructor);
         }
     }
 
@@ -175,7 +190,7 @@ export class DataMapper {
      *
      * @param items A synchronous or asynchronous iterable of items to put.
      */
-    batchPut<T extends StringToAnyObjectMap>(
+    async *batchPut<T extends StringToAnyObjectMap>(
         items: SyncOrAsyncIterable<T>
     ) {
         const generator: SyncOrAsyncIterable<[WriteType, T]> = isIterable(items)
@@ -190,7 +205,9 @@ export class DataMapper {
                 }
             }();
 
-        return this.batchWrite(generator);
+        for await (const [_, unmarshalled] of this.batchWrite(generator)) {
+            yield unmarshalled;
+        }
     }
 
     /**
@@ -205,23 +222,32 @@ export class DataMapper {
      * employed on a per-table basis.
      *
      * @param items A synchronous or asynchronous iterable of tuples of the
-     * string 'Put'|'Delete' and the item on which to perform the specified
+     * string 'put'|'delete' and the item on which to perform the specified
      * write action.
      */
     async *batchWrite<T extends StringToAnyObjectMap>(
         items: SyncOrAsyncIterable<[WriteType, T]>
-    ) {
+    ): AsyncIterableIterator<[WriteType, T]> {
+        const state: BatchState<T> = {};
         const batch = new BatchWrite(
             this.client,
-            items,
-            this.tableNamePrefix
+            this.mapWriteBatch(items, state)
         );
-        let {done, value} = await batch.next();
-        while (!done) {
-            yield value;
-            const next = await batch.next();
-            done = next.done;
-            value = next.value;
+
+        for await (const [tableName, {DeleteRequest, PutRequest}] of batch) {
+            const {keyProperties, itemSchemata} = state[tableName];
+            const attributes = PutRequest
+                ? PutRequest.Item
+                : (DeleteRequest || {Key: {}}).Key
+            const {
+                constructor,
+                schema,
+            } = itemSchemata[itemIdentifier(attributes, keyProperties)];
+
+            yield [
+                PutRequest ? 'put' : 'delete',
+                unmarshallItem<T>(schema, attributes, constructor)
+            ];
         }
     }
 
@@ -913,6 +939,125 @@ export class DataMapper {
     private getTableName(item: StringToAnyObjectMap): string {
         return getTableName(item, this.tableNamePrefix);
     }
+
+    private async *mapGetBatch<T extends StringToAnyObjectMap>(
+        items: SyncOrAsyncIterable<T>,
+        state: BatchState<T>,
+        options: {[tableName: string]: BatchGetTableOptions},
+        convertedOptions: PerTableOptions
+    ): AsyncIterableIterator<[string, AttributeMap]> {
+        for await (const item of items) {
+            const unprefixed = getTableName(item);
+            const tableName = this.tableNamePrefix + unprefixed;
+            const schema = getSchema(item);
+
+            if (unprefixed in options && !(tableName in convertedOptions)) {
+                convertedOptions[tableName] = convertBatchGetOptions(
+                    options[unprefixed],
+                    schema
+                );
+            }
+
+            if (!(tableName in state)) {
+                state[tableName] = {
+                    keyProperties: getKeyProperties(schema),
+                    itemSchemata: {}
+                };
+            }
+
+            const {keyProperties, itemSchemata} = state[tableName];
+            const marshalled = marshallKey(schema, item);
+            itemSchemata[itemIdentifier(marshalled, keyProperties)] = {
+                constructor: item.constructor as ZeroArgumentsConstructor<T>,
+                schema,
+            };
+
+            yield [tableName, marshalled];
+        }
+    }
+
+    private async *mapWriteBatch<T extends StringToAnyObjectMap>(
+        items: SyncOrAsyncIterable<[WriteType, T]>,
+        state: BatchState<T>
+    ): AsyncIterableIterator<[string, WriteRequest]> {
+        for await (const [type, item] of items) {
+            const unprefixed = getTableName(item);
+            const tableName = this.tableNamePrefix + unprefixed;
+            const schema = getSchema(item);
+
+            if (!(tableName in state)) {
+                state[tableName] = {
+                    keyProperties: getKeyProperties(schema),
+                    itemSchemata: {}
+                };
+            }
+
+            const {keyProperties, itemSchemata} = state[tableName];
+            const attributes = type === 'delete'
+                ? marshallKey(schema, item)
+                : marshallItem(schema, item);
+            const marshalled = type === 'delete'
+                ? {DeleteRequest: {Key: attributes}}
+                : {PutRequest: {Item: attributes}}
+            itemSchemata[itemIdentifier(attributes, keyProperties)] = {
+                constructor: item.constructor as ZeroArgumentsConstructor<T>,
+                schema,
+            };
+
+            yield [tableName, marshalled];
+        }
+    }
+}
+
+interface BatchState<T> {
+    [tableName: string]: {
+        keyProperties: Array<string>;
+        itemSchemata: {
+            [identifier: string]: {
+                schema: Schema;
+                constructor: ZeroArgumentsConstructor<T>;
+            };
+        };
+    };
+}
+
+function convertBatchGetOptions(
+    options: BatchGetTableOptions,
+    itemSchema: Schema
+): TableOptions {
+    const out: TableOptions = {};
+
+    if (options.readConsistency) {
+        out.ConsistentRead = options.readConsistency === 'strong';
+    }
+
+    if (options.projection) {
+        const attributes = new ExpressionAttributes();
+        out.ProjectionExpression = serializeProjectionExpression(
+            options.projection.map(
+                propName => toSchemaName(
+                    propName,
+                    options.projectionSchema || itemSchema
+                )
+            ),
+            attributes
+        );
+        out.ExpressionAttributeNames = attributes.names;
+    }
+
+    return out;
+}
+
+function getKeyProperties(schema: Schema): Array<string> {
+    const keys: Array<string> = [];
+    for (const property of Object.keys(schema).sort()) {
+        const fieldSchema = schema[property];
+        if (isKey(fieldSchema)) {
+            keys.push(fieldSchema.attributeName || property);
+        }
+    }
+
+    return keys;
 }
 
 function handleVersionAttribute(
@@ -950,6 +1095,19 @@ function isIterable<T>(arg: any): arg is Iterable<T> {
 function isVersionAttribute(fieldSchema: SchemaType): boolean {
     return fieldSchema.type === 'Number'
         && Boolean(fieldSchema.versionAttribute);
+}
+
+function itemIdentifier(
+    marshalled: AttributeMap,
+    keyProperties: Array<string>
+): string {
+    const keyAttributes: Array<string> = [];
+    for (const key of keyProperties) {
+        const value = marshalled[key];
+        `${key}=${value.B || value.N || value.S}`;
+    }
+
+    return keyAttributes.join(':');
 }
 
 function normalizeConditionExpressionPaths(
