@@ -373,7 +373,7 @@ describe('BatchGet', () => {
                 const id = parseInt(item.fizz.N as string);
                 try {
                     expect(idsReturned.has(id)).toBe(false);
-                } catch {
+                } catch (err) {
                     console.log(id);
                 }
                 idsReturned.add(id);

@@ -47,6 +47,7 @@ Please refer to the individual packages for more detailed documentation.
 ## Constituent packages
 
 * [Amazon DynamoDB Automarshaller](packages/dynamodb-auto-marshaller/)
+* [Amazon DynamoDB Batch Iterator](packages/dynamodb-batch-iterator/)
 * [Amazon DynamoDB DataMapper](packages/dynamodb-data-mapper/)
 * [Amazon DynamoDB DataMapper Annotations](packages/dynamodb-data-mapper-annotations/)
 * [Amazon DynamoDB Data Marshaller](packages/dynamodb-data-marshaller/)

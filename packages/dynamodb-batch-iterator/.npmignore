@@ -1,0 +1,12 @@
+/src
+/node_modules
+/coverage
+
+*.spec.d.ts
+*.spec.js
+*.spec.js.map
+*.integ.d.ts
+*.integ.js
+*.integ.js.map
+
+tsconfig.test.json

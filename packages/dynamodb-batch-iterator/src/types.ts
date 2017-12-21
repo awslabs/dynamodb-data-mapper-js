@@ -8,6 +8,9 @@ import {
     WriteRequest as DynamoDbWriteRequest
 } from "aws-sdk/clients/dynamodb";
 
+/**
+ * A synchronous or asynchronous iterable.
+ */
 export type SyncOrAsyncIterable<T> = Iterable<T>|AsyncIterable<T>;
 
 /**
@@ -52,15 +55,9 @@ export interface ThrottledTableConfiguration<
 }
 
 /**
- * @internal
+ * A write request for which exactly one of the `PutRequest` and `DeleteRequest`
+ * properties has been defined.
  */
-export type WriteType = 'put'|'delete';
-
-/**
- * @internal
- */
-export type WritePair = [WriteType, AttributeMap];
-
 export type WriteRequest =
     DynamoDbWriteRequest & { PutRequest: PutRequest, DeleteRequest?: undefined } |
     DynamoDbWriteRequest & { DeleteRequest: DeleteRequest, PutRequest?: undefined };
