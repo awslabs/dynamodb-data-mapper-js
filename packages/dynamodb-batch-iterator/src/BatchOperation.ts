@@ -4,15 +4,14 @@ import {
     TableState,
     TableStateElement,
     ThrottledTableConfiguration,
-} from './BatchTypes';
-import { AttributeMap } from "aws-sdk/clients/dynamodb";
+} from './types';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 require('./asyncIteratorSymbolPolyfill');
 
 export abstract class BatchOperation<
     Element extends TableStateElement
-> implements AsyncIterableIterator<[string, AttributeMap]> {
+> implements AsyncIterableIterator<[string, Element]> {
     /**
      * The maximum number of elements that may be included in a single batch.
      */
@@ -21,7 +20,7 @@ export abstract class BatchOperation<
     /**
      * Items that have been retrieved and are ready to be returned.
      */
-    protected readonly pending: Array<[string, AttributeMap]> = [];
+    protected readonly pending: Array<[string, Element]> = [];
 
     /**
      * A mapping of table names to table-specific operation state (e.g., the
@@ -38,7 +37,7 @@ export abstract class BatchOperation<
     private readonly iterator: Iterator<[string, Element]>|AsyncIterator<[string, Element]>;
     private sourceDone: boolean = false;
     private sourceNext: IteratorResult<[string, Element]>|Promise<IteratorResult<[string, Element]>>;
-    private lastResolved?: Promise<IteratorResult<[string, AttributeMap]>>;
+    private lastResolved?: Promise<IteratorResult<[string, Element]>>;
 
     /**
      * @param client    The AWS SDK client with which to communicate with
@@ -60,7 +59,7 @@ export abstract class BatchOperation<
         this.sourceNext = this.iterator.next();
     }
 
-    next(): Promise<IteratorResult<[string, AttributeMap]>> {
+    next(): Promise<IteratorResult<[string, Element]>> {
         if (this.lastResolved) {
             this.lastResolved = this.lastResolved.then(() => this.getNext());
         } else {
@@ -176,20 +175,20 @@ export abstract class BatchOperation<
         delete table.tableThrottling;
     }
 
-    private async getNext(): Promise<IteratorResult<[string, AttributeMap]>> {
+    private async getNext(): Promise<IteratorResult<[string, Element]>> {
         if (
             this.sourceDone &&
             this.pending.length === 0 &&
             this.toSend.length === 0 &&
             this.throttled.size === 0
         ) {
-            return {done: true} as IteratorResult<[string, AttributeMap]>;
+            return {done: true} as IteratorResult<[string, Element]>;
         }
 
         if (this.pending.length > 0) {
             return {
                 done: false,
-                value: this.pending.shift() as [string, AttributeMap]
+                value: this.pending.shift() as [string, Element]
             };
         }
 
@@ -222,7 +221,7 @@ export abstract class BatchOperation<
             this.enqueueThrottled(await Promise.race(this.throttled));
         }
 
-        if (this.toSend.length) {
+        if (this.toSend.length > 0) {
             await this.doBatchRequest();
         }
     }

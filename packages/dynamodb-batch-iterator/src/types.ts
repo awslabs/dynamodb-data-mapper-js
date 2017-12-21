@@ -1,8 +1,11 @@
 import {
     AttributeMap,
     ConsistentRead,
+    DeleteRequest,
     ExpressionAttributeNameMap,
     ProjectionExpression,
+    PutRequest,
+    WriteRequest as DynamoDbWriteRequest
 } from "aws-sdk/clients/dynamodb";
 
 export type SyncOrAsyncIterable<T> = Iterable<T>|AsyncIterable<T>;
@@ -29,7 +32,7 @@ export interface TableState<Element extends TableStateElement> {
 /**
  * @internal
  */
-export type TableStateElement = AttributeMap|WritePair;
+export type TableStateElement = AttributeMap|WriteRequest;
 
 /**
  * @internal
@@ -57,3 +60,7 @@ export type WriteType = 'put'|'delete';
  * @internal
  */
 export type WritePair = [WriteType, AttributeMap];
+
+export type WriteRequest =
+    DynamoDbWriteRequest & { PutRequest: PutRequest, DeleteRequest?: undefined } |
+    DynamoDbWriteRequest & { DeleteRequest: DeleteRequest, PutRequest?: undefined };

@@ -1,5 +1,6 @@
 import { BatchOperation } from './BatchOperation';
-import { WritePair, WriteType } from './BatchTypes';
+import { fromUtf8 } from './fromUtf8';
+import { WriteRequest } from './types';
 import {
     AttributeMap,
     BatchWriteItemInput,
@@ -14,37 +15,33 @@ const MAX_WRITE_BATCH_SIZE = 25;
  *
  * The iterable of writes to perform may be synchronous or asynchronous and is
  * expected to yield tuples describing the writes to be performed. The first
- * member should be the table name, and the second should be a tuple of the form
- * `['put'|'delete', AttributeMap]`. 
+ * member should be the table name, and the second should be {WriteRequest}
+ * object that defines either a put request or a delete request.
  *
  * This method will automatically retry any write requests returned by DynamoDB
  * as unprocessed. Exponential backoff on unprocessed items is employed on a
  * per-table basis.
  */
-export class BatchWrite extends BatchOperation<WritePair> {
+export class BatchWrite extends BatchOperation<WriteRequest> {
     readonly batchSize = MAX_WRITE_BATCH_SIZE;
 
     protected async doBatchRequest() {
-        const inFlight: Array<[WriteType, string, AttributeMap]> = [];
+        const inFlight: Array<[string, WriteRequest]> = [];
         const operationInput: BatchWriteItemInput = {RequestItems: {}};
 
         let batchSize = 0;
         while (this.toSend.length > 0) {
             const [
                 tableName,
-                [type, marshalled]
-            ] = this.toSend.shift() as [string, WritePair];
+                marshalled
+            ] = this.toSend.shift() as [string, WriteRequest];
 
-            inFlight.push([type, tableName, marshalled]);
+            inFlight.push([tableName, marshalled]);
 
             if (operationInput.RequestItems[tableName] === undefined) {
                 operationInput.RequestItems[tableName] = [];
             }
-            operationInput.RequestItems[tableName].push(
-                type === 'delete'
-                    ? {DeleteRequest: {Key: marshalled}}
-                    : {PutRequest: {Item: marshalled}}
-            );
+            operationInput.RequestItems[tableName].push(marshalled);
 
             if (++batchSize === this.batchSize) {
                 break;
@@ -58,26 +55,14 @@ export class BatchWrite extends BatchOperation<WritePair> {
 
         for (const table of Object.keys(UnprocessedItems)) {
             unprocessedTables.add(table);
-            const unprocessed: Array<WritePair> = [];
+            const unprocessed: Array<WriteRequest> = [];
             for (const item of UnprocessedItems[table]) {
-                if (item.DeleteRequest) {
-                    const {Key} = item.DeleteRequest;
-                    unprocessed.push(['delete', Key]);
+                if (item.DeleteRequest || item.PutRequest) {
+                    unprocessed.push(item as WriteRequest);
 
-                    const identifier = itemIdentifier(table, Key);
+                    const identifier = itemIdentifier(table, item as WriteRequest);
                     inFlight.filter(
-                        ([type, tableName, attributes]) => type !== 'delete' ||
-                            tableName !== table ||
-                            itemIdentifier(tableName, attributes) !== identifier
-                    );
-                } else if (item.PutRequest) {
-                    const {Item} = item.PutRequest;
-                    unprocessed.push(['put', Item]);
-
-                    const identifier = itemIdentifier(table, Item);
-                    inFlight.filter(
-                        ([type, tableName, attributes]) => type !== 'put' ||
-                            tableName !== table ||
+                        ([tableName, attributes]) => tableName !== table ||
                             itemIdentifier(tableName, attributes) !== identifier
                     );
                 }
@@ -89,36 +74,42 @@ export class BatchWrite extends BatchOperation<WritePair> {
         this.movePendingToThrottled(unprocessedTables);
 
         const processedTables = new Set<string>();
-        for (const [type, tableName, marshalled] of inFlight) {
+        for (const [tableName, marshalled] of inFlight) {
             processedTables.add(tableName);
-            if (type === 'delete') {
-                continue;
-            }
-
             this.pending.push([tableName, marshalled]);
         }
 
         for (const tableName of processedTables) {
-            const tableData = this.state[tableName];
-            tableData.backoffFactor = Math.max(0, tableData.backoffFactor - 1);
+            this.state[tableName].backoffFactor =
+                Math.max(0, this.state[tableName].backoffFactor - 1);
         }
     }
 }
 
-function itemIdentifier(tableName: string, attributes: AttributeMap): string {
+function itemIdentifier(tableName: string, request: WriteRequest): string {
+    if (request.DeleteRequest) {
+        return `${tableName}::delete::${serializeKeyTypeAttributes(request.DeleteRequest.Key)}`;
+    } else if (request.PutRequest) {
+        return `${tableName}::put::${serializeKeyTypeAttributes(request.PutRequest.Item)}`;
+    }
+
+    return tableName;
+}
+
+function serializeKeyTypeAttributes(attributes: AttributeMap): string {
     const keyTypeProperties: Array<string> = [];
     for (const property of Object.keys(attributes).sort()) {
         const attribute = attributes[property];
         if (attribute.B) {
             keyTypeProperties.push(`${property}=${toByteArray(attribute.B)}`);
         } else if (attribute.N) {
-            keyTypeProperties.push(`${property}=${toByteArray(attribute.N)}`);
+            keyTypeProperties.push(`${property}=${attribute.N}`);
         } else if (attribute.S) {
-            keyTypeProperties.push(`${property}=${toByteArray(attribute.S)}`);
+            keyTypeProperties.push(`${property}=${attribute.S}`);
         }
     }
 
-    return `${tableName}::${keyTypeProperties.join('&')}`;
+    return keyTypeProperties.join('&');
 }
 
 function toByteArray(value: BinaryAttributeValue): Uint8Array {
@@ -139,43 +130,6 @@ function toByteArray(value: BinaryAttributeValue): Uint8Array {
     }
 
     throw new Error('Unrecognized binary type');
-}
-
-function fromUtf8(input: string): Uint8Array {
-    const bytes: Array<number> = [];
-    for (let i = 0, len = input.length; i < len; i++) {
-        const value = input.charCodeAt(i);
-        if (value < 0x80) {
-            bytes.push(value);
-        } else if (value < 0x800) {
-            bytes.push(
-                (value >> 6) | 0b11000000,
-                (value & 0b111111) | 0b10000000
-            );
-        } else if (
-            i + 1 < input.length &&
-            ((value & 0xfc00) === 0xd800) &&
-            ((input.charCodeAt(i + 1) & 0xfc00) === 0xdc00)
-        ) {
-            const surrogatePair = 0x10000 +
-                ((value & 0b1111111111) << 10) +
-                (input.charCodeAt(++i) & 0b1111111111);
-            bytes.push(
-                (surrogatePair >> 18) | 0b11110000,
-                ((surrogatePair >> 12) & 0b111111) | 0b10000000,
-                ((surrogatePair >> 6) & 0b111111) | 0b10000000,
-                (surrogatePair & 0b111111) | 0b10000000
-            );
-        } else {
-            bytes.push(
-                (value >> 12) | 0b11100000,
-                ((value >> 6) & 0b111111) | 0b10000000,
-                (value & 0b111111) | 0b10000000,
-            );
-        }
-    }
-
-    return Uint8Array.from(bytes);
 }
 
 function isArrayBuffer(arg: any): arg is ArrayBuffer {
