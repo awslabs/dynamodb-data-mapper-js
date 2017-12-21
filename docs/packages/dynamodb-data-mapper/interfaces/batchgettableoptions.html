@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>QueryParameters | @aws/dynamodb-data-mapper</title>
+	<title>BatchGetTableOptions | @aws/dynamodb-data-mapper</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -54,32 +54,24 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="queryparameters.html">QueryParameters</a>
+					<a href="batchgettableoptions.html">BatchGetTableOptions</a>
 				</li>
 			</ul>
-			<h1>Interface QueryParameters&lt;T&gt;</h1>
+			<h1>Interface BatchGetTableOptions</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-type-parameters">
-				<h3>Type parameters</h3>
-				<ul class="tsd-type-parameters">
-					<li>
-						<h4>T<span class="tsd-signature-symbol">: </span><a href="stringtoanyobjectmap.html" class="tsd-signature-type">StringToAnyObjectMap</a></h4>
-					</li>
-				</ul>
-			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="queryoptions.html" class="tsd-signature-type">QueryOptions</a>
+						<a href="getoptions.html" class="tsd-signature-type">GetOptions</a>
 						<ul class="tsd-hierarchy">
 							<li>
-								<span class="target">QueryParameters</span>
+								<span class="target">BatchGetTableOptions</span>
 							</li>
 						</ul>
 					</li>
@@ -92,16 +84,9 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="queryparameters.html#filter" class="tsd-kind-icon">filter</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="queryparameters.html#indexname" class="tsd-kind-icon">index<wbr>Name</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="queryparameters.html#keycondition" class="tsd-kind-icon">key<wbr>Condition</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="queryparameters.html#limit" class="tsd-kind-icon">limit</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="queryparameters.html#pagesize" class="tsd-kind-icon">page<wbr>Size</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="queryparameters.html#projection" class="tsd-kind-icon">projection</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="queryparameters.html#readconsistency" class="tsd-kind-icon">read<wbr>Consistency</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="queryparameters.html#scanindexforward" class="tsd-kind-icon">scan<wbr>Index<wbr>Forward</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="queryparameters.html#startkey" class="tsd-kind-icon">start<wbr>Key</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="queryparameters.html#valueconstructor" class="tsd-kind-icon">value<wbr>Constructor</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="batchgettableoptions.html#projection" class="tsd-kind-icon">projection</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="batchgettableoptions.html#projectionschema" class="tsd-kind-icon">projection<wbr>Schema</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="batchgettableoptions.html#readconsistency" class="tsd-kind-icon">read<wbr>Consistency</a></li>
 							</ul>
 						</section>
 					</div>
@@ -110,108 +95,40 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-					<a name="filter" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> filter</h3>
-					<div class="tsd-signature tsd-kind-icon">filter<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ConditionExpression</span></div>
-					<aside class="tsd-sources">
-						<p>Inherited from <a href="queryoptions.html">QueryOptions</a>.<a href="queryoptions.html#filter">filter</a></p>
-						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/namedParameters.ts#L145">namedParameters.ts:145</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>A condition expression that DynamoDB applies after the Query operation,
-								but before the data is returned to you. Items that do not satisfy the
-							FilterExpression criteria are not returned.</p>
-						</div>
-						<p>A FilterExpression does not allow key attributes. You cannot define a
-						filter expression based on a partition key or a sort key.</p>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-					<a name="indexname" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> index<wbr>Name</h3>
-					<div class="tsd-signature tsd-kind-icon">index<wbr>Name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
-					<aside class="tsd-sources">
-						<p>Inherited from <a href="queryoptions.html">QueryOptions</a>.<a href="queryoptions.html#indexname">indexName</a></p>
-						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/namedParameters.ts#L151">namedParameters.ts:151</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>The name of an index to query. This index can be any local secondary
-							index or global secondary index on the table.</p>
-						</div>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="keycondition" class="tsd-anchor"></a>
-					<h3>key<wbr>Condition</h3>
-					<div class="tsd-signature tsd-kind-icon">key<wbr>Condition<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ConditionExpression</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">object</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/namedParameters.ts#L196">namedParameters.ts:196</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>The condition that specifies the key value(s) for items to be retrieved
-							by the Query action.</p>
-						</div>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-					<a name="limit" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> limit</h3>
-					<div class="tsd-signature tsd-kind-icon">limit<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
-					<aside class="tsd-sources">
-						<p>Inherited from <a href="queryoptions.html">QueryOptions</a>.<a href="queryoptions.html#limit">limit</a></p>
-						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/namedParameters.ts#L158">namedParameters.ts:158</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>The maximum number of items to fetch per page of results.</p>
-						</div>
-						<dl class="tsd-comment-tags">
-							<dt>deprecated</dt>
-							<dd></dd>
-						</dl>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-					<a name="pagesize" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> page<wbr>Size</h3>
-					<div class="tsd-signature tsd-kind-icon">page<wbr>Size<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
-					<aside class="tsd-sources">
-						<p>Inherited from <a href="queryoptions.html">QueryOptions</a>.<a href="queryoptions.html#pagesize">pageSize</a></p>
-						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/namedParameters.ts#L163">namedParameters.ts:163</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>The maximum number of items to fetch per page of results.</p>
-						</div>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 					<a name="projection" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> projection</h3>
 					<div class="tsd-signature tsd-kind-icon">projection<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ProjectionExpression</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="queryoptions.html">QueryOptions</a>.<a href="queryoptions.html#projection">projection</a></p>
+						<p>Inherited from <a href="getoptions.html">GetOptions</a>.<a href="getoptions.html#projection">projection</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/namedParameters.ts#L168">namedParameters.ts:168</a></li>
+							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/namedParameters.ts#L100">namedParameters.ts:100</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
 							<p>The item attributes to get.</p>
 						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="projectionschema" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> projection<wbr>Schema</h3>
+					<div class="tsd-signature tsd-kind-icon">projection<wbr>Schema<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Schema</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/namedParameters.ts#L64">namedParameters.ts:64</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The schema to use when mapping the supplied <code>projection</code> option to the
+							attribute names used in DynamoDB.</p>
+						</div>
+						<p>This parameter is only necessary if a batch contains items from multiple
+							classes that map to the <em>same</em> table using <em>different</em> property names to
+						represent the same DynamoDB attributes.</p>
+						<p>If not supplied, the schema associated with the first item associated
+						with a given table will be used in its place.</p>
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
@@ -227,61 +144,6 @@
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
 							<p>The read consistency to require when reading from DynamoDB.</p>
-						</div>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-					<a name="scanindexforward" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> scan<wbr>Index<wbr>Forward</h3>
-					<div class="tsd-signature tsd-kind-icon">scan<wbr>Index<wbr>Forward<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span></div>
-					<aside class="tsd-sources">
-						<p>Inherited from <a href="queryoptions.html">QueryOptions</a>.<a href="queryoptions.html#scanindexforward">scanIndexForward</a></p>
-						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/namedParameters.ts#L181">namedParameters.ts:181</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Specifies the order for index traversal: If true, the traversal is
-								performed in ascending order; if false, the traversal is performed in
-							descending order.</p>
-						</div>
-						<p>Items with the same partition key value are stored in sorted order by
-							sort key. If the sort key data type is Number, the results are stored in
-							numeric order. For type String, the results are stored in order of ASCII
-							character code values. For type Binary, DynamoDB treats each byte of the
-						binary data as unsigned.</p>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-					<a name="startkey" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> start<wbr>Key</h3>
-					<div class="tsd-signature tsd-kind-icon">start<wbr>Key<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">object</span></div>
-					<aside class="tsd-sources">
-						<p>Inherited from <a href="queryoptions.html">QueryOptions</a>.<a href="queryoptions.html#startkey">startKey</a></p>
-						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/namedParameters.ts#L186">namedParameters.ts:186</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>The primary key of the first item that this operation will evaluate.</p>
-						</div>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="valueconstructor" class="tsd-anchor"></a>
-					<h3>value<wbr>Constructor</h3>
-					<div class="tsd-signature tsd-kind-icon">value<wbr>Constructor<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ZeroArgumentsConstructor</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/namedParameters.ts#L203">namedParameters.ts:203</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>A constructor that creates objects representing one record returned by
-							the query operation.</p>
 						</div>
 					</div>
 				</section>
@@ -312,9 +174,24 @@
 					<li class=" tsd-kind-interface">
 						<a href="batchgetoptions.html" class="tsd-kind-icon">Batch<wbr>Get<wbr>Options</a>
 					</li>
-					<li class=" tsd-kind-interface">
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-interface">
 						<a href="batchgettableoptions.html" class="tsd-kind-icon">Batch<wbr>Get<wbr>Table<wbr>Options</a>
+						<ul>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="batchgettableoptions.html#projection" class="tsd-kind-icon">projection</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="batchgettableoptions.html#projectionschema" class="tsd-kind-icon">projection<wbr>Schema</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="batchgettableoptions.html#readconsistency" class="tsd-kind-icon">read<wbr>Consistency</a>
+							</li>
+						</ul>
 					</li>
+				</ul>
+				<ul class="after-current">
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
 						<a href="ctorbearer.html" class="tsd-kind-icon">Ctor<wbr>Bearer</a>
 					</li>
@@ -348,45 +225,9 @@
 					<li class=" tsd-kind-interface">
 						<a href="queryoptions.html" class="tsd-kind-icon">Query<wbr>Options</a>
 					</li>
-				</ul>
-				<ul class="current">
-					<li class="current tsd-kind-interface tsd-has-type-parameter">
+					<li class=" tsd-kind-interface tsd-has-type-parameter">
 						<a href="queryparameters.html" class="tsd-kind-icon">Query<wbr>Parameters</a>
-						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="queryparameters.html#filter" class="tsd-kind-icon">filter</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="queryparameters.html#indexname" class="tsd-kind-icon">index<wbr>Name</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="queryparameters.html#keycondition" class="tsd-kind-icon">key<wbr>Condition</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="queryparameters.html#limit" class="tsd-kind-icon">limit</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="queryparameters.html#pagesize" class="tsd-kind-icon">page<wbr>Size</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="queryparameters.html#projection" class="tsd-kind-icon">projection</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="queryparameters.html#readconsistency" class="tsd-kind-icon">read<wbr>Consistency</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="queryparameters.html#scanindexforward" class="tsd-kind-icon">scan<wbr>Index<wbr>Forward</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="queryparameters.html#startkey" class="tsd-kind-icon">start<wbr>Key</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="queryparameters.html#valueconstructor" class="tsd-kind-icon">value<wbr>Constructor</a>
-							</li>
-						</ul>
 					</li>
-				</ul>
-				<ul class="after-current">
 					<li class=" tsd-kind-interface">
 						<a href="readconsistencyconfiguration.html" class="tsd-kind-icon">Read<wbr>Consistency<wbr>Configuration</a>
 					</li>

@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>PreparedElement | @aws/dynamodb-data-mapper</title>
+	<title>TableOptions | @aws/dynamodb-batch-iterator</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="../index.html" class="title">@aws/dynamodb-data-mapper</a>
+					<a href="../index.html" class="title">@aws/dynamodb-batch-iterator</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -54,40 +54,21 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="preparedelement.html">PreparedElement</a>
+					<a href="tableoptions.html">TableOptions</a>
 				</li>
 			</ul>
-			<h1>Interface PreparedElement&lt;T, E&gt;</h1>
+			<h1>Interface TableOptions</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-comment">
-				<div class="tsd-comment tsd-typography">
-					<dl class="tsd-comment-tags">
-						<dt>internal</dt>
-						<dd></dd>
-					</dl>
-				</div>
-			</section>
-			<section class="tsd-panel tsd-type-parameters">
-				<h3>Type parameters</h3>
-				<ul class="tsd-type-parameters">
-					<li>
-						<h4>T</h4>
-					</li>
-					<li>
-						<h4>E<span class="tsd-signature-symbol">: </span><a href="../globals.html#tablestateelement" class="tsd-signature-type">TableStateElement</a></h4>
-					</li>
-				</ul>
-			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">PreparedElement</span>
+						<span class="target">TableOptions</span>
 					</li>
 				</ul>
 			</section>
@@ -98,9 +79,9 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="preparedelement.html#marshalled" class="tsd-kind-icon">marshalled</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="preparedelement.html#tablename" class="tsd-kind-icon">table<wbr>Name</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="preparedelement.html#tablestate" class="tsd-kind-icon">table<wbr>State</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="tableoptions.html#consistentread" class="tsd-kind-icon">Consistent<wbr>Read</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="tableoptions.html#expressionattributenames" class="tsd-kind-icon">Expression<wbr>Attribute<wbr>Names</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="tableoptions.html#projectionexpression" class="tsd-kind-icon">Projection<wbr>Expression</a></li>
 							</ul>
 						</section>
 					</div>
@@ -109,34 +90,50 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="marshalled" class="tsd-anchor"></a>
-					<h3>marshalled</h3>
-					<div class="tsd-signature tsd-kind-icon">marshalled<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">E</span></div>
+					<a name="consistentread" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> Consistent<wbr>Read</h3>
+					<div class="tsd-signature tsd-kind-icon">Consistent<wbr>Read<span class="tsd-signature-symbol">:</span> <a href="tableoptions.html#consistentread" class="tsd-signature-type">ConsistentRead</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/1a71184/packages/dynamodb-data-mapper/src/BatchTypes.ts#L19">BatchTypes.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-batch-iterator/src/BatchGetOptions.ts#L27">BatchGetOptions.ts:27</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The read consistency to apply to reads against this table.</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="tablename" class="tsd-anchor"></a>
-					<h3>table<wbr>Name</h3>
-					<div class="tsd-signature tsd-kind-icon">table<wbr>Name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<a name="expressionattributenames" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> Expression<wbr>Attribute<wbr>Names</h3>
+					<div class="tsd-signature tsd-kind-icon">Expression<wbr>Attribute<wbr>Names<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ExpressionAttributeNameMap</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/1a71184/packages/dynamodb-data-mapper/src/BatchTypes.ts#L20">BatchTypes.ts:20</a></li>
+							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-batch-iterator/src/BatchGetOptions.ts#L32">BatchGetOptions.ts:32</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>One or more substitution tokens for attribute names in an expression.</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="tablestate" class="tsd-anchor"></a>
-					<h3>table<wbr>State</h3>
-					<div class="tsd-signature tsd-kind-icon">table<wbr>State<span class="tsd-signature-symbol">:</span> <a href="tablestate.html" class="tsd-signature-type">TableState</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">E</span><span class="tsd-signature-symbol">&gt;</span></div>
+					<a name="projectionexpression" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> Projection<wbr>Expression</h3>
+					<div class="tsd-signature tsd-kind-icon">Projection<wbr>Expression<span class="tsd-signature-symbol">:</span> <a href="tableoptions.html#projectionexpression" class="tsd-signature-type">ProjectionExpression</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/1a71184/packages/dynamodb-data-mapper/src/BatchTypes.ts#L21">BatchTypes.ts:21</a></li>
+							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-batch-iterator/src/BatchGetOptions.ts#L38">BatchGetOptions.ts:38</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A string that identifies one or more attributes to retrieve from the
+							table.</p>
+						</div>
+					</div>
 				</section>
 			</section>
 		</div>
@@ -150,24 +147,63 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-class">
+						<a href="../classes/batchget.html" class="tsd-kind-icon">Batch<wbr>Get</a>
+					</li>
+					<li class=" tsd-kind-class tsd-has-type-parameter">
+						<a href="../classes/batchoperation.html" class="tsd-kind-icon">Batch<wbr>Operation</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="../classes/batchwrite.html" class="tsd-kind-icon">Batch<wbr>Write</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="batchgetoptions.html" class="tsd-kind-icon">Batch<wbr>Get<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-has-type-parameter">
+						<a href="batchstate.html" class="tsd-kind-icon">Batch<wbr>State</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="pertableoptions.html" class="tsd-kind-icon">Per<wbr>Table<wbr>Options</a>
+					</li>
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-interface tsd-has-type-parameter">
-						<a href="preparedelement.html" class="tsd-kind-icon">Prepared<wbr>Element</a>
+					<li class="current tsd-kind-interface">
+						<a href="tableoptions.html" class="tsd-kind-icon">Table<wbr>Options</a>
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="preparedelement.html#marshalled" class="tsd-kind-icon">marshalled</a>
+								<a href="tableoptions.html#consistentread" class="tsd-kind-icon">Consistent<wbr>Read</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="preparedelement.html#tablename" class="tsd-kind-icon">table<wbr>Name</a>
+								<a href="tableoptions.html#expressionattributenames" class="tsd-kind-icon">Expression<wbr>Attribute<wbr>Names</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="preparedelement.html#tablestate" class="tsd-kind-icon">table<wbr>State</a>
+								<a href="tableoptions.html#projectionexpression" class="tsd-kind-icon">Projection<wbr>Expression</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
+					<li class=" tsd-kind-interface tsd-has-type-parameter">
+						<a href="tablestate.html" class="tsd-kind-icon">Table<wbr>State</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-has-type-parameter">
+						<a href="tablethrottlingtracker.html" class="tsd-kind-icon">Table<wbr>Throttling<wbr>Tracker</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-has-type-parameter">
+						<a href="throttledtableconfiguration.html" class="tsd-kind-icon">Throttled<wbr>Table<wbr>Configuration</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="../globals.html#syncorasynciterable" class="tsd-kind-icon">Sync<wbr>OrAsync<wbr>Iterable</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="../globals.html#tablestateelement" class="tsd-kind-icon">Table<wbr>State<wbr>Element</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="../globals.html#writerequest" class="tsd-kind-icon">Write<wbr>Request</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="../globals.html#fromutf8" class="tsd-kind-icon">from<wbr>Utf8</a>
+					</li>
 				</ul>
 			</nav>
 		</div>
