@@ -96,10 +96,6 @@
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="datamapper.html#batchdelete" class="tsd-kind-icon">batch<wbr>Delete</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="datamapper.html#batchget" class="tsd-kind-icon">batch<wbr>Get</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="datamapper.html#batchput" class="tsd-kind-icon">batch<wbr>Put</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="datamapper.html#batchwrite" class="tsd-kind-icon">batch<wbr>Write</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="datamapper.html#delete" class="tsd-kind-icon">delete</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="datamapper.html#get" class="tsd-kind-icon">get</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="datamapper.html#parallelscan" class="tsd-kind-icon">parallel<wbr>Scan</a></li>
@@ -124,7 +120,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L94">DataMapper.ts:94</a></li>
+									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/DataMapper.ts#L75">DataMapper.ts:75</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -143,189 +139,6 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-					<a name="batchdelete" class="tsd-anchor"></a>
-					<h3>batch<wbr>Delete</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">batch<wbr>Delete&lt;T&gt;<span class="tsd-signature-symbol">(</span>items<span class="tsd-signature-symbol">: </span><a href="../globals.html#syncorasynciterable" class="tsd-signature-type">SyncOrAsyncIterable</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AsyncIterableIterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L122">DataMapper.ts:122</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Deletes items from DynamoDB in batches of 25 or fewer via one or more
-										BatchWriteItem operations. The items may be from any number of tables;
-										tables and schemas for each item are determined using the
-										{DynamoDbSchema} property and the {DynamoDbTable} property on defined on
-									each item supplied.</p>
-								</div>
-								<p>This method will automatically retry any delete requests returned by
-									DynamoDB as unprocessed. Exponential backoff on unprocessed items is
-								employed on a per-table basis.</p>
-							</div>
-							<h4 class="tsd-type-parameters-title">Type parameters</h4>
-							<ul class="tsd-type-parameters">
-								<li>
-									<h4>T<span class="tsd-signature-symbol">: </span><a href="../interfaces/stringtoanyobjectmap.html" class="tsd-signature-type">StringToAnyObjectMap</a></h4>
-								</li>
-							</ul>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>items: <a href="../globals.html#syncorasynciterable" class="tsd-signature-type">SyncOrAsyncIterable</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>A synchronous or asynchronous iterable of items to delete.</p>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">AsyncIterableIterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-					<a name="batchget" class="tsd-anchor"></a>
-					<h3>batch<wbr>Get</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">batch<wbr>Get&lt;T&gt;<span class="tsd-signature-symbol">(</span>items<span class="tsd-signature-symbol">: </span><a href="../globals.html#syncorasynciterable" class="tsd-signature-type">SyncOrAsyncIterable</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span>, __namedParameters<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AsyncIterableIterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L151">DataMapper.ts:151</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Retrieves items from DynamoDB in batches of 100 or fewer via one or more
-										BatchGetItem operations. The items may be from any number of tables;
-										tables and schemas for each item are determined using the
-										{DynamoDbSchema} property and the {DynamoDbTable} property on defined on
-									each item supplied.</p>
-								</div>
-								<p>This method will automatically retry any get requests returned by
-									DynamoDB as unprocessed. Exponential backoff on unprocessed items is
-								employed on a per-table basis.</p>
-							</div>
-							<h4 class="tsd-type-parameters-title">Type parameters</h4>
-							<ul class="tsd-type-parameters">
-								<li>
-									<h4>T<span class="tsd-signature-symbol">: </span><a href="../interfaces/stringtoanyobjectmap.html" class="tsd-signature-type">StringToAnyObjectMap</a></h4>
-								</li>
-							</ul>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>items: <a href="../globals.html#syncorasynciterable" class="tsd-signature-type">SyncOrAsyncIterable</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>A synchronous or asynchronous iterable of items to get.</p>
-									</div>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> __namedParameters: <span class="tsd-signature-type">object</span><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
-									<ul class="tsd-parameters">
-									</ul>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">AsyncIterableIterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-					<a name="batchput" class="tsd-anchor"></a>
-					<h3>batch<wbr>Put</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">batch<wbr>Put&lt;T&gt;<span class="tsd-signature-symbol">(</span>items<span class="tsd-signature-symbol">: </span><a href="../globals.html#syncorasynciterable" class="tsd-signature-type">SyncOrAsyncIterable</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AsyncIterableIterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L193">DataMapper.ts:193</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Puts items into DynamoDB in batches of 25 or fewer via one or more
-										BatchWriteItem operations. The items may be from any number of tables;
-										tables and schemas for each item are determined using the
-										{DynamoDbSchema} property and the {DynamoDbTable} property on defined on
-									each item supplied.</p>
-								</div>
-								<p>This method will automatically retry any put requests returned by
-									DynamoDB as unprocessed. Exponential backoff on unprocessed items is
-								employed on a per-table basis.</p>
-							</div>
-							<h4 class="tsd-type-parameters-title">Type parameters</h4>
-							<ul class="tsd-type-parameters">
-								<li>
-									<h4>T<span class="tsd-signature-symbol">: </span><a href="../interfaces/stringtoanyobjectmap.html" class="tsd-signature-type">StringToAnyObjectMap</a></h4>
-								</li>
-							</ul>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>items: <a href="../globals.html#syncorasynciterable" class="tsd-signature-type">SyncOrAsyncIterable</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>A synchronous or asynchronous iterable of items to put.</p>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">AsyncIterableIterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-					<a name="batchwrite" class="tsd-anchor"></a>
-					<h3>batch<wbr>Write</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">batch<wbr>Write&lt;T&gt;<span class="tsd-signature-symbol">(</span>items<span class="tsd-signature-symbol">: </span><a href="../globals.html#syncorasynciterable" class="tsd-signature-type">SyncOrAsyncIterable</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">[</span><a href="../globals.html#writetype" class="tsd-signature-type">WriteType</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AsyncIterableIterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">[</span><a href="../globals.html#writetype" class="tsd-signature-type">WriteType</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L228">DataMapper.ts:228</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Puts or deletes items from DynamoDB in batches of 25 or fewer via one or
-										more BatchWriteItem operations. The items may belong to any number of
-										tables; tables and schemas for each item are determined using the
-										{DynamoDbSchema} property and the {DynamoDbTable} property on defined on
-									each item supplied.</p>
-								</div>
-								<p>This method will automatically retry any write requests returned by
-									DynamoDB as unprocessed. Exponential backoff on unprocessed items is
-								employed on a per-table basis.</p>
-							</div>
-							<h4 class="tsd-type-parameters-title">Type parameters</h4>
-							<ul class="tsd-type-parameters">
-								<li>
-									<h4>T<span class="tsd-signature-symbol">: </span><a href="../interfaces/stringtoanyobjectmap.html" class="tsd-signature-type">StringToAnyObjectMap</a></h4>
-								</li>
-							</ul>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>items: <a href="../globals.html#syncorasynciterable" class="tsd-signature-type">SyncOrAsyncIterable</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">[</span><a href="../globals.html#writetype" class="tsd-signature-type">WriteType</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>A synchronous or asynchronous iterable of tuples of the
-											string &#39;put&#39;|&#39;delete&#39; and the item on which to perform the specified
-										write action.</p>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">AsyncIterableIterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">[</span><a href="../globals.html#writetype" class="tsd-signature-type">WriteType</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 					<a name="delete" class="tsd-anchor"></a>
 					<h3>delete</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
@@ -336,14 +149,14 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L262">DataMapper.ts:262</a></li>
+									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/DataMapper.ts#L98">DataMapper.ts:98</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>Perform a DeleteItem operation using the schema accessible via the
-										{DynamoDbSchema} property and the table name accessible via the
-									{DynamoDbTable} property on the item supplied.</p>
+										{DynamoDbSchema} method and the table name accessible via the
+									{DynamoDbTable} method on the item supplied.</p>
 								</div>
 							</div>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -372,7 +185,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L270">DataMapper.ts:270</a></li>
+									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/DataMapper.ts#L106">DataMapper.ts:106</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -408,7 +221,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L348">DataMapper.ts:348</a></li>
+									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/DataMapper.ts#L194">DataMapper.ts:194</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -444,7 +257,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L356">DataMapper.ts:356</a></li>
+									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/DataMapper.ts#L202">DataMapper.ts:202</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -480,7 +293,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L425">DataMapper.ts:425</a></li>
+									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/DataMapper.ts#L282">DataMapper.ts:282</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -529,7 +342,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L434">DataMapper.ts:434</a></li>
+									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/DataMapper.ts#L291">DataMapper.ts:291</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -565,7 +378,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L511">DataMapper.ts:511</a></li>
+									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/DataMapper.ts#L368">DataMapper.ts:368</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -601,7 +414,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L519">DataMapper.ts:519</a></li>
+									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/DataMapper.ts#L376">DataMapper.ts:376</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -637,7 +450,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L607">DataMapper.ts:607</a></li>
+									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/DataMapper.ts#L467">DataMapper.ts:467</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -683,7 +496,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L617">DataMapper.ts:617</a></li>
+									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/DataMapper.ts#L477">DataMapper.ts:477</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -719,7 +532,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L710">DataMapper.ts:710</a></li>
+									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/DataMapper.ts#L572">DataMapper.ts:572</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -759,7 +572,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L718">DataMapper.ts:718</a></li>
+									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/DataMapper.ts#L580">DataMapper.ts:580</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -795,7 +608,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L758">DataMapper.ts:758</a></li>
+									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/DataMapper.ts#L620">DataMapper.ts:620</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -831,7 +644,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/ffad05c/packages/dynamodb-data-mapper/src/DataMapper.ts#L766">DataMapper.ts:766</a></li>
+									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/DataMapper.ts#L628">DataMapper.ts:628</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -877,18 +690,6 @@
 								<a href="datamapper.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-								<a href="datamapper.html#batchdelete" class="tsd-kind-icon">batch<wbr>Delete</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-								<a href="datamapper.html#batchget" class="tsd-kind-icon">batch<wbr>Get</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-								<a href="datamapper.html#batchput" class="tsd-kind-icon">batch<wbr>Put</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-								<a href="datamapper.html#batchwrite" class="tsd-kind-icon">batch<wbr>Write</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 								<a href="datamapper.html#delete" class="tsd-kind-icon">delete</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
@@ -921,12 +722,6 @@
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="../interfaces/basesequentialscanoptions.html" class="tsd-kind-icon">Base<wbr>Sequential<wbr>Scan<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/batchgetoptions.html" class="tsd-kind-icon">Batch<wbr>Get<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/batchgettableoptions.html" class="tsd-kind-icon">Batch<wbr>Get<wbr>Table<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
 						<a href="../interfaces/ctorbearer.html" class="tsd-kind-icon">Ctor<wbr>Bearer</a>
@@ -965,9 +760,6 @@
 						<a href="../interfaces/queryparameters.html" class="tsd-kind-icon">Query<wbr>Parameters</a>
 					</li>
 					<li class=" tsd-kind-interface">
-						<a href="../interfaces/readconsistencyconfiguration.html" class="tsd-kind-icon">Read<wbr>Consistency<wbr>Configuration</a>
-					</li>
-					<li class=" tsd-kind-interface">
 						<a href="../interfaces/scanoptions.html" class="tsd-kind-icon">Scan<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface">
@@ -994,12 +786,6 @@
 					<li class=" tsd-kind-type-alias">
 						<a href="../globals.html#scanparameters" class="tsd-kind-icon">Scan<wbr>Parameters</a>
 					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../globals.html#syncorasynciterable" class="tsd-kind-icon">Sync<wbr>OrAsync<wbr>Iterable</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../globals.html#writetype" class="tsd-kind-icon">Write<wbr>Type</a>
-					</li>
 					<li class=" tsd-kind-variable">
 						<a href="../globals.html#dynamodbdirtyfields" class="tsd-kind-icon">Dynamo<wbr>DbDirty<wbr>Fields</a>
 					</li>
@@ -1010,22 +796,16 @@
 						<a href="../globals.html#dynamodbtable" class="tsd-kind-icon">Dynamo<wbr>DbTable</a>
 					</li>
 					<li class=" tsd-kind-variable">
-						<a href="../globals.html#max_read_batch_size" class="tsd-kind-icon">MAX_<wbr>READ_<wbr>BATCH_<wbr>SIZE</a>
-					</li>
-					<li class=" tsd-kind-variable">
-						<a href="../globals.html#max_write_batch_size" class="tsd-kind-icon">MAX_<wbr>WRITE_<wbr>BATCH_<wbr>SIZE</a>
-					</li>
-					<li class=" tsd-kind-variable">
 						<a href="../globals.html#version" class="tsd-kind-icon">VERSION</a>
 					</li>
 					<li class=" tsd-kind-function tsd-has-type-parameter">
 						<a href="../globals.html#embed" class="tsd-kind-icon">embed</a>
 					</li>
-					<li class=" tsd-kind-function">
-						<a href="../globals.html#getschema" class="tsd-kind-icon">get<wbr>Schema</a>
+					<li class=" tsd-kind-object-literal">
+						<a href="../globals.html#onmissingstrategies" class="tsd-kind-icon">On<wbr>Missing<wbr>Strategies</a>
 					</li>
-					<li class=" tsd-kind-function">
-						<a href="../globals.html#gettablename" class="tsd-kind-icon">get<wbr>Table<wbr>Name</a>
+					<li class=" tsd-kind-object-literal">
+						<a href="../globals.html#readconsistencies" class="tsd-kind-icon">Read<wbr>Consistencies</a>
 					</li>
 				</ul>
 			</nav>
