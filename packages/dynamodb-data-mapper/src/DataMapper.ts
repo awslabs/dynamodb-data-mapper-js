@@ -1,5 +1,3 @@
-import { BatchGet } from './BatchGet';
-import { BatchWrite } from './BatchWrite';
 import {
     ReadConsistency,
     StringToAnyObjectMap,
@@ -33,6 +31,7 @@ import {
     getSchema,
     getTableName,
 } from './protocols';
+import { BatchGet, BatchWrite } from '@aws/dynamodb-batch-iterator';
 import {
     isKey,
     marshallItem,
@@ -146,6 +145,7 @@ export class DataMapper {
         items: SyncOrAsyncIterable<T>,
         options: BatchGetOptions = {}
     ) {
+        
         const batch = new BatchGet(
             this.client,
             items,

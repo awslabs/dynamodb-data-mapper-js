@@ -26,6 +26,7 @@
     "typescript": "^2.6"
   },
   "dependencies": {
+    "@aws/dynamodb-batch-iterator": "^0.2.1",
     "@aws/dynamodb-data-marshaller": "^0.2.1",
     "@aws/dynamodb-expressions": "^0.2.1",
     "tslib": "^1.8.1"
