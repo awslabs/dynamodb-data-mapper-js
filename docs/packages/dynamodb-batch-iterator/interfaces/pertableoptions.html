@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>OnMissingStrategy | @aws/dynamodb-data-marshaller</title>
+	<title>PerTableOptions | @aws/dynamodb-batch-iterator</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="../index.html" class="title">@aws/dynamodb-data-marshaller</a>
+					<a href="../index.html" class="title">@aws/dynamodb-batch-iterator</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -54,52 +54,27 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="onmissingstrategy.html">OnMissingStrategy</a>
+					<a href="pertableoptions.html">PerTableOptions</a>
 				</li>
 			</ul>
-			<h1>Enumeration OnMissingStrategy</h1>
+			<h1>Interface PerTableOptions</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel-group tsd-index-group">
-				<h2>Index</h2>
-				<section class="tsd-panel tsd-index-panel">
-					<div class="tsd-index-content">
-						<section class="tsd-index-section ">
-							<h3>Enumeration members</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="onmissingstrategy.html#remove" class="tsd-kind-icon">Remove</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="onmissingstrategy.html#skip" class="tsd-kind-icon">Skip</a></li>
-							</ul>
-						</section>
-					</div>
-				</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">PerTableOptions</span>
+					</li>
+				</ul>
 			</section>
-			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Enumeration members</h2>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="remove" class="tsd-anchor"></a>
-					<h3>Remove</h3>
-					<div class="tsd-signature tsd-kind-icon">Remove<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;0</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-marshaller/src/OnMissingStrategy.ts#L2">OnMissingStrategy.ts:2</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="skip" class="tsd-anchor"></a>
-					<h3>Skip</h3>
-					<div class="tsd-signature tsd-kind-icon">Skip<span class="tsd-signature-symbol">:</span> </div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-marshaller/src/OnMissingStrategy.ts#L3">OnMissingStrategy.ts:3</a></li>
-						</ul>
-					</aside>
-				</section>
+			<section class="tsd-panel tsd-kind-interface">
+				<h3 class="tsd-before-signature">Indexable</h3>
+				<div class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">[</span>tableName: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><a href="tableoptions.html" class="tsd-signature-type">TableOptions</a></div>
 			</section>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -112,113 +87,51 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-class">
+						<a href="../classes/batchget.html" class="tsd-kind-icon">Batch<wbr>Get</a>
+					</li>
+					<li class=" tsd-kind-class tsd-has-type-parameter">
+						<a href="../classes/batchoperation.html" class="tsd-kind-icon">Batch<wbr>Operation</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="../classes/batchwrite.html" class="tsd-kind-icon">Batch<wbr>Write</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="batchgetoptions.html" class="tsd-kind-icon">Batch<wbr>Get<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-has-type-parameter">
+						<a href="batchstate.html" class="tsd-kind-icon">Batch<wbr>State</a>
+					</li>
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-enum">
-						<a href="onmissingstrategy.html" class="tsd-kind-icon">On<wbr>Missing<wbr>Strategy</a>
-						<ul>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="onmissingstrategy.html#remove" class="tsd-kind-icon">Remove</a>
-							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="onmissingstrategy.html#skip" class="tsd-kind-icon">Skip</a>
-							</li>
-						</ul>
+					<li class="current tsd-kind-interface">
+						<a href="pertableoptions.html" class="tsd-kind-icon">Per<wbr>Table<wbr>Options</a>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-class">
-						<a href="../classes/invalidschemaerror.html" class="tsd-kind-icon">Invalid<wbr>Schema<wbr>Error</a>
-					</li>
-					<li class=" tsd-kind-class">
-						<a href="../classes/invalidvalueerror.html" class="tsd-kind-icon">Invalid<wbr>Value<wbr>Error</a>
+					<li class=" tsd-kind-interface">
+						<a href="tableoptions.html" class="tsd-kind-icon">Table<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
-						<a href="../interfaces/anytype.html" class="tsd-kind-icon">Any<wbr>Type</a>
+						<a href="tablestate.html" class="tsd-kind-icon">Table<wbr>State</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
-						<a href="../interfaces/basetype.html" class="tsd-kind-icon">Base<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/binarytype.html" class="tsd-kind-icon">Binary<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/booleantype.html" class="tsd-kind-icon">Boolean<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/collectiontype.html" class="tsd-kind-icon">Collection<wbr>Type</a>
+						<a href="tablethrottlingtracker.html" class="tsd-kind-icon">Table<wbr>Throttling<wbr>Tracker</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
-						<a href="../interfaces/customtype.html" class="tsd-kind-icon">Custom<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/datetype.html" class="tsd-kind-icon">Date<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-has-type-parameter">
-						<a href="../interfaces/documenttype.html" class="tsd-kind-icon">Document<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/hashtype.html" class="tsd-kind-icon">Hash<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/keyabletype.html" class="tsd-kind-icon">Keyable<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-has-type-parameter">
-						<a href="../interfaces/listtype.html" class="tsd-kind-icon">List<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-has-type-parameter">
-						<a href="../interfaces/maptype.html" class="tsd-kind-icon">Map<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/nulltype.html" class="tsd-kind-icon">Null<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/numbertype.html" class="tsd-kind-icon">Number<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/schema.html" class="tsd-kind-icon">Schema</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/settype.html" class="tsd-kind-icon">Set<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/stringtype.html" class="tsd-kind-icon">String<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-has-type-parameter">
-						<a href="../interfaces/tupletype.html" class="tsd-kind-icon">Tuple<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-has-type-parameter">
-						<a href="../interfaces/zeroargumentsconstructor.html" class="tsd-kind-icon">Zero<wbr>Arguments<wbr>Constructor</a>
+						<a href="throttledtableconfiguration.html" class="tsd-kind-icon">Throttled<wbr>Table<wbr>Configuration</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
-						<a href="../globals.html#keytype" class="tsd-kind-icon">Key<wbr>Type</a>
+						<a href="../globals.html#syncorasynciterable" class="tsd-kind-icon">Sync<wbr>OrAsync<wbr>Iterable</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
-						<a href="../globals.html#schematype" class="tsd-kind-icon">Schema<wbr>Type</a>
+						<a href="../globals.html#tablestateelement" class="tsd-kind-icon">Table<wbr>State<wbr>Element</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
-						<a href="../globals.html#typetag" class="tsd-kind-icon">Type<wbr>Tag</a>
+						<a href="../globals.html#writerequest" class="tsd-kind-icon">Write<wbr>Request</a>
 					</li>
 					<li class=" tsd-kind-function">
-						<a href="../globals.html#isschema" class="tsd-kind-icon">is<wbr>Schema</a>
-					</li>
-					<li class=" tsd-kind-function">
-						<a href="../globals.html#isschematype" class="tsd-kind-icon">is<wbr>Schema<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-function">
-						<a href="../globals.html#marshallitem" class="tsd-kind-icon">marshall<wbr>Item</a>
-					</li>
-					<li class=" tsd-kind-function">
-						<a href="../globals.html#marshallvalue" class="tsd-kind-icon">marshall<wbr>Value</a>
-					</li>
-					<li class=" tsd-kind-function tsd-has-type-parameter">
-						<a href="../globals.html#unmarshallitem" class="tsd-kind-icon">unmarshall<wbr>Item</a>
-					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="../globals.html#keytypes" class="tsd-kind-icon">Key<wbr>Types</a>
-					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="../globals.html#typetags" class="tsd-kind-icon">Type<wbr>Tags</a>
+						<a href="../globals.html#itemidentifier" class="tsd-kind-icon">item<wbr>Identifier</a>
 					</li>
 				</ul>
 			</nav>

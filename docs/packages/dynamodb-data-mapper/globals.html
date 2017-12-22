@@ -77,6 +77,8 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-interface"><a href="interfaces/basescanoptions.html" class="tsd-kind-icon">Base<wbr>Scan<wbr>Options</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/basesequentialscanoptions.html" class="tsd-kind-icon">Base<wbr>Sequential<wbr>Scan<wbr>Options</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/batchgetoptions.html" class="tsd-kind-icon">Batch<wbr>Get<wbr>Options</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/batchgettableoptions.html" class="tsd-kind-icon">Batch<wbr>Get<wbr>Table<wbr>Options</a></li>
 								<li class="tsd-kind-interface tsd-has-type-parameter"><a href="interfaces/ctorbearer.html" class="tsd-kind-icon">Ctor<wbr>Bearer</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/datamapperconfiguration.html" class="tsd-kind-icon">Data<wbr>Mapper<wbr>Configuration</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/deleteoptions.html" class="tsd-kind-icon">Delete<wbr>Options</a></li>
@@ -89,6 +91,7 @@
 								<li class="tsd-kind-interface tsd-has-type-parameter"><a href="interfaces/putparameters.html" class="tsd-kind-icon">Put<wbr>Parameters</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/queryoptions.html" class="tsd-kind-icon">Query<wbr>Options</a></li>
 								<li class="tsd-kind-interface tsd-has-type-parameter"><a href="interfaces/queryparameters.html" class="tsd-kind-icon">Query<wbr>Parameters</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/readconsistencyconfiguration.html" class="tsd-kind-icon">Read<wbr>Consistency<wbr>Configuration</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/scanoptions.html" class="tsd-kind-icon">Scan<wbr>Options</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/stringtoanyobjectmap.html" class="tsd-kind-icon">String<wbr>ToAny<wbr>Object<wbr>Map</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/updateoptions.html" class="tsd-kind-icon">Update<wbr>Options</a></li>
@@ -103,6 +106,8 @@
 								<li class="tsd-kind-type-alias"><a href="globals.html#parallelscanworkerparameters" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>Worker<wbr>Parameters</a></li>
 								<li class="tsd-kind-type-alias"><a href="globals.html#readconsistency" class="tsd-kind-icon">Read<wbr>Consistency</a></li>
 								<li class="tsd-kind-type-alias"><a href="globals.html#scanparameters" class="tsd-kind-icon">Scan<wbr>Parameters</a></li>
+								<li class="tsd-kind-type-alias"><a href="globals.html#syncorasynciterable" class="tsd-kind-icon">Sync<wbr>OrAsync<wbr>Iterable</a></li>
+								<li class="tsd-kind-type-alias"><a href="globals.html#writetype" class="tsd-kind-icon">Write<wbr>Type</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
@@ -111,6 +116,8 @@
 								<li class="tsd-kind-variable"><a href="globals.html#dynamodbdirtyfields" class="tsd-kind-icon">Dynamo<wbr>DbDirty<wbr>Fields</a></li>
 								<li class="tsd-kind-variable"><a href="globals.html#dynamodbschema" class="tsd-kind-icon">Dynamo<wbr>DbSchema</a></li>
 								<li class="tsd-kind-variable"><a href="globals.html#dynamodbtable" class="tsd-kind-icon">Dynamo<wbr>DbTable</a></li>
+								<li class="tsd-kind-variable"><a href="globals.html#max_read_batch_size" class="tsd-kind-icon">MAX_<wbr>READ_<wbr>BATCH_<wbr>SIZE</a></li>
+								<li class="tsd-kind-variable"><a href="globals.html#max_write_batch_size" class="tsd-kind-icon">MAX_<wbr>WRITE_<wbr>BATCH_<wbr>SIZE</a></li>
 								<li class="tsd-kind-variable"><a href="globals.html#version" class="tsd-kind-icon">VERSION</a></li>
 							</ul>
 						</section>
@@ -118,13 +125,8 @@
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-function tsd-has-type-parameter"><a href="globals.html#embed" class="tsd-kind-icon">embed</a></li>
-							</ul>
-						</section>
-						<section class="tsd-index-section ">
-							<h3>Object literals</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-object-literal"><a href="globals.html#onmissingstrategies" class="tsd-kind-icon">On<wbr>Missing<wbr>Strategies</a></li>
-								<li class="tsd-kind-object-literal"><a href="globals.html#readconsistencies" class="tsd-kind-icon">Read<wbr>Consistencies</a></li>
+								<li class="tsd-kind-function"><a href="globals.html#getschema" class="tsd-kind-icon">get<wbr>Schema</a></li>
+								<li class="tsd-kind-function"><a href="globals.html#gettablename" class="tsd-kind-icon">get<wbr>Table<wbr>Name</a></li>
 							</ul>
 						</section>
 					</div>
@@ -138,7 +140,7 @@
 					<div class="tsd-signature tsd-kind-icon">On<wbr>Missing<wbr>Strategy<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"remove"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"skip"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/constants.ts#L15">constants.ts:15</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/constants.ts#L7">constants.ts:7</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -148,17 +150,17 @@
 					<div class="tsd-signature tsd-kind-icon">Parallel<wbr>Scan<wbr>Parameters<span class="tsd-signature-symbol">:</span> <a href="interfaces/basescanoptions.html" class="tsd-signature-type">BaseScanOptions</a><span class="tsd-signature-symbol"> &amp; </span><a href="interfaces/ctorbearer.html" class="tsd-signature-type">CtorBearer</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/namedParameters.ts#L278">namedParameters.ts:278</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/namedParameters.ts#L299">namedParameters.ts:299</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-type-alias">
 					<a name="parallelscanworkerparameters" class="tsd-anchor"></a>
 					<h3>Parallel<wbr>Scan<wbr>Worker<wbr>Parameters</h3>
-					<div class="tsd-signature tsd-kind-icon">Parallel<wbr>Scan<wbr>Worker<wbr>Parameters<span class="tsd-signature-symbol">:</span> <a href="interfaces/parallelscanworkeroptions.html" class="tsd-signature-type">ParallelScanWorkerOptions</a><span class="tsd-signature-symbol"> &amp; </span><a href="interfaces/ctorbearer.html" class="tsd-signature-type">CtorBearer</a></div>
+					<div class="tsd-signature tsd-kind-icon">Parallel<wbr>Scan<wbr>Worker<wbr>Parameters<span class="tsd-signature-symbol">:</span> <a href="interfaces/parallelscanworkeroptions.html" class="tsd-signature-type">ParallelScanWorkerOptions</a><span class="tsd-signature-symbol"> &amp; </span><a href="interfaces/ctorbearer.html" class="tsd-signature-type">CtorBearer</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/namedParameters.ts#L274">namedParameters.ts:274</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/namedParameters.ts#L295">namedParameters.ts:295</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -168,7 +170,7 @@
 					<div class="tsd-signature tsd-kind-icon">Read<wbr>Consistency<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"eventual"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"strong"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/constants.ts#L8">constants.ts:8</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/constants.ts#L9">constants.ts:9</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -178,7 +180,27 @@
 					<div class="tsd-signature tsd-kind-icon">Scan<wbr>Parameters<span class="tsd-signature-symbol">:</span> <a href="interfaces/scanoptions.html" class="tsd-signature-type">ScanOptions</a><span class="tsd-signature-symbol"> &amp; </span><a href="interfaces/ctorbearer.html" class="tsd-signature-type">CtorBearer</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/namedParameters.ts#L265">namedParameters.ts:265</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/namedParameters.ts#L286">namedParameters.ts:286</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias">
+					<a name="syncorasynciterable" class="tsd-anchor"></a>
+					<h3>Sync<wbr>OrAsync<wbr>Iterable</h3>
+					<div class="tsd-signature tsd-kind-icon">Sync<wbr>OrAsync<wbr>Iterable<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Iterable</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AsyncIterable</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/constants.ts#L14">constants.ts:14</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias">
+					<a name="writetype" class="tsd-anchor"></a>
+					<h3>Write<wbr>Type</h3>
+					<div class="tsd-signature tsd-kind-icon">Write<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"put"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"delete"</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/constants.ts#L16">constants.ts:16</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -191,7 +213,7 @@
 					<div class="tsd-signature tsd-kind-icon">Dynamo<wbr>DbDirty<wbr>Fields<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">symbol</span><span class="tsd-signature-symbol"> =&nbsp;Symbol(&#x27;DynamoDbDirtyFields&#x27;)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/protocols.ts#L80">protocols.ts:80</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/protocols.ts#L111">protocols.ts:111</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -202,25 +224,26 @@
 						</div>
 						<dl class="tsd-comment-tags">
 							<dt>example</dt>
-							<dd><p> class FooDocument {
-									constructor() {
-									this._dirtyFields = new Set();
-									this._foo = &#39;&#39;;
-								}</p>
-								<pre><code> <span class="hljs-function"><span class="hljs-keyword">get</span> <span class="hljs-title">foo</span>(<span class="hljs-params"></span>) </span>{
-     <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>._foo;
- }
+							<dd><pre><code> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FooDocument</span> </span>{
+     <span class="hljs-keyword">constructor</span>() {
+         <span class="hljs-keyword">this</span>._dirtyFields = new Set();
+         <span class="hljs-keyword">this</span>._foo = <span class="hljs-string">''</span>;
+     }
 
- <span class="hljs-function"><span class="hljs-keyword">set</span> <span class="hljs-title">foo</span>(<span class="hljs-params"><span class="hljs-keyword">value</span></span>) </span>{
-     <span class="hljs-keyword">this</span>._foo = <span class="hljs-keyword">value</span>;
-     <span class="hljs-keyword">this</span>._dirtyFields.<span class="hljs-keyword">add</span>(<span class="hljs-string">'foo'</span>);
- }
+     <span class="hljs-keyword">get</span> foo() {
+         <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>._foo;
+     }
 
- [<span class="hljs-meta">DynamoDbDirtyFields</span>]() {
-     <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>._dirtyFields.values();
+     <span class="hljs-keyword">set</span> foo(value) {
+         <span class="hljs-keyword">this</span>._foo = value;
+         <span class="hljs-keyword">this</span>._dirtyFields.add(<span class="hljs-string">'foo'</span>);
+     }
+
+     [DynamoDbDirtyFields]() {
+         <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>._dirtyFields.values();
+     }
  }
-</code></pre><p> }</p>
-							</dd>
+</code></pre></dd>
 						</dl>
 					</div>
 				</section>
@@ -230,7 +253,7 @@
 					<div class="tsd-signature tsd-kind-icon">Dynamo<wbr>DbSchema<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">symbol</span><span class="tsd-signature-symbol"> =&nbsp;Symbol(&#x27;DynamoDbSchema&#x27;)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/protocols.ts#L31">protocols.ts:31</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/protocols.ts#L33">protocols.ts:33</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -258,7 +281,7 @@
 					<div class="tsd-signature tsd-kind-icon">Dynamo<wbr>DbTable<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">symbol</span><span class="tsd-signature-symbol"> =&nbsp;Symbol(&#x27;DynamoDbTableName&#x27;)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/protocols.ts#L52">protocols.ts:52</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/protocols.ts#L68">protocols.ts:68</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -285,12 +308,32 @@
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-variable">
-					<a name="version" class="tsd-anchor"></a>
-					<h3>VERSION</h3>
-					<div class="tsd-signature tsd-kind-icon">VERSION<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"0.2.0"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;0.2.0&quot;</span></div>
+					<a name="max_read_batch_size" class="tsd-anchor"></a>
+					<h3>MAX_<wbr>READ_<wbr>BATCH_<wbr>SIZE</h3>
+					<div class="tsd-signature tsd-kind-icon">MAX_<wbr>READ_<wbr>BATCH_<wbr>SIZE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">100</span><span class="tsd-signature-symbol"> =&nbsp;100</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/constants.ts#L1">constants.ts:1</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/constants.ts#L5">constants.ts:5</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable">
+					<a name="max_write_batch_size" class="tsd-anchor"></a>
+					<h3>MAX_<wbr>WRITE_<wbr>BATCH_<wbr>SIZE</h3>
+					<div class="tsd-signature tsd-kind-icon">MAX_<wbr>WRITE_<wbr>BATCH_<wbr>SIZE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">25</span><span class="tsd-signature-symbol"> =&nbsp;25</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/constants.ts#L3">constants.ts:3</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable">
+					<a name="version" class="tsd-anchor"></a>
+					<h3>VERSION</h3>
+					<div class="tsd-signature tsd-kind-icon">VERSION<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"0.3.0"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;0.3.0&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/constants.ts#L1">constants.ts:1</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -307,7 +350,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/embed.ts#L12">embed.ts:12</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/embed.ts#L12">embed.ts:12</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -331,68 +374,54 @@
 						</li>
 					</ul>
 				</section>
-			</section>
-			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Object literals</h2>
-				<section class="tsd-panel tsd-member tsd-kind-object-literal">
-					<a name="onmissingstrategies" class="tsd-anchor"></a>
-					<h3>On<wbr>Missing<wbr>Strategies</h3>
-					<div class="tsd-signature tsd-kind-icon">On<wbr>Missing<wbr>Strategies<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/constants.ts#L10">constants.ts:10</a></li>
-						</ul>
-					</aside>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="onmissingstrategies.remove" class="tsd-anchor"></a>
-						<h3>remove</h3>
-						<div class="tsd-signature tsd-kind-icon">remove<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;true</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/constants.ts#L11">constants.ts:11</a></li>
+				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="getschema" class="tsd-anchor"></a>
+					<h3>get<wbr>Schema</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Schema<span class="tsd-signature-symbol">(</span>item<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Schema</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/protocols.ts#L35">protocols.ts:35</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>item: <span class="tsd-signature-type">any</span></h5>
+								</li>
 							</ul>
-						</aside>
-					</section>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="onmissingstrategies.skip" class="tsd-anchor"></a>
-						<h3>skip</h3>
-						<div class="tsd-signature tsd-kind-icon">skip<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;true</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/constants.ts#L12">constants.ts:12</a></li>
-							</ul>
-						</aside>
-					</section>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Schema</span></h4>
+						</li>
+					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-object-literal">
-					<a name="readconsistencies" class="tsd-anchor"></a>
-					<h3>Read<wbr>Consistencies</h3>
-					<div class="tsd-signature tsd-kind-icon">Read<wbr>Consistencies<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/constants.ts#L3">constants.ts:3</a></li>
-						</ul>
-					</aside>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="readconsistencies.eventual" class="tsd-anchor"></a>
-						<h3>eventual</h3>
-						<div class="tsd-signature tsd-kind-icon">eventual<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;true</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/constants.ts#L4">constants.ts:4</a></li>
+				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="gettablename" class="tsd-anchor"></a>
+					<h3>get<wbr>Table<wbr>Name</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Table<wbr>Name<span class="tsd-signature-symbol">(</span>item<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, tableNamePrefix<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/protocols.ts#L70">protocols.ts:70</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>item: <span class="tsd-signature-type">any</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> tableNamePrefix: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;&quot;</span></h5>
+								</li>
 							</ul>
-						</aside>
-					</section>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="readconsistencies.strong" class="tsd-anchor"></a>
-						<h3>strong</h3>
-						<div class="tsd-signature tsd-kind-icon">strong<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;true</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/constants.ts#L5">constants.ts:5</a></li>
-							</ul>
-						</aside>
-					</section>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
 				</section>
 			</section>
 		</div>
@@ -417,6 +446,12 @@
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/basesequentialscanoptions.html" class="tsd-kind-icon">Base<wbr>Sequential<wbr>Scan<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/batchgetoptions.html" class="tsd-kind-icon">Batch<wbr>Get<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/batchgettableoptions.html" class="tsd-kind-icon">Batch<wbr>Get<wbr>Table<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
 						<a href="interfaces/ctorbearer.html" class="tsd-kind-icon">Ctor<wbr>Bearer</a>
@@ -455,6 +490,9 @@
 						<a href="interfaces/queryparameters.html" class="tsd-kind-icon">Query<wbr>Parameters</a>
 					</li>
 					<li class=" tsd-kind-interface">
+						<a href="interfaces/readconsistencyconfiguration.html" class="tsd-kind-icon">Read<wbr>Consistency<wbr>Configuration</a>
+					</li>
+					<li class=" tsd-kind-interface">
 						<a href="interfaces/scanoptions.html" class="tsd-kind-icon">Scan<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface">
@@ -481,6 +519,12 @@
 					<li class=" tsd-kind-type-alias">
 						<a href="globals.html#scanparameters" class="tsd-kind-icon">Scan<wbr>Parameters</a>
 					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#syncorasynciterable" class="tsd-kind-icon">Sync<wbr>OrAsync<wbr>Iterable</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#writetype" class="tsd-kind-icon">Write<wbr>Type</a>
+					</li>
 					<li class=" tsd-kind-variable">
 						<a href="globals.html#dynamodbdirtyfields" class="tsd-kind-icon">Dynamo<wbr>DbDirty<wbr>Fields</a>
 					</li>
@@ -491,16 +535,22 @@
 						<a href="globals.html#dynamodbtable" class="tsd-kind-icon">Dynamo<wbr>DbTable</a>
 					</li>
 					<li class=" tsd-kind-variable">
+						<a href="globals.html#max_read_batch_size" class="tsd-kind-icon">MAX_<wbr>READ_<wbr>BATCH_<wbr>SIZE</a>
+					</li>
+					<li class=" tsd-kind-variable">
+						<a href="globals.html#max_write_batch_size" class="tsd-kind-icon">MAX_<wbr>WRITE_<wbr>BATCH_<wbr>SIZE</a>
+					</li>
+					<li class=" tsd-kind-variable">
 						<a href="globals.html#version" class="tsd-kind-icon">VERSION</a>
 					</li>
 					<li class=" tsd-kind-function tsd-has-type-parameter">
 						<a href="globals.html#embed" class="tsd-kind-icon">embed</a>
 					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="globals.html#onmissingstrategies" class="tsd-kind-icon">On<wbr>Missing<wbr>Strategies</a>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#getschema" class="tsd-kind-icon">get<wbr>Schema</a>
 					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="globals.html#readconsistencies" class="tsd-kind-icon">Read<wbr>Consistencies</a>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#gettablename" class="tsd-kind-icon">get<wbr>Table<wbr>Name</a>
 					</li>
 				</ul>
 			</nav>

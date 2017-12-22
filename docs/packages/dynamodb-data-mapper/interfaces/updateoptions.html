@@ -100,7 +100,7 @@
 					<div class="tsd-signature tsd-kind-icon">condition<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ConditionExpression</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/namedParameters.ts#L294">namedParameters.ts:294</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/namedParameters.ts#L315">namedParameters.ts:315</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -116,7 +116,7 @@
 					<div class="tsd-signature tsd-kind-icon">on<wbr>Missing<span class="tsd-signature-symbol">:</span> <a href="../globals.html#onmissingstrategy" class="tsd-signature-type">OnMissingStrategy</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/namedParameters.ts#L300">namedParameters.ts:300</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/namedParameters.ts#L321">namedParameters.ts:321</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -132,7 +132,7 @@
 					<div class="tsd-signature tsd-kind-icon">skip<wbr>Version<wbr>Check<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/namedParameters.ts#L307">namedParameters.ts:307</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/namedParameters.ts#L328">namedParameters.ts:328</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -166,6 +166,12 @@
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="basesequentialscanoptions.html" class="tsd-kind-icon">Base<wbr>Sequential<wbr>Scan<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="batchgetoptions.html" class="tsd-kind-icon">Batch<wbr>Get<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="batchgettableoptions.html" class="tsd-kind-icon">Batch<wbr>Get<wbr>Table<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
 						<a href="ctorbearer.html" class="tsd-kind-icon">Ctor<wbr>Bearer</a>
@@ -202,6 +208,9 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
 						<a href="queryparameters.html" class="tsd-kind-icon">Query<wbr>Parameters</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="readconsistencyconfiguration.html" class="tsd-kind-icon">Read<wbr>Consistency<wbr>Configuration</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="scanoptions.html" class="tsd-kind-icon">Scan<wbr>Options</a>
@@ -245,6 +254,12 @@
 					<li class=" tsd-kind-type-alias">
 						<a href="../globals.html#scanparameters" class="tsd-kind-icon">Scan<wbr>Parameters</a>
 					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="../globals.html#syncorasynciterable" class="tsd-kind-icon">Sync<wbr>OrAsync<wbr>Iterable</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="../globals.html#writetype" class="tsd-kind-icon">Write<wbr>Type</a>
+					</li>
 					<li class=" tsd-kind-variable">
 						<a href="../globals.html#dynamodbdirtyfields" class="tsd-kind-icon">Dynamo<wbr>DbDirty<wbr>Fields</a>
 					</li>
@@ -255,16 +270,22 @@
 						<a href="../globals.html#dynamodbtable" class="tsd-kind-icon">Dynamo<wbr>DbTable</a>
 					</li>
 					<li class=" tsd-kind-variable">
+						<a href="../globals.html#max_read_batch_size" class="tsd-kind-icon">MAX_<wbr>READ_<wbr>BATCH_<wbr>SIZE</a>
+					</li>
+					<li class=" tsd-kind-variable">
+						<a href="../globals.html#max_write_batch_size" class="tsd-kind-icon">MAX_<wbr>WRITE_<wbr>BATCH_<wbr>SIZE</a>
+					</li>
+					<li class=" tsd-kind-variable">
 						<a href="../globals.html#version" class="tsd-kind-icon">VERSION</a>
 					</li>
 					<li class=" tsd-kind-function tsd-has-type-parameter">
 						<a href="../globals.html#embed" class="tsd-kind-icon">embed</a>
 					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="../globals.html#onmissingstrategies" class="tsd-kind-icon">On<wbr>Missing<wbr>Strategies</a>
+					<li class=" tsd-kind-function">
+						<a href="../globals.html#getschema" class="tsd-kind-icon">get<wbr>Schema</a>
 					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="../globals.html#readconsistencies" class="tsd-kind-icon">Read<wbr>Consistencies</a>
+					<li class=" tsd-kind-function">
+						<a href="../globals.html#gettablename" class="tsd-kind-icon">get<wbr>Table<wbr>Name</a>
 					</li>
 				</ul>
 			</nav>

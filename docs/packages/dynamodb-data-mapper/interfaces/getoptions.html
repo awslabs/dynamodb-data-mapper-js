@@ -68,10 +68,18 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">GetOptions</span>
+						<a href="readconsistencyconfiguration.html" class="tsd-signature-type">ReadConsistencyConfiguration</a>
 						<ul class="tsd-hierarchy">
 							<li>
-								<a href="getparameters.html" class="tsd-signature-type">GetParameters</a>
+								<span class="target">GetOptions</span>
+								<ul class="tsd-hierarchy">
+									<li>
+										<a href="batchgettableoptions.html" class="tsd-signature-type">BatchGetTableOptions</a>
+									</li>
+									<li>
+										<a href="getparameters.html" class="tsd-signature-type">GetParameters</a>
+									</li>
+								</ul>
 							</li>
 						</ul>
 					</li>
@@ -85,7 +93,7 @@
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="getoptions.html#projection" class="tsd-kind-icon">projection</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="getoptions.html#readconsistency" class="tsd-kind-icon">read<wbr>Consistency</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="getoptions.html#readconsistency" class="tsd-kind-icon">read<wbr>Consistency</a></li>
 							</ul>
 						</section>
 					</div>
@@ -99,7 +107,7 @@
 					<div class="tsd-signature tsd-kind-icon">projection<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ProjectionExpression</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/namedParameters.ts#L76">namedParameters.ts:76</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/namedParameters.ts#L100">namedParameters.ts:100</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -108,18 +116,19 @@
 						</div>
 					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 					<a name="readconsistency" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> read<wbr>Consistency</h3>
 					<div class="tsd-signature tsd-kind-icon">read<wbr>Consistency<span class="tsd-signature-symbol">:</span> <a href="../globals.html#readconsistency" class="tsd-signature-type">ReadConsistency</a></div>
 					<aside class="tsd-sources">
+						<p>Inherited from <a href="readconsistencyconfiguration.html">ReadConsistencyConfiguration</a>.<a href="readconsistencyconfiguration.html#readconsistency">readConsistency</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/jeskew/dynamodb-data-mapper-js/blob/3ec69e1/packages/dynamodb-data-mapper/src/namedParameters.ts#L71">namedParameters.ts:71</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/e341ff2/packages/dynamodb-data-mapper/src/namedParameters.ts#L210">namedParameters.ts:210</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>The read consistency to use when loading the requested item.</p>
+							<p>The read consistency to require when reading from DynamoDB.</p>
 						</div>
 					</div>
 				</section>
@@ -147,6 +156,12 @@
 					<li class=" tsd-kind-interface">
 						<a href="basesequentialscanoptions.html" class="tsd-kind-icon">Base<wbr>Sequential<wbr>Scan<wbr>Options</a>
 					</li>
+					<li class=" tsd-kind-interface">
+						<a href="batchgetoptions.html" class="tsd-kind-icon">Batch<wbr>Get<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="batchgettableoptions.html" class="tsd-kind-icon">Batch<wbr>Get<wbr>Table<wbr>Options</a>
+					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
 						<a href="ctorbearer.html" class="tsd-kind-icon">Ctor<wbr>Bearer</a>
 					</li>
@@ -170,7 +185,7 @@
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="getoptions.html#projection" class="tsd-kind-icon">projection</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 								<a href="getoptions.html#readconsistency" class="tsd-kind-icon">read<wbr>Consistency</a>
 							</li>
 						</ul>
@@ -194,6 +209,9 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
 						<a href="queryparameters.html" class="tsd-kind-icon">Query<wbr>Parameters</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="readconsistencyconfiguration.html" class="tsd-kind-icon">Read<wbr>Consistency<wbr>Configuration</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="scanoptions.html" class="tsd-kind-icon">Scan<wbr>Options</a>
@@ -222,6 +240,12 @@
 					<li class=" tsd-kind-type-alias">
 						<a href="../globals.html#scanparameters" class="tsd-kind-icon">Scan<wbr>Parameters</a>
 					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="../globals.html#syncorasynciterable" class="tsd-kind-icon">Sync<wbr>OrAsync<wbr>Iterable</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="../globals.html#writetype" class="tsd-kind-icon">Write<wbr>Type</a>
+					</li>
 					<li class=" tsd-kind-variable">
 						<a href="../globals.html#dynamodbdirtyfields" class="tsd-kind-icon">Dynamo<wbr>DbDirty<wbr>Fields</a>
 					</li>
@@ -232,16 +256,22 @@
 						<a href="../globals.html#dynamodbtable" class="tsd-kind-icon">Dynamo<wbr>DbTable</a>
 					</li>
 					<li class=" tsd-kind-variable">
+						<a href="../globals.html#max_read_batch_size" class="tsd-kind-icon">MAX_<wbr>READ_<wbr>BATCH_<wbr>SIZE</a>
+					</li>
+					<li class=" tsd-kind-variable">
+						<a href="../globals.html#max_write_batch_size" class="tsd-kind-icon">MAX_<wbr>WRITE_<wbr>BATCH_<wbr>SIZE</a>
+					</li>
+					<li class=" tsd-kind-variable">
 						<a href="../globals.html#version" class="tsd-kind-icon">VERSION</a>
 					</li>
 					<li class=" tsd-kind-function tsd-has-type-parameter">
 						<a href="../globals.html#embed" class="tsd-kind-icon">embed</a>
 					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="../globals.html#onmissingstrategies" class="tsd-kind-icon">On<wbr>Missing<wbr>Strategies</a>
+					<li class=" tsd-kind-function">
+						<a href="../globals.html#getschema" class="tsd-kind-icon">get<wbr>Schema</a>
 					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="../globals.html#readconsistencies" class="tsd-kind-icon">Read<wbr>Consistencies</a>
+					<li class=" tsd-kind-function">
+						<a href="../globals.html#gettablename" class="tsd-kind-icon">get<wbr>Table<wbr>Name</a>
 					</li>
 				</ul>
 			</nav>
