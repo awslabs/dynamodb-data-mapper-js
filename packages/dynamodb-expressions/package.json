@@ -28,6 +28,6 @@
   },
   "dependencies": {
     "@aws/dynamodb-auto-marshaller": "^0.2.1",
-    "tslib": "^1.8"
+    "tslib": "^1.8.1"
   }
 }

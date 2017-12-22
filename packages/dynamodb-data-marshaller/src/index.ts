@@ -5,4 +5,5 @@ export * from './marshallItem';
 export * from './marshallKey';
 export * from './Schema';
 export * from './SchemaType';
+export * from './toSchemaName';
 export * from './unmarshallItem';

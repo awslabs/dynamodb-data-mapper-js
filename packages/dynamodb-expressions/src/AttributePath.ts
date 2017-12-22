@@ -4,7 +4,7 @@ const EXPECTED_TAG = `[object ${ATTRIBUTE_PATH_TAG}]`;
 /**
  * The path to an attribute of a DynamoDB item or to a property
  * or member thereof. Supports map property access (`map.property`)
- * and list member access (`list[1]`). 
+ * and list member access (`list[1]`).
  *
  * Control characters that are part of the property identifier may be
  * used when escaped with a backslash (`\`) character.

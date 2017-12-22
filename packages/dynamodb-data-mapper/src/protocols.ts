@@ -1,3 +1,5 @@
+import {Schema} from '@aws/dynamodb-data-marshaller';
+
 /**
  * Table metadata is reported by items submitted to the data mapper via methods
  * identified by symbols. This is done both to disambiguate data (which should
@@ -30,6 +32,20 @@
  */
 export const DynamoDbSchema = Symbol('DynamoDbSchema');
 
+export function getSchema(item: any): Schema {
+    if (item) {
+        const schema = item[DynamoDbSchema];
+        if (schema && typeof schema === 'object') {
+            return schema;
+        }
+    }
+
+    throw new Error(
+        'The provided item did not adhere to the DynamoDbDocument protocol.' +
+        ' No object property was found at the `DynamoDbSchema` symbol'
+    );
+}
+
 /**
  * Used to designate that an object represents a row of the named DynamoDB
  * table. Meant to be used in conjunction with {DynamoDbSchema}.
@@ -50,6 +66,20 @@ export const DynamoDbSchema = Symbol('DynamoDbSchema');
  *      }
  */
 export const DynamoDbTable = Symbol('DynamoDbTableName');
+
+export function getTableName(item: any, tableNamePrefix: string = ''): string {
+    if (item) {
+        const tableName = item[DynamoDbTable];
+        if (typeof tableName === 'string') {
+            return tableNamePrefix + tableName;
+        }
+    }
+
+    throw new Error(
+        'The provided item did not adhere to the DynamoDbTable protocol. No' +
+        ' string property was found at the `DynamoDbTable` symbol'
+    );
+}
 
 /**
  * Used to designate which fields on an object have been changed. The method

@@ -22,7 +22,7 @@
   },
   "typedocOptions": {
     "mode": "file",
-    "out": "../../docs/packages/dynamodb-data-mapper",
+    "out": "../../docs/packages/dynamodb-batch-iterator",
     "excludeNotExported": true,
     "excludePrivate": true,
     "hideGenerator": true

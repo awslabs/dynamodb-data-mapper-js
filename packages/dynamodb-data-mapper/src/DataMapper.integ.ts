@@ -76,8 +76,8 @@ describe('DataMapper', () => {
                     }
                 ],
                 ProvisionedThroughput: {
-                    ReadCapacityUnits: 5,
-                    WriteCapacityUnits: 5,
+                    ReadCapacityUnits: 10,
+                    WriteCapacityUnits: 10,
                 },
             })
                 .promise(),
@@ -158,17 +158,17 @@ describe('DataMapper', () => {
         const mapper = new DataMapper({client: ddbClient});
         const scanIdentifier = Date.now();
 
-        const puts: Array<Promise<any>> = [];
-        for (let i = 0; i < 10; i++) {
+        const items: Array<TestRecord> = [];
+        for (let i = 0; i < 30; i++) {
             const item = new TestRecord();
             item.key = idx++;
             item.tuple = [item.key % 2 === 0, 'string'];
             item.scanIdentifier = scanIdentifier;
             keys.push(item.key);
-            puts.push(mapper.put(item));
+            items.push(item);
         }
 
-        await Promise.all(puts);
+        for await (const _ of mapper.batchPut(items)) {}
 
         const results: Array<TestRecord> = [];
         for await (const element of mapper.scan(TestRecord, {
@@ -195,17 +195,17 @@ describe('DataMapper', () => {
         const mapper = new DataMapper({client: ddbClient});
         const scanIdentifier = Date.now();
 
-        const puts: Array<Promise<any>> = [];
+        const items: Array<TestRecord> = [];
         for (let i = 0; i < 10; i++) {
             const item = new TestRecord();
             item.key = idx++;
             item.tuple = [item.key % 2 === 0, 'string'];
             item.scanIdentifier = scanIdentifier;
             keys.push(item.key);
-            puts.push(mapper.put(item));
+            items.push(item);
         }
 
-        await Promise.all(puts);
+        for await (const _ of mapper.batchPut(items)) {}
 
         const results: Array<TestRecord> = [];
         for await (const element of mapper.parallelScan(TestRecord, 4, {

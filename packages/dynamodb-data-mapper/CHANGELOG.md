@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+ - Add `batchGet`, which allows a synchronous or asynchronous iterable of items
+    (like those supplied to `get`) to be automatically grouped into
+    `BatchGetItem` operations.
+ - Add `batchDelete`, which allows a synchronous or asynchronous iterable of
+    items (like those supplied to `delete`) to be automatically grouped into
+    `BatchWriteItem` operations.
+ - Add `batchPut`, which allows a synchronous or asynchronous iterable of
+    items (like those supplied to `put`) to be automatically grouped into
+    `BatchWriteItem` operations.
+ - Add `batchWrite`, which allows a synchronous or asynchronous iterable of
+    tuples of tags (`'put'` or `'delete'`) and items (like those supplied to the
+    `put` or `delete` methods, respectively) to be automatically grouped into
+    `BatchWriteItem` operations.
+
 ## [0.2.1]
 ### Added
  - Add the ability to call all DataMapper methods with positional rather than

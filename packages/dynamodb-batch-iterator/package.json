@@ -1,14 +1,12 @@
 {
-  "name": "@aws/dynamodb-data-mapper-annotations",
+  "name": "@aws/dynamodb-batch-iterator",
   "version": "0.2.1",
-  "description": "Annotations providing easy integration between TypeScript domain objects and the @aws/dynamodb-data-mapper library",
+  "description": "Abstraction for DynamoDB batch reads and writes for that handles batch splitting and partial retries with exponential backoff",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "scripts": {
-    "build": "tsc",
     "docs": "typedoc src",
-    "integ": "npm run pretest && jest --config=jest.integration.js",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "tsc",
     "pretest": "tsc -p tsconfig.test.json",
     "test": "jest"
   },
@@ -20,18 +18,16 @@
   "devDependencies": {
     "@types/jest": "^21",
     "@types/node": "^8.0.4",
-    "@types/uuid": "^3.0.0",
     "aws-sdk": "^2.7.0",
     "jest": "^21",
     "typedoc": "^0.9.0",
     "typescript": "^2.6"
   },
+  "peerDependencies": {
+    "aws-sdk": "^2.7.0"
+  },
   "dependencies": {
-    "@aws/dynamodb-auto-marshaller": "^0.2.1",
-    "@aws/dynamodb-data-mapper": "^0.2.1",
-    "@aws/dynamodb-data-marshaller": "^0.2.1",
-    "reflect-metadata": "^0.1.10",
     "tslib": "^1.8.1",
-    "uuid": "^3.0.0"
+    "utf8-bytes": "^0.0.1"
   }
 }

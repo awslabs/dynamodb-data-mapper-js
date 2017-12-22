@@ -1,7 +1,15 @@
-import {ReadConsistency, VERSION} from "./constants";
-import {ItemNotFoundException} from "./ItemNotFoundException";
+import {
+    ReadConsistency,
+    StringToAnyObjectMap,
+    SyncOrAsyncIterable,
+    VERSION,
+    WriteType,
+} from "./constants";
+import { ItemNotFoundException } from "./ItemNotFoundException";
 import {
     BaseScanOptions,
+    BatchGetOptions,
+    BatchGetTableOptions,
     DataMapperConfiguration,
     DeleteOptions,
     DeleteParameters,
@@ -16,14 +24,21 @@ import {
     QueryParameters,
     ScanOptions,
     ScanParameters,
-    StringToAnyObjectMap,
     UpdateOptions,
     UpdateParameters,
 } from './namedParameters';
 import {
-    DynamoDbSchema,
     DynamoDbTable,
+    getSchema,
+    getTableName,
 } from './protocols';
+import {
+    BatchGet,
+    BatchWrite,
+    PerTableOptions,
+    TableOptions,
+    WriteRequest,
+} from '@aws/dynamodb-batch-iterator';
 import {
     isKey,
     marshallItem,
@@ -31,6 +46,7 @@ import {
     marshallValue,
     Schema,
     SchemaType,
+    toSchemaName,
     unmarshallItem,
     ZeroArgumentsConstructor,
 } from "@aws/dynamodb-data-marshaller";
@@ -49,6 +65,7 @@ import {
     UpdateExpression,
 } from "@aws/dynamodb-expressions";
 import {
+    AttributeMap,
     DeleteItemInput,
     GetItemInput,
     PutItemInput,
@@ -90,9 +107,154 @@ export class DataMapper {
     }
 
     /**
+     * Deletes items from DynamoDB in batches of 25 or fewer via one or more
+     * BatchWriteItem operations. The items may be from any number of tables;
+     * tables and schemas for each item are determined using the
+     * {DynamoDbSchema} property and the {DynamoDbTable} property on defined on
+     * each item supplied.
+     *
+     * This method will automatically retry any delete requests returned by
+     * DynamoDB as unprocessed. Exponential backoff on unprocessed items is
+     * employed on a per-table basis.
+     *
+     * @param items A synchronous or asynchronous iterable of items to delete.
+     */
+    async *batchDelete<T extends StringToAnyObjectMap>(
+        items: SyncOrAsyncIterable<T>
+    ) {
+        const iter = this.batchWrite(
+            async function *mapToDelete(): AsyncIterable<['delete', T]> {
+                for await (const item of items) {
+                    yield ['delete', item];
+                }
+            }()
+        );
+
+        for await (const [_, unmarshalled] of iter) {
+            yield unmarshalled;
+        }
+    }
+
+    /**
+     * Retrieves items from DynamoDB in batches of 100 or fewer via one or more
+     * BatchGetItem operations. The items may be from any number of tables;
+     * tables and schemas for each item are determined using the
+     * {DynamoDbSchema} property and the {DynamoDbTable} property on defined on
+     * each item supplied.
+     *
+     * This method will automatically retry any get requests returned by
+     * DynamoDB as unprocessed. Exponential backoff on unprocessed items is
+     * employed on a per-table basis.
+     *
+     * @param items A synchronous or asynchronous iterable of items to get.
+     */
+    async *batchGet<T extends StringToAnyObjectMap>(
+        items: SyncOrAsyncIterable<T>,
+        {
+            readConsistency = this.readConsistency,
+            perTableOptions = {}
+        }: BatchGetOptions = {}
+    ) {
+        const state: BatchState<T> = {};
+        const options: PerTableOptions = {};
+
+        const batch = new BatchGet(
+            this.client,
+            this.mapGetBatch(items, state, perTableOptions, options),
+            {
+                ConsistentRead: readConsistency === 'strong',
+                PerTableOptions: options
+            }
+        );
+
+        for await (const [tableName, marshalled] of batch) {
+            const {keyProperties, itemSchemata} = state[tableName];
+            const {
+                constructor,
+                schema,
+            } = itemSchemata[itemIdentifier(marshalled, keyProperties)];
+            yield unmarshallItem<T>(schema, marshalled, constructor);
+        }
+    }
+
+    /**
+     * Puts items into DynamoDB in batches of 25 or fewer via one or more
+     * BatchWriteItem operations. The items may be from any number of tables;
+     * tables and schemas for each item are determined using the
+     * {DynamoDbSchema} property and the {DynamoDbTable} property on defined on
+     * each item supplied.
+     *
+     * This method will automatically retry any put requests returned by
+     * DynamoDB as unprocessed. Exponential backoff on unprocessed items is
+     * employed on a per-table basis.
+     *
+     * @param items A synchronous or asynchronous iterable of items to put.
+     */
+    async *batchPut<T extends StringToAnyObjectMap>(
+        items: SyncOrAsyncIterable<T>
+    ) {
+        const generator: SyncOrAsyncIterable<[WriteType, T]> = isIterable(items)
+            ? function *mapToPut() {
+                for (const item of items) {
+                    yield ['put', item] as [WriteType, T];
+                }
+            }()
+            : async function *mapToPut() {
+                for await (const item of items) {
+                    yield ['put', item] as [WriteType, T];
+                }
+            }();
+
+        for await (const [_, unmarshalled] of this.batchWrite(generator)) {
+            yield unmarshalled;
+        }
+    }
+
+    /**
+     * Puts or deletes items from DynamoDB in batches of 25 or fewer via one or
+     * more BatchWriteItem operations. The items may belong to any number of
+     * tables; tables and schemas for each item are determined using the
+     * {DynamoDbSchema} property and the {DynamoDbTable} property on defined on
+     * each item supplied.
+     *
+     * This method will automatically retry any write requests returned by
+     * DynamoDB as unprocessed. Exponential backoff on unprocessed items is
+     * employed on a per-table basis.
+     *
+     * @param items A synchronous or asynchronous iterable of tuples of the
+     * string 'put'|'delete' and the item on which to perform the specified
+     * write action.
+     */
+    async *batchWrite<T extends StringToAnyObjectMap>(
+        items: SyncOrAsyncIterable<[WriteType, T]>
+    ): AsyncIterableIterator<[WriteType, T]> {
+        const state: BatchState<T> = {};
+        const batch = new BatchWrite(
+            this.client,
+            this.mapWriteBatch(items, state)
+        );
+
+        for await (const [tableName, {DeleteRequest, PutRequest}] of batch) {
+            const {keyProperties, itemSchemata} = state[tableName];
+            const attributes = PutRequest
+                ? PutRequest.Item
+                : (DeleteRequest || {Key: {}}).Key
+            const {
+                constructor,
+                schema,
+            } = itemSchemata[itemIdentifier(attributes, keyProperties)];
+
+            yield [
+                PutRequest ? 'put' : 'delete',
+                unmarshallItem<T>(schema, attributes, constructor)
+            ];
+        }
+    }
+
+    /**
      * Perform a DeleteItem operation using the schema accessible via the
-     * {DynamoDbSchema} method and the table name accessible via the
-     * {DynamoDbTable} method on the item supplied.
+     * {DynamoDbSchema} property and the table name accessible via the
+     * {DynamoDbTable} property on the item supplied.
      *
      * @param item The item to delete
      * @param options Options to configure the DeleteItem operation
@@ -132,7 +294,7 @@ export class DataMapper {
         const schema = getSchema(item);
 
         const operationInput: DeleteItemInput = {
-            TableName: this.tableNamePrefix + getTableName(item),
+            TableName: this.getTableName(item),
             Key: marshallKey(schema, item),
             ReturnValues: returnValues,
         };
@@ -158,21 +320,18 @@ export class DataMapper {
         if (condition) {
             const attributes = new ExpressionAttributes();
             operationInput.ConditionExpression = serializeConditionExpression(
-                normalizeConditionExpressionPaths(
-                    condition,
-                    getAttributeNameMapping(schema)
-                ),
+                normalizeConditionExpressionPaths(condition, schema),
                 attributes
             );
             operationInput.ExpressionAttributeNames = attributes.names;
             operationInput.ExpressionAttributeValues = attributes.values;
         }
 
-        const response = await this.client.deleteItem(operationInput).promise();
-        if (response.Attributes) {
+        const {Attributes} = await this.client.deleteItem(operationInput).promise();
+        if (Attributes) {
             return unmarshallItem<T>(
                 schema,
-                response.Attributes,
+                Attributes,
                 item.constructor as ZeroArgumentsConstructor<T>
             );
         }
@@ -219,26 +378,25 @@ export class DataMapper {
 
         const schema = getSchema(item);
         const operationInput: GetItemInput = {
-            TableName: this.tableNamePrefix + getTableName(item),
+            TableName: this.getTableName(item),
             Key: marshallKey(schema, item),
             ConsistentRead: readConsistency === 'strong',
         };
 
         if (projection) {
             const attributes = new ExpressionAttributes();
-            const mapping = getAttributeNameMapping(schema);
             operationInput.ProjectionExpression = serializeProjectionExpression(
-                projection.map(propName => toSchemaName(propName, mapping)),
+                projection.map(propName => toSchemaName(propName, schema)),
                 attributes
             );
             operationInput.ExpressionAttributeNames = attributes.names;
         }
 
-        const rawResponse = await this.client.getItem(operationInput).promise();
-        if (rawResponse.Item) {
+        const {Item} = await this.client.getItem(operationInput).promise();
+        if (Item) {
             return unmarshallItem<T>(
                 schema,
-                rawResponse.Item,
+                Item,
                 item.constructor as ZeroArgumentsConstructor<T>
             );
         }
@@ -383,7 +541,7 @@ export class DataMapper {
 
         const schema = getSchema(item);
         const req: PutItemInput = {
-            TableName: this.tableNamePrefix + getTableName(item),
+            TableName: this.getTableName(item),
             Item: marshallItem(schema, item),
         };
 
@@ -416,10 +574,7 @@ export class DataMapper {
         if (condition) {
             const attributes = new ExpressionAttributes();
             req.ConditionExpression = serializeConditionExpression(
-                normalizeConditionExpressionPaths(
-                    condition,
-                    getAttributeNameMapping(schema)
-                ),
+                normalizeConditionExpressionPaths(condition, schema),
                 attributes
             );
             req.ExpressionAttributeNames = attributes.names;
@@ -488,7 +643,7 @@ export class DataMapper {
         } = options;
 
         const req: QueryInput = {
-            TableName: this.tableNamePrefix + getTableName(valueConstructor.prototype),
+            TableName: this.getTableName(valueConstructor.prototype),
             ConsistentRead: readConsistency === 'strong',
             ScanIndexForward: scanIndexForward,
             Limit: pageSize,
@@ -498,26 +653,24 @@ export class DataMapper {
         const schema = getSchema(valueConstructor.prototype);
 
         const attributes = new ExpressionAttributes();
-        const mapping = getAttributeNameMapping(schema);
-
         req.KeyConditionExpression = serializeConditionExpression(
             normalizeConditionExpressionPaths(
                 normalizeKeyCondition(keyCondition),
-                mapping
+                schema
             ),
             attributes
         );
 
         if (filter) {
             req.FilterExpression = serializeConditionExpression(
-                normalizeConditionExpressionPaths(filter, mapping),
+                normalizeConditionExpressionPaths(filter, schema),
                 attributes
             );
         }
 
         if (projection) {
             req.ProjectionExpression = serializeProjectionExpression(
-                projection.map(propName => toSchemaName(propName, mapping)),
+                projection.map(propName => toSchemaName(propName, schema)),
                 attributes
             );
         }
@@ -636,7 +789,7 @@ export class DataMapper {
 
         const schema = getSchema(item);
         const req: UpdateItemInput = {
-            TableName: this.tableNamePrefix + getTableName(item),
+            TableName: this.getTableName(item),
             ReturnValues: 'ALL_NEW',
             Key: marshallKey(schema, item),
         };
@@ -680,7 +833,7 @@ export class DataMapper {
             req.ConditionExpression = serializeConditionExpression(
                 normalizeConditionExpressionPaths(
                     condition,
-                    getAttributeNameMapping(schema)
+                    schema
                 ),
                 attributes
             );
@@ -725,7 +878,7 @@ export class DataMapper {
         }: ScanOptions|ParallelScanWorkerOptions
     ): ScanInput {
         const req: ScanInput = {
-            TableName: this.tableNamePrefix + getTableName(valueConstructor.prototype),
+            TableName: this.getTableName(valueConstructor.prototype),
             ConsistentRead: readConsistency === 'strong',
             Limit: pageSize,
             IndexName: indexName,
@@ -736,18 +889,17 @@ export class DataMapper {
         const schema = getSchema(valueConstructor.prototype);
 
         const attributes = new ExpressionAttributes();
-        const mapping = getAttributeNameMapping(schema);
 
         if (filter) {
             req.FilterExpression = serializeConditionExpression(
-                normalizeConditionExpressionPaths(filter, mapping),
+                normalizeConditionExpressionPaths(filter, schema),
                 attributes
             );
         }
 
         if (projection) {
             req.ProjectionExpression = serializeProjectionExpression(
-                projection.map(propName => toSchemaName(propName, mapping)),
+                projection.map(propName => toSchemaName(propName, schema)),
                 attributes
             );
         }
@@ -783,6 +935,129 @@ export class DataMapper {
             }
         } while (result.LastEvaluatedKey !== undefined);
     }
+
+    private getTableName(item: StringToAnyObjectMap): string {
+        return getTableName(item, this.tableNamePrefix);
+    }
+
+    private async *mapGetBatch<T extends StringToAnyObjectMap>(
+        items: SyncOrAsyncIterable<T>,
+        state: BatchState<T>,
+        options: {[tableName: string]: BatchGetTableOptions},
+        convertedOptions: PerTableOptions
+    ): AsyncIterableIterator<[string, AttributeMap]> {
+        for await (const item of items) {
+            const unprefixed = getTableName(item);
+            const tableName = this.tableNamePrefix + unprefixed;
+            const schema = getSchema(item);
+
+            if (unprefixed in options && !(tableName in convertedOptions)) {
+                convertedOptions[tableName] = convertBatchGetOptions(
+                    options[unprefixed],
+                    schema
+                );
+            }
+
+            if (!(tableName in state)) {
+                state[tableName] = {
+                    keyProperties: getKeyProperties(schema),
+                    itemSchemata: {}
+                };
+            }
+
+            const {keyProperties, itemSchemata} = state[tableName];
+            const marshalled = marshallKey(schema, item);
+            itemSchemata[itemIdentifier(marshalled, keyProperties)] = {
+                constructor: item.constructor as ZeroArgumentsConstructor<T>,
+                schema,
+            };
+
+            yield [tableName, marshalled];
+        }
+    }
+
+    private async *mapWriteBatch<T extends StringToAnyObjectMap>(
+        items: SyncOrAsyncIterable<[WriteType, T]>,
+        state: BatchState<T>
+    ): AsyncIterableIterator<[string, WriteRequest]> {
+        for await (const [type, item] of items) {
+            const unprefixed = getTableName(item);
+            const tableName = this.tableNamePrefix + unprefixed;
+            const schema = getSchema(item);
+
+            if (!(tableName in state)) {
+                state[tableName] = {
+                    keyProperties: getKeyProperties(schema),
+                    itemSchemata: {}
+                };
+            }
+
+            const {keyProperties, itemSchemata} = state[tableName];
+            const attributes = type === 'delete'
+                ? marshallKey(schema, item)
+                : marshallItem(schema, item);
+            const marshalled = type === 'delete'
+                ? {DeleteRequest: {Key: attributes}}
+                : {PutRequest: {Item: attributes}}
+            itemSchemata[itemIdentifier(attributes, keyProperties)] = {
+                constructor: item.constructor as ZeroArgumentsConstructor<T>,
+                schema,
+            };
+
+            yield [tableName, marshalled];
+        }
+    }
+}
+
+interface BatchState<T> {
+    [tableName: string]: {
+        keyProperties: Array<string>;
+        itemSchemata: {
+            [identifier: string]: {
+                schema: Schema;
+                constructor: ZeroArgumentsConstructor<T>;
+            };
+        };
+    };
+}
+
+function convertBatchGetOptions(
+    options: BatchGetTableOptions,
+    itemSchema: Schema
+): TableOptions {
+    const out: TableOptions = {};
+
+    if (options.readConsistency) {
+        out.ConsistentRead = options.readConsistency === 'strong';
+    }
+
+    if (options.projection) {
+        const attributes = new ExpressionAttributes();
+        out.ProjectionExpression = serializeProjectionExpression(
+            options.projection.map(
+                propName => toSchemaName(
+                    propName,
+                    options.projectionSchema || itemSchema
+                )
+            ),
+            attributes
+        );
+        out.ExpressionAttributeNames = attributes.names;
+    }
+
+    return out;
+}
+
+function getKeyProperties(schema: Schema): Array<string> {
+    const keys: Array<string> = [];
+    for (const property of Object.keys(schema).sort()) {
+        const fieldSchema = schema[property];
+        if (isKey(fieldSchema)) {
+            keys.push(fieldSchema.attributeName || property);
+        }
+    }
+
+    return keys;
 }
 
 function handleVersionAttribute(
@@ -813,16 +1088,8 @@ function handleVersionAttribute(
     return {condition, value};
 }
 
-type AttributeNameMapping = {[propName: string]: string};
-function getAttributeNameMapping(schema: Schema): AttributeNameMapping {
-    const mapping: AttributeNameMapping = {};
-
-    for (const propName of Object.keys(schema)) {
-        const {attributeName = propName} = schema[propName];
-        mapping[propName] = attributeName;
-    }
-
-    return mapping;
+function isIterable<T>(arg: any): arg is Iterable<T> {
+    return Boolean(arg) && typeof arg[Symbol.iterator] === 'function';
 }
 
 function isVersionAttribute(fieldSchema: SchemaType): boolean {
@@ -830,14 +1097,27 @@ function isVersionAttribute(fieldSchema: SchemaType): boolean {
         && Boolean(fieldSchema.versionAttribute);
 }
 
+function itemIdentifier(
+    marshalled: AttributeMap,
+    keyProperties: Array<string>
+): string {
+    const keyAttributes: Array<string> = [];
+    for (const key of keyProperties) {
+        const value = marshalled[key];
+        `${key}=${value.B || value.N || value.S}`;
+    }
+
+    return keyAttributes.join(':');
+}
+
 function normalizeConditionExpressionPaths(
     expr: ConditionExpression,
-    mapping: AttributeNameMapping
+    schema: Schema
 ): ConditionExpression {
     if (FunctionExpression.isFunctionExpression(expr)) {
         return new FunctionExpression(
             expr.name,
-            ...expr.args.map(arg => normalizeIfPath(arg, mapping))
+            ...expr.args.map(arg => normalizeIfPath(arg, schema))
         );
     }
 
@@ -850,29 +1130,29 @@ function normalizeConditionExpressionPaths(
         case 'GreaterThanOrEqualTo':
             return {
                 ...expr,
-                subject: toSchemaName(expr.subject, mapping),
-                object: normalizeIfPath(expr.object, mapping),
+                subject: toSchemaName(expr.subject, schema),
+                object: normalizeIfPath(expr.object, schema),
             };
 
         case 'Between':
             return {
                 ...expr,
-                subject: toSchemaName(expr.subject, mapping),
-                lowerBound: normalizeIfPath(expr.lowerBound, mapping),
-                upperBound: normalizeIfPath(expr.upperBound, mapping),
+                subject: toSchemaName(expr.subject, schema),
+                lowerBound: normalizeIfPath(expr.lowerBound, schema),
+                upperBound: normalizeIfPath(expr.upperBound, schema),
             };
         case 'Membership':
             return {
                 ...expr,
-                subject: toSchemaName(expr.subject, mapping),
-                values: expr.values.map(arg => normalizeIfPath(arg, mapping)),
+                subject: toSchemaName(expr.subject, schema),
+                values: expr.values.map(arg => normalizeIfPath(arg, schema)),
             };
         case 'Not':
             return {
                 ...expr,
                 condition: normalizeConditionExpressionPaths(
                     expr.condition,
-                    mapping
+                    schema
                 ),
             };
         case 'And':
@@ -880,15 +1160,15 @@ function normalizeConditionExpressionPaths(
             return {
                 ...expr,
                 conditions: expr.conditions.map(condition =>
-                    normalizeConditionExpressionPaths(condition, mapping)
+                    normalizeConditionExpressionPaths(condition, schema)
                 ),
             };
     }
 }
 
-function normalizeIfPath(path: any, mapping: AttributeNameMapping): any {
+function normalizeIfPath(path: any, schema: Schema): any {
     if (AttributePath.isAttributePath(path)) {
-        return toSchemaName(path, mapping);
+        return toSchemaName(path, schema);
     }
 
     return path;
@@ -924,48 +1204,4 @@ function normalizeKeyCondition(
     }
 
     return {type: 'And', conditions};
-}
-
-function toSchemaName(
-    path: AttributePath|string,
-    mapping: AttributeNameMapping
-): AttributePath|string {
-    if (typeof path === 'string') {
-        path = new AttributePath(path);
-    }
-
-    return new AttributePath(path.elements.map(el => {
-        if (el.type === 'AttributeName' && el.name in mapping) {
-            return {
-                ...el,
-                name: mapping[el.name],
-            };
-        }
-
-        return el;
-    }));
-}
-
-function getSchema(item: StringToAnyObjectMap): Schema {
-    const schema = item[DynamoDbSchema];
-    if (schema && typeof schema === 'object') {
-        return schema;
-    }
-
-    throw new Error(
-        'The provided item did not adhere to the DynamoDbDocument protocol.' +
-        ' No object property was found at the `DynamoDbSchema` symbol'
-    );
-}
-
-function getTableName(item: StringToAnyObjectMap): string {
-    const tableName = item[DynamoDbTable];
-    if (typeof tableName === 'string') {
-        return tableName;
-    }
-
-    throw new Error(
-        'The provided item did not adhere to the DynamoDbTable protocol. No' +
-        ' string property was found at the `DynamoDbTable` symbol'
-    );
 }
