@@ -27,6 +27,7 @@
     "aws-sdk": "^2.7.0"
   },
   "dependencies": {
-    "tslib": "^1.8.1"
+    "tslib": "^1.8.1",
+    "utf8-bytes": "^0.0.1"
   }
 }

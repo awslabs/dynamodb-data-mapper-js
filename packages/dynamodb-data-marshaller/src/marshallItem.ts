@@ -10,6 +10,7 @@ import {
     Marshaller,
     NumberValueSet,
 } from "@aws/dynamodb-auto-marshaller";
+const bytes = require('utf8-bytes');
 
 /**
  * Converts a JavaScript object into a DynamoDB Item.
@@ -262,7 +263,7 @@ export function marshallValue(
 
 function marshallBinary(
     input: string|ArrayBuffer|ArrayBufferView
-): string|Uint8Array {
+): Uint8Array {
     if (ArrayBuffer.isView(input)) {
         return new Uint8Array(
             input.buffer,
@@ -275,7 +276,7 @@ function marshallBinary(
         return new Uint8Array(input);
     }
 
-    return input;
+    return Uint8Array.from(bytes(input));
 }
 
 function marshallNumber(input: number): string {

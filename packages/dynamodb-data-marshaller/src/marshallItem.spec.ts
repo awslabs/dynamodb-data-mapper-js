@@ -115,16 +115,16 @@ describe('marshallItem', () => {
             });
         });
 
-        it('should allow binary strings to be serialized by the AWS SDK', () => {
+        it('should convert UTF-8 strings to Uint8Arrays', () => {
             const binaryDoc: Schema = {
                 binary: {type: 'Binary'},
             };
             const document = {
-                binary: 'a string that should be saved as binary',
+                binary: '☃💩',
             };
 
             expect(marshallItem(binaryDoc, document)).toEqual({
-                binary: {B: 'a string that should be saved as binary'},
+                binary: {B: new Uint8Array([226, 152, 131, 240, 159, 146, 169])},
             });
         });
 

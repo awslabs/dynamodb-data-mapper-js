@@ -2,7 +2,7 @@
 
 [![Apache 2 License](https://img.shields.io/github/license/awslabs/dynamodb-data-mapper-js.svg?style=flat)](http://aws.amazon.com/apache-2-0/)
 
-This library provides utilities for automatic submitting arbitrarily-sized
+This library provides utilities for automatically submitting arbitrarily-sized
 batches of reads and writes to DynamoDB using well-formed `BatchGetItem` and
 `BatchWriteItem` operations, respectively. Partial successes (i.e.,
 `BatchGetItem` operations that return some responses and some unprocessed keys

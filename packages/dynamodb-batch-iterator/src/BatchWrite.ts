@@ -1,11 +1,7 @@
 import { BatchOperation } from './BatchOperation';
-import { fromUtf8 } from './fromUtf8';
+import { itemIdentifier } from './itemIdentifier';
 import { WriteRequest } from './types';
-import {
-    AttributeMap,
-    BatchWriteItemInput,
-    BinaryAttributeValue,
-} from 'aws-sdk/clients/dynamodb';
+import { BatchWriteItemInput } from 'aws-sdk/clients/dynamodb';
 
 const MAX_WRITE_BATCH_SIZE = 25;
 
@@ -84,55 +80,4 @@ export class BatchWrite extends BatchOperation<WriteRequest> {
                 Math.max(0, this.state[tableName].backoffFactor - 1);
         }
     }
-}
-
-function itemIdentifier(tableName: string, request: WriteRequest): string {
-    if (request.DeleteRequest) {
-        return `${tableName}::delete::${serializeKeyTypeAttributes(request.DeleteRequest.Key)}`;
-    } else if (request.PutRequest) {
-        return `${tableName}::put::${serializeKeyTypeAttributes(request.PutRequest.Item)}`;
-    }
-
-    return tableName;
-}
-
-function serializeKeyTypeAttributes(attributes: AttributeMap): string {
-    const keyTypeProperties: Array<string> = [];
-    for (const property of Object.keys(attributes).sort()) {
-        const attribute = attributes[property];
-        if (attribute.B) {
-            keyTypeProperties.push(`${property}=${toByteArray(attribute.B)}`);
-        } else if (attribute.N) {
-            keyTypeProperties.push(`${property}=${attribute.N}`);
-        } else if (attribute.S) {
-            keyTypeProperties.push(`${property}=${attribute.S}`);
-        }
-    }
-
-    return keyTypeProperties.join('&');
-}
-
-function toByteArray(value: BinaryAttributeValue): Uint8Array {
-    if (ArrayBuffer.isView(value)) {
-        return new Uint8Array(
-            value.buffer,
-            value.byteOffset,
-            value.byteLength
-        );
-    }
-
-    if (typeof value === 'string') {
-        return fromUtf8(value);
-    }
-
-    if (isArrayBuffer(value)) {
-        return new Uint8Array(value);
-    }
-
-    throw new Error('Unrecognized binary type');
-}
-
-function isArrayBuffer(arg: any): arg is ArrayBuffer {
-    return (typeof ArrayBuffer === 'function' && arg instanceof ArrayBuffer) ||
-        Object.prototype.toString.call(arg) === '[object ArrayBuffer]';
 }
