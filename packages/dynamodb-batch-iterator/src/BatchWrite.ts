@@ -3,7 +3,7 @@ import { itemIdentifier } from './itemIdentifier';
 import { WriteRequest } from './types';
 import { BatchWriteItemInput } from 'aws-sdk/clients/dynamodb';
 
-const MAX_WRITE_BATCH_SIZE = 25;
+export const MAX_WRITE_BATCH_SIZE = 25;
 
 /**
  * Puts or deletes items from DynamoDB in batches of 25 or fewer via one or more
@@ -19,7 +19,7 @@ const MAX_WRITE_BATCH_SIZE = 25;
  * per-table basis.
  */
 export class BatchWrite extends BatchOperation<WriteRequest> {
-    readonly batchSize = MAX_WRITE_BATCH_SIZE;
+    protected readonly batchSize = MAX_WRITE_BATCH_SIZE;
 
     protected async doBatchRequest() {
         const inFlight: Array<[string, WriteRequest]> = [];
@@ -57,10 +57,15 @@ export class BatchWrite extends BatchOperation<WriteRequest> {
                     unprocessed.push(item as WriteRequest);
 
                     const identifier = itemIdentifier(table, item as WriteRequest);
-                    inFlight.filter(
-                        ([tableName, attributes]) => tableName !== table ||
-                            itemIdentifier(tableName, attributes) !== identifier
-                    );
+                    for (let i = inFlight.length - 1; i >= 0; i--) {
+                        const [tableName, attributes] = inFlight[i];
+                        if (
+                            tableName === table &&
+                            itemIdentifier(tableName, attributes) === identifier
+                        ) {
+                            inFlight.splice(i, 1);
+                        }
+                    }
                 }
             }
 

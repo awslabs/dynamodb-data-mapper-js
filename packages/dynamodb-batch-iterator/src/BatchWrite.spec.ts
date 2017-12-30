@@ -1,5 +1,6 @@
-import { BatchWrite } from './BatchWrite';
+import { BatchWrite, MAX_WRITE_BATCH_SIZE } from './BatchWrite';
 import { WriteRequest } from './types';
+import { BatchWriteItemOutput } from 'aws-sdk/clients/dynamodb';
 
 describe('BatchWrite', () => {
     const promiseFunc = jest.fn(() => Promise.resolve({
@@ -22,7 +23,7 @@ describe('BatchWrite', () => {
 
     for (const asyncInput of [true, false]) {
         it(
-            'should should partition write batches into requests with 25 or fewer items',
+            `should should partition write batches into requests with ${MAX_WRITE_BATCH_SIZE} or fewer items`,
             async () => {
                 const writes: Array<[string, WriteRequest]> = [];
                 const expected: any = [
@@ -73,7 +74,8 @@ describe('BatchWrite', () => {
                         ? {DeleteRequest: {Key: {fizz}}}
                         : {PutRequest: {Item: {fizz}}};
                     writes.push([table, req]);
-                    expected[Math.floor(i / 25)][0].RequestItems[table]
+                    expected[Math.floor(i / MAX_WRITE_BATCH_SIZE)][0]
+                        .RequestItems[table]
                         .push(req);
                 }
 
@@ -104,7 +106,8 @@ describe('BatchWrite', () => {
                 }
 
                 const {calls} = mockDynamoDbClient.batchWriteItem.mock;
-                expect(calls.length).toBe(4);
+                expect(calls.length)
+                    .toBe(Math.ceil(writes.length / MAX_WRITE_BATCH_SIZE));
                 expect(calls).toEqual(expected);
             }
         );
@@ -112,50 +115,7 @@ describe('BatchWrite', () => {
         it('should should retry unprocessed items', async () => {
             const failures = new Set(['21', '24', '38', '43', '55', '60']);
             const writes: Array<[string, WriteRequest]> = [];
-            const expected: any = [
-                [
-                    {
-                        RequestItems: {
-                            snap: [],
-                            crackle: [],
-                            pop: [],
-                        }
-                    }
-                ],
-                [
-                    {
-                        RequestItems: {
-                            snap: [],
-                            crackle: [],
-                            pop: [],
-                        }
-                    }
-                ],
-                [
-                    {
-                        RequestItems: {
-                            snap: [],
-                            crackle: [],
-                            pop: [],
-                        }
-                    }
-                ],
-                [
-                    {
-                        RequestItems: {
-                            snap: [],
-                            crackle: [],
-                            pop: [],
-                        }
-                    }
-                ],
-            ];
-            const responses: any = [
-                { UnprocessedItems: {} },
-                { UnprocessedItems: {} },
-                { UnprocessedItems: {} },
-                { UnprocessedItems: {} },
-            ];
+            const unprocessed = new Map<string, WriteRequest>();
 
             for (let i = 0; i < 80; i++) {
                 const table = i % 3 === 0
@@ -172,23 +132,38 @@ describe('BatchWrite', () => {
                         quux: {S: 'string'}
                     }}};
                 writes.push([table, req]);
-                expected[Math.floor(i / 25)][0].RequestItems[table]
-                    .push(req);
 
                 if (failures.has(fizz.N)) {
-                    const {UnprocessedItems} = responses[Math.floor(i / 25)];
-                    if (!(table in UnprocessedItems)) {
-                        UnprocessedItems[table] = [];
-                    }
-
-                    UnprocessedItems[table].push(req);
-                    expected[3][0].RequestItems[table].push(req);
+                    unprocessed.set(fizz.N, req);
                 }
             }
 
-            for (const response of responses) {
-                promiseFunc.mockImplementationOnce(() => Promise.resolve(response));
-            }
+            promiseFunc.mockImplementation(() => {
+                const response: BatchWriteItemOutput = {};
+
+                const {RequestItems} = mockDynamoDbClient.batchWriteItem.mock.calls.slice(-1)[0][0];
+                for (const tableName of Object.keys(RequestItems)) {
+                    for (const {DeleteRequest, PutRequest} of RequestItems[tableName]) {
+                        const item = DeleteRequest ? DeleteRequest.Key : PutRequest.Item;
+                        if (unprocessed.has(item.fizz.N)) {
+                            if (!response.UnprocessedItems) {
+                                response.UnprocessedItems = {};
+                            }
+
+                            if (!(tableName in response.UnprocessedItems)) {
+                                response.UnprocessedItems[tableName] = [];
+                            }
+
+                            response.UnprocessedItems[tableName].push(
+                                unprocessed.get(item.fizz.N) as object
+                            );
+                            unprocessed.delete(item.fizz.N);
+                        }
+                    }
+                }
+
+                return response;
+            });
 
             const input = asyncInput
                 ? async function *() {
@@ -202,10 +177,14 @@ describe('BatchWrite', () => {
                 }()
                 : writes;
 
+            const seen = new Set<number>();
             for await (const [tableName, req] of new BatchWrite(mockDynamoDbClient as any, input)) {
                 const id = req.DeleteRequest
                     ? parseInt(req.DeleteRequest.Key.fizz.N as string)
                     : parseInt((req.PutRequest as any).Item.fizz.N as string);
+
+                expect(seen.has(id)).toBe(false);
+                seen.add(id);
 
                 if (id % 3 === 0) {
                     expect(tableName).toBe('snap');
@@ -216,8 +195,11 @@ describe('BatchWrite', () => {
                 }
             }
 
+            expect(seen.size).toBe(writes.length);
+
             const {calls} = mockDynamoDbClient.batchWriteItem.mock;
-            expect(calls.length).toBe(4);
+            expect(calls.length)
+                .toBe(Math.ceil(writes.length / MAX_WRITE_BATCH_SIZE));
 
             const callCount: {[key: string]: number} = calls.reduce(
                 (
@@ -242,7 +224,7 @@ describe('BatchWrite', () => {
                 {}
             );
 
-            for (let i = 0; i < 80; i++) {
+            for (let i = 0; i < writes.length; i++) {
                 expect(callCount[i]).toBe(failures.has(String(i)) ? 2 : 1);
             }
         });

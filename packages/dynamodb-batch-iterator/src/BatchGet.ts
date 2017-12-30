@@ -4,7 +4,7 @@ import { SyncOrAsyncIterable, TableState } from './types';
 import { AttributeMap, BatchGetItemInput } from 'aws-sdk/clients/dynamodb';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
-const MAX_READ_BATCH_SIZE = 100;
+export const MAX_READ_BATCH_SIZE = 100;
 
 /**
  * Retrieves items from DynamoDB in batches of 100 or fewer via one or more
