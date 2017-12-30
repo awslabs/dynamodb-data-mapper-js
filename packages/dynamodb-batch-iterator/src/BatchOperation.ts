@@ -201,10 +201,12 @@ export abstract class BatchOperation<
             !this.sourceDone &&
             this.toSend.length < this.batchSize
         ) {
-            const toProcess = await Promise.race([
-                this.sourceNext,
-                Promise.race(this.throttled)
-            ]);
+            const toProcess = isIteratorResult(this.sourceNext)
+                ? this.sourceNext
+                : await Promise.race([
+                    this.sourceNext,
+                    Promise.race(this.throttled)
+                ]);
 
             if (isIteratorResult(toProcess)) {
                 this.sourceDone = toProcess.done;
