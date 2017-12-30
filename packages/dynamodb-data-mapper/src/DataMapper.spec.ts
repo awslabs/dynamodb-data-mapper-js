@@ -311,7 +311,7 @@ describe('DataMapper', () => {
                         projection: ['snap.pop', 'mixedList[2]']
                     }
                 }
-            }
+            };
 
             for await (const _ of mapper.batchGet(gets, config)) {
                 // pass
