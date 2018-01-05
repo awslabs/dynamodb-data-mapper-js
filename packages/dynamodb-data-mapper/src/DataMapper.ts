@@ -293,7 +293,7 @@ export class DataMapper {
 
         const schema = getSchema(item);
 
-        const operationInput: DeleteItemInput = {
+        const req: DeleteItemInput = {
             TableName: this.getTableName(item),
             Key: marshallKey(schema, item),
             ReturnValues: returnValues,
@@ -319,15 +319,21 @@ export class DataMapper {
 
         if (condition) {
             const attributes = new ExpressionAttributes();
-            operationInput.ConditionExpression = serializeConditionExpression(
+            req.ConditionExpression = serializeConditionExpression(
                 normalizeConditionExpressionPaths(condition, schema),
                 attributes
             );
-            operationInput.ExpressionAttributeNames = attributes.names;
-            operationInput.ExpressionAttributeValues = attributes.values;
+
+            if (Object.keys(attributes.names).length > 0) {
+                req.ExpressionAttributeNames = attributes.names;
+            }
+
+            if (Object.keys(attributes.values).length > 0) {
+                req.ExpressionAttributeValues = attributes.values;
+            }
         }
 
-        const {Attributes} = await this.client.deleteItem(operationInput).promise();
+        const {Attributes} = await this.client.deleteItem(req).promise();
         if (Attributes) {
             return unmarshallItem<T>(
                 schema,
@@ -377,7 +383,7 @@ export class DataMapper {
         } = options;
 
         const schema = getSchema(item);
-        const operationInput: GetItemInput = {
+        const req: GetItemInput = {
             TableName: this.getTableName(item),
             Key: marshallKey(schema, item),
             ConsistentRead: readConsistency === 'strong',
@@ -385,14 +391,17 @@ export class DataMapper {
 
         if (projection) {
             const attributes = new ExpressionAttributes();
-            operationInput.ProjectionExpression = serializeProjectionExpression(
+            req.ProjectionExpression = serializeProjectionExpression(
                 projection.map(propName => toSchemaName(propName, schema)),
                 attributes
             );
-            operationInput.ExpressionAttributeNames = attributes.names;
+
+            if (Object.keys(attributes.names).length > 0) {
+                req.ExpressionAttributeNames = attributes.names;
+            }
         }
 
-        const {Item} = await this.client.getItem(operationInput).promise();
+        const {Item} = await this.client.getItem(req).promise();
         if (Item) {
             return unmarshallItem<T>(
                 schema,
@@ -401,7 +410,7 @@ export class DataMapper {
             );
         }
 
-        throw new ItemNotFoundException(operationInput);
+        throw new ItemNotFoundException(req);
     }
 
     /**
@@ -577,8 +586,14 @@ export class DataMapper {
                 normalizeConditionExpressionPaths(condition, schema),
                 attributes
             );
-            req.ExpressionAttributeNames = attributes.names;
-            req.ExpressionAttributeValues = attributes.values;
+
+            if (Object.keys(attributes.names).length > 0) {
+                req.ExpressionAttributeNames = attributes.names;
+            }
+
+            if (Object.keys(attributes.values).length > 0) {
+                req.ExpressionAttributeValues = attributes.values;
+            }
         }
 
         await this.client.putItem(req).promise();
@@ -675,8 +690,13 @@ export class DataMapper {
             );
         }
 
-        req.ExpressionAttributeNames = attributes.names;
-        req.ExpressionAttributeValues = attributes.values;
+        if (Object.keys(attributes.names).length > 0) {
+            req.ExpressionAttributeNames = attributes.names;
+        }
+
+        if (Object.keys(attributes.values).length > 0) {
+            req.ExpressionAttributeValues = attributes.values;
+        }
 
         if (startKey) {
             req.ExclusiveStartKey = marshallItem(schema, startKey);
@@ -840,8 +860,13 @@ export class DataMapper {
         }
 
         req.UpdateExpression = expr.serialize(attributes);
-        req.ExpressionAttributeNames = attributes.names;
-        req.ExpressionAttributeValues = attributes.values;
+        if (Object.keys(attributes.names).length > 0) {
+            req.ExpressionAttributeNames = attributes.names;
+        }
+
+        if (Object.keys(attributes.values).length > 0) {
+            req.ExpressionAttributeValues = attributes.values;
+        }
 
         const rawResponse = await this.client.updateItem(req).promise();
         if (rawResponse.Attributes) {
