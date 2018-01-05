@@ -149,8 +149,8 @@ deepEqual(original, unmarshalled); <span class="hljs-comment">// true</span>
 </code></pre>
 				<h3 id="empty-value-support">Empty value support</h3>
 				<p>DynamoDB&#39;s data model requires that strings, sets, and binary attributes have
-					lengths greater than zero, whereas JavaScript has no such requirement. By
-					default, the marshaller will not attempt to alter empty values, as the
+				lengths greater than zero, whereas JavaScript has no such requirement. By</p>
+				<p>default, the marshaller will not attempt to alter empty values, as the
 					marshaller would not be able to disambiguate any sigil value used from a field
 				that was meant to legitimately contain that value.</p>
 				<p>The marshaller offers two opt-in options for handling empty values, both of

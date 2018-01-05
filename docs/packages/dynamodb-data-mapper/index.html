@@ -120,8 +120,8 @@
     }
 }
 </code></pre>
-				<p>Next, create an instance of <code>DataMapper</code> and use the <code>MyDomainClass</code> constructor
-				defined above to save and load objects from DynamoDB:</p>
+				<p>Next, create an instance of <code>DataMapper</code> and use the <code>MyDomainClass</code> constructor</p>
+				<p>defined above to save and load objects from DynamoDB:</p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
     DataMapper,
     DynamoDbSchema,
@@ -200,65 +200,175 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 });
 </code></pre>
 				<h2 id="supported-operations">Supported operations</h2>
-				<h3 id="-delete-"><code>delete</code></h3>
-				<p>Removes an item from a DynamoDB table. Supports the following named parameters:</p>
+				<h3 id="-batchdelete-"><code>batchDelete</code></h3>
+				<p>Deletes any number of items from one or more tables in batches of 100 or fewer
+					items. Unprocessed deletes are retried following an exponentially increasing
+				backoff delay that is applied on a per-table basis.</p>
+				<p>Returns an async iterable of items that have been deleted (deleted items are
+					yielded when the delete has been accepted by DynamoDB). The results can be
+					consumed with a <code>for-await-of</code> loop. If you are using TypeScript, you will need
+					to include <code>esnext.asynciterable</code> in your <code>lib</code> declaration (as well as enabling
+					<code>downlevelIteration</code> if targeting ES5 or lower). Please refer to <a href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-3.html#async-iteration">the TypeScript
+					release notes</a>
+				for more information.</p>
+				<p>Takes one parameter:</p>
 				<ul>
-					<li><p><code>item</code> - (<strong>Required</strong>) The item to be deleted. Must be an instance of a class
-							with a table name accessible via a property identified with the
-							<code>DynamoDbTable</code> symbol and a schema accessible via a property identified
-						with the <code>DynamoDbSchema</code> symbol.</p>
+					<li>An iterable (synchronous or asynchronous) of items to delete. Each item must
+						be an instance of a class with a table name accessible via a property
+						identified with the <code>DynamoDbTable</code> symbol and a schema accessible via a
+					property identified with the <code>DynamoDbSchema</code> symbol.</li>
+				</ul>
+				<h3 id="-batchget-"><code>batchGet</code></h3>
+				<p>Fetches any number of items from one or more tables in batches of 100 or fewer
+					items. Unprocessed reads are retried following an exponentially increasing
+				backoff delay that is applied on a per-table basis.</p>
+				<p>Takes two parameters:</p>
+				<ul>
+					<li><p>An iterable (synchronous or asynchronous) of items to fetch. Each item must be
+							an instance of a class with a table name accessible via a property
+							identified with the <code>DynamoDbTable</code> symbol and a schema accessible via a
+						property identified with the <code>DynamoDbSchema</code> symbol.</p>
 					</li>
-					<li><p><code>condition</code> - A condition expression whose assertion must be satisfied in
-							order for the delete operation to be executed. Please refer to the
-							documentation for the <code>@aws/dynamodb-expressions</code> package for guidance on
-						creating condition expression objects.</p>
+					<li><p>(Optional) An object specifying any of the following options:</p>
+						<ul>
+							<li><p><code>readConsistency</code> - Specify <code>&#39;strong&#39;</code> to perform a strongly consistent
+									read. Specify <code>&#39;eventual&#39;</code> (the default) to perform an eventually
+								consistent read.</p>
+							</li>
+							<li><p><code>perTableOptions</code> - An object whose keys are table names and whose values
+								are objects specifying any of the following options:</p>
+								<ul>
+									<li><p><code>readConsistency</code> - Specify <code>&#39;strong&#39;</code> to perform a strongly
+											consistent read. Specify <code>&#39;eventual&#39;</code> (the default) to perform an
+										eventually consistent read.</p>
+									</li>
+									<li><p><code>projection</code> - A projection expression directing DynamoDB to return a
+											subset of the fetched item&#39;s attributes. Please refer to the
+											documentation for the <code>@aws/dynamodb-expressions</code> package for
+										guidance on creating projection expression objects.</p>
+									</li>
+									<li><p><code>projectionSchema</code> - The schema to use when mapping the supplied
+										<code>projection</code> option to the attribute names used in DynamoDB.</p>
+										<p>  This parameter is only necessary if a batch contains items from
+											multiple classes that map to the <em>same</em> table using <em>different</em>
+										property names to represent the same DynamoDB attributes.</p>
+										<p>  If not supplied, the schema associated with the first item
+										associated with a given table will be used in its place.</p>
+									</li>
+								</ul>
+							</li>
+						</ul>
 					</li>
-					<li><p><code>returnValues</code> - Specify <code>&#39;ALL_OLD&#39;</code> to have the deleted item returned to you
-						when the delete operation completes.</p>
+				</ul>
+				<h3 id="-batchput-"><code>batchPut</code></h3>
+				<p>Puts any number of items to one or more tables in batches of 25 or fewer items.
+					Unprocessed puts are retried following an exponentially increasing backoff delay
+				that is applied on a per-table basis.</p>
+				<p>Returns an async iterable of items that have been put (put items are yielded
+					when the put has been accepted by DynamoDB). The results can be consumed with a
+					<code>for-await-of</code> loop. If you are using TypeScript, you will need to include
+					<code>esnext.asynciterable</code> in your <code>lib</code> declaration (as well as enabling
+					<code>downlevelIteration</code> if targeting ES5 or lower). Please refer to <a href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-3.html#async-iteration">the TypeScript
+					release notes</a>
+				for more information.</p>
+				<p>Takes one parameter:</p>
+				<ul>
+					<li>An iterable (synchronous or asynchronous) of items to put. Each item must be
+						an instance of a class with a table name accessible via a property
+						identified with the <code>DynamoDbTable</code> symbol and a schema accessible via a
+					property identified with the <code>DynamoDbSchema</code> symbol.</li>
+				</ul>
+				<h3 id="-batchwrite-"><code>batchWrite</code></h3>
+				<p>Puts or deletes any number of items to one or more tables in batches of 25 or
+					fewer items. Unprocessed writes are retried following an exponentially
+				increasing backoff delay that is applied on a per-table basis.</p>
+				<p>Returns an async iterable of tuples of the string &#39;put&#39;|&#39;delete&#39; and the item on
+					which the specified write action was performed. The results can be consumed with
+					a <code>for-await-of</code> loop. If you are using TypeScript, you will need to include
+					<code>esnext.asynciterable</code> in your <code>lib</code> declaration (as well as enabling
+					<code>downlevelIteration</code> if targeting ES5 or lower). Please refer to <a href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-3.html#async-iteration">the TypeScript
+					release notes</a>
+				for more information.</p>
+				<p>Takes one parameter:</p>
+				<ul>
+					<li>An iterable (synchronous or asynchronous) of tuples of the string
+						&#39;put&#39;|&#39;delete&#39; and the item on which to perform the specified write action.
+						Each item must be an instance of a class with a table name accessible via a
+						property identified with the <code>DynamoDbTable</code> symbol and a schema accessible
+					via a property identified with the <code>DynamoDbSchema</code> symbol.</li>
+				</ul>
+				<h3 id="-delete-"><code>delete</code></h3>
+				<p>Removes an item from a DynamoDB table. Takes two parameters:</p>
+				<ul>
+					<li><p>The item to be deleted. Must be an instance of a class with a table name
+							accessible via a property identified with the <code>DynamoDbTable</code> symbol and a
+							schema accessible via a property identified with the <code>DynamoDbSchema</code>
+						symbol.</p>
 					</li>
-					<li><p><code>skipVersionCheck</code> - Whether to forgo creating a condition expression based on
-						a defined <code>versionAttribute</code> in the schema.</p>
+					<li><p>(Optional) An object specifying any of the following options:</p>
+						<ul>
+							<li><p><code>condition</code> - A condition expression whose assertion must be satisfied in
+									order for the delete operation to be executed. Please refer to the
+									documentation for the <code>@aws/dynamodb-expressions</code> package for guidance
+								on creating condition expression objects.</p>
+							</li>
+							<li><p><code>returnValues</code> - Specify <code>&#39;ALL_OLD&#39;</code> to have the deleted item returned to
+								you when the delete operation completes.</p>
+							</li>
+							<li><p><code>skipVersionCheck</code> - Whether to forgo creating a condition expression
+								based on a defined <code>versionAttribute</code> in the schema.</p>
+							</li>
+						</ul>
 					</li>
 				</ul>
 				<h3 id="-get-"><code>get</code></h3>
 				<p>Fetches an item from a DynamoDB table. If no item with the specified key was
-					found, the returned promise will be rejected with an error. Supports the
-				following named parameters:</p>
+					found, the returned promise will be rejected with an error. Takes two
+				parameters:</p>
 				<ul>
-					<li><p><code>item</code> - (<strong>Required</strong>) The item to be deleted. Must be an instance of a class
-							with a table name accessible via a property identified with the
-							<code>DynamoDbTable</code> symbol and a schema accessible via a property identified
-						with the <code>DynamoDbSchema</code> symbol.</p>
+					<li><p>The item to be fetched. Must be an instance of a class with a table name
+							accessible via a property identified with the <code>DynamoDbTable</code> symbol and a
+							schema accessible via a property identified with the <code>DynamoDbSchema</code>
+						symbol.</p>
 						<p>  The supplied item will <strong>NOT</strong> be updated in place. Rather, a new item of
 						the same class with data from the DynamoDB table will be returned.</p>
 					</li>
-					<li><p><code>readConsistency</code> - Specify <code>&#39;strong&#39;</code> to perform a strongly consistent read.
-						Specify <code>&#39;eventual&#39;</code> (the default) to perform an eventually consistent read.</p>
-					</li>
-					<li><p><code>projection</code> - A projection expression directing DynamoDB to return a subset
-							of the fetched item&#39;s attributes. Please refer to the documentation for the
-							<code>@aws/dynamodb-expressions</code> package for guidance on creating projection
-						expression objects.</p>
+					<li><p>(Optional) An object specifying any of the following options:</p>
+						<ul>
+							<li><p><code>readConsistency</code> - Specify <code>&#39;strong&#39;</code> to perform a strongly consistent
+									read. Specify <code>&#39;eventual&#39;</code> (the default) to perform an eventually
+								consistent read.</p>
+							</li>
+							<li><p><code>projection</code> - A projection expression directing DynamoDB to return a
+									subset of the fetched item&#39;s attributes. Please refer to the
+									documentation for the <code>@aws/dynamodb-expressions</code> package for guidance
+								on creating projection expression objects.</p>
+							</li>
+						</ul>
 					</li>
 				</ul>
 				<h3 id="-put-"><code>put</code></h3>
-				<p>Inserts an item into a DynamoDB table. Supports the following named parameters:</p>
+				<p>Inserts an item into a DynamoDB table. Takes two parameters:</p>
 				<ul>
-					<li><p><code>item</code> - (<strong>Required</strong>) The item to be inserted. Must be an instance of a
-							class with a table name accessible via a property identified with the
-							<code>DynamoDbTable</code> symbol and a schema accessible via a property identified
-						with the <code>DynamoDbSchema</code> symbol.</p>
+					<li><p>The item to be inserted. Must be an instance of a class with a table name
+							accessible via a property identified with the <code>DynamoDbTable</code> symbol and a
+							schema accessible via a property identified with the <code>DynamoDbSchema</code>
+						symbol.</p>
 					</li>
-					<li><p><code>condition</code> - A condition expression whose assertion must be satisfied in
-							order for the put operation to be executed. Please refer to the
-							documentation for the <code>@aws/dynamodb-expressions</code> package for guidance on
-						creating condition expression objects.</p>
-					</li>
-					<li><p><code>returnValues</code> - Specify <code>&#39;ALL_OLD&#39;</code> to have the overwritten item (if one
-						existed) returned to you when the put operation completes.</p>
-					</li>
-					<li><p><code>skipVersionCheck</code> - Whether to forgo creating a condition expression based on
-						a defined <code>versionAttribute</code> in the schema.</p>
+					<li><p>(Optional) An object specifying any of the following options:</p>
+						<ul>
+							<li><p><code>condition</code> - A condition expression whose assertion must be satisfied in
+									order for the put operation to be executed. Please refer to the
+									documentation for the <code>@aws/dynamodb-expressions</code> package for guidance
+								on creating condition expression objects.</p>
+							</li>
+							<li><p><code>returnValues</code> - Specify <code>&#39;ALL_OLD&#39;</code> to have the overwritten item (if one
+								existed) returned to you when the put operation completes.</p>
+							</li>
+							<li><p><code>skipVersionCheck</code> - Whether to forgo creating a condition expression
+								based on a defined <code>versionAttribute</code> in the schema.</p>
+							</li>
+						</ul>
 					</li>
 				</ul>
 				<h3 id="-query-"><code>query</code></h3>
@@ -271,13 +381,19 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 					<code>downlevelIteration</code> if targeting ES5 or lower). Please refer to <a href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-3.html#async-iteration">the TypeScript
 					release notes</a>
 				for more information.</p>
+				<p>Takes three parameters:</p>
 				<ul>
-					<li><p><code>keyCondition</code> - (<strong>Required</strong>) The condition that specifies the key value(s)
-							for items to be retrieved by the query operation. You may provide a hash
-							matching key properties to the values they must equal, a hash matching keys
-							to <code>ConditionExpressionPredicate</code>s, or a fully composed
-							<code>ConditionExpression</code>. If a hash is provided, it may contain a mixture of
-						condition expression predicates and exact value matches:</p>
+					<li><p>The constructor function to use for any results returned by this operation.
+							Must have a prototype with a table name accessible via a property identified
+							with the <code>DynamoDbTable</code> symbol and a schema accessible via a property
+						identified with the <code>DynamoDbSchema</code> symbol.</p>
+					</li>
+					<li><p>The condition that specifies the key value(s) for items to be retrieved by the
+							query operation. You may provide a hash matching key properties to the
+							values they must equal, a hash matching keys to
+							<code>ConditionExpressionPredicate</code>s, or a fully composed <code>ConditionExpression</code>.
+							If a hash is provided, it may contain a mixture of condition expression
+						predicates and exact value matches:</p>
 						<pre><code class="lang-typescript">  <span class="hljs-keyword">import</span> {between} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
 
   <span class="hljs-keyword">const</span> keyCondition = {
@@ -289,39 +405,38 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 						<p>  Please refer to the documentation for the <code>@aws/dynamodb-expressions</code>
 						package for guidance on creating condition expression objects.</p>
 					</li>
-					<li><p><code>valueConstructor</code> - (<strong>Required</strong>) The constructor to use for any results
-							returned by this operation. Must have a prototype with a table name
-							accessible via a property identified with the <code>DynamoDbTable</code> symbol and a
-							schema accessible via a property identified with the <code>DynamoDbSchema</code>
-						symbol.</p>
-					</li>
-					<li><p><code>filter</code> - A condition expression that DynamoDB applies after the Query
-							operation, but before the data is returned to you. Items that do not satisfy
-						the <code>filter</code> criteria are not returned.</p>
-						<p>  You cannot define a filter expression based on a partition key or a sort
-						key.</p>
-						<p>  Please refer to the documentation for the <code>@aws/dynamodb-expressions</code>
-						package for guidance on creating condition expression objects.</p>
-					</li>
-					<li><p><code>indexName</code> - The name of the index against which to execute this query. If
-						not specified, the query will be executed against the base table.</p>
-					</li>
-					<li><p><code>limit</code> - The maximum number of items to return.</p>
-					</li>
-					<li><p><code>projection</code> - A projection expression directing DynamoDB to return a subset
-							of any fetched item&#39;s attributes. Please refer to the documentation for the
-							<code>@aws/dynamodb-expressions</code> package for guidance on creating projection
-						expression objects.</p>
-					</li>
-					<li><p><code>readConsistency</code> - Specify <code>&#39;strong&#39;</code> to perform a strongly consistent read.
-						Specify <code>&#39;eventual&#39;</code> (the default) to perform an eventually consistent read.</p>
-					</li>
-					<li><p><code>scanIndexForward</code> - Specifies the order for index traversal: If true, the
-							traversal is performed in ascending order; if false, the traversal is
-						performed in descending order.</p>
-					</li>
-					<li><p><code>startKey</code> - The primary key of the first item that this operation will
-						evaluate.</p>
+					<li><p>(Optional) An object specifying any of the following options:</p>
+						<ul>
+							<li><p><code>filter</code> - A condition expression that DynamoDB applies after the Query
+									operation, but before the data is returned to you. Items that do not
+								satisfy the <code>filter</code> criteria are not returned.</p>
+								<p>  You cannot define a filter expression based on a partition key or a sort
+								key.</p>
+								<p>  Please refer to the documentation for the <code>@aws/dynamodb-expressions</code>
+								package for guidance on creating condition expression objects.</p>
+							</li>
+							<li><p><code>indexName</code> - The name of the index against which to execute this query.
+								If not specified, the query will be executed against the base table.</p>
+							</li>
+							<li><p><code>pageSize</code> - The maximum number of items to return.</p>
+							</li>
+							<li><p><code>projection</code> - A projection expression directing DynamoDB to return a
+									subset of any fetched item&#39;s attributes. Please refer to the
+									documentation for the <code>@aws/dynamodb-expressions</code> package for guidance
+								on creating projection expression objects.</p>
+							</li>
+							<li><p><code>readConsistency</code> - Specify <code>&#39;strong&#39;</code> to perform a strongly consistent
+									read. Specify <code>&#39;eventual&#39;</code> (the default) to perform an eventually
+								consistent read.</p>
+							</li>
+							<li><p><code>scanIndexForward</code> - Specifies the order for index traversal: If true, the
+									traversal is performed in ascending order; if false, the traversal is
+								performed in descending order.</p>
+							</li>
+							<li><p><code>startKey</code> - The primary key of the first item that this operation will
+								evaluate.</p>
+							</li>
+						</ul>
 					</li>
 				</ul>
 				<h3 id="-scan-"><code>scan</code></h3>
@@ -332,42 +447,48 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 					<code>downlevelIteration</code> if targeting ES5 or lower). Please refer to <a href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-3.html#async-iteration">the TypeScript
 					release notes</a>
 				for more information.</p>
+				<p>Takes two parameters:</p>
 				<ul>
-					<li><p><code>valueConstructor</code> - (<strong>Required</strong>) The constructor to use for any results
-							returned by this operation. Must have a prototype with a table name
-							accessible via a property identified with the <code>DynamoDbTable</code> symbol and a
-							schema accessible via a property identified with the <code>DynamoDbSchema</code>
-						symbol.</p>
+					<li><p>The constructor function to use for any results returned by this operation.
+							Must have a prototype with a table name accessible via a property identified
+							with the <code>DynamoDbTable</code> symbol and a schema accessible via a property
+						identified with the <code>DynamoDbSchema</code> symbol.</p>
 					</li>
-					<li><p><code>filter</code> - A condition expression that DynamoDB applies after the scan
-							operation, but before the data is returned to you. Items that do not satisfy
-						the <code>filter</code> criteria are not returned.</p>
-						<p>  You cannot define a filter expression based on a partition key or a sort
-						key.</p>
-						<p>  Please refer to the documentation for the <code>@aws/dynamodb-expressions</code>
-						package for guidance on creating condition expression objects.</p>
-					</li>
-					<li><p><code>indexName</code> - The name of the index against which to execute this query. If
-						not specified, the query will be executed against the base table.</p>
-					</li>
-					<li><p><code>limit</code> - The maximum number of items to return.</p>
-					</li>
-					<li><p><code>projection</code> - A projection expression directing DynamoDB to return a subset
-							of any fetched item&#39;s attributes. Please refer to the documentation for the
-							<code>@aws/dynamodb-expressions</code> package for guidance on creating projection
-						expression objects.</p>
-					</li>
-					<li><p><code>readConsistency</code> - Specify <code>&#39;strong&#39;</code> to perform a strongly consistent read.
-						Specify <code>&#39;eventual&#39;</code> (the default) to perform an eventually consistent read.</p>
-					</li>
-					<li><p><code>segment</code> - The identifier for this segment (if this scan is being performed
-						as part of a parallel scan operation).</p>
-					</li>
-					<li><p><code>startKey</code> - The primary key of the first item that this operation will
-						evaluate.</p>
-					</li>
-					<li><p><code>totalSegments</code> - The number of segments into which this scan has been divided
-						(if this scan is being performed as part of a parallel scan operation).</p>
+					<li><p>(Optional) An object specifying any of the following options:</p>
+						<ul>
+							<li><p><code>filter</code> - A condition expression that DynamoDB applies after the scan
+									operation, but before the data is returned to you. Items that do not
+								satisfy the <code>filter</code> criteria are not returned.</p>
+								<p>  You cannot define a filter expression based on a partition key or a sort
+								key.</p>
+								<p>  Please refer to the documentation for the <code>@aws/dynamodb-expressions</code>
+								package for guidance on creating condition expression objects.</p>
+							</li>
+							<li><p><code>indexName</code> - The name of the index against which to execute this query.
+								If not specified, the query will be executed against the base table.</p>
+							</li>
+							<li><p><code>limit</code> - The maximum number of items to return.</p>
+							</li>
+							<li><p><code>projection</code> - A projection expression directing DynamoDB to return a
+									subset of any fetched item&#39;s attributes. Please refer to the
+									documentation for the <code>@aws/dynamodb-expressions</code> package for guidance
+								on creating projection expression objects.</p>
+							</li>
+							<li><p><code>readConsistency</code> - Specify <code>&#39;strong&#39;</code> to perform a strongly consistent
+									read. Specify <code>&#39;eventual&#39;</code> (the default) to perform an eventually
+								consistent read.</p>
+							</li>
+							<li><p><code>segment</code> - The identifier for this segment (if this scan is being
+								performed as part of a parallel scan operation).</p>
+							</li>
+							<li><p><code>startKey</code> - The primary key of the first item that this operation will
+								evaluate.</p>
+							</li>
+							<li><p><code>totalSegments</code> - The number of segments into which this scan has been
+									divided (if this scan is being performed as part of a parallel scan
+								operation).</p>
+							</li>
+						</ul>
 					</li>
 				</ul>
 				<h3 id="-parallelscan-"><code>parallelScan</code></h3>
@@ -379,62 +500,71 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 					<code>downlevelIteration</code> if targeting ES5 or lower). Please refer to <a href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-3.html#async-iteration">the TypeScript
 					release notes</a>
 				for more information.</p>
+				<p>Takes three parameters:</p>
 				<ul>
-					<li><p><code>valueConstructor</code> - (<strong>Required</strong>) The constructor to use for any results
-							returned by this operation. Must have a prototype with a table name
-							accessible via a property identified with the <code>DynamoDbTable</code> symbol and a
-							schema accessible via a property identified with the <code>DynamoDbSchema</code>
-						symbol.</p>
+					<li><p>The constructor to use for any results returned by this operation. Must have a
+							prototype with a table name accessible via a property identified with the
+							<code>DynamoDbTable</code> symbol and a schema accessible via a property identified
+						with the <code>DynamoDbSchema</code> symbol.</p>
 					</li>
-					<li><p><code>segments</code> - (<strong>Required</strong>) The total number of parallel workers to use to
-						scan the table.</p>
+					<li><p>The total number of parallel workers to use to scan the table.</p>
 					</li>
-					<li><p><code>filter</code> - A condition expression that DynamoDB applies after the scan
-							operation, but before the data is returned to you. Items that do not satisfy
-						the <code>filter</code> criteria are not returned.</p>
-						<p>  You cannot define a filter expression based on a partition key or a sort
-						key.</p>
-						<p>  Please refer to the documentation for the <code>@aws/dynamodb-expressions</code>
-						package for guidance on creating condition expression objects.</p>
-					</li>
-					<li><p><code>indexName</code> - The name of the index against which to execute this query. If
-						not specified, the query will be executed against the base table.</p>
-					</li>
-					<li><p><code>limit</code> - The maximum number of items to return.</p>
-					</li>
-					<li><p><code>projection</code> - A projection expression directing DynamoDB to return a subset
-							of any fetched item&#39;s attributes. Please refer to the documentation for the
-							<code>@aws/dynamodb-expressions</code> package for guidance on creating projection
-						expression objects.</p>
-					</li>
-					<li><p><code>readConsistency</code> - Specify <code>&#39;strong&#39;</code> to perform a strongly consistent read.
-						Specify <code>&#39;eventual&#39;</code> (the default) to perform an eventually consistent read.</p>
-					</li>
-					<li><p><code>startKey</code> - The primary key of the first item that this operation will
-						evaluate.</p>
+					<li><p>(Optional) An object specifying any of the following options:</p>
+						<ul>
+							<li><p><code>filter</code> - A condition expression that DynamoDB applies after the scan
+									operation, but before the data is returned to you. Items that do not
+								satisfy the <code>filter</code> criteria are not returned.</p>
+								<p>  You cannot define a filter expression based on a partition key or a sort
+								key.</p>
+								<p>  Please refer to the documentation for the <code>@aws/dynamodb-expressions</code>
+								package for guidance on creating condition expression objects.</p>
+							</li>
+							<li><p><code>indexName</code> - The name of the index against which to execute this query.
+								If not specified, the query will be executed against the base table.</p>
+							</li>
+							<li><p><code>limit</code> - The maximum number of items to return.</p>
+							</li>
+							<li><p><code>projection</code> - A projection expression directing DynamoDB to return a
+									subset of any fetched item&#39;s attributes. Please refer to the
+									documentation for the <code>@aws/dynamodb-expressions</code> package for guidance
+								on creating projection expression objects.</p>
+							</li>
+							<li><p><code>readConsistency</code> - Specify <code>&#39;strong&#39;</code> to perform a strongly consistent
+									read. Specify <code>&#39;eventual&#39;</code> (the default) to perform an eventually
+								consistent read.</p>
+							</li>
+							<li><p><code>startKey</code> - The primary key of the first item that this operation will
+								evaluate.</p>
+							</li>
+						</ul>
 					</li>
 				</ul>
 				<h3 id="-update-"><code>update</code></h3>
 				<p>Updates an item in a DynamoDB table. Will leave attributes not defined in the
 				schema in place.</p>
+				<p>Takes two parameters:</p>
 				<ul>
-					<li><p><code>item</code> - (<strong>Required</strong>) The item with its desired property state. Must be an
-							instance of a class with a table name accessible via a property identified
-							with the <code>DynamoDbTable</code> symbol and a schema accessible via a property
-						identified with the <code>DynamoDbSchema</code> symbol.</p>
+					<li><p>The item with its desired property state. Must be an instance of a class with
+							a table name accessible via a property identified with the <code>DynamoDbTable</code>
+							symbol and a schema accessible via a property identified with the
+						<code>DynamoDbSchema</code> symbol.</p>
 					</li>
-					<li><p><code>condition</code> - A condition expression whose assertion must be satisfied in
-							order for the update operation to be executed. Please refer to the
-							documentation for the <code>@aws/dynamodb-expressions</code> package for guidance on
-						creating condition expression objects.</p>
-					</li>
-					<li><p><code>onMissing</code> - Specify <code>&#39;remove&#39;</code> (the default) to treat the absence of a value
-							in the supplied <code>item</code> as a directive to remove the property from the record
-							in DynamoDB. Specify <code>&#39;skip&#39;</code> to only update the properties that are defined
-						in the supplied <code>item</code>.</p>
-					</li>
-					<li><p><code>skipVersionCheck</code> - Whether to forgo creating a condition expression based on
-						a defined <code>versionAttribute</code> in the schema.</p>
+					<li><p>(Optional) An object specifying any of the following options:</p>
+						<ul>
+							<li><p><code>condition</code> - A condition expression whose assertion must be satisfied in
+									order for the update operation to be executed. Please refer to the
+									documentation for the <code>@aws/dynamodb-expressions</code> package for guidance
+								on creating condition expression objects.</p>
+							</li>
+							<li><p><code>onMissing</code> - Specify <code>&#39;remove&#39;</code> (the default) to treat the absence of a
+									value in the supplied <code>item</code> as a directive to remove the property from
+									the record in DynamoDB. Specify <code>&#39;skip&#39;</code> to only update the properties
+								that are defined in the supplied <code>item</code>.</p>
+							</li>
+							<li><p><code>skipVersionCheck</code> - Whether to forgo creating a condition expression
+								based on a defined <code>versionAttribute</code> in the schema.</p>
+							</li>
+						</ul>
 					</li>
 				</ul>
 			</div>
