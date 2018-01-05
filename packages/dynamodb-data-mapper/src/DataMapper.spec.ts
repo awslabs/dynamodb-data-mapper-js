@@ -985,6 +985,44 @@ describe('DataMapper', () => {
             }
         );
 
+        it(
+            'should not include ExpressionAttributeValues when a substitution has not been made',
+            async () => {
+                await mapper.delete(
+                    {
+                        fizz: 'buzz',
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                attributeName: 'bar',
+                                keyType: 'HASH',
+                            }
+                        },
+                    },
+                    {
+                        condition: new FunctionExpression(
+                            'attribute_not_exists',
+                            new AttributePath('fizz')
+                        )
+                    }
+                );
+
+                expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
+                    .toEqual({
+                        ConditionExpression: 'attribute_not_exists(#attr0)',
+                        ExpressionAttributeNames: {
+                            '#attr0': 'bar',
+                        },
+                        TableName: 'foo',
+                        Key: {
+                            bar: { S: 'buzz' }
+                        },
+                        ReturnValues: 'ALL_OLD'
+                    });
+            }
+        );
+
         it('should unmarshall any returned attributes', async () => {
             promiseFunc.mockImplementation(() => Promise.resolve({Attributes: {
                 fizz: {S: 'buzz'},
@@ -1642,14 +1680,14 @@ describe('DataMapper', () => {
                 });
 
                 expect(mockDynamoDbClient.putItem.mock.calls[0][0])
-                    .toMatchObject({
+                    .toEqual({
                         Item: {
                             foo: {S: 'buzz'},
                             pop: {N: '0'},
                         },
                         ConditionExpression: 'attribute_not_exists(#attr0)',
                         ExpressionAttributeNames: {'#attr0': 'pop'},
-                        ExpressionAttributeValues: {},
+                        TableName: 'foo',
                     });
             }
         );
