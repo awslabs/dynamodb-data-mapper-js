@@ -1,6 +1,6 @@
 {
   "name": "@aws/dynamodb-data-mapper",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "A schema-based data mapper for Amazon DynamoDB",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
