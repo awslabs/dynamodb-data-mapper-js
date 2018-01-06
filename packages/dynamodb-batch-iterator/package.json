@@ -2,6 +2,18 @@
   "name": "@aws/dynamodb-batch-iterator",
   "version": "0.3.1",
   "description": "Abstraction for DynamoDB batch reads and writes for that handles batch splitting and partial retries with exponential backoff",
+  "keywords": [
+    "aws",
+    "dynamodb"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/awslabs/dynamodb-data-mapper-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/awslabs/dynamodb-data-mapper-js/issues"
+  },
+  "homepage": "https://awslabs.github.io/dynamodb-data-mapper-js/packages/dynamodb-batch-iterator/",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "scripts": {

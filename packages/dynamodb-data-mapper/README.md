@@ -152,7 +152,7 @@ mapper.put(toPut).then((persisted: MyDomainModel) => {
 
 ### `batchDelete`
 
-Deletes any number of items from one or more tables in batches of 100 or fewer
+Deletes any number of items from one or more tables in batches of 25 or fewer
 items. Unprocessed deletes are retried following an exponentially increasing
 backoff delay that is applied on a per-table basis.
 
