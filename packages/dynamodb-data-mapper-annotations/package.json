@@ -2,6 +2,18 @@
   "name": "@aws/dynamodb-data-mapper-annotations",
   "version": "0.3.3",
   "description": "Annotations providing easy integration between TypeScript domain objects and the @aws/dynamodb-data-mapper library",
+  "keywords": [
+    "aws",
+    "dynamodb"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/awslabs/dynamodb-data-mapper-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/awslabs/dynamodb-data-mapper-js/issues"
+  },
+  "homepage": "https://awslabs.github.io/dynamodb-data-mapper-js/packages/dynamodb-data-mapper-annotations/",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "scripts": {

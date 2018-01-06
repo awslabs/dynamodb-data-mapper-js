@@ -2,6 +2,18 @@
   "name": "@aws/dynamodb-expressions",
   "version": "0.3.0",
   "description": "Composable expression objects for Amazon DynamoDB",
+  "keywords": [
+    "aws",
+    "dynamodb"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/awslabs/dynamodb-data-mapper-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/awslabs/dynamodb-data-mapper-js/issues"
+  },
+  "homepage": "https://awslabs.github.io/dynamodb-data-mapper-js/packages/dynamodb-expressions/",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "scripts": {
