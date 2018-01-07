@@ -1,7 +1,7 @@
-import {AttributeValue} from 'aws-sdk/clients/dynamodb';
-import {Schema} from './Schema';
-import {MarshallingOptions} from "@aws/dynamodb-auto-marshaller";
-import {BinaryValue} from "@aws/dynamodb-auto-marshaller";
+import { ScalarAttributeType } from './KeySchema';
+import { Schema } from './Schema';
+import { BinaryValue, MarshallingOptions } from "@aws/dynamodb-auto-marshaller";
+import { AttributeValue } from 'aws-sdk/clients/dynamodb';
 
 /**
  * The enumeration of types supported by this marshaller package.
@@ -156,6 +156,15 @@ export interface CollectionType extends
  */
 export interface CustomType<JsType> extends BaseType<JsType>, KeyableType {
     type: 'Custom';
+
+    /**
+     * The attribute type to be used for this field when creating or updating
+     * the DynamoDB table definition for this record.
+     *
+     * Required if the custom field is being used as a key and the schema is
+     * used to create or update a table or index.
+     */
+    attributeType?: ScalarAttributeType;
 
     /**
      * A function that converts an input value into a DynamoDB attribute value.
@@ -332,7 +341,13 @@ export function isSchemaType(
             case 'Custom':
                 return isKeyableType(arg)
                     && typeof (arg as CustomType<any>).marshall === 'function'
-                    && typeof (arg as CustomType<any>).unmarshall === 'function';
+                    && typeof (arg as CustomType<any>).unmarshall === 'function'
+                    && [
+                        void 0,
+                        'S',
+                        'N',
+                        'B',
+                    ].indexOf((arg as CustomType<any>).attributeType) > -1;
             case 'Document':
                 return isDocumentType(arg, alreadyVisited);
             case 'List':

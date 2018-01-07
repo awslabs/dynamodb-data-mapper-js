@@ -5,6 +5,7 @@ import {InvalidSchemaError} from "./InvalidSchemaError";
 import {AttributeMap, AttributeValue} from "aws-sdk/clients/dynamodb";
 import {
     BinarySet,
+    BinaryValue,
     EmptyHandlingStrategy,
     InvalidHandlingStrategy,
     Marshaller,
@@ -188,19 +189,17 @@ export function marshallValue(
     if (schemaType.type === 'Set') {
         if (schemaType.memberType === 'Binary') {
             if (!(input instanceof BinarySet)) {
-                input = new BinarySet(input);
+                const set = new BinarySet();
+                for (const item of input) {
+                    set.add(marshallBinary(item));
+                }
+                input = set;
             }
 
             return marshallSet(
                 input,
                 marshallBinary,
-                (bin: Uint8Array|string) => {
-                    if (typeof bin === 'string') {
-                        return bin.length === 0;
-                    }
-
-                    return bin.byteLength === 0;
-                },
+                (bin: BinaryValue) => bin.byteLength === 0,
                 'BS'
             );
         }

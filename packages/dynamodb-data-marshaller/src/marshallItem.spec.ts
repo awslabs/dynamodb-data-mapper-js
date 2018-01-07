@@ -150,54 +150,63 @@ describe('marshallItem', () => {
         it('should serialize BinarySet fields', () => {
             expect(marshallItem(
                 schema,
-                {binSet: new BinarySet([
-                    new Uint8Array(1),
-                    new Uint8Array(2),
-                    new Uint8Array(3),
-                ])}
+                {
+                    binSet: new BinarySet([
+                        new Uint8Array(1),
+                        new Uint8Array(2),
+                        new Uint8Array(3),
+                    ])
+                }
             )).toEqual({
-                binSet: {BS: [
-                    new Uint8Array(1),
-                    new Uint8Array(2),
-                    new Uint8Array(3),
-                ]},
+                binSet: {
+                    BS: [
+                        new Uint8Array(1),
+                        new Uint8Array(2),
+                        new Uint8Array(3),
+                    ]
+                },
             });
         });
 
         it('should deduplicate values included in the input', () => {
             expect(marshallItem(
                 schema,
-                {binSet: new BinarySet([
-                    new Uint8Array(1),
-                    new Uint8Array(2),
-                    new Uint8Array(3),
-                    new ArrayBuffer(1),
-                ])}
+                {
+                    binSet: [
+                        Uint8Array.from([240, 159, 144, 142, 240, 159, 145, 177, 226, 157, 164]).buffer,
+                        Uint8Array.from([240, 159, 144, 142, 240, 159, 145, 177, 226, 157, 164]),
+                        '🐎👱❤',
+                    ]
+                }
             )).toEqual({
-                binSet: {BS: [
-                    new Uint8Array(1),
-                    new Uint8Array(2),
-                    new Uint8Array(3),
-                ]},
+                binSet:{
+                    BS: [
+                        Uint8Array.from([240, 159, 144, 142, 240, 159, 145, 177, 226, 157, 164]),
+                    ]
+                },
             });
         });
 
         it('should remove empty values from sets', () => {
             expect(marshallItem(
                 schema,
-                {binSet: new BinarySet([
-                    new ArrayBuffer(0),
-                    new ArrayBuffer(1),
-                    new ArrayBuffer(2),
-                    new ArrayBuffer(3),
-                    new ArrayBuffer(0),
-                ])}
+                {
+                    binSet: new BinarySet([
+                        new ArrayBuffer(0),
+                        new ArrayBuffer(1),
+                        new ArrayBuffer(2),
+                        new ArrayBuffer(3),
+                        new ArrayBuffer(0),
+                    ])
+                }
             )).toEqual({
-                binSet: {BS: [
-                    new Uint8Array(1),
-                    new Uint8Array(2),
-                    new Uint8Array(3),
-                ]},
+                binSet: {
+                    BS: [
+                        new Uint8Array(1),
+                        new Uint8Array(2),
+                        new Uint8Array(3),
+                    ]
+                },
             });
         });
 
