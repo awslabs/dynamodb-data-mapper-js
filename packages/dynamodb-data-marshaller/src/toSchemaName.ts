@@ -38,7 +38,7 @@ export function toSchemaName(
     return new AttributePath(elements);
 }
 
-function getSchemaName(propertyName: string, schema: Schema): string {
+export function getSchemaName(propertyName: string, schema: Schema): string {
     const fieldSchema = schema[propertyName];
     if (fieldSchema) {
         const {attributeName = propertyName} = fieldSchema;
