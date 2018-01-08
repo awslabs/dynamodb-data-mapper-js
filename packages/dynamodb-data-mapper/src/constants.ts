@@ -1,4 +1,4 @@
-export const VERSION = '0.3.1';
+export const VERSION = '0.4.0';
 
 export const MAX_WRITE_BATCH_SIZE = 25;
 
