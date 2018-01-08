@@ -68,10 +68,7 @@ describe('DataMapper', () => {
     });
 
     afterAll(() => {
-        return Promise.all([
-            ddbClient.deleteTable({TableName}).promise(),
-            ddbClient.waitFor('tableNotExists', {TableName}).promise()
-        ]);
+        return mapper.ensureTableNotExists(TestRecord);
     });
 
     it('should save and load objects', async () => {

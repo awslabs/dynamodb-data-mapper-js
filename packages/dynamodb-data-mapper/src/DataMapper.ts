@@ -265,8 +265,19 @@ export class DataMapper {
         }
     }
 
-    async createTable<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
-        valueConstructor: ZeroArgumentsConstructor<T>,
+    /**
+     * Perform a CreateTable operation using the schema accessible via the
+     * {DynamoDbSchema} property and the table name accessible via the
+     * {DynamoDbTable} property on the prototype of the constructor supplied.
+     *
+     * The promise returned by this method will not resolve until the table is
+     * active and ready for use.
+     *
+     * @param valueConstructor  The constructor used for values in the table.
+     * @param options           Options to configure the CreateTable operation
+     */
+    async createTable(
+        valueConstructor: ZeroArgumentsConstructor<any>,
         {
             readCapacityUnits,
             streamViewType = 'NONE',
@@ -295,7 +306,7 @@ export class DataMapper {
         }).promise();
 
         if (TableStatus !== 'ACTIVE') {
-            await this.client.waitFor('tableExists', {TableName});
+            await this.client.waitFor('tableExists', {TableName}).promise();
         }
     }
 
@@ -304,8 +315,8 @@ export class DataMapper {
      * {DynamoDbSchema} property and the table name accessible via the
      * {DynamoDbTable} property on the item supplied.
      *
-     * @param item The item to delete
-     * @param options Options to configure the DeleteItem operation
+     * @param item      The item to delete
+     * @param options   Options to configure the DeleteItem operation
      */
     delete<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
         item: T,
@@ -391,10 +402,36 @@ export class DataMapper {
         }
     }
 
-    async ensureTableExists<
-        T extends StringToAnyObjectMap = StringToAnyObjectMap
-    >(
-        valueConstructor: ZeroArgumentsConstructor<T>,
+    /**
+     * Perform a DeleteTable operation using the schema accessible via the
+     * {DynamoDbSchema} property and the table name accessible via the
+     * {DynamoDbTable} property on the prototype of the constructor supplied.
+     *
+     * The promise returned by this method will not resolve until the table is
+     * deleted and can no longer be used.
+     *
+     * @param valueConstructor  The constructor used for values in the table.
+     */
+    async deleteTable(valueConstructor: ZeroArgumentsConstructor<any>) {
+        const TableName = this.getTableName(valueConstructor.prototype);
+        await this.client.deleteTable({TableName}).promise();
+        await this.client.waitFor('tableNotExists', {TableName}).promise();
+    }
+
+    /**
+     * If the table does not already exist, perform a CreateTable operation
+     * using the schema accessible via the {DynamoDbSchema} property and the
+     * table name accessible via the {DynamoDbTable} property on the prototype
+     * of the constructor supplied.
+     *
+     * The promise returned by this method will not resolve until the table is
+     * active and ready for use.
+     *
+     * @param valueConstructor  The constructor used for values in the table.
+     * @param options           Options to configure the CreateTable operation
+     */
+    async ensureTableExists(
+        valueConstructor: ZeroArgumentsConstructor<any>,
         options: CreateTableOptions
     ) {
         const TableName = this.getTableName(valueConstructor.prototype);
@@ -416,12 +453,49 @@ export class DataMapper {
     }
 
     /**
+     * If the table exists, perform a DeleteTable operation using the schema
+     * accessible via the {DynamoDbSchema} property and the table name
+     * accessible via the {DynamoDbTable} property on the prototype of the
+     * constructor supplied.
+     *
+     * The promise returned by this method will not resolve until the table is
+     * deleted and can no longer be used.
+     *
+     * @param valueConstructor  The constructor used for values in the table.
+     */
+    async ensureTableNotExists(
+        valueConstructor: ZeroArgumentsConstructor<any>
+    ) {
+        const TableName = this.getTableName(valueConstructor.prototype);
+        try {
+            const {
+                Table: {TableStatus: status} = {TableStatus: 'CREATING'}
+            } = await this.client.describeTable({TableName}).promise();
+
+            if (status === 'DELETING') {
+                await this.client.waitFor('tableNotExists', {TableName})
+                    .promise();
+                return;
+            } else if (status === 'CREATING' || status === 'UPDATING') {
+                await this.client.waitFor('tableExists', {TableName})
+                    .promise();
+            }
+
+            await this.deleteTable(valueConstructor);
+        } catch (err) {
+            if (err.name !== 'ResourceNotFoundException') {
+                throw err;
+            }
+        }
+    }
+
+    /**
      * Perform a GetItem operation using the schema accessible via the
      * {DynamoDbSchema} method and the table name accessible via the
      * {DynamoDbTable} method on the item supplied.
      *
-     * @param item The item to get
-     * @param options Options to configure the GetItem operation
+     * @param item      The item to get
+     * @param options   Options to configure the GetItem operation
      */
     get<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
         item: T,
@@ -586,8 +660,8 @@ export class DataMapper {
      * {DynamoDbSchema} method and the table name accessible via the
      * {DynamoDbTable} method on the item supplied.
      *
-     * @param item The item to save to DynamoDB
-     * @param options Options to configure the PutItem operation
+     * @param item      The item to save to DynamoDB
+     * @param options   Options to configure the PutItem operation
      */
     put<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
         item: T,
@@ -844,8 +918,8 @@ export class DataMapper {
      * {DynamoDbSchema} method and the table name accessible via the
      * {DynamoDbTable} method on the item supplied.
      *
-     * @param item The item to save to DynamoDB
-     * @param options Options to configure the UpdateItem operation
+     * @param item      The item to save to DynamoDB
+     * @param options   Options to configure the UpdateItem operation
      */
     update<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
         item: T,
