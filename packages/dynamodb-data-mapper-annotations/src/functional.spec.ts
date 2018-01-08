@@ -5,11 +5,10 @@ import {
     table,
     versionAttribute,
 } from "./";
-import {DataMapper, DynamoDbSchema} from '@aws/dynamodb-data-mapper';
-import {isSchema} from '@aws/dynamodb-data-marshaller';
+import { DataMapper, DynamoDbSchema } from '@aws/dynamodb-data-mapper';
+import { isSchema } from '@aws/dynamodb-data-marshaller';
 
 jest.mock('uuid', () => ({v4: jest.fn(() => 'uuid')}));
-import {v4} from 'uuid';
 
 export class Author {
     @attribute()

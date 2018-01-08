@@ -1,8 +1,7 @@
-import {versionAttribute} from './versionAttribute';
-import {v4} from 'uuid';
+import { versionAttribute } from './versionAttribute';
 
 jest.mock('./attribute', () => ({attribute: jest.fn()}));
-import {attribute} from './attribute';
+import { attribute } from './attribute';
 
 describe('versionAttribute', () => {
     beforeEach(() => {
@@ -12,7 +11,7 @@ describe('versionAttribute', () => {
     it(
         'should call attribute with a defined type and versionAttribute trait',
         () => {
-            const annotation = versionAttribute();
+            versionAttribute();
 
             expect((attribute as any).mock.calls.length).toBe(1);
             expect((attribute as any).mock.calls[0]).toEqual([
@@ -26,7 +25,7 @@ describe('versionAttribute', () => {
 
     it('should pass through any supplied parameters', () => {
         const attributeName = 'foo'
-        const annotation = versionAttribute({attributeName});
+        versionAttribute({attributeName});
 
         expect((attribute as any).mock.calls[0][0])
             .toMatchObject({attributeName});

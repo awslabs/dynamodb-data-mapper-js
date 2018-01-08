@@ -1,8 +1,7 @@
-import {rangeKey} from './rangeKey';
-import {v4} from 'uuid';
+import { rangeKey } from './rangeKey';
 
 jest.mock('./attribute', () => ({attribute: jest.fn()}));
-import {attribute} from './attribute';
+import { attribute } from './attribute';
 
 describe('rangeKey', () => {
     beforeEach(() => {
@@ -10,7 +9,7 @@ describe('rangeKey', () => {
     });
 
     it('should call attribute with a defined keyType', () => {
-        const annotation = rangeKey();
+        rangeKey();
 
         expect((attribute as any).mock.calls.length).toBe(1);
         expect((attribute as any).mock.calls[0]).toEqual([
@@ -20,7 +19,7 @@ describe('rangeKey', () => {
 
     it('should pass through any supplied parameters', () => {
         const attributeName = 'foo'
-        const annotation = rangeKey({attributeName});
+        rangeKey({attributeName});
 
         expect((attribute as any).mock.calls[0][0])
             .toMatchObject({attributeName});
