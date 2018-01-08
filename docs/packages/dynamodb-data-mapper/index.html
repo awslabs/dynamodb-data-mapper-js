@@ -201,7 +201,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 </code></pre>
 				<h2 id="supported-operations">Supported operations</h2>
 				<h3 id="-batchdelete-"><code>batchDelete</code></h3>
-				<p>Deletes any number of items from one or more tables in batches of 100 or fewer
+				<p>Deletes any number of items from one or more tables in batches of 25 or fewer
 					items. Unprocessed deletes are retried following an exponentially increasing
 				backoff delay that is applied on a per-table basis.</p>
 				<p>Returns an async iterable of items that have been deleted (deleted items are
@@ -598,6 +598,12 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 						<a href="interfaces/batchgettableoptions.html" class="tsd-kind-icon">Batch<wbr>Get<wbr>Table<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
+						<a href="interfaces/batchstate.html" class="tsd-kind-icon">Batch<wbr>State</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/createtableoptions.html" class="tsd-kind-icon">Create<wbr>Table<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-has-type-parameter">
 						<a href="interfaces/ctorbearer.html" class="tsd-kind-icon">Ctor<wbr>Bearer</a>
 					</li>
 					<li class=" tsd-kind-interface">
@@ -619,7 +625,19 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 						<a href="interfaces/getparameters.html" class="tsd-kind-icon">Get<wbr>Parameters</a>
 					</li>
 					<li class=" tsd-kind-interface">
+						<a href="interfaces/globalsecondaryindexoptions.html" class="tsd-kind-icon">Global<wbr>Secondary<wbr>Index<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/localsecondaryindexoptions.html" class="tsd-kind-icon">Local<wbr>Secondary<wbr>Index<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
 						<a href="interfaces/parallelscanworkeroptions.html" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>Worker<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/perindexoptions.html" class="tsd-kind-icon">Per<wbr>Index<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/provisionedthroughput.html" class="tsd-kind-icon">Provisioned<wbr>Throughput</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/putoptions.html" class="tsd-kind-icon">Put<wbr>Options</a>
@@ -638,6 +656,9 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/scanoptions.html" class="tsd-kind-icon">Scan<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/sharedsecondaryindexoptions.html" class="tsd-kind-icon">Shared<wbr>Secondary<wbr>Index<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/stringtoanyobjectmap.html" class="tsd-kind-icon">String<wbr>ToAny<wbr>Object<wbr>Map</a>
@@ -662,6 +683,15 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="globals.html#scanparameters" class="tsd-kind-icon">Scan<wbr>Parameters</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#secondaryindexoptions" class="tsd-kind-icon">Secondary<wbr>Index<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#secondaryindexprojection" class="tsd-kind-icon">Secondary<wbr>Index<wbr>Projection</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#streamviewtype" class="tsd-kind-icon">Stream<wbr>View<wbr>Type</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="globals.html#syncorasynciterable" class="tsd-kind-icon">Sync<wbr>OrAsync<wbr>Iterable</a>

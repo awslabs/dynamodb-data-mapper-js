@@ -100,7 +100,11 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="datamapper.html#batchget" class="tsd-kind-icon">batch<wbr>Get</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="datamapper.html#batchput" class="tsd-kind-icon">batch<wbr>Put</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="datamapper.html#batchwrite" class="tsd-kind-icon">batch<wbr>Write</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="datamapper.html#createtable" class="tsd-kind-icon">create<wbr>Table</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="datamapper.html#delete" class="tsd-kind-icon">delete</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="datamapper.html#deletetable" class="tsd-kind-icon">delete<wbr>Table</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="datamapper.html#ensuretableexists" class="tsd-kind-icon">ensure<wbr>Table<wbr>Exists</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="datamapper.html#ensuretablenotexists" class="tsd-kind-icon">ensure<wbr>Table<wbr>Not<wbr>Exists</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="datamapper.html#get" class="tsd-kind-icon">get</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="datamapper.html#parallelscan" class="tsd-kind-icon">parallel<wbr>Scan</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="datamapper.html#put" class="tsd-kind-icon">put</a></li>
@@ -124,7 +128,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L94">DataMapper.ts:94</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L108">DataMapper.ts:108</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -152,7 +156,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L122">DataMapper.ts:122</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L136">DataMapper.ts:136</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -196,7 +200,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L151">DataMapper.ts:151</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L165">DataMapper.ts:165</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -245,7 +249,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L193">DataMapper.ts:193</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L207">DataMapper.ts:207</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -289,7 +293,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L228">DataMapper.ts:228</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L242">DataMapper.ts:242</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -325,6 +329,46 @@
 						</li>
 					</ul>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="createtable" class="tsd-anchor"></a>
+					<h3>create<wbr>Table</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">create<wbr>Table<span class="tsd-signature-symbol">(</span>valueConstructor<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ZeroArgumentsConstructor</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>, __namedParameters<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L279">DataMapper.ts:279</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Perform a CreateTable operation using the schema accessible via the
+										{DynamoDbSchema} property and the table name accessible via the
+									{DynamoDbTable} property on the prototype of the constructor supplied.</p>
+								</div>
+								<p>The promise returned by this method will not resolve until the table is
+								active and ready for use.</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>valueConstructor: <span class="tsd-signature-type">ZeroArgumentsConstructor</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The constructor used for values in the table.</p>
+									</div>
+								</li>
+								<li>
+									<h5>__namedParameters: <span class="tsd-signature-type">object</span></h5>
+									<ul class="tsd-parameters">
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 					<a name="delete" class="tsd-anchor"></a>
 					<h3>delete</h3>
@@ -336,7 +380,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L262">DataMapper.ts:262</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L321">DataMapper.ts:321</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -372,7 +416,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L270">DataMapper.ts:270</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L329">DataMapper.ts:329</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -397,6 +441,119 @@
 						</li>
 					</ul>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="deletetable" class="tsd-anchor"></a>
+					<h3>delete<wbr>Table</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">delete<wbr>Table<span class="tsd-signature-symbol">(</span>valueConstructor<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ZeroArgumentsConstructor</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L415">DataMapper.ts:415</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Perform a DeleteTable operation using the schema accessible via the
+										{DynamoDbSchema} property and the table name accessible via the
+									{DynamoDbTable} property on the prototype of the constructor supplied.</p>
+								</div>
+								<p>The promise returned by this method will not resolve until the table is
+								deleted and can no longer be used.</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>valueConstructor: <span class="tsd-signature-type">ZeroArgumentsConstructor</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The constructor used for values in the table.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="ensuretableexists" class="tsd-anchor"></a>
+					<h3>ensure<wbr>Table<wbr>Exists</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">ensure<wbr>Table<wbr>Exists<span class="tsd-signature-symbol">(</span>valueConstructor<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ZeroArgumentsConstructor</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>, options<span class="tsd-signature-symbol">: </span><a href="../interfaces/createtableoptions.html" class="tsd-signature-type">CreateTableOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L433">DataMapper.ts:433</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>If the table does not already exist, perform a CreateTable operation
+										using the schema accessible via the {DynamoDbSchema} property and the
+										table name accessible via the {DynamoDbTable} property on the prototype
+									of the constructor supplied.</p>
+								</div>
+								<p>The promise returned by this method will not resolve until the table is
+								active and ready for use.</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>valueConstructor: <span class="tsd-signature-type">ZeroArgumentsConstructor</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The constructor used for values in the table.</p>
+									</div>
+								</li>
+								<li>
+									<h5>options: <a href="../interfaces/createtableoptions.html" class="tsd-signature-type">CreateTableOptions</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Options to configure the CreateTable operation</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="ensuretablenotexists" class="tsd-anchor"></a>
+					<h3>ensure<wbr>Table<wbr>Not<wbr>Exists</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">ensure<wbr>Table<wbr>Not<wbr>Exists<span class="tsd-signature-symbol">(</span>valueConstructor<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ZeroArgumentsConstructor</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L466">DataMapper.ts:466</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>If the table exists, perform a DeleteTable operation using the schema
+										accessible via the {DynamoDbSchema} property and the table name
+										accessible via the {DynamoDbTable} property on the prototype of the
+									constructor supplied.</p>
+								</div>
+								<p>The promise returned by this method will not resolve until the table is
+								deleted and can no longer be used.</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>valueConstructor: <span class="tsd-signature-type">ZeroArgumentsConstructor</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The constructor used for values in the table.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 					<a name="get" class="tsd-anchor"></a>
 					<h3>get</h3>
@@ -408,7 +565,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L354">DataMapper.ts:354</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L500">DataMapper.ts:500</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -444,7 +601,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L362">DataMapper.ts:362</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L508">DataMapper.ts:508</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -480,7 +637,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L434">DataMapper.ts:434</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L580">DataMapper.ts:580</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -529,7 +686,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L443">DataMapper.ts:443</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L589">DataMapper.ts:589</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -565,7 +722,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L520">DataMapper.ts:520</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L666">DataMapper.ts:666</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -601,7 +758,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L528">DataMapper.ts:528</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L674">DataMapper.ts:674</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -637,7 +794,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L622">DataMapper.ts:622</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L768">DataMapper.ts:768</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -683,7 +840,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L632">DataMapper.ts:632</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L778">DataMapper.ts:778</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -719,7 +876,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L730">DataMapper.ts:730</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L876">DataMapper.ts:876</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -759,7 +916,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L738">DataMapper.ts:738</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L884">DataMapper.ts:884</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -795,7 +952,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L778">DataMapper.ts:778</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L924">DataMapper.ts:924</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -831,7 +988,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-mapper/src/DataMapper.ts#L786">DataMapper.ts:786</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-mapper/src/DataMapper.ts#L932">DataMapper.ts:932</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -888,8 +1045,20 @@
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 								<a href="datamapper.html#batchwrite" class="tsd-kind-icon">batch<wbr>Write</a>
 							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="datamapper.html#createtable" class="tsd-kind-icon">create<wbr>Table</a>
+							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 								<a href="datamapper.html#delete" class="tsd-kind-icon">delete</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="datamapper.html#deletetable" class="tsd-kind-icon">delete<wbr>Table</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="datamapper.html#ensuretableexists" class="tsd-kind-icon">ensure<wbr>Table<wbr>Exists</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="datamapper.html#ensuretablenotexists" class="tsd-kind-icon">ensure<wbr>Table<wbr>Not<wbr>Exists</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 								<a href="datamapper.html#get" class="tsd-kind-icon">get</a>
@@ -913,120 +1082,6 @@
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-class">
-						<a href="itemnotfoundexception.html" class="tsd-kind-icon">Item<wbr>Not<wbr>Found<wbr>Exception</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/basescanoptions.html" class="tsd-kind-icon">Base<wbr>Scan<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/basesequentialscanoptions.html" class="tsd-kind-icon">Base<wbr>Sequential<wbr>Scan<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/batchgetoptions.html" class="tsd-kind-icon">Batch<wbr>Get<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/batchgettableoptions.html" class="tsd-kind-icon">Batch<wbr>Get<wbr>Table<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-has-type-parameter">
-						<a href="../interfaces/ctorbearer.html" class="tsd-kind-icon">Ctor<wbr>Bearer</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/datamapperconfiguration.html" class="tsd-kind-icon">Data<wbr>Mapper<wbr>Configuration</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/deleteoptions.html" class="tsd-kind-icon">Delete<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-has-type-parameter">
-						<a href="../interfaces/deleteparameters.html" class="tsd-kind-icon">Delete<wbr>Parameters</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-has-type-parameter">
-						<a href="../interfaces/documenttypeoptions.html" class="tsd-kind-icon">Document<wbr>Type<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/getoptions.html" class="tsd-kind-icon">Get<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-has-type-parameter">
-						<a href="../interfaces/getparameters.html" class="tsd-kind-icon">Get<wbr>Parameters</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/parallelscanworkeroptions.html" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>Worker<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/putoptions.html" class="tsd-kind-icon">Put<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-has-type-parameter">
-						<a href="../interfaces/putparameters.html" class="tsd-kind-icon">Put<wbr>Parameters</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/queryoptions.html" class="tsd-kind-icon">Query<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-has-type-parameter">
-						<a href="../interfaces/queryparameters.html" class="tsd-kind-icon">Query<wbr>Parameters</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/readconsistencyconfiguration.html" class="tsd-kind-icon">Read<wbr>Consistency<wbr>Configuration</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/scanoptions.html" class="tsd-kind-icon">Scan<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/stringtoanyobjectmap.html" class="tsd-kind-icon">String<wbr>ToAny<wbr>Object<wbr>Map</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/updateoptions.html" class="tsd-kind-icon">Update<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-has-type-parameter">
-						<a href="../interfaces/updateparameters.html" class="tsd-kind-icon">Update<wbr>Parameters</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../globals.html#onmissingstrategy" class="tsd-kind-icon">On<wbr>Missing<wbr>Strategy</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../globals.html#parallelscanparameters" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>Parameters</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../globals.html#parallelscanworkerparameters" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>Worker<wbr>Parameters</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../globals.html#readconsistency" class="tsd-kind-icon">Read<wbr>Consistency</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../globals.html#scanparameters" class="tsd-kind-icon">Scan<wbr>Parameters</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../globals.html#syncorasynciterable" class="tsd-kind-icon">Sync<wbr>OrAsync<wbr>Iterable</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../globals.html#writetype" class="tsd-kind-icon">Write<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-variable">
-						<a href="../globals.html#dynamodbdirtyfields" class="tsd-kind-icon">Dynamo<wbr>DbDirty<wbr>Fields</a>
-					</li>
-					<li class=" tsd-kind-variable">
-						<a href="../globals.html#dynamodbschema" class="tsd-kind-icon">Dynamo<wbr>DbSchema</a>
-					</li>
-					<li class=" tsd-kind-variable">
-						<a href="../globals.html#dynamodbtable" class="tsd-kind-icon">Dynamo<wbr>DbTable</a>
-					</li>
-					<li class=" tsd-kind-variable">
-						<a href="../globals.html#max_read_batch_size" class="tsd-kind-icon">MAX_<wbr>READ_<wbr>BATCH_<wbr>SIZE</a>
-					</li>
-					<li class=" tsd-kind-variable">
-						<a href="../globals.html#max_write_batch_size" class="tsd-kind-icon">MAX_<wbr>WRITE_<wbr>BATCH_<wbr>SIZE</a>
-					</li>
-					<li class=" tsd-kind-variable">
-						<a href="../globals.html#version" class="tsd-kind-icon">VERSION</a>
-					</li>
-					<li class=" tsd-kind-function tsd-has-type-parameter">
-						<a href="../globals.html#embed" class="tsd-kind-icon">embed</a>
-					</li>
-					<li class=" tsd-kind-function">
-						<a href="../globals.html#getschema" class="tsd-kind-icon">get<wbr>Schema</a>
-					</li>
-					<li class=" tsd-kind-function">
-						<a href="../globals.html#gettablename" class="tsd-kind-icon">get<wbr>Table<wbr>Name</a>
-					</li>
 				</ul>
 			</nav>
 		</div>

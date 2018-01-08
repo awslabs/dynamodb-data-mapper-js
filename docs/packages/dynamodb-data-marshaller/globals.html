@@ -76,6 +76,7 @@
 							<h3>Interfaces</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-interface tsd-has-type-parameter"><a href="interfaces/anytype.html" class="tsd-kind-icon">Any<wbr>Type</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/attributetypemap.html" class="tsd-kind-icon">Attribute<wbr>Type<wbr>Map</a></li>
 								<li class="tsd-kind-interface tsd-has-type-parameter"><a href="interfaces/basetype.html" class="tsd-kind-icon">Base<wbr>Type</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/binarytype.html" class="tsd-kind-icon">Binary<wbr>Type</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/booleantype.html" class="tsd-kind-icon">Boolean<wbr>Type</a></li>
@@ -84,11 +85,14 @@
 								<li class="tsd-kind-interface"><a href="interfaces/datetype.html" class="tsd-kind-icon">Date<wbr>Type</a></li>
 								<li class="tsd-kind-interface tsd-has-type-parameter"><a href="interfaces/documenttype.html" class="tsd-kind-icon">Document<wbr>Type</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/hashtype.html" class="tsd-kind-icon">Hash<wbr>Type</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/keyschema.html" class="tsd-kind-icon">Key<wbr>Schema</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/keytypemap.html" class="tsd-kind-icon">Key<wbr>Type<wbr>Map</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/keyabletype.html" class="tsd-kind-icon">Keyable<wbr>Type</a></li>
 								<li class="tsd-kind-interface tsd-has-type-parameter"><a href="interfaces/listtype.html" class="tsd-kind-icon">List<wbr>Type</a></li>
 								<li class="tsd-kind-interface tsd-has-type-parameter"><a href="interfaces/maptype.html" class="tsd-kind-icon">Map<wbr>Type</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/nulltype.html" class="tsd-kind-icon">Null<wbr>Type</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/numbertype.html" class="tsd-kind-icon">Number<wbr>Type</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/perindexkeys.html" class="tsd-kind-icon">Per<wbr>Index<wbr>Keys</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/schema.html" class="tsd-kind-icon">Schema</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/settype.html" class="tsd-kind-icon">Set<wbr>Type</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/stringtype.html" class="tsd-kind-icon">String<wbr>Type</a></li>
@@ -100,6 +104,7 @@
 							<h3>Type aliases</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-type-alias"><a href="globals.html#keytype" class="tsd-kind-icon">Key<wbr>Type</a></li>
+								<li class="tsd-kind-type-alias"><a href="globals.html#scalarattributetype" class="tsd-kind-icon">Scalar<wbr>Attribute<wbr>Type</a></li>
 								<li class="tsd-kind-type-alias"><a href="globals.html#schematype" class="tsd-kind-icon">Schema<wbr>Type</a></li>
 								<li class="tsd-kind-type-alias"><a href="globals.html#typetag" class="tsd-kind-icon">Type<wbr>Tag</a></li>
 							</ul>
@@ -107,9 +112,11 @@
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-function"><a href="globals.html#getschemaname" class="tsd-kind-icon">get<wbr>Schema<wbr>Name</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#iskey" class="tsd-kind-icon">is<wbr>Key</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#isschema" class="tsd-kind-icon">is<wbr>Schema</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#isschematype" class="tsd-kind-icon">is<wbr>Schema<wbr>Type</a></li>
+								<li class="tsd-kind-function"><a href="globals.html#keysfromschema" class="tsd-kind-icon">keys<wbr>From<wbr>Schema</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#marshallitem" class="tsd-kind-icon">marshall<wbr>Item</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#marshallkey" class="tsd-kind-icon">marshall<wbr>Key</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#marshallvalue" class="tsd-kind-icon">marshall<wbr>Value</a></li>
@@ -135,7 +142,7 @@
 					<div class="tsd-signature tsd-kind-icon">Key<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"HASH"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"RANGE"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L74">SchemaType.ts:74</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L74">SchemaType.ts:74</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -145,12 +152,22 @@
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-type-alias">
+					<a name="scalarattributetype" class="tsd-anchor"></a>
+					<h3>Scalar<wbr>Attribute<wbr>Type</h3>
+					<div class="tsd-signature tsd-kind-icon">Scalar<wbr>Attribute<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"S"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"N"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"B"</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/KeySchema.ts#L21">KeySchema.ts:21</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias">
 					<a name="schematype" class="tsd-anchor"></a>
 					<h3>Schema<wbr>Type</h3>
 					<div class="tsd-signature tsd-kind-icon">Schema<wbr>Type<span class="tsd-signature-symbol">:</span> <a href="interfaces/anytype.html" class="tsd-signature-type">AnyType</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/binarytype.html" class="tsd-signature-type">BinaryType</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/booleantype.html" class="tsd-signature-type">BooleanType</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/customtype.html" class="tsd-signature-type">CustomType</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><a href="interfaces/collectiontype.html" class="tsd-signature-type">CollectionType</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/datetype.html" class="tsd-signature-type">DateType</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/documenttype.html" class="tsd-signature-type">DocumentType</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><a href="interfaces/hashtype.html" class="tsd-signature-type">HashType</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/listtype.html" class="tsd-signature-type">ListType</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/maptype.html" class="tsd-signature-type">MapType</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/nulltype.html" class="tsd-signature-type">NullType</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/numbertype.html" class="tsd-signature-type">NumberType</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/settype.html" class="tsd-signature-type">SetType</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/stringtype.html" class="tsd-signature-type">StringType</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/tupletype.html" class="tsd-signature-type">TupleType</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L300">SchemaType.ts:300</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L309">SchemaType.ts:309</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -165,7 +182,7 @@
 					<div class="tsd-signature tsd-kind-icon">Type<wbr>Tag<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"Any"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Binary"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Boolean"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Collection"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Custom"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Date"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Document"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Hash"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"List"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Map"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Null"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Number"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Set"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"String"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Tuple"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L30">SchemaType.ts:30</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L30">SchemaType.ts:30</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -178,6 +195,32 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
 				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="getschemaname" class="tsd-anchor"></a>
+					<h3>get<wbr>Schema<wbr>Name</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Schema<wbr>Name<span class="tsd-signature-symbol">(</span>propertyName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, schema<span class="tsd-signature-symbol">: </span><a href="interfaces/schema.html" class="tsd-signature-type">Schema</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/toSchemaName.ts#L41">toSchemaName.ts:41</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>propertyName: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>schema: <a href="interfaces/schema.html" class="tsd-signature-type">Schema</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function">
 					<a name="iskey" class="tsd-anchor"></a>
 					<h3>is<wbr>Key</h3>
 					<ul class="tsd-signatures tsd-kind-function">
@@ -187,7 +230,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/isKey.ts#L3">isKey.ts:3</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/isKey.ts#L3">isKey.ts:3</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -213,7 +256,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/Schema.ts#L14">Schema.ts:14</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/Schema.ts#L14">Schema.ts:14</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -241,7 +284,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L317">SchemaType.ts:317</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L326">SchemaType.ts:326</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -258,6 +301,29 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="keysfromschema" class="tsd-anchor"></a>
+					<h3>keys<wbr>From<wbr>Schema</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">keys<wbr>From<wbr>Schema<span class="tsd-signature-symbol">(</span>schema<span class="tsd-signature-symbol">: </span><a href="interfaces/schema.html" class="tsd-signature-type">Schema</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="interfaces/keyschema.html" class="tsd-signature-type">KeySchema</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/keysFromSchema.ts#L17">keysFromSchema.ts:17</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>schema: <a href="interfaces/schema.html" class="tsd-signature-type">Schema</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="interfaces/keyschema.html" class="tsd-signature-type">KeySchema</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function">
 					<a name="marshallitem" class="tsd-anchor"></a>
 					<h3>marshall<wbr>Item</h3>
 					<ul class="tsd-signatures tsd-kind-function">
@@ -267,7 +333,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/marshallItem.ts#L21">marshallItem.ts:21</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/marshallItem.ts#L22">marshallItem.ts:22</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -309,7 +375,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/marshallKey.ts#L6">marshallKey.ts:6</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/marshallKey.ts#L6">marshallKey.ts:6</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -343,7 +409,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/marshallItem.ts#L46">marshallItem.ts:46</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/marshallItem.ts#L47">marshallItem.ts:47</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -384,7 +450,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/toSchemaName.ts#L5">toSchemaName.ts:5</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/toSchemaName.ts#L5">toSchemaName.ts:5</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -410,7 +476,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/unmarshallItem.ts#L28">unmarshallItem.ts:28</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/unmarshallItem.ts#L28">unmarshallItem.ts:28</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -460,7 +526,7 @@
 					<div class="tsd-signature tsd-kind-icon">Key<wbr>Types<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L66">SchemaType.ts:66</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L66">SchemaType.ts:66</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -474,7 +540,7 @@
 						<div class="tsd-signature tsd-kind-icon">HASH<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;HASH&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L67">SchemaType.ts:67</a></li>
+								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L67">SchemaType.ts:67</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -484,7 +550,7 @@
 						<div class="tsd-signature tsd-kind-icon">RANGE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;RANGE&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L68">SchemaType.ts:68</a></li>
+								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L68">SchemaType.ts:68</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -495,7 +561,7 @@
 					<div class="tsd-signature tsd-kind-icon">Type<wbr>Tags<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L9">SchemaType.ts:9</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L9">SchemaType.ts:9</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -509,7 +575,7 @@
 						<div class="tsd-signature tsd-kind-icon">Any<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Any&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L10">SchemaType.ts:10</a></li>
+								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L10">SchemaType.ts:10</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -519,7 +585,7 @@
 						<div class="tsd-signature tsd-kind-icon">Binary<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Binary&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L11">SchemaType.ts:11</a></li>
+								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L11">SchemaType.ts:11</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -529,7 +595,7 @@
 						<div class="tsd-signature tsd-kind-icon">Boolean<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Boolean&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L12">SchemaType.ts:12</a></li>
+								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L12">SchemaType.ts:12</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -539,7 +605,7 @@
 						<div class="tsd-signature tsd-kind-icon">Collection<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Collection&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L13">SchemaType.ts:13</a></li>
+								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L13">SchemaType.ts:13</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -549,7 +615,7 @@
 						<div class="tsd-signature tsd-kind-icon">Custom<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Custom&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L14">SchemaType.ts:14</a></li>
+								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L14">SchemaType.ts:14</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -559,7 +625,7 @@
 						<div class="tsd-signature tsd-kind-icon">Date<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Date&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L15">SchemaType.ts:15</a></li>
+								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L15">SchemaType.ts:15</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -569,7 +635,7 @@
 						<div class="tsd-signature tsd-kind-icon">Document<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Document&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L16">SchemaType.ts:16</a></li>
+								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L16">SchemaType.ts:16</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -579,7 +645,7 @@
 						<div class="tsd-signature tsd-kind-icon">Hash<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Hash&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L17">SchemaType.ts:17</a></li>
+								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L17">SchemaType.ts:17</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -589,7 +655,7 @@
 						<div class="tsd-signature tsd-kind-icon">List<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;List&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L18">SchemaType.ts:18</a></li>
+								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L18">SchemaType.ts:18</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -599,7 +665,7 @@
 						<div class="tsd-signature tsd-kind-icon">Map<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Map&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L19">SchemaType.ts:19</a></li>
+								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L19">SchemaType.ts:19</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -609,7 +675,7 @@
 						<div class="tsd-signature tsd-kind-icon">Null<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Null&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L20">SchemaType.ts:20</a></li>
+								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L20">SchemaType.ts:20</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -619,7 +685,7 @@
 						<div class="tsd-signature tsd-kind-icon">Number<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Number&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L21">SchemaType.ts:21</a></li>
+								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L21">SchemaType.ts:21</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -629,7 +695,7 @@
 						<div class="tsd-signature tsd-kind-icon">Set<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Set&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L22">SchemaType.ts:22</a></li>
+								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L22">SchemaType.ts:22</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -639,7 +705,7 @@
 						<div class="tsd-signature tsd-kind-icon">String<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;String&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L23">SchemaType.ts:23</a></li>
+								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L23">SchemaType.ts:23</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -649,7 +715,7 @@
 						<div class="tsd-signature tsd-kind-icon">Tuple<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Tuple&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/526f342/packages/dynamodb-data-marshaller/src/SchemaType.ts#L24">SchemaType.ts:24</a></li>
+								<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/2dddcf7/packages/dynamodb-data-marshaller/src/SchemaType.ts#L24">SchemaType.ts:24</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -674,6 +740,9 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
 						<a href="interfaces/anytype.html" class="tsd-kind-icon">Any<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/attributetypemap.html" class="tsd-kind-icon">Attribute<wbr>Type<wbr>Map</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
 						<a href="interfaces/basetype.html" class="tsd-kind-icon">Base<wbr>Type</a>
@@ -700,6 +769,12 @@
 						<a href="interfaces/hashtype.html" class="tsd-kind-icon">Hash<wbr>Type</a>
 					</li>
 					<li class=" tsd-kind-interface">
+						<a href="interfaces/keyschema.html" class="tsd-kind-icon">Key<wbr>Schema</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/keytypemap.html" class="tsd-kind-icon">Key<wbr>Type<wbr>Map</a>
+					</li>
+					<li class=" tsd-kind-interface">
 						<a href="interfaces/keyabletype.html" class="tsd-kind-icon">Keyable<wbr>Type</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
@@ -713,6 +788,9 @@
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/numbertype.html" class="tsd-kind-icon">Number<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/perindexkeys.html" class="tsd-kind-icon">Per<wbr>Index<wbr>Keys</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/schema.html" class="tsd-kind-icon">Schema</a>
@@ -733,10 +811,16 @@
 						<a href="globals.html#keytype" class="tsd-kind-icon">Key<wbr>Type</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#scalarattributetype" class="tsd-kind-icon">Scalar<wbr>Attribute<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
 						<a href="globals.html#schematype" class="tsd-kind-icon">Schema<wbr>Type</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="globals.html#typetag" class="tsd-kind-icon">Type<wbr>Tag</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#getschemaname" class="tsd-kind-icon">get<wbr>Schema<wbr>Name</a>
 					</li>
 					<li class=" tsd-kind-function">
 						<a href="globals.html#iskey" class="tsd-kind-icon">is<wbr>Key</a>
@@ -746,6 +830,9 @@
 					</li>
 					<li class=" tsd-kind-function">
 						<a href="globals.html#isschematype" class="tsd-kind-icon">is<wbr>Schema<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#keysfromschema" class="tsd-kind-icon">keys<wbr>From<wbr>Schema</a>
 					</li>
 					<li class=" tsd-kind-function">
 						<a href="globals.html#marshallitem" class="tsd-kind-icon">marshall<wbr>Item</a>
