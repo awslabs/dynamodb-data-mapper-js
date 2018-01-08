@@ -1410,6 +1410,49 @@ describe('DataMapper', () => {
         });
     });
 
+    describe('#deleteTable', () => {
+        const waitPromiseFunc = jest.fn(() => Promise.resolve());
+        const deleteTablePromiseFunc = jest.fn(() => Promise.resolve({}));
+        const mockDynamoDbClient = {
+            config: {},
+            deleteTable: jest.fn(() => ({promise: deleteTablePromiseFunc})),
+            waitFor: jest.fn(() => ({promise: waitPromiseFunc})),
+        };
+
+        beforeEach(() => {
+            deleteTablePromiseFunc.mockClear();
+            mockDynamoDbClient.deleteTable.mockClear();
+            waitPromiseFunc.mockClear();
+            mockDynamoDbClient.waitFor.mockClear();
+        });
+
+        const mapper = new DataMapper({
+            client: mockDynamoDbClient as any,
+        });
+
+        class Item {
+            get [DynamoDbTable]() { return 'foo' }
+
+            get [DynamoDbSchema]() {
+                return { id: { type: 'String', keyType: 'HASH' } };
+            }
+        }
+
+        it(
+            'should make and send a DeleteTable request and wait for it to take effect',
+            async () => {
+                await mapper.deleteTable(Item);
+
+            expect(mockDynamoDbClient.deleteTable.mock.calls).toEqual([
+                [ { TableName: 'foo' } ],
+            ]);
+
+            expect(mockDynamoDbClient.waitFor.mock.calls).toEqual([
+                [ 'tableNotExists', { TableName: 'foo' } ],
+            ]);
+        });
+    });
+
     describe('#ensureTableExists', () => {
         const waitPromiseFunc = jest.fn(() => Promise.resolve());
         const describeTablePromiseFunc = jest.fn(() => Promise.resolve({
@@ -1523,6 +1566,150 @@ describe('DataMapper', () => {
                 ]);
 
                 expect((mapper.createTable as any).mock.calls.length).toBe(0);
+                expect(mockDynamoDbClient.waitFor.mock.calls.length).toBe(0);
+            }
+        );
+    });
+
+    describe('#ensureTableNotExists', () => {
+        const waitPromiseFunc = jest.fn(() => Promise.resolve());
+        const describeTablePromiseFunc = jest.fn(() => Promise.resolve({}));
+        const mockDynamoDbClient = {
+            config: {},
+            describeTable: jest.fn(() => ({promise: describeTablePromiseFunc})),
+            waitFor: jest.fn(() => ({promise: waitPromiseFunc})),
+        };
+
+        const mapper = new DataMapper({
+            client: mockDynamoDbClient as any,
+        });
+        mapper.deleteTable = jest.fn(() => Promise.resolve());
+
+        beforeEach(() => {
+            (mapper.deleteTable as any).mockClear();
+            mockDynamoDbClient.describeTable.mockClear();
+            waitPromiseFunc.mockClear();
+            mockDynamoDbClient.waitFor.mockClear();
+        });
+
+        let tableName = 'foo';
+        let schema = {
+            id: { type: 'String', keyType: 'HASH' }
+        };
+
+        class Item {
+            get [DynamoDbTable]() { return tableName }
+
+            get [DynamoDbSchema]() { return schema; }
+        }
+
+        it(
+            'should resolve immediately if the table does not exist',
+            async () => {
+                describeTablePromiseFunc.mockImplementationOnce(async () => {
+                    const err = new Error('No such table!');
+                    err.name = 'ResourceNotFoundException';
+                    throw err;
+                });
+
+                await mapper.ensureTableNotExists(Item);
+
+                expect(mockDynamoDbClient.describeTable.mock.calls).toEqual([
+                    [{ TableName: tableName }]
+                ]);
+
+                expect(mockDynamoDbClient.waitFor.mock.calls.length).toBe(0);
+                expect((mapper.deleteTable as any).mock.calls.length).toBe(0);
+            }
+        );
+
+        it(
+            'should wait for the table not to exist if its state is not "DELETING"',
+            async () => {
+                describeTablePromiseFunc.mockImplementationOnce(() => Promise.resolve({
+                    Table: { TableStatus: 'DELETING' }
+                }))
+                await mapper.ensureTableNotExists(Item);
+
+                expect(mockDynamoDbClient.describeTable.mock.calls).toEqual([
+                    [{ TableName: tableName }]
+                ]);
+
+                expect(mockDynamoDbClient.waitFor.mock.calls).toEqual([
+                    [ 'tableNotExists', { TableName: tableName } ],
+                ]);
+                expect((mapper.deleteTable as any).mock.calls.length).toBe(0);
+            }
+        );
+
+        it('should delete the table if its state is "ACTIVE"', async () => {
+            describeTablePromiseFunc.mockImplementationOnce(() => Promise.resolve({
+                Table: { TableStatus: 'ACTIVE' }
+            }))
+            await mapper.ensureTableNotExists(Item);
+
+            expect(mockDynamoDbClient.describeTable.mock.calls).toEqual([
+                [{ TableName: tableName }]
+            ]);
+
+            expect(mockDynamoDbClient.waitFor.mock.calls.length).toBe(0);
+            expect((mapper.deleteTable as any).mock.calls.length).toBe(1);
+        });
+
+        it(
+            'should wait for the table to exist if its state is "CREATING", then delete it',
+            async () => {
+                describeTablePromiseFunc.mockImplementationOnce(() => Promise.resolve({
+                    Table: { TableStatus: 'CREATING' }
+                }))
+                await mapper.ensureTableNotExists(Item);
+
+                expect(mockDynamoDbClient.describeTable.mock.calls).toEqual([
+                    [{ TableName: tableName }]
+                ]);
+
+                expect(mockDynamoDbClient.waitFor.mock.calls).toEqual([
+                    [ 'tableExists', { TableName: tableName } ],
+                ]);
+                expect((mapper.deleteTable as any).mock.calls.length).toBe(1);
+            }
+        );
+
+        it(
+            'should wait for the table to exist if its state is "UPDATING", then delete it',
+            async () => {
+                describeTablePromiseFunc.mockImplementationOnce(() => Promise.resolve({
+                    Table: { TableStatus: 'UPDATING' }
+                }))
+                await mapper.ensureTableNotExists(Item);
+
+                expect(mockDynamoDbClient.describeTable.mock.calls).toEqual([
+                    [{ TableName: tableName }]
+                ]);
+
+                expect(mockDynamoDbClient.waitFor.mock.calls).toEqual([
+                    [ 'tableExists', { TableName: tableName } ],
+                ]);
+                expect((mapper.deleteTable as any).mock.calls.length).toBe(1);
+            }
+        );
+
+        it(
+            'should rethrow any service exception other than "ResourceNotFoundException"',
+            async () => {
+                describeTablePromiseFunc.mockImplementationOnce(
+                    () => Promise.reject(new Error('PANIC'))
+                );
+
+                await expect(mapper.ensureTableNotExists(Item))
+                    .rejects
+                    .toMatchObject(new Error('PANIC'));
+
+                expect(mockDynamoDbClient.describeTable.mock.calls).toEqual([
+                    [{ TableName: tableName }]
+                ]);
+
+                expect((mapper.deleteTable as any).mock.calls.length).toBe(0);
                 expect(mockDynamoDbClient.waitFor.mock.calls.length).toBe(0);
             }
         );
