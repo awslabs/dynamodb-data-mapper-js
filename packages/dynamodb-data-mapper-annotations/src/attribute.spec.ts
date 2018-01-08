@@ -35,6 +35,32 @@ describe('attribute', () => {
         }
     );
 
+    it(
+        'should throw an error if a keyType is set on a schema node that is not a valid key',
+        () => {
+            const expected: any = {
+                type: 'Boolean',
+                keyType: 'HASH'
+            };
+            const decorator = attribute(expected);
+            expect(() => decorator(Object.create(null), 'property')).toThrow();
+        }
+    );
+
+    it(
+        'should throw an error if index key configurations are set on a schema node that is not a valid key',
+        () => {
+            const expected: any = {
+                type: 'Boolean',
+                indexKeyConfigurations: {
+                    indexName: 'HASH'
+                }
+            };
+            const decorator = attribute(expected);
+            expect(() => decorator(Object.create(null), 'property')).toThrow();
+        }
+    );
+
     describe('TypeScript decorator metadata integration', () => {
         const originalGetMetadata = Reflect.getMetadata;
 

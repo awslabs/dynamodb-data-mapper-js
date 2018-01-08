@@ -1,10 +1,11 @@
 import 'reflect-metadata';
-import {METADATA_TYPE_KEY} from './constants';
-import {PropertyAnnotation} from './annotationShapes';
-import {BinarySet, NumberValueSet} from "@aws/dynamodb-auto-marshaller";
-import {DynamoDbSchema} from '@aws/dynamodb-data-mapper';
+import { PropertyAnnotation } from './annotationShapes';
+import { METADATA_TYPE_KEY } from './constants';
+import { BinarySet, NumberValueSet } from "@aws/dynamodb-auto-marshaller";
+import { DynamoDbSchema } from '@aws/dynamodb-data-mapper';
 import {
     DocumentType,
+    KeyableType,
     Schema,
     SchemaType,
     SetType
@@ -67,10 +68,30 @@ export function attribute(
             );
         }
 
-        (target as any)[DynamoDbSchema][propertyKey] = metadataToSchemaType(
+        const schemaType = metadataToSchemaType(
             Reflect.getMetadata(METADATA_TYPE_KEY, target, propertyKey),
             parameters
         );
+
+        if (
+            (
+                (schemaType as KeyableType).keyType ||
+                (schemaType as KeyableType).indexKeyConfigurations
+            ) &&
+            [
+                'Binary',
+                'Custom',
+                'Date',
+                'Number',
+                'String',
+            ].indexOf(schemaType.type) < 0
+        ) {
+            throw new Error(
+                `Properties of type ${schemaType.type} may not be used as index or table keys. If you are relying on automatic type detection and have encountered this error, please ensure that the 'emitDecoratorMetadata' TypeScript compiler option is enabled. Please see https://www.typescriptlang.org/docs/handbook/decorators.html#metadata for more information on this compiler option.`
+            );
+        }
+
+        (target as any)[DynamoDbSchema][propertyKey] = schemaType;
     };
 }
 

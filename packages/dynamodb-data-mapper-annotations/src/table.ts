@@ -1,6 +1,5 @@
 import {ClassAnnotation} from './annotationShapes';
 import {DynamoDbTable} from '@aws/dynamodb-data-mapper';
-import {ZeroArgumentsConstructor} from "@aws/dynamodb-data-marshaller";
 
 /**
  * Declare a TypeScript class to be represent items in a table in a way
