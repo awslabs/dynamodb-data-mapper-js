@@ -6,6 +6,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+ - Add `createTable` to create tables based on table names and schemas bound to
+    constructor prototypes
+ - Add `ensureTableExists` to create a table only if it does not already exist
+ - Add `deleteTable` to delete tables based on table names bound to constructor
+    prototypes
+ - Add `ensureTableNotExists` to delete a table only if it is not already
+    deleted
+
+## [0.3.2]
+### Fixed
+ - Only include expression name or value substitions when a substitution has
+    occurred
+
+## [0.3.1]
+### Fixed
+ - Ensure retried writes in a `batchDelete`, `batchPut`, or `batchWrite` are
+    only yielded once
+
+## [0.3.0]
+### Added
  - Add `batchGet`, which allows a synchronous or asynchronous iterable of items
     (like those supplied to `get`) to be automatically grouped into
     `BatchGetItem` operations.
