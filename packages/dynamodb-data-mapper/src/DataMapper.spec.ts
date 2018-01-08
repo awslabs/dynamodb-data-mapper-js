@@ -679,6 +679,335 @@ describe('DataMapper', () => {
         }
     });
 
+    describe('#createTable', () => {
+        const waitPromiseFunc = jest.fn(() => Promise.resolve());
+        const createTablePromiseFunc = jest.fn(() => Promise.resolve({}));
+        const mockDynamoDbClient = {
+            config: {},
+            createTable: jest.fn(() => ({promise: createTablePromiseFunc})),
+            waitFor: jest.fn(() => ({promise: waitPromiseFunc})),
+        };
+
+        beforeEach(() => {
+            createTablePromiseFunc.mockClear();
+            mockDynamoDbClient.createTable.mockClear();
+            waitPromiseFunc.mockClear();
+            mockDynamoDbClient.waitFor.mockClear();
+        });
+
+        const mapper = new DataMapper({
+            client: mockDynamoDbClient as any,
+        });
+
+        class Item {
+            get [DynamoDbTable]() { return 'foo' }
+
+            get [DynamoDbSchema]() {
+                return { id: { type: 'String', keyType: 'HASH' } };
+            }
+        }
+
+        it('should make and send a CreateTable request', async () => {
+            await mapper.createTable(Item, {
+                readCapacityUnits: 5,
+                writeCapacityUnits: 5,
+            });
+
+            expect(mockDynamoDbClient.createTable.mock.calls).toEqual([
+                [
+                    {
+                        TableName: 'foo',
+                        AttributeDefinitions: [
+                            {
+                                AttributeName: 'id',
+                                AttributeType: 'S'
+                            }
+                        ],
+                        KeySchema: [
+                            {
+                                AttributeName: 'id',
+                                KeyType: 'HASH',
+                            }
+                        ],
+                        ProvisionedThroughput: {
+                            ReadCapacityUnits: 5,
+                            WriteCapacityUnits: 5,
+                        },
+                        StreamSpecification: { StreamEnabled: false }
+                    },
+                ]
+            ]);
+
+            expect(mockDynamoDbClient.waitFor.mock.calls).toEqual([
+                [ 'tableExists', { TableName: 'foo' } ],
+            ]);
+        });
+
+        it(
+            'should forgo invoking the waiter if the table is already active',
+            async () => {
+                createTablePromiseFunc.mockImplementationOnce(() => Promise.resolve({
+                    TableDescription: {TableStatus: 'ACTIVE'}
+                }));
+
+                await mapper.createTable(Item, {
+                    readCapacityUnits: 5,
+                    writeCapacityUnits: 5,
+                });
+
+                expect(mockDynamoDbClient.createTable.mock.calls.length).toBe(1);
+
+                expect(mockDynamoDbClient.waitFor.mock.calls.length).toBe(0);
+            }
+        );
+
+        it('should allow enabling streams', async () => {
+            await mapper.createTable(Item, {
+                readCapacityUnits: 5,
+                streamViewType: 'NEW_AND_OLD_IMAGES',
+                writeCapacityUnits: 5,
+            });
+
+            expect(mockDynamoDbClient.createTable.mock.calls).toEqual([
+                [
+                    {
+                        TableName: 'foo',
+                        AttributeDefinitions: [
+                            {
+                                AttributeName: 'id',
+                                AttributeType: 'S'
+                            }
+                        ],
+                        KeySchema: [
+                            {
+                                AttributeName: 'id',
+                                KeyType: 'HASH',
+                            }
+                        ],
+                        ProvisionedThroughput: {
+                            ReadCapacityUnits: 5,
+                            WriteCapacityUnits: 5,
+                        },
+                        StreamSpecification: {
+                            StreamEnabled: true,
+                            StreamViewType: 'NEW_AND_OLD_IMAGES'
+                        },
+                    },
+                ]
+            ]);
+        });
+
+        describe('index keys', () => {
+            class IndexedItem {
+                get [DynamoDbTable]() { return 'foo' }
+
+                get [DynamoDbSchema]() {
+                    return {
+                        partitionKey: {
+                            type: 'Number',
+                            keyType: 'HASH',
+                        },
+                        createdAt: {
+                            type: 'Date',
+                            keyType: 'RANGE',
+                            indexKeyConfigurations: {
+                                chronological: 'HASH',
+                                globalIndex: 'RANGE'
+                            },
+                            attributeName: 'timestamp'
+                        },
+                        createdBy: {
+                            type: 'String',
+                            indexKeyConfigurations: {
+                                globalIndex: 'HASH',
+                                localIndex: 'RANGE'
+                            },
+                            attributeName: 'creator',
+                        },
+                        binaryKey: {
+                            type: 'Binary',
+                            indexKeyConfigurations: {
+                                binaryIndex: 'HASH'
+                            }
+                        },
+                        customKey: {
+                            type: 'Custom',
+                            attributeType: 'S',
+                            marshall: (str: string) => str,
+                            unmarshall: (av: any) => av.S,
+                            indexKeyConfigurations: {
+                                binaryIndex: 'RANGE',
+                            },
+                        },
+                        listProp: { type: 'Collection' },
+                    };
+                }
+            }
+
+            it('should identify and report index keys', async () => {
+                await mapper.createTable(IndexedItem, {
+                    readCapacityUnits: 5,
+                    writeCapacityUnits: 5,
+                    indexOptions: {
+                        binaryIndex: {
+                            type: 'global',
+                            readCapacityUnits: 2,
+                            writeCapacityUnits: 3,
+                            projection: ['createdBy', 'createdAt'],
+                        },
+                        chronological: {
+                            type: 'global',
+                            readCapacityUnits: 5,
+                            writeCapacityUnits: 5,
+                            projection: 'all',
+                        },
+                        globalIndex: {
+                            type: 'global',
+                            readCapacityUnits: 6,
+                            writeCapacityUnits: 7,
+                            projection: 'all',
+                        },
+                        localIndex: {
+                            type: 'local',
+                            projection: 'keys',
+                        },
+                    }
+                });
+
+                expect(mockDynamoDbClient.createTable.mock.calls).toEqual([
+                    [
+                        {
+                            AttributeDefinitions: [
+                                {
+                                    AttributeName: 'partitionKey',
+                                    AttributeType: 'N'
+                                },
+                                {
+                                    AttributeName: 'timestamp',
+                                    AttributeType: 'N'
+                                },
+                                {
+                                    AttributeName: 'creator',
+                                    AttributeType: 'S'
+                                },
+                                {
+                                    AttributeName: 'binaryKey',
+                                    AttributeType: 'B'
+                                },
+                                {
+                                    AttributeName: 'customKey',
+                                    AttributeType: 'S'
+                                },
+                            ],
+                            GlobalSecondaryIndexes: [
+                                {
+                                    IndexName: 'chronological',
+                                    KeySchema: [
+                                        {
+                                            AttributeName: 'timestamp',
+                                            KeyType: 'HASH',
+                                        },
+                                    ],
+                                    Projection: { ProjectionType: 'ALL' },
+                                    ProvisionedThroughput: {
+                                        ReadCapacityUnits: 5,
+                                        WriteCapacityUnits: 5,
+                                    },
+                                },
+                                {
+                                    IndexName: 'globalIndex',
+                                    KeySchema: [
+                                        {
+                                            AttributeName: 'timestamp',
+                                            KeyType: 'RANGE',
+                                        },
+                                        {
+                                            AttributeName: 'creator',
+                                            KeyType: 'HASH',
+                                        },
+                                    ],
+                                    Projection: { ProjectionType: 'ALL' },
+                                    ProvisionedThroughput: {
+                                        ReadCapacityUnits: 6,
+                                        WriteCapacityUnits: 7,
+                                    },
+                                },
+                                {
+                                    IndexName: 'binaryIndex',
+                                    KeySchema: [
+                                        {
+                                            AttributeName: 'binaryKey',
+                                            KeyType: 'HASH',
+                                        },
+                                        {
+                                            AttributeName: 'customKey',
+                                            KeyType: 'RANGE',
+                                        },
+                                    ],
+                                    Projection: {
+                                        ProjectionType: 'INCLUDE',
+                                        NonKeyAttributes: [
+                                            'creator',
+                                            'timestamp',
+                                        ],
+                                    },
+                                    ProvisionedThroughput: {
+                                        ReadCapacityUnits: 2,
+                                        WriteCapacityUnits: 3,
+                                    },
+                                },
+                            ],
+                            KeySchema: [
+                                {
+                                    AttributeName: 'partitionKey',
+                                    KeyType: 'HASH',
+                                },
+                                {
+                                    AttributeName: 'timestamp',
+                                    KeyType: 'RANGE',
+                                },
+                            ],
+                            LocalSecondaryIndexes: [
+                                {
+                                    IndexName: 'localIndex',
+                                    KeySchema: [
+                                        {
+                                            AttributeName: 'creator',
+                                            KeyType: 'RANGE',
+                                        },
+                                    ],
+                                    Projection: { ProjectionType: 'KEYS_ONLY' },
+                                },
+                            ],
+                            ProvisionedThroughput: {
+                                ReadCapacityUnits: 5,
+                                WriteCapacityUnits: 5,
+                            },
+                            StreamSpecification: { StreamEnabled: false },
+                            TableName: 'foo',
+                        },
+                    ],
+                ]);
+            });
+
+            it(
+                'should throw if no options were provided for a modeled index',
+                async () => {
+                    const options = {
+                        readCapacityUnits: 5,
+                        writeCapacityUnits: 5,
+                    };
+
+                    await expect(mapper.createTable(IndexedItem, options))
+                        .rejects
+                        .toMatchObject(new Error(
+                            'No options provided for chronological index'
+                        ));
+                }
+            );
+        });
+    });
+
     describe('#delete', () => {
         const promiseFunc = jest.fn(() => Promise.resolve({Item: {}}));
         const mockDynamoDbClient = {
@@ -1079,6 +1408,124 @@ describe('DataMapper', () => {
                 }
             });
         });
+    });
+
+    describe('#ensureTableExists', () => {
+        const waitPromiseFunc = jest.fn(() => Promise.resolve());
+        const describeTablePromiseFunc = jest.fn(() => Promise.resolve({
+            Table: { TableStatus: 'ACTIVE' }
+        }));
+        const mockDynamoDbClient = {
+            config: {},
+            describeTable: jest.fn(() => ({promise: describeTablePromiseFunc})),
+            waitFor: jest.fn(() => ({promise: waitPromiseFunc})),
+        };
+
+        const mapper = new DataMapper({
+            client: mockDynamoDbClient as any,
+        });
+        mapper.createTable = jest.fn(() => Promise.resolve());
+
+        beforeEach(() => {
+            (mapper.createTable as any).mockClear();
+            mockDynamoDbClient.describeTable.mockClear();
+            waitPromiseFunc.mockClear();
+            mockDynamoDbClient.waitFor.mockClear();
+        });
+
+        let tableName = 'foo';
+        let schema = {
+            id: { type: 'String', keyType: 'HASH' }
+        };
+
+        class Item {
+            get [DynamoDbTable]() { return tableName }
+
+            get [DynamoDbSchema]() { return schema; }
+        }
+
+        it(
+            'should resolve immediately if the table exists and is active',
+            async () => {
+                await mapper.ensureTableExists(Item, {
+                    readCapacityUnits: 5,
+                    writeCapacityUnits: 5,
+                });
+
+                expect(mockDynamoDbClient.describeTable.mock.calls).toEqual([
+                    [{ TableName: tableName }]
+                ]);
+
+                expect(mockDynamoDbClient.waitFor.mock.calls.length).toBe(0);
+                expect((mapper.createTable as any).mock.calls.length).toBe(0);
+            }
+        );
+
+        it(
+            'should wait for the table to exist if its state is not "ACTIVE"',
+            async () => {
+                describeTablePromiseFunc.mockImplementationOnce(() => Promise.resolve({
+                    Table: { TableStatus: 'CREATING' }
+                }))
+                await mapper.ensureTableExists(Item, {
+                    readCapacityUnits: 5,
+                    writeCapacityUnits: 5,
+                });
+
+                expect(mockDynamoDbClient.describeTable.mock.calls).toEqual([
+                    [{ TableName: tableName }]
+                ]);
+
+                expect(mockDynamoDbClient.waitFor.mock.calls.length).toBe(1);
+                expect((mapper.createTable as any).mock.calls.length).toBe(0);
+            }
+        );
+
+        it(
+            'should attempt to create the table if "describeTable" throws a "ResourceNotFoundException"',
+            async () => {
+                describeTablePromiseFunc.mockImplementationOnce(async () => {
+                    const err = new Error('No such table!');
+                    err.name = 'ResourceNotFoundException';
+                    throw err;
+                });
+
+                const options = { readCapacityUnits: 5, writeCapacityUnits: 5 };
+                await mapper.ensureTableExists(Item, options);
+
+                expect(mockDynamoDbClient.describeTable.mock.calls).toEqual([
+                    [{ TableName: tableName }]
+                ]);
+
+                expect((mapper.createTable as any).mock.calls).toEqual([
+                    [Item, options],
+                ]);
+
+                expect(mockDynamoDbClient.waitFor.mock.calls.length).toBe(0);
+            }
+        );
+
+        it(
+            'should rethrow any service exception other than "ResourceNotFoundException"',
+            async () => {
+                describeTablePromiseFunc.mockImplementationOnce(
+                    () => Promise.reject(new Error('PANIC'))
+                );
+
+                const options = { readCapacityUnits: 5, writeCapacityUnits: 5 };
+
+                await expect(mapper.ensureTableExists(Item, options))
+                    .rejects
+                    .toMatchObject(new Error('PANIC'));
+
+                expect(mockDynamoDbClient.describeTable.mock.calls).toEqual([
+                    [{ TableName: tableName }]
+                ]);
+
+                expect((mapper.createTable as any).mock.calls.length).toBe(0);
+                expect(mockDynamoDbClient.waitFor.mock.calls.length).toBe(0);
+            }
+        );
     });
 
     describe('#get', () => {

@@ -57,32 +57,14 @@ Object.defineProperties(TestRecord.prototype, {
 describe('DataMapper', () => {
     let idx = 0;
     const ddbClient = new DynamoDB();
+    const mapper = new DataMapper({client: ddbClient});
     jest.setTimeout(60000);
 
     beforeAll(() => {
-        return Promise.all([
-            ddbClient.createTable({
-                TableName,
-                AttributeDefinitions: [
-                    {
-                        AttributeName: 'testIndex',
-                        AttributeType: 'N',
-                    }
-                ],
-                KeySchema: [
-                    {
-                        AttributeName: 'testIndex',
-                        KeyType: 'HASH',
-                    }
-                ],
-                ProvisionedThroughput: {
-                    ReadCapacityUnits: 10,
-                    WriteCapacityUnits: 10,
-                },
-            })
-                .promise(),
-            ddbClient.waitFor('tableExists', {TableName}).promise()
-        ]);
+        return mapper.ensureTableExists(TestRecord, {
+            readCapacityUnits: 10,
+            writeCapacityUnits: 10,
+        });
     });
 
     afterAll(() => {

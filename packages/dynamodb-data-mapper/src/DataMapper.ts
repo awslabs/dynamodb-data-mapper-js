@@ -1,3 +1,4 @@
+import { BatchState } from './BatchState';
 import {
     ReadConsistency,
     StringToAnyObjectMap,
@@ -10,6 +11,7 @@ import {
     BaseScanOptions,
     BatchGetOptions,
     BatchGetTableOptions,
+    CreateTableOptions,
     DataMapperConfiguration,
     DeleteOptions,
     DeleteParameters,
@@ -18,12 +20,14 @@ import {
     ParallelScanParameters,
     ParallelScanWorkerOptions,
     ParallelScanWorkerParameters,
+    PerIndexOptions,
     PutOptions,
     PutParameters,
     QueryOptions,
     QueryParameters,
     ScanOptions,
     ScanParameters,
+    SecondaryIndexProjection,
     UpdateOptions,
     UpdateParameters,
 } from './namedParameters';
@@ -40,10 +44,15 @@ import {
     WriteRequest,
 } from '@aws/dynamodb-batch-iterator';
 import {
+    AttributeTypeMap,
+    getSchemaName,
     isKey,
+    keysFromSchema,
+    KeyTypeMap,
     marshallItem,
     marshallKey,
     marshallValue,
+    PerIndexKeys,
     Schema,
     SchemaType,
     toSchemaName,
@@ -65,9 +74,14 @@ import {
     UpdateExpression,
 } from "@aws/dynamodb-expressions";
 import {
+    AttributeDefinition,
     AttributeMap,
     DeleteItemInput,
     GetItemInput,
+    GlobalSecondaryIndexList,
+    KeySchemaElement,
+    LocalSecondaryIndexList,
+    Projection,
     PutItemInput,
     QueryInput,
     QueryOutput,
@@ -251,6 +265,40 @@ export class DataMapper {
         }
     }
 
+    async createTable<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
+        valueConstructor: ZeroArgumentsConstructor<T>,
+        {
+            readCapacityUnits,
+            streamViewType = 'NONE',
+            writeCapacityUnits,
+            indexOptions = {},
+        }: CreateTableOptions
+    ) {
+        const schema = getSchema(valueConstructor.prototype);
+        const { attributes, indexKeys, tableKeys } = keysFromSchema(schema);
+        const TableName = this.getTableName(valueConstructor.prototype);
+
+        const {
+            TableDescription: {TableStatus} = {TableStatus: 'CREATING'}
+        } = await this.client.createTable({
+            ...indexDefinitions(indexKeys, indexOptions, schema),
+            TableName,
+            ProvisionedThroughput: {
+                ReadCapacityUnits: readCapacityUnits,
+                WriteCapacityUnits: writeCapacityUnits,
+            },
+            AttributeDefinitions: attributeDefinitionList(attributes),
+            KeySchema: keyTypesToElementList(tableKeys),
+            StreamSpecification: streamViewType === 'NONE'
+                ? { StreamEnabled: false }
+                : { StreamEnabled: true, StreamViewType: streamViewType },
+        }).promise();
+
+        if (TableStatus !== 'ACTIVE') {
+            await this.client.waitFor('tableExists', {TableName});
+        }
+    }
+
     /**
      * Perform a DeleteItem operation using the schema accessible via the
      * {DynamoDbSchema} property and the table name accessible via the
@@ -340,6 +388,30 @@ export class DataMapper {
                 Attributes,
                 item.constructor as ZeroArgumentsConstructor<T>
             );
+        }
+    }
+
+    async ensureTableExists<
+        T extends StringToAnyObjectMap = StringToAnyObjectMap
+    >(
+        valueConstructor: ZeroArgumentsConstructor<T>,
+        options: CreateTableOptions
+    ) {
+        const TableName = this.getTableName(valueConstructor.prototype);
+        try {
+            const {
+                Table: {TableStatus} = {TableStatus: 'CREATING'}
+            } = await this.client.describeTable({TableName}).promise();
+
+            if (TableStatus !== 'ACTIVE') {
+                await this.client.waitFor('tableExists', {TableName}).promise();
+            }
+        } catch (err) {
+            if (err.name === 'ResourceNotFoundException') {
+                await this.createTable(valueConstructor, options);
+            } else {
+                throw err;
+            }
         }
     }
 
@@ -1034,16 +1106,13 @@ export class DataMapper {
     }
 }
 
-interface BatchState<T> {
-    [tableName: string]: {
-        keyProperties: Array<string>;
-        itemSchemata: {
-            [identifier: string]: {
-                schema: Schema;
-                constructor: ZeroArgumentsConstructor<T>;
-            };
-        };
-    };
+function attributeDefinitionList(
+    attributes: AttributeTypeMap
+): Array<AttributeDefinition> {
+    return Object.keys(attributes).map(name => ({
+        AttributeName: name,
+        AttributeType: attributes[name]
+    }));
 }
 
 function convertBatchGetOptions(
@@ -1113,6 +1182,64 @@ function handleVersionAttribute(
     return {condition, value};
 }
 
+function indexDefinitions(
+    keys: PerIndexKeys,
+    options: PerIndexOptions,
+    schema: Schema
+): {
+    GlobalSecondaryIndexes?: GlobalSecondaryIndexList;
+    LocalSecondaryIndexes?: LocalSecondaryIndexList;
+} {
+    const globalIndices: GlobalSecondaryIndexList = [];
+    const localIndices: LocalSecondaryIndexList = [];
+
+    for (const IndexName of Object.keys(keys)) {
+        const KeySchema = keyTypesToElementList(keys[IndexName]);
+        const indexOptions = options[IndexName];
+        if (!indexOptions) {
+            throw new Error(`No options provided for ${IndexName} index`);
+        }
+
+        const indexInfo = {
+            IndexName,
+            KeySchema,
+            Projection: indexProjection(schema, indexOptions.projection),
+        };
+        if (indexOptions.type === 'local') {
+            localIndices.push(indexInfo);
+        } else {
+            globalIndices.push({
+                ...indexInfo,
+                ProvisionedThroughput: {
+                    ReadCapacityUnits: indexOptions.readCapacityUnits,
+                    WriteCapacityUnits: indexOptions.writeCapacityUnits,
+                },
+            });
+        }
+    }
+
+    return {
+        GlobalSecondaryIndexes: globalIndices.length ? globalIndices : void 0,
+        LocalSecondaryIndexes: localIndices.length ? localIndices : void 0,
+    };
+}
+
+function indexProjection(
+    schema: Schema,
+    projection: SecondaryIndexProjection
+): Projection {
+    if (typeof projection === 'string') {
+        return {
+            ProjectionType:  projection === 'all' ? 'ALL' : 'KEYS_ONLY',
+        }
+    }
+
+    return {
+        ProjectionType: 'INCLUDE',
+        NonKeyAttributes: projection.map(propName => getSchemaName(propName, schema))
+    };
+}
+
 function isIterable<T>(arg: any): arg is Iterable<T> {
     return Boolean(arg) && typeof arg[Symbol.iterator] === 'function';
 }
@@ -1133,6 +1260,13 @@ function itemIdentifier(
     }
 
     return keyAttributes.join(':');
+}
+
+function keyTypesToElementList(keys: KeyTypeMap): Array<KeySchemaElement> {
+    return Object.keys(keys).map(name => ({
+        AttributeName: name,
+        KeyType: keys[name]
+    }));
 }
 
 function normalizeConditionExpressionPaths(
