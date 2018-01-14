@@ -2,11 +2,16 @@
 /node_modules
 /coverage
 
-*.spec.d.ts
-*.spec.js
-*.spec.js.map
+*.fixture.d.ts
+*.fixture.js
+*.fixture.js.map
+
 *.integ.d.ts
 *.integ.js
 *.integ.js.map
+
+*.spec.d.ts
+*.spec.js
+*.spec.js.map
 
 tsconfig.test.json
