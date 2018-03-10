@@ -35,8 +35,8 @@
     "@types/uuid": "^3.0.0",
     "aws-sdk": "^2.7.0",
     "jest": "^21",
-    "typedoc": "^0.9.0",
-    "typescript": "^2.6"
+    "typedoc": "^0.11.0",
+    "typescript": "^2.7"
   },
   "dependencies": {
     "@aws/dynamodb-auto-marshaller": "^0.4.0",

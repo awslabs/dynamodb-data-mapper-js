@@ -5,7 +5,7 @@ import {
     SyncOrAsyncIterable,
     VERSION,
     WriteType,
-} from "./constants";
+} from './constants';
 import { ItemNotFoundException } from "./ItemNotFoundException";
 import {
     BaseScanOptions,
@@ -69,6 +69,7 @@ import {
     isConditionExpression,
     isConditionExpressionPredicate,
     MathematicalExpression,
+    PathElement,
     serializeConditionExpression,
     serializeProjectionExpression,
     UpdateExpression,
@@ -1237,7 +1238,9 @@ function handleVersionAttribute(
     if (inputMember === undefined) {
         condition = new FunctionExpression(
             'attribute_not_exists',
-            new AttributePath([{type: 'AttributeName', name: attributeName}])
+            new AttributePath([
+                {type: 'AttributeName', name: attributeName} as PathElement
+            ])
         );
         value = new AttributeValue({N: "0"});
     } else {

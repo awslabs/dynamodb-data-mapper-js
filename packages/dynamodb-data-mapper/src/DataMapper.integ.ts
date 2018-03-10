@@ -42,7 +42,7 @@ const schema: Schema = {
 };
 
 class TestRecord {
-    key: number;
+    key!: number;
     timestamp?: Date;
     data?: NestedDocument;
     tuple?: [boolean, string];
