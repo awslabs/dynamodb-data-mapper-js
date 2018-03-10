@@ -32,8 +32,8 @@
     "@types/node": "^8.0.4",
     "aws-sdk": "^2.7.0",
     "jest": "^21",
-    "typedoc": "^0.9.0",
-    "typescript": "^2.6"
+    "typedoc": "^0.11.0",
+    "typescript": "^2.7"
   },
   "peerDependencies": {
     "aws-sdk": "^2.7.0"

@@ -64,17 +64,17 @@ describe('attribute', () => {
     it('should support branching inheritance', () => {
         abstract class Foo {
             @attribute()
-            prop: string;
+            prop?: string;
         }
 
         class Bar extends Foo {
             @attribute()
-            otherProp: number;
+            otherProp?: number;
         }
 
         class Baz extends Foo {
             @attribute()
-            yetAnotherProp: boolean;
+            yetAnotherProp?: boolean;
         }
 
         const bar = new Bar();
@@ -93,17 +93,17 @@ describe('attribute', () => {
     it('should support multiple inheritance levels', () => {
         class Foo {
             @attribute()
-            prop: string;
+            prop?: string;
         }
 
         class Bar extends Foo {
             @attribute()
-            otherProp: number;
+            otherProp?: number;
         }
 
         class Baz extends Bar {
             @attribute()
-            yetAnotherProp: boolean;
+            yetAnotherProp?: boolean;
         }
 
         const foo = new Foo();

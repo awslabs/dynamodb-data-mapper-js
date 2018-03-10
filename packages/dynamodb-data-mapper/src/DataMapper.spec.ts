@@ -2493,7 +2493,7 @@ describe('DataMapper', () => {
         });
 
         class QueryableItem {
-            snap: string;
+            snap!: string;
             fizz?: Array<string>;
 
             get [DynamoDbTable]() { return 'foo'; }
@@ -2835,7 +2835,7 @@ describe('DataMapper', () => {
         });
 
         class ScannableItem {
-            snap: string;
+            snap!: string;
             fizz?: Array<string>;
 
             get [DynamoDbTable]() { return 'foo'; }
@@ -3144,7 +3144,7 @@ describe('DataMapper', () => {
         }
 
         class ComplexItem extends EmptyItem {
-            foo: string;
+            foo!: string;
             bar?: [number, BinaryValue];
             quux?: {
                 snap: string;
@@ -3366,7 +3366,7 @@ describe('DataMapper', () => {
 
         describe('version attributes', () => {
             class VersionedItem {
-                foo: string;
+                foo!: string;
                 bar?: [number, Uint8Array];
                 baz?: number;
 
