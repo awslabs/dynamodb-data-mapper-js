@@ -14,4 +14,9 @@ describe('ItemNotFoundException', () => {
         expect(exception.message).toBe('message');
         expect(exception.itemSought).toBe(getItemInput);
     });
+
+    it('should identify itself by name', () => {
+        const exception = new ItemNotFoundException({} as any, 'message');
+        expect(exception.name).toBe('ItemNotFoundException');
+    })
 });
