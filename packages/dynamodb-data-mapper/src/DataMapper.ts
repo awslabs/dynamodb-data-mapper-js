@@ -846,7 +846,7 @@ export class DataMapper {
         }
 
         if (startKey) {
-            req.ExclusiveStartKey = marshallItem(schema, startKey);
+            req.ExclusiveStartKey = marshallKey(schema, startKey);
         }
 
         let result: QueryOutput;
@@ -1085,7 +1085,7 @@ export class DataMapper {
         }
 
         if (startKey) {
-            req.ExclusiveStartKey = marshallItem(schema, startKey);
+            req.ExclusiveStartKey = marshallKey(schema, startKey);
         }
 
         return req;
