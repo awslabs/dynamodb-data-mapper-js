@@ -2812,6 +2812,50 @@ describe('DataMapper', () => {
 
             await iter.next();
         });
+
+        it('should only serialize key properties from the startKey', () => {
+            class MyItem {
+                snap?: string;
+                crackle?: number;
+                pop?: Date;
+
+                constructor(key?: string) {
+                    this.snap = key;
+                }
+
+                get [DynamoDbTable]() { return 'table'; }
+                get [DynamoDbSchema]() {
+                    return {
+                        snap: {
+                            type: 'String',
+                            keyType: 'HASH',
+                        },
+                        crackle: {
+                            type: 'Number',
+                            keyType: 'RANGE',
+                            defaultProvider: () => 0,
+                        },
+                        pop: {
+                            type: 'Date',
+                            defaultProvider: () => new Date,
+                        },
+                    };
+                }
+            };
+
+            const iter = mapper.query(
+                MyItem,
+                { snap: 'key' },
+                { startKey: new MyItem('key') }
+            );
+            iter.next();
+
+            expect(mockDynamoDbClient.query.mock.calls[0][0].ExclusiveStartKey)
+                .toEqual({
+                    snap: {S: 'key'},
+                    crackle: {N: '0'},
+                });
+        });
     });
 
     describe('#scan', () => {
@@ -3127,6 +3171,46 @@ describe('DataMapper', () => {
         it('should support the legacy call pattern', async () => {
             const iter = mapper.scan({valueConstructor: ScannableItem});
             await iter.next();
+        });
+
+        it('should only serialize key properties from the startKey', () => {
+            class MyItem {
+                snap?: string;
+                crackle?: number;
+                pop?: Date;
+
+                constructor(key?: string) {
+                    this.snap = key;
+                }
+
+                get [DynamoDbTable]() { return 'table'; }
+                get [DynamoDbSchema]() {
+                    return {
+                        snap: {
+                            type: 'String',
+                            keyType: 'HASH',
+                        },
+                        crackle: {
+                            type: 'Number',
+                            keyType: 'RANGE',
+                            defaultProvider: () => 0,
+                        },
+                        pop: {
+                            type: 'Date',
+                            defaultProvider: () => new Date,
+                        },
+                    };
+                }
+            };
+
+            const iter = mapper.scan(MyItem, { startKey: new MyItem('key') });
+            iter.next();
+
+            expect(mockDynamoDbClient.scan.mock.calls[0][0].ExclusiveStartKey)
+                .toEqual({
+                    snap: {S: 'key'},
+                    crackle: {N: '0'},
+                });
         });
     });
 
