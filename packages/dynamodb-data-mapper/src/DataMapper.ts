@@ -855,7 +855,7 @@ export class DataMapper {
             req.ExclusiveStartKey = result.LastEvaluatedKey;
             if (result.Items) {
                 for (const item of result.Items) {
-                    yield unmarshallItem<T>(schema, item);
+                    yield unmarshallItem<T>(schema, item, valueConstructor);
                 }
             }
         } while (result.LastEvaluatedKey !== undefined);
