@@ -1386,7 +1386,7 @@ describe('DataMapper', () => {
                 foo: 'buzz',
                 bar: new Set([1, 2, 3]),
                 baz: [true, 4],
-            })
+            });
         });
 
         it('should support the legacy call pattern', async () => {
@@ -1406,6 +1406,55 @@ describe('DataMapper', () => {
                         },
                     },
                 }
+            });
+        });
+
+        it('should return instances of the correct class', async () => {
+            promiseFunc.mockImplementation(() => Promise.resolve({Attributes: {
+                    fizz: {S: 'buzz'},
+                    bar: {NS: ['1', '2', '3']},
+                    baz: {L: [{BOOL: true}, {N: '4'}]}
+                }}));
+
+            class Item {
+                foo?: string;
+
+                constructor(foo?: string) {
+                    this.foo = foo;
+                }
+
+                get [DynamoDbTable]() {
+                    return 'foo'
+                }
+
+                get [DynamoDbSchema]() {
+                    return {
+                        foo: {
+                            type: 'String',
+                            attributeName: 'fizz',
+                            keyType: 'HASH',
+                        },
+                        bar: {
+                            type: 'Set',
+                            memberType: 'Number'
+                        },
+                        baz: {
+                            type: 'Tuple',
+                            members: [{type: 'Boolean'}, {type: 'Number'}]
+                        },
+                    }
+                }
+            }
+
+            const result = await mapper.delete(
+                new Item('buzz'),
+                {returnValues: "ALL_OLD"}
+            );
+
+            expect(result).toEqual({
+                foo: 'buzz',
+                bar: new Set([1, 2, 3]),
+                baz: [true, 4],
             });
         });
     });
@@ -2013,6 +2062,48 @@ describe('DataMapper', () => {
                 }
             });
         });
+
+        it('should return instances of the correct class', async () => {
+            promiseFunc.mockImplementation(() => Promise.resolve({
+                Item: {
+                    foo: {S: 'buzz'},
+                    pop: {N: '60'},
+                }
+            }));
+
+            class Item {
+                fizz?: string;
+
+                constructor(fizz?: string) {
+                    this.fizz = fizz;
+                }
+
+                get [DynamoDbTable]() {
+                    return 'foo';
+                }
+
+                get [DynamoDbSchema]() {
+                    return {
+                        fizz: {
+                            type: 'String',
+                            attributeName: 'foo',
+                            keyType: 'HASH',
+                        },
+                        pop: {
+                            type: 'Date'
+                        },
+                    }
+                }
+            }
+
+            const result = await mapper.get(new Item('buzz'));
+
+            expect(result).toEqual({
+                fizz: 'buzz',
+                pop: new Date(60000),
+            });
+            expect(result).toBeInstanceOf(Item);
+        });
     });
 
     describe('#parallelScan', () => {
@@ -2149,6 +2240,10 @@ describe('DataMapper', () => {
                         baz: [true, 101],
                     },
                 ]);
+
+                for (const scannedItem of result) {
+                    expect(scannedItem).toBeInstanceOf(ScannableItem);
+                }
             }
         );
 
@@ -2472,6 +2567,39 @@ describe('DataMapper', () => {
                 }
             });
         });
+
+        it('should return an instance of the provided class', async () => {
+            promiseFunc.mockImplementation(() => Promise.resolve({}));
+
+            class Item {
+                get [DynamoDbTable]() {
+                    return 'foo';
+                }
+
+                get [DynamoDbSchema] () {
+                    return {
+                        foo: {
+                            type: 'String',
+                            attributeName: 'fizz',
+                            defaultProvider: () => 'keykey',
+                            keyType: 'HASH',
+                        },
+                        bar: {
+                            type: 'Number',
+                            versionAttribute: true
+                        },
+                    };
+                }
+            }
+            const result = await mapper.put(new Item);
+
+            expect(result).toMatchObject({
+                foo: 'keykey',
+                bar: 0
+            });
+
+            expect(result).toBeInstanceOf(Item);
+        });
     });
 
     describe('#query', () => {
@@ -2578,29 +2706,28 @@ describe('DataMapper', () => {
                 }));
                 promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
 
-                const results = mapper.query(
-                    class {
-                        get [DynamoDbTable]() { return 'foo'; }
-                        get [DynamoDbSchema]() {
-                            return {
-                                foo: {
-                                    type: 'String',
-                                    attributeName: 'fizz',
-                                    keyType: 'HASH',
-                                },
-                                bar: {
-                                    type: 'Set',
-                                    memberType: 'Number'
-                                },
-                                baz: {
-                                    type: 'Tuple',
-                                    members: [{type: 'Boolean'}, {type: 'Number'}]
-                                },
-                            };
-                        }
-                    },
-                    {foo: 'buzz'}
-                );
+                class QueryableItem {
+                    get [DynamoDbTable]() { return 'foo'; }
+                    get [DynamoDbSchema]() {
+                        return {
+                            foo: {
+                                type: 'String',
+                                attributeName: 'fizz',
+                                keyType: 'HASH',
+                            },
+                            bar: {
+                                type: 'Set',
+                                memberType: 'Number'
+                            },
+                            baz: {
+                                type: 'Tuple',
+                                members: [{type: 'Boolean'}, {type: 'Number'}]
+                            },
+                        };
+                    }
+                }
+
+                const results = mapper.query(QueryableItem, {foo: 'buzz'});
 
                 const result: any[] = [];
                 for await (const res of results) {
@@ -2624,6 +2751,10 @@ describe('DataMapper', () => {
                         baz: [true, 24],
                     },
                 ]);
+
+                for (const queriedItem of result) {
+                    expect(queriedItem).toBeInstanceOf(QueryableItem);
+                }
             }
         );
 
@@ -2960,28 +3091,28 @@ describe('DataMapper', () => {
                 }));
                 promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
 
-                const results = mapper.scan(
-                    class {
-                        get [DynamoDbTable]() { return 'foo'; }
-                        get [DynamoDbSchema]() {
-                            return {
-                                foo: {
-                                    type: 'String',
-                                    attributeName: 'fizz',
-                                    keyType: 'HASH',
-                                },
-                                bar: {
-                                    type: 'Set',
-                                    memberType: 'Number'
-                                },
-                                baz: {
-                                    type: 'Tuple',
-                                    members: [{type: 'Boolean'}, {type: 'Number'}]
-                                },
-                            };
-                        }
+                class ScannableItem {
+                    get [DynamoDbTable]() { return 'foo'; }
+                    get [DynamoDbSchema]() {
+                        return {
+                            foo: {
+                                type: 'String',
+                                attributeName: 'fizz',
+                                keyType: 'HASH',
+                            },
+                            bar: {
+                                type: 'Set',
+                                memberType: 'Number'
+                            },
+                            baz: {
+                                type: 'Tuple',
+                                members: [{type: 'Boolean'}, {type: 'Number'}]
+                            },
+                        };
                     }
-                );
+                }
+
+                const results = mapper.scan(ScannableItem);
 
                 const result: any[] = [];
                 for await (const res of results) {
@@ -3005,6 +3136,10 @@ describe('DataMapper', () => {
                         baz: [true, 24],
                     },
                 ]);
+
+                for (const item of result) {
+                    expect(item).toBeInstanceOf(ScannableItem);
+                }
             }
         );
 
@@ -3642,6 +3777,50 @@ describe('DataMapper', () => {
                     },
                 },
             });
+        });
+
+        it('should return an instance of the provided class', async () => {
+            class VersionedItem {
+                foo!: string;
+                bar?: [number, Uint8Array];
+                baz?: number;
+
+                get [DynamoDbTable]() {
+                    return 'table';
+                }
+
+                get [DynamoDbSchema]() {
+                    return {
+                        foo: {
+                            type: 'String',
+                            keyType: 'HASH',
+                            attributeName: 'fizz'
+                        },
+                        bar: {
+                            type: 'Tuple',
+                            members: [
+                                {type: 'Number'},
+                                {type: 'Binary'},
+                            ],
+                            attributeName: 'buzz',
+                        },
+                        baz: {
+                            type: 'Number',
+                            versionAttribute: true,
+                        },
+                    };
+                }
+            }
+
+
+            const item = new VersionedItem();
+            item.foo = 'key';
+            item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
+            item.baz = 10;
+
+            const result = await mapper.update(item);
+
+            expect(result).toBeInstanceOf(VersionedItem);
         });
     });
 });
