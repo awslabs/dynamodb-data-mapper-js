@@ -1,6 +1,6 @@
 {
   "name": "@aws/dynamodb-data-marshaller",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "A schema-based data marshaller for Amazon DynamoDB",
   "keywords": [
     "aws",
@@ -36,8 +36,8 @@
     "typescript": "^2.7"
   },
   "dependencies": {
-    "@aws/dynamodb-auto-marshaller": "^0.4.0",
-    "@aws/dynamodb-expressions": "^0.4.0",
+    "@aws/dynamodb-auto-marshaller": "^0.4.1",
+    "@aws/dynamodb-expressions": "^0.4.1",
     "tslib": "^1.8.1",
     "utf8-bytes": "^0.0.1"
   },
