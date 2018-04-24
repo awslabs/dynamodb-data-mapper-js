@@ -94,7 +94,7 @@
 				<p>These expressions envelope one or more simple expressions and are true or false
 					based on the value of the subexpressions they contain. The recognized compound
 				expressions are:</p>
-				<h4 id="-and-expressions"><code>And</code> expressions</h4>
+				<h4 id="and-expressions"><code>And</code> expressions</h4>
 				<p>Asserts that all of the subexpressions&#39; conditions are satisfied.</p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {ConditionExpression} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
 
@@ -105,7 +105,7 @@
     ]
 };
 </code></pre>
-				<h4 id="-or-expressions"><code>Or</code> expressions</h4>
+				<h4 id="or-expressions"><code>Or</code> expressions</h4>
 				<p>Asserts that at least one of the subexpressions&#39; conditions are satisfied.</p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {ConditionExpression} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
 
@@ -116,7 +116,7 @@
     ]
 };
 </code></pre>
-				<h4 id="-not-expressions"><code>Not</code> expressions</h4>
+				<h4 id="not-expressions"><code>Not</code> expressions</h4>
 				<p>Asserts that the subexpression&#39;s condition is not satisfied.</p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {ConditionExpression} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
 
@@ -137,9 +137,9 @@
 					<code>ConditionExpressionPredicate</code>. A predicate may be declared separately from its
 					<code>subject</code> but only becomes a valid expression when paired with a <code>subject</code>. The
 				supported condition expression predicates are:</p>
-				<h4 id="-equals-expression-predicate"><code>Equals</code> expression predicate</h4>
-				<p>Creates a condition which is true if the defined <code>subject</code> is equal to the</p>
-				<p>defined <code>object</code>. For example, the following predicate object asserts that the
+				<h4 id="equals-expression-predicate"><code>Equals</code> expression predicate</h4>
+				<p>Creates a condition which is true if the defined <code>subject</code> is equal to the
+					defined <code>object</code>. For example, the following predicate object asserts that the
 				subject has a value of <code>&#39;bar&#39;</code>:</p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
     ConditionExpression,
@@ -165,9 +165,9 @@ equalsExpressionPredicate = equals(<span class="hljs-string">'bar'</span>);
 				<p><code>object</code> may be an <a href="#attribute-paths">attribute path</a>, an <a href="#attribute-values">attribute
 					value</a>, or another type. If the lattermost type is received,
 				it will be serialized using the <code>@aws/dynamodb-auto-marshaller</code> package.</p>
-				<h4 id="-notequals-expression-predicate"><code>NotEquals</code> expression predicate</h4>
-				<p>Creates a condition which is true if the defined <code>subject</code> is NOT equal to the</p>
-				<p>defined <code>object</code>. For example, the following predicate object asserts that the
+				<h4 id="notequals-expression-predicate"><code>NotEquals</code> expression predicate</h4>
+				<p>Creates a condition which is true if the defined <code>subject</code> is NOT equal to the
+					defined <code>object</code>. For example, the following predicate object asserts that the
 				subject does not have a value of <code>&#39;bar&#39;</code>:</p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
     ConditionExpression,
@@ -193,9 +193,9 @@ equalsExpressionPredicate = notEquals(<span class="hljs-string">'bar'</span>);
 				<p><code>object</code> may be an <a href="#attribute-paths">attribute path</a>, an <a href="#attribute-values">attribute
 					value</a>, or another type. If the lattermost type is received,
 				it will be serialized using the <code>@aws/dynamodb-auto-marshaller</code> package.</p>
-				<h4 id="-lessthan-expression-predicate"><code>LessThan</code> expression predicate</h4>
-				<p>Creates a condition which is true if the defined <code>subject</code> is less than the</p>
-				<p>defined <code>object</code>. For example, the following predicate object asserts that the
+				<h4 id="lessthan-expression-predicate"><code>LessThan</code> expression predicate</h4>
+				<p>Creates a condition which is true if the defined <code>subject</code> is less than the
+					defined <code>object</code>. For example, the following predicate object asserts that the
 				subject is less than 10:</p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
     ConditionExpression,
@@ -221,7 +221,7 @@ equalsExpressionPredicate = lessThan(<span class="hljs-number">10</span>);
 				<p><code>object</code> may be an <a href="#attribute-paths">attribute path</a>, an <a href="#attribute-values">attribute
 					value</a>, or another type. If the lattermost type is received,
 				it will be serialized using the <code>@aws/dynamodb-auto-marshaller</code> package.</p>
-				<h4 id="-lessthanorequalto-expression-predicate"><code>LessThanOrEqualTo</code> expression predicate</h4>
+				<h4 id="lessthanorequalto-expression-predicate"><code>LessThanOrEqualTo</code> expression predicate</h4>
 				<p>Creates a condition which is true if the defined <code>subject</code> is less than or equal
 					to the defined <code>object</code>. For example, the following predicate object asserts
 				that the subject is less than or equal to 10:</p>
@@ -249,9 +249,9 @@ equalsExpressionPredicate = lessThanOrEqualTo(<span class="hljs-number">10</span
 				<p><code>object</code> may be an <a href="#attribute-paths">attribute path</a>, an <a href="#attribute-values">attribute
 					value</a>, or another type. If the lattermost type is received,
 				it will be serialized using the <code>@aws/dynamodb-auto-marshaller</code> package.</p>
-				<h4 id="-greaterthan-expression-predicate"><code>GreaterThan</code> expression predicate</h4>
-				<p>Creates a condition which is true if the defined <code>subject</code> is greater than the</p>
-				<p>defined <code>object</code>. For example, the following predicate object asserts that the
+				<h4 id="greaterthan-expression-predicate"><code>GreaterThan</code> expression predicate</h4>
+				<p>Creates a condition which is true if the defined <code>subject</code> is greater than the
+					defined <code>object</code>. For example, the following predicate object asserts that the
 				subject is greater than 10:</p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
     ConditionExpression,
@@ -277,7 +277,7 @@ equalsExpressionPredicate = greaterThan(<span class="hljs-number">10</span>);
 				<p><code>object</code> may be an <a href="#attribute-paths">attribute path</a>, an <a href="#attribute-values">attribute
 					value</a>, or another type. If the lattermost type is received,
 				it will be serialized using the <code>@aws/dynamodb-auto-marshaller</code> package.</p>
-				<h4 id="-greaterthanorequalto-expression-predicate"><code>GreaterThanOrEqualTo</code> expression predicate</h4>
+				<h4 id="greaterthanorequalto-expression-predicate"><code>GreaterThanOrEqualTo</code> expression predicate</h4>
 				<p>Creates a condition which is true if the defined <code>subject</code> is greater than or
 					equal to the defined <code>object</code>. For example, the following predicate object
 				asserts that the subject is greater than or equal to 10:</p>
@@ -305,7 +305,7 @@ equalsExpressionPredicate = greaterThanOrEqualTo(<span class="hljs-number">10</s
 				<p><code>object</code> may be an <a href="#attribute-paths">attribute path</a>, an <a href="#attribute-values">attribute
 					value</a>, or another type. If the lattermost type is received,
 				it will be serialized using the <code>@aws/dynamodb-auto-marshaller</code> package.</p>
-				<h4 id="-between-expression-predicate"><code>Between</code> expression predicate</h4>
+				<h4 id="between-expression-predicate"><code>Between</code> expression predicate</h4>
 				<p>Creates a condition which is true if the defined <code>subject</code> is between a defined
 					<code>lowerBound</code> and <code>upperBound</code>. For example, the following predicate object
 					asserts that the subject is greater than or equal to 10 and less than or equal
@@ -336,7 +336,7 @@ equalsExpressionPredicate = between(<span class="hljs-number">10</span>, <span c
 					an <a href="#attribute-values">attribute value</a>, or another type. If the lattermost type
 					is received, it will be serialized using the <code>@aws/dynamodb-auto-marshaller</code>
 				package.</p>
-				<h4 id="-membership-expression-predicate"><code>Membership</code> expression predicate</h4>
+				<h4 id="membership-expression-predicate"><code>Membership</code> expression predicate</h4>
 				<p>Creates a condition which is true if the defined <code>subject</code> is equal to a member
 					of a list of defined values. For example, the following predicate object asserts
 				that the subject is one of <code>&#39;fizz&#39;</code>, <code>&#39;buzz&#39;</code>, or <code>&#39;fizzbuzz&#39;</code>:</p>
