@@ -10,8 +10,14 @@ export class ItemNotFoundException extends Error {
 
     constructor(
         public readonly itemSought: GetItemInput,
-        message?: string
+        message: string = defaultErrorMessage(itemSought)
     ) {
         super(message);
     }
+}
+
+function defaultErrorMessage(itemSought: GetItemInput): string {
+    return `No item with the key ${
+        JSON.stringify(itemSought.Key)
+    } found in the ${itemSought.TableName} table.`;
 }
