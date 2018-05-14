@@ -6,8 +6,6 @@ import {AttributeMap, AttributeValue} from "aws-sdk/clients/dynamodb";
 import {
     BinarySet,
     BinaryValue,
-    EmptyHandlingStrategy,
-    InvalidHandlingStrategy,
     Marshaller,
     NumberValueSet,
 } from "@aws/dynamodb-auto-marshaller";

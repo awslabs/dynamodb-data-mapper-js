@@ -1,6 +1,6 @@
-import {AttributePath} from '@aws/dynamodb-expressions';
-import {Schema} from './Schema';
-import {ListType, SchemaType} from './SchemaType';
+import { AttributePath } from '@aws/dynamodb-expressions';
+import { Schema } from './Schema';
+import { SchemaType } from './SchemaType';
 
 export function toSchemaName(
     path: AttributePath|string,

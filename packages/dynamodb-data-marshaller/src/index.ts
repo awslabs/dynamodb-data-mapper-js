@@ -3,6 +3,7 @@ export * from './InvalidValueError';
 export * from './isKey';
 export * from './KeySchema';
 export * from './keysFromSchema';
+export * from './marshallExpression';
 export * from './marshallItem';
 export * from './marshallKey';
 export * from './Schema';

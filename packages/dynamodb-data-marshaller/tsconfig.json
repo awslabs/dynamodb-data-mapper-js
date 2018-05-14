@@ -12,6 +12,7 @@
     "importHelpers": true,
     "module": "commonjs",
     "strict": true,
+    "noUnusedLocals": true,
     "declaration": true,
     "sourceMap": true,
     "rootDir": "./src",
