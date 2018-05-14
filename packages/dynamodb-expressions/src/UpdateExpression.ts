@@ -5,36 +5,42 @@ import {ExpressionAttributes} from "./ExpressionAttributes";
 import {FunctionExpression} from "./FunctionExpression";
 import {MathematicalExpression} from "./MathematicalExpression";
 
-type UpdateExpressionClause = Map<AttributePath|string, any>;
-
 /**
  * An object representing a DynamoDB update expression.
  */
 export class UpdateExpression implements AttributeBearingExpression {
-    private readonly toAdd: UpdateExpressionClause = new Map();
-    private readonly toDelete: UpdateExpressionClause = new Map();
-    private readonly toRemove = new Set<AttributePath|string>();
-    private readonly toSet: UpdateExpressionClause = new Map();
+    readonly toAdd = new Map<AttributePath, any>();
+    readonly toDelete = new Map<AttributePath, any>();
+    readonly toRemove = new Set<AttributePath>();
+    readonly toSet = new Map<AttributePath, any>();
 
     /**
      * Add a directive to the expression's `add` clause.
      */
     add(path: AttributePath|string, value: any): void {
-        this.toAdd.set(path, value);
+        this.toAdd.set(
+            AttributePath.isAttributePath(path) ? path : new AttributePath(path),
+            value
+        );
     }
 
     /**
      * Add a directive to the expression's `delete` clause.
      */
     delete(path: AttributePath|string, value: any): void {
-        this.toDelete.set(path, value);
+        this.toDelete.set(
+            AttributePath.isAttributePath(path) ? path : new AttributePath(path),
+            value
+        );
     }
 
     /**
      * Add a directive to the expression's `remove` clause.
      */
     remove(path: AttributePath|string): void {
-        this.toRemove.add(path);
+        this.toRemove.add(
+            AttributePath.isAttributePath(path) ? path : new AttributePath(path)
+        );
     }
 
     /**
@@ -44,7 +50,10 @@ export class UpdateExpression implements AttributeBearingExpression {
         path: AttributePath|string,
         value: AttributeValue|FunctionExpression|MathematicalExpression|any
     ): void {
-        this.toSet.set(path, value);
+        this.toSet.set(
+            AttributePath.isAttributePath(path) ? path : new AttributePath(path),
+            value
+        );
     }
 
     serialize(attributes: ExpressionAttributes): string {
@@ -53,7 +62,7 @@ export class UpdateExpression implements AttributeBearingExpression {
         for (const [mapping, verb] of [
             [this.toAdd, 'ADD'],
             [this.toDelete, 'DELETE'],
-        ] as Array<[UpdateExpressionClause, string]>) {
+        ] as Array<[Map<AttributePath, any>, string]>) {
             for (const [key, value] of mapping.entries()) {
                 phrases.push(
                     `${attributes.addName(key)} ${attributes.addValue(value)}`

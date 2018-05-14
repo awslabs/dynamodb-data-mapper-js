@@ -9,7 +9,6 @@ import {
     BinaryType,
     CustomType,
     DateType,
-    KeyType,
     NumberType,
     StringType,
 } from './SchemaType';
