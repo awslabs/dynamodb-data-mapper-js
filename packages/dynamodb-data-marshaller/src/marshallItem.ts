@@ -1,14 +1,14 @@
-import {Schema} from "./Schema";
-import {SchemaType} from "./SchemaType";
-import {InvalidValueError} from "./InvalidValueError";
-import {InvalidSchemaError} from "./InvalidSchemaError";
-import {AttributeMap, AttributeValue} from "aws-sdk/clients/dynamodb";
+import { Schema } from './Schema';
+import { SchemaType } from './SchemaType';
+import { InvalidValueError } from './InvalidValueError';
+import { InvalidSchemaError } from './InvalidSchemaError';
+import { AttributeMap, AttributeValue } from 'aws-sdk/clients/dynamodb';
 import {
     BinarySet,
     BinaryValue,
     Marshaller,
     NumberValueSet,
-} from "@aws/dynamodb-auto-marshaller";
+} from '@aws/dynamodb-auto-marshaller';
 const bytes = require('utf8-bytes');
 
 /**

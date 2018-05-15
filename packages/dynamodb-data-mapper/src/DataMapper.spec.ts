@@ -10,6 +10,7 @@ import {
     equals,
     FunctionExpression,
     inList,
+    UpdateExpression,
 } from "@aws/dynamodb-expressions";
 import {ItemNotFoundException} from "./ItemNotFoundException";
 import { BatchGetOptions } from './index';
@@ -3401,7 +3402,7 @@ describe('DataMapper', () => {
         });
     });
 
-    describe('#update', () => {
+    describe('updating items', () => {
         const tableName = 'foo';
 
         class EmptyItem {
@@ -3467,91 +3468,62 @@ describe('DataMapper', () => {
             client: mockDynamoDbClient as any,
         });
 
-        it(
-            'should throw if the item does not provide a schema per the data mapper protocol',
-            async () => {
-                await expect(mapper.update({
-                    [DynamoDbTable]: 'foo',
-                })).rejects.toMatchObject(new Error(
-                    'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
-                ));
-            }
-        );
+        describe('#update', () => {
+            it(
+                'should throw if the item does not provide a schema per the data mapper protocol',
+                async () => {
+                    await expect(mapper.update({
+                        [DynamoDbTable]: 'foo',
+                    })).rejects.toMatchObject(new Error(
+                        'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
+                    ));
+                }
+            );
 
-        it(
-            'should throw if the item does not provide a table name per the data mapper protocol',
-            async () => {
-                await expect(mapper.update({
-                    [DynamoDbSchema]: {},
-                })).rejects.toMatchObject(new Error(
-                    'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
-                ));
-            }
-        );
+            it(
+                'should throw if the item does not provide a table name per the data mapper protocol',
+                async () => {
+                    await expect(mapper.update({
+                        [DynamoDbSchema]: {},
+                    })).rejects.toMatchObject(new Error(
+                        'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
+                    ));
+                }
+            );
 
-        it(
-            'should use the table name specified in the supplied table definition',
-            async () => {
-                const tableName = 'foo';
-                await mapper.update({item: new EmptyItem()});
+            it(
+                'should use the table name specified in the supplied table definition',
+                async () => {
+                    const tableName = 'foo';
+                    await mapper.update({item: new EmptyItem()});
 
-                expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
-                    .toMatchObject({TableName: tableName});
-            }
-        );
+                    expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
+                        .toMatchObject({TableName: tableName});
+                }
+            );
 
-        it(
-            'should apply a table name prefix provided to the mapper constructor',
-            async () => {
-                const tableNamePrefix = 'INTEG_';
-                const mapper = new DataMapper({
-                    client: mockDynamoDbClient as any,
-                    tableNamePrefix,
-                });
-                const tableName = 'foo';
-                await mapper.update(new EmptyItem());
+            it(
+                'should apply a table name prefix provided to the mapper constructor',
+                async () => {
+                    const tableNamePrefix = 'INTEG_';
+                    const mapper = new DataMapper({
+                        client: mockDynamoDbClient as any,
+                        tableNamePrefix,
+                    });
+                    const tableName = 'foo';
+                    await mapper.update(new EmptyItem());
 
-                expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
-                    .toMatchObject({TableName: tableNamePrefix + tableName});
-            }
-        );
+                    expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
+                        .toMatchObject({TableName: tableNamePrefix + tableName});
+                }
+            );
 
-        it('should marshall updates into an UpdateItemInput', async () => {
-            const item = new ComplexItem();
-            item.foo = 'key';
-            item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
-
-            await mapper.update(item);
-
-            expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
-                .toMatchObject({
-                    TableName: tableName,
-                    Key: {
-                        fizz: {S: 'key'}
-                    },
-                    ExpressionAttributeNames: {
-                        '#attr0': 'buzz',
-                        '#attr2': 'quux',
-                    },
-                    ExpressionAttributeValues: {
-                        ':val1': {
-                            L: [
-                                {N: '1'},
-                                {B: Uint8Array.from([0xde, 0xad, 0xbe, 0xef])}
-                            ],
-                        }
-                    },
-                    UpdateExpression: 'SET #attr0 = :val1 REMOVE #attr2',
-                });
-        });
-
-        it(
-            'should not remove missing keys when onMissing is "SKIP"',
-            async () => {
+            it('should marshall updates into an UpdateItemInput', async () => {
                 const item = new ComplexItem();
                 item.foo = 'key';
                 item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
-                await mapper.update(item, {onMissing: 'skip'});
+
+                await mapper.update(item);
 
                 expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
                     .toMatchObject({
@@ -3561,6 +3533,7 @@ describe('DataMapper', () => {
                         },
                         ExpressionAttributeNames: {
                             '#attr0': 'buzz',
+                            '#attr2': 'quux',
                         },
                         ExpressionAttributeValues: {
                             ':val1': {
@@ -3570,309 +3543,333 @@ describe('DataMapper', () => {
                                 ],
                             }
                         },
-                        UpdateExpression: 'SET #attr0 = :val1',
+                        UpdateExpression: 'SET #attr0 = :val1 REMOVE #attr2',
                     });
-            }
-        );
-
-        it('should unmarshall any returned attributes', async () => {
-            promiseFunc.mockImplementation(() => Promise.resolve({Attributes: {
-                fizz: {S: 'buzz'},
-                bar: {NS: ['1', '2', '3']},
-                baz: {L: [{BOOL: true}, {N: '4'}]}
-            }}));
-
-            const result = await mapper.update({
-                foo: 'buzz',
-                [DynamoDbTable]: 'foo',
-                [DynamoDbSchema]: {
-                    foo: {
-                        type: 'String',
-                        attributeName: 'fizz',
-                        keyType: 'HASH',
-                    },
-                    bar: {
-                        type: 'Set',
-                        memberType: 'Number'
-                    },
-                    baz: {
-                        type: 'Tuple',
-                        members: [{type: 'Boolean'}, {type: 'Number'}]
-                    },
-                },
             });
 
-            expect(result).toEqual({
-                foo: 'buzz',
-                bar: new Set([1, 2, 3]),
-                baz: [true, 4],
-            })
-        });
-
-        it('should throw an error if no attributes were returned', async () => {
-            promiseFunc.mockImplementation(() => Promise.resolve({}));
-
-            return expect(mapper.update({
-                foo: 'buzz',
-                [DynamoDbTable]: 'foo',
-                [DynamoDbSchema]: {
-                    foo: {
-                        type: 'String',
-                        attributeName: 'fizz',
-                        keyType: 'HASH',
-                    },
-                    bar: {
-                        type: 'Set',
-                        memberType: 'Number'
-                    },
-                    baz: {
-                        type: 'Tuple',
-                        members: [{type: 'Boolean'}, {type: 'Number'}]
-                    },
-                },
-            })).rejects.toMatchObject(new Error(
-                'Update operation completed successfully, but the updated value was not returned'
-            ));
-        });
-
-        describe('version attributes', () => {
-            class VersionedItem {
-                foo!: string;
-                bar?: [number, Uint8Array];
-                baz?: number;
-
-                get [DynamoDbTable]() {
-                    return 'table';
-                }
-
-                get [DynamoDbSchema]() {
-                    return {
-                        foo: {
-                            type: 'String',
-                            keyType: 'HASH',
-                            attributeName: 'fizz'
-                        },
-                        bar: {
-                            type: 'Tuple',
-                            members: [
-                                {type: 'Number'},
-                                {type: 'Binary'},
-                            ],
-                            attributeName: 'buzz',
-                        },
-                        baz: {
-                            type: 'Number',
-                            versionAttribute: true,
-                        },
-                    };
-                }
-            }
-
             it(
-                'should inject a conditional expression requiring the absence of the versioning property and set its value to 0 when an object without a value for it is marshalled',
+                'should not remove missing keys when onMissing is "SKIP"',
                 async () => {
-                    const item = new VersionedItem();
+                    const item = new ComplexItem();
                     item.foo = 'key';
                     item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
-
-                    await mapper.update(item);
+                    await mapper.update(item, {onMissing: 'skip'});
 
                     expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
                         .toMatchObject({
-                            TableName: 'table',
+                            TableName: tableName,
                             Key: {
                                 fizz: {S: 'key'}
                             },
-                            ConditionExpression: 'attribute_not_exists(#attr0)',
-                            ExpressionAttributeNames: {
-                                '#attr0': 'baz',
-                                '#attr1': 'buzz',
-                            },
-                            ExpressionAttributeValues: {
-                                ':val2': {
-                                    L: [
-                                        {N: '1'},
-                                        {B: Uint8Array.from([0xde, 0xad, 0xbe, 0xef])}
-                                    ],
-                                },
-                                ':val3': {N: '0'},
-                            },
-                            UpdateExpression: 'SET #attr1 = :val2, #attr0 = :val3',
-                        });
-                }
-            );
-
-            it(
-                'should inject a conditional expression requiring the known value of the versioning property and set its value to the previous value + 1 when an object with a value for it is marshalled',
-                async () => {
-                    const item = new VersionedItem();
-                    item.foo = 'key';
-                    item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
-                    item.baz = 10;
-
-                    await mapper.update(item);
-
-                    expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
-                        .toMatchObject({
-                            TableName: 'table',
-                            Key: {
-                                fizz: {S: 'key'}
-                            },
-                            ConditionExpression: '#attr0 = :val1',
-                            ExpressionAttributeNames: {
-                                '#attr0': 'baz',
-                                '#attr2': 'buzz',
-                            },
-                            ExpressionAttributeValues: {
-                                ':val1': {N: '10'},
-                                ':val3': {
-                                    L: [
-                                        {N: '1'},
-                                        {B: Uint8Array.from([0xde, 0xad, 0xbe, 0xef])}
-                                    ],
-                                },
-                                ':val4': {N: '1'},
-                            },
-                            UpdateExpression: 'SET #attr2 = :val3, #attr0 = #attr0 + :val4',
-                        });
-                }
-            );
-
-            it(
-                'should not include a condition expression when the skipVersionCheck input parameter is true',
-                async () => {
-                    const item = new VersionedItem();
-                    item.foo = 'key';
-                    item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
-                    item.baz = 10;
-
-                    await mapper.update(item, {skipVersionCheck: true});
-
-                    expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
-                        .not.toHaveProperty('ConditionExpression');
-                }
-            );
-
-            it(
-                `should not include a condition expression when the mapper's default skipVersionCheck input parameter is true`,
-                async () => {
-                    const mapper = new DataMapper({
-                        client: mockDynamoDbClient as any,
-                        skipVersionCheck: true
-                    });
-
-                    const item = new VersionedItem();
-                    item.foo = 'key';
-                    item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
-                    item.baz = 10;
-
-                    await mapper.update(item);
-
-                    expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
-                        .not.toHaveProperty('ConditionExpression');
-                }
-            );
-
-            it(
-                'should combine the version condition with any other condition expression',
-                async () => {
-                    const item = new VersionedItem();
-                    item.foo = 'key';
-                    item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
-                    item.baz = 10;
-
-                    await mapper.update(item, {
-                        condition: {
-                            type: 'LessThan',
-                            subject: 'bar[0]',
-                            object: 600000
-                        }
-                    });
-
-                    expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
-                        .toMatchObject({
-                            ConditionExpression: '(#attr0[0] < :val1) AND (#attr2 = :val3)',
                             ExpressionAttributeNames: {
                                 '#attr0': 'buzz',
-                                '#attr2': 'baz',
                             },
                             ExpressionAttributeValues: {
-                                ':val1': {N: '600000'},
-                                ':val3': {N: '10'},
-                                ':val4': {
+                                ':val1': {
                                     L: [
                                         {N: '1'},
-                                        {B: Uint8Array.from([0xde, 0xad, 0xbe, 0xef])},
+                                        {B: Uint8Array.from([0xde, 0xad, 0xbe, 0xef])}
                                     ],
-                                },
+                                }
                             },
+                            UpdateExpression: 'SET #attr0 = :val1',
                         });
                 }
             );
-        });
 
-        it('should support the legacy call pattern', async () => {
-            await mapper.update({
-                item: {
-                    fizz: 'buzz',
+            it('should unmarshall any returned attributes', async () => {
+                promiseFunc.mockImplementation(() => Promise.resolve({Attributes: {
+                    fizz: {S: 'buzz'},
+                    bar: {NS: ['1', '2', '3']},
+                    baz: {L: [{BOOL: true}, {N: '4'}]}
+                }}));
+
+                const result = await mapper.update({
+                    foo: 'buzz',
                     [DynamoDbTable]: 'foo',
                     [DynamoDbSchema]: {
-                        fizz: {
+                        foo: {
                             type: 'String',
-                            attributeName: 'foo',
+                            attributeName: 'fizz',
                             keyType: 'HASH',
                         },
-                        pop: {
-                            type: 'Number',
-                            versionAttribute: true,
+                        bar: {
+                            type: 'Set',
+                            memberType: 'Number'
+                        },
+                        baz: {
+                            type: 'Tuple',
+                            members: [{type: 'Boolean'}, {type: 'Number'}]
                         },
                     },
-                },
+                });
+
+                expect(result).toEqual({
+                    foo: 'buzz',
+                    bar: new Set([1, 2, 3]),
+                    baz: [true, 4],
+                })
+            });
+
+            it('should throw an error if no attributes were returned', async () => {
+                promiseFunc.mockImplementation(() => Promise.resolve({}));
+
+                return expect(mapper.update({
+                    foo: 'buzz',
+                    [DynamoDbTable]: 'foo',
+                    [DynamoDbSchema]: {
+                        foo: {
+                            type: 'String',
+                            attributeName: 'fizz',
+                            keyType: 'HASH',
+                        },
+                        bar: {
+                            type: 'Set',
+                            memberType: 'Number'
+                        },
+                        baz: {
+                            type: 'Tuple',
+                            members: [{type: 'Boolean'}, {type: 'Number'}]
+                        },
+                    },
+                })).rejects.toMatchObject(new Error(
+                    'Update operation completed successfully, but the updated value was not returned'
+                ));
+            });
+
+            describe('version attributes', () => {
+                class VersionedItem {
+                    foo!: string;
+                    bar?: [number, Uint8Array];
+                    baz?: number;
+
+                    get [DynamoDbTable]() {
+                        return 'table';
+                    }
+
+                    get [DynamoDbSchema]() {
+                        return {
+                            foo: {
+                                type: 'String',
+                                keyType: 'HASH',
+                                attributeName: 'fizz'
+                            },
+                            bar: {
+                                type: 'Tuple',
+                                members: [
+                                    {type: 'Number'},
+                                    {type: 'Binary'},
+                                ],
+                                attributeName: 'buzz',
+                            },
+                            baz: {
+                                type: 'Number',
+                                versionAttribute: true,
+                            },
+                        };
+                    }
+                }
+
+                it(
+                    'should inject a conditional expression requiring the absence of the versioning property and set its value to 0 when an object without a value for it is marshalled',
+                    async () => {
+                        const item = new VersionedItem();
+                        item.foo = 'key';
+                        item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
+
+                        await mapper.update(item);
+
+                        expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
+                            .toMatchObject({
+                                TableName: 'table',
+                                Key: {
+                                    fizz: {S: 'key'}
+                                },
+                                ConditionExpression: 'attribute_not_exists(#attr0)',
+                                ExpressionAttributeNames: {
+                                    '#attr0': 'baz',
+                                    '#attr1': 'buzz',
+                                },
+                                ExpressionAttributeValues: {
+                                    ':val2': {
+                                        L: [
+                                            {N: '1'},
+                                            {B: Uint8Array.from([0xde, 0xad, 0xbe, 0xef])}
+                                        ],
+                                    },
+                                    ':val3': {N: '0'},
+                                },
+                                UpdateExpression: 'SET #attr1 = :val2, #attr0 = :val3',
+                            });
+                    }
+                );
+
+                it(
+                    'should inject a conditional expression requiring the known value of the versioning property and set its value to the previous value + 1 when an object with a value for it is marshalled',
+                    async () => {
+                        const item = new VersionedItem();
+                        item.foo = 'key';
+                        item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
+                        item.baz = 10;
+
+                        await mapper.update(item);
+
+                        expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
+                            .toMatchObject({
+                                TableName: 'table',
+                                Key: {
+                                    fizz: {S: 'key'}
+                                },
+                                ConditionExpression: '#attr0 = :val1',
+                                ExpressionAttributeNames: {
+                                    '#attr0': 'baz',
+                                    '#attr2': 'buzz',
+                                },
+                                ExpressionAttributeValues: {
+                                    ':val1': {N: '10'},
+                                    ':val3': {
+                                        L: [
+                                            {N: '1'},
+                                            {B: Uint8Array.from([0xde, 0xad, 0xbe, 0xef])}
+                                        ],
+                                    },
+                                    ':val4': {N: '1'},
+                                },
+                                UpdateExpression: 'SET #attr2 = :val3, #attr0 = #attr0 + :val4',
+                            });
+                    }
+                );
+
+                it(
+                    'should not include a condition expression when the skipVersionCheck input parameter is true',
+                    async () => {
+                        const item = new VersionedItem();
+                        item.foo = 'key';
+                        item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
+                        item.baz = 10;
+
+                        await mapper.update(item, {skipVersionCheck: true});
+
+                        expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
+                            .not.toHaveProperty('ConditionExpression');
+                    }
+                );
+
+                it(
+                    `should not include a condition expression when the mapper's default skipVersionCheck input parameter is true`,
+                    async () => {
+                        const mapper = new DataMapper({
+                            client: mockDynamoDbClient as any,
+                            skipVersionCheck: true
+                        });
+
+                        const item = new VersionedItem();
+                        item.foo = 'key';
+                        item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
+                        item.baz = 10;
+
+                        await mapper.update(item);
+
+                        expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
+                            .not.toHaveProperty('ConditionExpression');
+                    }
+                );
+
+                it(
+                    'should combine the version condition with any other condition expression',
+                    async () => {
+                        const item = new VersionedItem();
+                        item.foo = 'key';
+                        item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
+                        item.baz = 10;
+
+                        await mapper.update(item, {
+                            condition: {
+                                type: 'LessThan',
+                                subject: 'bar[0]',
+                                object: 600000
+                            }
+                        });
+
+                        expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
+                            .toMatchObject({
+                                ConditionExpression: '(#attr0[0] < :val1) AND (#attr2 = :val3)',
+                                ExpressionAttributeNames: {
+                                    '#attr0': 'buzz',
+                                    '#attr2': 'baz',
+                                },
+                                ExpressionAttributeValues: {
+                                    ':val1': {N: '600000'},
+                                    ':val3': {N: '10'},
+                                    ':val4': {
+                                        L: [
+                                            {N: '1'},
+                                            {B: Uint8Array.from([0xde, 0xad, 0xbe, 0xef])},
+                                        ],
+                                    },
+                                },
+                            });
+                    }
+                );
+            });
+
+            it('should support the legacy call pattern', async () => {
+                await mapper.update({
+                    item: {
+                        fizz: 'buzz',
+                        [DynamoDbTable]: 'foo',
+                        [DynamoDbSchema]: {
+                            fizz: {
+                                type: 'String',
+                                attributeName: 'foo',
+                                keyType: 'HASH',
+                            },
+                            pop: {
+                                type: 'Number',
+                                versionAttribute: true,
+                            },
+                        },
+                    },
+                });
+            });
+
+            it('should return an instance of the provided class', async () => {
+                const item = new ComplexItem();
+                item.foo = 'key';
+                item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
+
+                const result = await mapper.update(item);
+
+                expect(result).toBeInstanceOf(ComplexItem);
             });
         });
 
-        it('should return an instance of the provided class', async () => {
-            class VersionedItem {
-                foo!: string;
-                bar?: [number, Uint8Array];
-                baz?: number;
+        describe('#executeUpdateExpression', () => {
+            it(
+                'should use the provided schema to execute the provided expression',
+                async () => {
+                    const expression = new UpdateExpression;
+                    expression.set(new AttributePath('bar[1]'), Uint8Array.from([0xde, 0xad, 0xbe, 0xef]));
 
-                get [DynamoDbTable]() {
-                    return 'table';
+                    const updated = await mapper.executeUpdateExpression(expression, {foo: 'key'}, ComplexItem);
+
+                    expect(updated).toBeInstanceOf(ComplexItem);
+                    expect(mockDynamoDbClient.updateItem.mock.calls[0][0])
+                        .toMatchObject({
+                            TableName: tableName,
+                            Key: {
+                                fizz: {S: 'key'}
+                            },
+                            ExpressionAttributeNames: {
+                                '#attr0': 'buzz',
+                            },
+                            ExpressionAttributeValues: {
+                                ':val1': {B: Uint8Array.from([0xde, 0xad, 0xbe, 0xef])},
+                            },
+                            UpdateExpression: 'SET #attr0[1] = :val1',
+                        });
                 }
-
-                get [DynamoDbSchema]() {
-                    return {
-                        foo: {
-                            type: 'String',
-                            keyType: 'HASH',
-                            attributeName: 'fizz'
-                        },
-                        bar: {
-                            type: 'Tuple',
-                            members: [
-                                {type: 'Number'},
-                                {type: 'Binary'},
-                            ],
-                            attributeName: 'buzz',
-                        },
-                        baz: {
-                            type: 'Number',
-                            versionAttribute: true,
-                        },
-                    };
-                }
-            }
-
-
-            const item = new VersionedItem();
-            item.foo = 'key';
-            item.bar = [1, Uint8Array.from([0xde, 0xad, 0xbe, 0xef])];
-            item.baz = 10;
-
-            const result = await mapper.update(item);
-
-            expect(result).toBeInstanceOf(VersionedItem);
+            );
         });
     });
 });

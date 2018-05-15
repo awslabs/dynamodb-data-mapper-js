@@ -15,6 +15,7 @@ import {
     DataMapperConfiguration,
     DeleteOptions,
     DeleteParameters,
+    ExecuteUpdateExpressionOptions,
     GetOptions,
     GetParameters,
     ParallelScanParameters,
@@ -49,8 +50,11 @@ import {
     isKey,
     keysFromSchema,
     KeyTypeMap,
+    marshallConditionExpression,
     marshallItem,
     marshallKey,
+    marshallProjectionExpression,
+    marshallUpdateExpression,
     marshallValue,
     PerIndexKeys,
     Schema,
@@ -70,7 +74,6 @@ import {
     isConditionExpressionPredicate,
     MathematicalExpression,
     PathElement,
-    serializeConditionExpression,
     serializeProjectionExpression,
     UpdateExpression,
 } from "@aws/dynamodb-expressions";
@@ -362,11 +365,11 @@ export class DataMapper {
         if (!skipVersionCheck) {
             for (const prop of Object.keys(schema)) {
                 let inputMember = item[prop];
-                const {attributeName = prop, ...fieldSchema} = schema[prop];
+                const fieldSchema = schema[prop];
 
                 if (isVersionAttribute(fieldSchema) && inputMember !== undefined) {
                     const {condition: versionCondition} = handleVersionAttribute(
-                        attributeName,
+                        prop,
                         inputMember
                     );
 
@@ -379,10 +382,11 @@ export class DataMapper {
 
         if (condition) {
             const attributes = new ExpressionAttributes();
-            req.ConditionExpression = serializeConditionExpression(
-                normalizeConditionExpressionPaths(condition, schema),
+            req.ConditionExpression = marshallConditionExpression(
+                condition,
+                schema,
                 attributes
-            );
+            ).expression;
 
             if (Object.keys(attributes.names).length > 0) {
                 req.ExpressionAttributeNames = attributes.names;
@@ -709,7 +713,7 @@ export class DataMapper {
 
                 if (isVersionAttribute(fieldSchema)) {
                     const {condition: versionCond} = handleVersionAttribute(
-                        attributeName,
+                        key,
                         inputMember
                     );
                     if (req.Item[attributeName]) {
@@ -729,10 +733,11 @@ export class DataMapper {
 
         if (condition) {
             const attributes = new ExpressionAttributes();
-            req.ConditionExpression = serializeConditionExpression(
-                normalizeConditionExpressionPaths(condition, schema),
+            req.ConditionExpression = marshallConditionExpression(
+                condition,
+                schema,
                 attributes
-            );
+            ).expression;
 
             if (Object.keys(attributes.names).length > 0) {
                 req.ExpressionAttributeNames = attributes.names;
@@ -815,26 +820,26 @@ export class DataMapper {
         const schema = getSchema(valueConstructor.prototype);
 
         const attributes = new ExpressionAttributes();
-        req.KeyConditionExpression = serializeConditionExpression(
-            normalizeConditionExpressionPaths(
-                normalizeKeyCondition(keyCondition),
-                schema
-            ),
+        req.KeyConditionExpression = marshallConditionExpression(
+            normalizeKeyCondition(keyCondition),
+            schema,
             attributes
-        );
+        ).expression;
 
         if (filter) {
-            req.FilterExpression = serializeConditionExpression(
-                normalizeConditionExpressionPaths(filter, schema),
+            req.FilterExpression = marshallConditionExpression(
+                filter,
+                schema,
                 attributes
-            );
+            ).expression;
         }
 
         if (projection) {
-            req.ProjectionExpression = serializeProjectionExpression(
-                projection.map(propName => toSchemaName(propName, schema)),
+            req.ProjectionExpression = marshallProjectionExpression(
+                projection,
+                schema,
                 attributes
-            );
+            ).expression;
         }
 
         if (Object.keys(attributes.names).length > 0) {
@@ -955,29 +960,21 @@ export class DataMapper {
         } = options;
 
         const schema = getSchema(item);
-        const req: UpdateItemInput = {
-            TableName: this.getTableName(item),
-            ReturnValues: 'ALL_NEW',
-            Key: marshallKey(schema, item),
-        };
-
-        const attributes = new ExpressionAttributes();
         const expr = new UpdateExpression();
+        const itemKey: {[propertyName: string]: any} = {};
 
         for (const key of Object.keys(schema)) {
             let inputMember = item[key];
             const fieldSchema = schema[key];
-            const {attributeName = key} = fieldSchema;
 
             if (isKey(fieldSchema)) {
-                // Keys must be excluded from the update expression
-                continue;
+                itemKey[key] = inputMember;
             } else if (isVersionAttribute(fieldSchema)) {
                 const {condition: versionCond, value} = handleVersionAttribute(
-                    attributeName,
+                    key,
                     inputMember
                 );
-                expr.set(attributeName, value);
+                expr.set(key, value);
 
                 if (!skipVersionCheck) {
                     condition = condition
@@ -986,27 +983,115 @@ export class DataMapper {
                 }
             } else if (inputMember === undefined) {
                 if (onMissing === 'remove') {
-                    expr.remove(attributeName);
+                    expr.remove(key);
                 }
             } else {
                 const marshalled = marshallValue(fieldSchema, inputMember);
                 if (marshalled) {
-                    expr.set(attributeName, new AttributeValue(marshalled));
+                    expr.set(key, new AttributeValue(marshalled));
                 }
             }
         }
 
-        if (condition) {
-            req.ConditionExpression = serializeConditionExpression(
-                normalizeConditionExpressionPaths(
-                    condition,
-                    schema
-                ),
+        return this.doExecuteUpdateExpression(
+            expr,
+            itemKey,
+            getSchema(item),
+            getTableName(item),
+            item.constructor  as ZeroArgumentsConstructor<T>,
+            {condition}
+        );
+    }
+
+    /**
+     * Execute a custom update expression using the schema and table name
+     * defined on the provided `valueConstructor`.
+     *
+     * This method does not support automatic version checking, as the current
+     * state of a table's version attribute cannot be inferred from an update
+     * expression object. To perform a version check manually, add a condition
+     * expression:
+     *
+     * ```typescript
+     *  const currentVersion = 1;
+     *  updateExpression.set('nameOfVersionAttribute', currentVersion + 1);
+     *  const condition = {
+     *      type: 'Equals',
+     *      subject: 'nameOfVersionAttribute',
+     *      object: currentVersion
+     *  };
+     *
+     *  const updated = await mapper.executeUpdateExpression(
+     *      updateExpression,
+     *      itemKey,
+     *      constructor,
+     *      {condition}
+     *  );
+     * ```
+     *
+     * **NB:** Property names and attribute paths in the update expression
+     * should reflect the names used in the schema.
+     *
+     * @param expression        The update expression to execute.
+     * @param key               The full key to identify the object being
+     *                          updated.
+     * @param valueConstructor  The constructor with which to map the result to
+     *                          a domain object.
+     * @param options           Options with which to customize the UpdateItem
+     *                          request.
+     *
+     * @returns The updated item.
+     */
+    async executeUpdateExpression<
+        T extends StringToAnyObjectMap = StringToAnyObjectMap
+    >(
+        expression: UpdateExpression,
+        key: {[propertyName: string]: any},
+        valueConstructor: ZeroArgumentsConstructor<T>,
+        options: ExecuteUpdateExpressionOptions = {}
+    ): Promise<T> {
+        return this.doExecuteUpdateExpression(
+            expression,
+            key,
+            getSchema(valueConstructor.prototype),
+            getTableName(valueConstructor.prototype),
+            valueConstructor,
+            options
+        );
+    }
+
+    private async doExecuteUpdateExpression<
+        T extends StringToAnyObjectMap = StringToAnyObjectMap
+    >(
+        expression: UpdateExpression,
+        key: {[propertyName: string]: any},
+        schema: Schema,
+        tableName: string,
+        valueConstructor?: ZeroArgumentsConstructor<T>,
+        options: ExecuteUpdateExpressionOptions = {}
+    ): Promise<T> {
+        const req: UpdateItemInput = {
+            TableName: this.tableNamePrefix + tableName,
+            ReturnValues: 'ALL_NEW',
+            Key: marshallKey(schema, key),
+        };
+
+        const attributes = new ExpressionAttributes();
+
+        if (options.condition) {
+            req.ConditionExpression = marshallConditionExpression(
+                options.condition,
+                schema,
                 attributes
-            );
+            ).expression;
         }
 
-        req.UpdateExpression = expr.serialize(attributes);
+        req.UpdateExpression = marshallUpdateExpression(
+            expression,
+            schema,
+            attributes
+        ).expression;
+
         if (Object.keys(attributes.names).length > 0) {
             req.ExpressionAttributeNames = attributes.names;
         }
@@ -1017,11 +1102,7 @@ export class DataMapper {
 
         const rawResponse = await this.client.updateItem(req).promise();
         if (rawResponse.Attributes) {
-            return unmarshallItem<T>(
-                schema,
-                rawResponse.Attributes,
-                item.constructor as ZeroArgumentsConstructor<T>
-            );
+            return unmarshallItem<T>(schema, rawResponse.Attributes, valueConstructor);
         }
 
         // this branch should not be reached when interacting with DynamoDB, as
@@ -1063,17 +1144,19 @@ export class DataMapper {
         const attributes = new ExpressionAttributes();
 
         if (filter) {
-            req.FilterExpression = serializeConditionExpression(
-                normalizeConditionExpressionPaths(filter, schema),
+            req.FilterExpression = marshallConditionExpression(
+                filter,
+                schema,
                 attributes
-            );
+            ).expression;
         }
 
         if (projection) {
-            req.ProjectionExpression = serializeProjectionExpression(
-                projection.map(propName => toSchemaName(propName, schema)),
+            req.ProjectionExpression = marshallProjectionExpression(
+                projection,
+                schema,
                 attributes
-            );
+            ).expression;
         }
 
         if (Object.keys(attributes.names).length > 0) {
@@ -1344,70 +1427,6 @@ function keyTypesToElementList(keys: KeyTypeMap): Array<KeySchemaElement> {
         AttributeName: name,
         KeyType: keys[name]
     }));
-}
-
-function normalizeConditionExpressionPaths(
-    expr: ConditionExpression,
-    schema: Schema
-): ConditionExpression {
-    if (FunctionExpression.isFunctionExpression(expr)) {
-        return new FunctionExpression(
-            expr.name,
-            ...expr.args.map(arg => normalizeIfPath(arg, schema))
-        );
-    }
-
-    switch (expr.type) {
-        case 'Equals':
-        case 'NotEquals':
-        case 'LessThan':
-        case 'LessThanOrEqualTo':
-        case 'GreaterThan':
-        case 'GreaterThanOrEqualTo':
-            return {
-                ...expr,
-                subject: toSchemaName(expr.subject, schema),
-                object: normalizeIfPath(expr.object, schema),
-            };
-
-        case 'Between':
-            return {
-                ...expr,
-                subject: toSchemaName(expr.subject, schema),
-                lowerBound: normalizeIfPath(expr.lowerBound, schema),
-                upperBound: normalizeIfPath(expr.upperBound, schema),
-            };
-        case 'Membership':
-            return {
-                ...expr,
-                subject: toSchemaName(expr.subject, schema),
-                values: expr.values.map(arg => normalizeIfPath(arg, schema)),
-            };
-        case 'Not':
-            return {
-                ...expr,
-                condition: normalizeConditionExpressionPaths(
-                    expr.condition,
-                    schema
-                ),
-            };
-        case 'And':
-        case 'Or':
-            return {
-                ...expr,
-                conditions: expr.conditions.map(condition =>
-                    normalizeConditionExpressionPaths(condition, schema)
-                ),
-            };
-    }
-}
-
-function normalizeIfPath(path: any, schema: Schema): any {
-    if (AttributePath.isAttributePath(path)) {
-        return toSchemaName(path, schema);
-    }
-
-    return path;
 }
 
 function normalizeKeyCondition(
