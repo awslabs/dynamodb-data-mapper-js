@@ -2938,10 +2938,29 @@ describe('DataMapper', () => {
         it('supports the legacy call pattern', async () => {
             const iter = mapper.query({
                 valueConstructor: QueryableItem,
-                keyCondition: {foo: 'bar'}
+                keyCondition: {snap: 'crackle'},
+                indexName: 'baz-index',
+                pageSize: 1,
+                scanIndexForward: true
             });
 
             await iter.next();
+
+            expect(mockDynamoDbClient.query.mock.calls[0][0])
+                .toEqual({
+                    TableName: 'foo',
+                    KeyConditionExpression: '#attr0 = :val1',
+                    ExpressionAttributeNames: {
+                        '#attr0': 'snap',
+                    },
+                    ExpressionAttributeValues: {
+                        ':val1': {S: 'crackle'}
+                    },
+                    IndexName: 'baz-index',
+                    Limit: 1,
+                    ScanIndexForward: true,
+                    ConsistentRead: false
+                });
         });
 
         describe('startKey serialization', () => {
@@ -3329,8 +3348,18 @@ describe('DataMapper', () => {
         });
 
         it('should support the legacy call pattern', async () => {
-            const iter = mapper.scan({valueConstructor: ScannableItem});
+            const iter = mapper.scan({
+                valueConstructor: ScannableItem,
+                indexName: 'baz-index'
+            });
+
             await iter.next();
+
+            expect(mockDynamoDbClient.scan.mock.calls[0][0]).toEqual({
+                TableName: 'foo',
+                IndexName: 'baz-index',
+                ConsistentRead: false
+            });
         });
 
         describe('startKey serialization', () => {

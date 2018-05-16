@@ -790,6 +790,7 @@ export class DataMapper {
         if (!keyCondition) {
             valueConstructor = (valueConstructorOrParameters as QueryParameters<T>).valueConstructor;
             keyCondition = (valueConstructorOrParameters as QueryParameters<T>).keyCondition;
+            options = (valueConstructorOrParameters as QueryParameters<T>);
         } else {
             valueConstructor = valueConstructorOrParameters as ZeroArgumentsConstructor<T>;
         }
