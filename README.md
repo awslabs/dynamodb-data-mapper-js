@@ -69,7 +69,7 @@ mapper.put(toSave).then(objectSaved => {
 Retrieves an item from DynamoDB
 
 ```typescript
-mapper.get(Object.assign(new MyDomainObject, {id: 'foo', createdAt: 946684800}))
+mapper.get(Object.assign(new MyDomainObject, {id: 'foo', createdAt: new Date(946684800000)}))
     .then(myItem => {
         // the item was found
     })
@@ -88,7 +88,7 @@ Updates an item in the table
 ```typescript
 const myItem = await mapper.get(Object.assign(
     new MyDomainObject,
-    {id: 'foo', createdAt: 946684800}
+    {id: 'foo', createdAt: new Date(946684800000)}
 ));
 myItem.completed = true;
 
@@ -102,7 +102,7 @@ Removes an item from the table
 ```typescript
 await mapper.delete(Object.assign(
     new MyDomainObject,
-    {id: 'foo', createdAt: 946684800}
+    {id: 'foo', createdAt: new Date(946684800000)}
 ));
 ```
 
@@ -159,8 +159,8 @@ Fetches multiple items from the table
 
 ```typescript
 const toGet = [
-    Object.assign(new MyDomainObject, {id: 'foo', createdAt: 946684800}),
-    Object.assign(new MyDomainObject, {id: 'bar', createdAt: 946684801})
+    Object.assign(new MyDomainObject, {id: 'foo', createdAt: new Date(946684800000)}),
+    Object.assign(new MyDomainObject, {id: 'bar', createdAt: new Date(946684800001)})
 ];
 for await (const found of mapper.batchGet(toGet)) {
     // items will be yielded as they are successfully retrieved
@@ -176,8 +176,8 @@ Removes multiple items from the table
 
 ```typescript
 const toRemove = [
-    Object.assign(new MyDomainObject, {id: 'foo', createdAt: 946684800}),
-    Object.assign(new MyDomainObject, {id: 'bar', createdAt: 946684801})
+    Object.assign(new MyDomainObject, {id: 'foo', createdAt: new Date(946684800000)}),
+    Object.assign(new MyDomainObject, {id: 'bar', createdAt: new Date(946684800001)})
 ];
 for await (const found of mapper.batchDelete(toRemove)) {
     // items will be yielded as they are successfully removed
@@ -213,7 +213,7 @@ mapper.ensureTableExists(MyDomainObject, {readCapacityUnits: 5, writeCapacityUni
 Deletes the table for the mapped class and waits for it to be removed:
 
 ```typescript
-await mapper.delete(MyDomainObject)
+await mapper.deleteTable(MyDomainObject)
 ```
 
 ##### `ensureTableNoExists`
