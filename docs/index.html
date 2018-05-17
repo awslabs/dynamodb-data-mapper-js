@@ -114,7 +114,7 @@ mapper.put(toSave).then(<span class="hljs-function"><span class="hljs-params">ob
 </code></pre>
 				<h4 id="get"><code>get</code></h4>
 				<p>Retrieves an item from DynamoDB</p>
-				<pre><code class="lang-typescript">mapper.get(<span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'foo'</span>, createdAt: <span class="hljs-number">946684800</span>}))
+				<pre><code class="lang-typescript">mapper.get(<span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'foo'</span>, createdAt: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(<span class="hljs-number">946684800000</span>)}))
     .then(<span class="hljs-function"><span class="hljs-params">myItem</span> =&gt;</span> {
         <span class="hljs-comment">// the item was found</span>
     })
@@ -128,7 +128,7 @@ mapper.put(toSave).then(<span class="hljs-function"><span class="hljs-params">ob
 				<p>Updates an item in the table</p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">const</span> myItem = <span class="hljs-keyword">await</span> mapper.get(<span class="hljs-built_in">Object</span>.assign(
     <span class="hljs-keyword">new</span> MyDomainObject,
-    {id: <span class="hljs-string">'foo'</span>, createdAt: <span class="hljs-number">946684800</span>}
+    {id: <span class="hljs-string">'foo'</span>, createdAt: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(<span class="hljs-number">946684800000</span>)}
 ));
 myItem.completed = <span class="hljs-literal">true</span>;
 
@@ -138,7 +138,7 @@ myItem.completed = <span class="hljs-literal">true</span>;
 				<p>Removes an item from the table</p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">await</span> mapper.delete(<span class="hljs-built_in">Object</span>.assign(
     <span class="hljs-keyword">new</span> MyDomainObject,
-    {id: <span class="hljs-string">'foo'</span>, createdAt: <span class="hljs-number">946684800</span>}
+    {id: <span class="hljs-string">'foo'</span>, createdAt: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(<span class="hljs-number">946684800000</span>)}
 ));
 </code></pre>
 				<h4 id="scan"><code>scan</code></h4>
@@ -177,8 +177,8 @@ myItem.completed = <span class="hljs-literal">true</span>;
 				<h5 id="batchget"><code>batchGet</code></h5>
 				<p>Fetches multiple items from the table</p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">const</span> toGet = [
-    <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'foo'</span>, createdAt: <span class="hljs-number">946684800</span>}),
-    <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'bar'</span>, createdAt: <span class="hljs-number">946684801</span>})
+    <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'foo'</span>, createdAt: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(<span class="hljs-number">946684800000</span>)}),
+    <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'bar'</span>, createdAt: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(<span class="hljs-number">946684800001</span>)})
 ];
 <span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> found of mapper.batchGet(toGet)) {
     <span class="hljs-comment">// items will be yielded as they are successfully retrieved</span>
@@ -189,8 +189,8 @@ myItem.completed = <span class="hljs-literal">true</span>;
 				<h5 id="batchdelete"><code>batchDelete</code></h5>
 				<p>Removes multiple items from the table</p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">const</span> toRemove = [
-    <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'foo'</span>, createdAt: <span class="hljs-number">946684800</span>}),
-    <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'bar'</span>, createdAt: <span class="hljs-number">946684801</span>})
+    <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'foo'</span>, createdAt: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(<span class="hljs-number">946684800000</span>)}),
+    <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'bar'</span>, createdAt: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(<span class="hljs-number">946684800001</span>)})
 ];
 <span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> found of mapper.batchDelete(toRemove)) {
     <span class="hljs-comment">// items will be yielded as they are successfully removed</span>
@@ -213,7 +213,7 @@ myItem.completed = <span class="hljs-literal">true</span>;
 </code></pre>
 				<h5 id="deletetable"><code>deleteTable</code></h5>
 				<p>Deletes the table for the mapped class and waits for it to be removed:</p>
-				<pre><code class="lang-typescript"><span class="hljs-keyword">await</span> mapper.delete(MyDomainObject)
+				<pre><code class="lang-typescript"><span class="hljs-keyword">await</span> mapper.deleteTable(MyDomainObject)
 </code></pre>
 				<h5 id="ensuretablenoexists"><code>ensureTableNoExists</code></h5>
 				<p>Like <code>deleteTable</code>, but only deletes the table if it exists:</p>
