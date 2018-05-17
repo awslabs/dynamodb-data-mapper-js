@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>GreaterThanOrEqualToExpressionPredicate | @aws/dynamodb-expressions</title>
+	<title>MarshalledExpression | @aws/dynamodb-data-marshaller</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="../index.html" class="title">@aws/dynamodb-expressions</a>
+					<a href="../index.html" class="title">@aws/dynamodb-data-marshaller</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -54,10 +54,10 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="greaterthanorequaltoexpressionpredicate.html">GreaterThanOrEqualToExpressionPredicate</a>
+					<a href="marshalledexpression.html">MarshalledExpression</a>
 				</li>
 			</ul>
-			<h1>Interface GreaterThanOrEqualToExpressionPredicate</h1>
+			<h1>Interface MarshalledExpression</h1>
 		</div>
 	</div>
 </header>
@@ -67,8 +67,8 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>A comparison predicate asserting that the subject is greater than or equal
-						to the object.</p>
+						<p>A DynamoDB expression serialized to a string and accompanied by the name and
+						value substitutions that have been performed during serialization.</p>
 					</div>
 				</div>
 			</section>
@@ -76,12 +76,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="binarycomparisonpredicate.html" class="tsd-signature-type">BinaryComparisonPredicate</a>
-						<ul class="tsd-hierarchy">
-							<li>
-								<span class="target">GreaterThanOrEqualToExpressionPredicate</span>
-							</li>
-						</ul>
+						<span class="target">MarshalledExpression</span>
 					</li>
 				</ul>
 			</section>
@@ -92,8 +87,9 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="greaterthanorequaltoexpressionpredicate.html#object" class="tsd-kind-icon">object</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="greaterthanorequaltoexpressionpredicate.html#type" class="tsd-kind-icon">type</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="marshalledexpression.html#expressionattributenames" class="tsd-kind-icon">Expression<wbr>Attribute<wbr>Names</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="marshalledexpression.html#expressionattributevalues" class="tsd-kind-icon">Expression<wbr>Attribute<wbr>Values</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="marshalledexpression.html#expression" class="tsd-kind-icon">expression</a></li>
 							</ul>
 						</section>
 					</div>
@@ -101,31 +97,52 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-					<a name="object" class="tsd-anchor"></a>
-					<h3>object</h3>
-					<div class="tsd-signature tsd-kind-icon">object<span class="tsd-signature-symbol">:</span> <a href="../globals.html#comparisonoperand" class="tsd-signature-type">ComparisonOperand</a></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="expressionattributenames" class="tsd-anchor"></a>
+					<h3>Expression<wbr>Attribute<wbr>Names</h3>
+					<div class="tsd-signature tsd-kind-icon">Expression<wbr>Attribute<wbr>Names<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ExpressionAttributeNameMap</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="binarycomparisonpredicate.html">BinaryComparisonPredicate</a>.<a href="binarycomparisonpredicate.html#object">object</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/432282e/packages/dynamodb-expressions/src/ConditionExpression.ts#L12">ConditionExpression.ts:12</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/432282e/packages/dynamodb-data-marshaller/src/marshallExpression.ts#L33">marshallExpression.ts:33</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>The value against which the comparison subject will be compared.</p>
+							<p>A map of name tokens =&gt; the property name for which the token has been
+							substituted in the serialized expression.</p>
 						</div>
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="type" class="tsd-anchor"></a>
-					<h3>type</h3>
-					<div class="tsd-signature tsd-kind-icon">type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"GreaterThanOrEqualTo"</span></div>
+					<a name="expressionattributevalues" class="tsd-anchor"></a>
+					<h3>Expression<wbr>Attribute<wbr>Values</h3>
+					<div class="tsd-signature tsd-kind-icon">Expression<wbr>Attribute<wbr>Values<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ExpressionAttributeValueMap</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/432282e/packages/dynamodb-expressions/src/ConditionExpression.ts#L105">ConditionExpression.ts:105</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/432282e/packages/dynamodb-data-marshaller/src/marshallExpression.ts#L39">marshallExpression.ts:39</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A map of value tokens =&gt; the value for which the token has been
+							substituted in the serialized expression.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="expression" class="tsd-anchor"></a>
+					<h3>expression</h3>
+					<div class="tsd-signature tsd-kind-icon">expression<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/432282e/packages/dynamodb-data-marshaller/src/marshallExpression.ts#L27">marshallExpression.ts:27</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A serialized expression.</p>
+						</div>
+					</div>
 				</section>
 			</section>
 		</div>
@@ -142,13 +159,16 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface">
-						<a href="greaterthanorequaltoexpressionpredicate.html" class="tsd-kind-icon">Greater<wbr>Than<wbr>OrEqual<wbr>ToExpression<wbr>Predicate</a>
+						<a href="marshalledexpression.html" class="tsd-kind-icon">Marshalled<wbr>Expression</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="greaterthanorequaltoexpressionpredicate.html#object" class="tsd-kind-icon">object</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="marshalledexpression.html#expressionattributenames" class="tsd-kind-icon">Expression<wbr>Attribute<wbr>Names</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="greaterthanorequaltoexpressionpredicate.html#type" class="tsd-kind-icon">type</a>
+								<a href="marshalledexpression.html#expressionattributevalues" class="tsd-kind-icon">Expression<wbr>Attribute<wbr>Values</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="marshalledexpression.html#expression" class="tsd-kind-icon">expression</a>
 							</li>
 						</ul>
 					</li>

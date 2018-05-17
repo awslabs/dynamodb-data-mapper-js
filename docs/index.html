@@ -73,8 +73,7 @@
 					<code>@aws/dynamodb-data-mapper-annotations</code> package</a>,
 					you can describe the relationship between a class and its representation in
 				DynamoDB by adding a few decorators:</p>
-				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {DataMapper} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-data-mapper'</span>;
-<span class="hljs-keyword">import</span> {
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
     attribute,
     hashKey,
     rangeKey,
@@ -82,7 +81,7 @@
 } <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-data-mapper-annotations'</span>;
 
 <span class="hljs-meta">@table</span>(<span class="hljs-string">'table_name'</span>)
-<span class="hljs-keyword">class</span> MyDomainClass {
+<span class="hljs-keyword">class</span> MyDomainObject {
     <span class="hljs-meta">@hashKey</span>()
     id: <span class="hljs-built_in">string</span>;
 
@@ -92,15 +91,138 @@
     <span class="hljs-meta">@attribute</span>()
     completed?: <span class="hljs-built_in">boolean</span>;
 }
-
-<span class="hljs-comment">// Now you can save instances of this item to DynamoDB</span>
-<span class="hljs-keyword">const</span> myDomainObject = <span class="hljs-keyword">new</span> MyDomainClass();
-myDomainObject.id = <span class="hljs-string">'id'</span>;
-<span class="hljs-keyword">const</span> mapper = <span class="hljs-keyword">new</span> DataMapper()
-mapper.put(myDomainObject);
 </code></pre>
-				<p>Please refer to the individual packages for more detailed documentation.</p>
+				<p>With domain classes defined, you can interact with records in DynamoDB via an
+				instance of <code>DataMapper</code>:</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {DataMapper} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-data-mapper'</span>;
+<span class="hljs-keyword">import</span> DynamoDB = <span class="hljs-built_in">require</span>(<span class="hljs-string">'aws-sdk/clients/dynamodb'</span>);
+
+<span class="hljs-keyword">const</span> mapper = <span class="hljs-keyword">new</span> DataMapper({
+    client: <span class="hljs-keyword">new</span> DynamoDB({region: <span class="hljs-string">'us-west-2'</span>}), <span class="hljs-comment">// the SDK client used to execute operations</span>
+    tableNamePrefix: <span class="hljs-string">'dev_'</span> <span class="hljs-comment">// optionally, you can provide a table prefix to keep your dev and prod tables separate</span>
+});
+</code></pre>
+				<h3 id="supported-operations">Supported operations</h3>
+				<p>Using the <code>mapper</code> object and <code>MyDomainObject</code> class defined above, you can
+				perform the following operations:</p>
+				<h4 id="put"><code>put</code></h4>
+				<p>Creates (or overwrites) an item in the table</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">const</span> toSave = <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'foo'</span>});
+mapper.put(toSave).then(<span class="hljs-function"><span class="hljs-params">objectSaved</span> =&gt;</span> {
+    <span class="hljs-comment">// the record has been saved</span>
+});
+</code></pre>
+				<h4 id="get"><code>get</code></h4>
+				<p>Retrieves an item from DynamoDB</p>
+				<pre><code class="lang-typescript">mapper.get(<span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'foo'</span>, createdAt: <span class="hljs-number">946684800</span>}))
+    .then(<span class="hljs-function"><span class="hljs-params">myItem</span> =&gt;</span> {
+        <span class="hljs-comment">// the item was found</span>
+    })
+    .catch(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> {
+        <span class="hljs-comment">// the item was not found</span>
+    })
+</code></pre>
+				<p><strong>NB:</strong> The promise returned by the mapper will be rejected with an
+				<code>ItemNotFoundException</code> if the item sought is not found.</p>
+				<h4 id="update"><code>update</code></h4>
+				<p>Updates an item in the table</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">const</span> myItem = <span class="hljs-keyword">await</span> mapper.get(<span class="hljs-built_in">Object</span>.assign(
+    <span class="hljs-keyword">new</span> MyDomainObject,
+    {id: <span class="hljs-string">'foo'</span>, createdAt: <span class="hljs-number">946684800</span>}
+));
+myItem.completed = <span class="hljs-literal">true</span>;
+
+<span class="hljs-keyword">await</span> mapper.update(myItem);
+</code></pre>
+				<h4 id="delete"><code>delete</code></h4>
+				<p>Removes an item from the table</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">await</span> mapper.delete(<span class="hljs-built_in">Object</span>.assign(
+    <span class="hljs-keyword">new</span> MyDomainObject,
+    {id: <span class="hljs-string">'foo'</span>, createdAt: <span class="hljs-number">946684800</span>}
+));
+</code></pre>
+				<h4 id="scan"><code>scan</code></h4>
+				<p>Lists the items in a table or index</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> item of mapper.scan(MyDomainObject)) {
+    <span class="hljs-comment">// individual items will be yielded as the scan is performed</span>
+}
+
+<span class="hljs-comment">// Optionally, scan an index instead of the table:</span>
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> item of mapper.scan(MyDomainObject, {indexName: <span class="hljs-string">'myIndex'</span>})) {
+    <span class="hljs-comment">// individual items will be yielded as the scan is performed</span>
+}
+</code></pre>
+				<h4 id="query"><code>query</code></h4>
+				<p>Finds a specific item (or range of items) in a table or index</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> foo of mapper.query(MyDomainObject, {id: <span class="hljs-string">'foo'</span>})) {
+    <span class="hljs-comment">// individual items with a hash key of "foo" will be yielded as the query is performed</span>
+}
+</code></pre>
+				<h4 id="batch-operations">Batch operations</h4>
+				<p>The mapper also supports batch operations. Under the hood, the batch will
+					automatically be split into chunks that fall within DynamoDB&#39;s limits (25 for
+					<code>batchPut</code> and <code>batchDelete</code>, 100 for <code>batchGet</code>). The items can belong to any
+					number of tables, and exponential backoff for unprocessed items is handled
+				automatically.</p>
+				<h5 id="batchput"><code>batchPut</code></h5>
+				<p>Creates (or overwrites) multiple items in the table</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">const</span> toSave = [
+    <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'foo'</span>, completed: <span class="hljs-literal">false</span>}),
+    <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'bar'</span>, completed: <span class="hljs-literal">false</span>})
+];
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> persisted of mapper.batchPut(toSave)) {
+    <span class="hljs-comment">// items will be yielded as they are successfully written</span>
+}
+</code></pre>
+				<h5 id="batchget"><code>batchGet</code></h5>
+				<p>Fetches multiple items from the table</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">const</span> toGet = [
+    <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'foo'</span>, createdAt: <span class="hljs-number">946684800</span>}),
+    <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'bar'</span>, createdAt: <span class="hljs-number">946684801</span>})
+];
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> found of mapper.batchGet(toGet)) {
+    <span class="hljs-comment">// items will be yielded as they are successfully retrieved</span>
+}
+</code></pre>
+				<p><strong>NB:</strong> Only items that exist in the table will be retrieved. If a key is not
+				found, it will be omitted from the result.</p>
+				<h5 id="batchdelete"><code>batchDelete</code></h5>
+				<p>Removes multiple items from the table</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">const</span> toRemove = [
+    <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'foo'</span>, createdAt: <span class="hljs-number">946684800</span>}),
+    <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">new</span> MyDomainObject, {id: <span class="hljs-string">'bar'</span>, createdAt: <span class="hljs-number">946684801</span>})
+];
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> found of mapper.batchDelete(toRemove)) {
+    <span class="hljs-comment">// items will be yielded as they are successfully removed</span>
+}
+</code></pre>
+				<h4 id="table-lifecycle-operations">Table lifecycle operations</h4>
+				<h5 id="createtable"><code>createTable</code></h5>
+				<p>Creates a table for the mapped class and waits for it to be initialized:</p>
+				<pre><code class="lang-typescript">mapper.createTable(MyDomainObject, {readCapacityUnits: <span class="hljs-number">5</span>, writeCapacityUnits: <span class="hljs-number">5</span>})
+    .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-comment">// the table has been provisioned and is ready for use!</span>
+    })
+</code></pre>
+				<h5 id="ensuretableexists"><code>ensureTableExists</code></h5>
+				<p>Like <code>createTable</code>, but only creates the table if it doesn&#39;t already exist:</p>
+				<pre><code class="lang-typescript">mapper.ensureTableExists(MyDomainObject, {readCapacityUnits: <span class="hljs-number">5</span>, writeCapacityUnits: <span class="hljs-number">5</span>})
+    .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-comment">// the table has been provisioned and is ready for use!</span>
+    })
+</code></pre>
+				<h5 id="deletetable"><code>deleteTable</code></h5>
+				<p>Deletes the table for the mapped class and waits for it to be removed:</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">await</span> mapper.delete(MyDomainObject)
+</code></pre>
+				<h5 id="ensuretablenoexists"><code>ensureTableNoExists</code></h5>
+				<p>Like <code>deleteTable</code>, but only deletes the table if it exists:</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">await</span> mapper.ensureTableNotExists(MyDomainObject)
+</code></pre>
 				<h2 id="constituent-packages">Constituent packages</h2>
+				<p>The DataMapper is developed as a monorepo using <a href="https://github.com/lerna/lerna"><code>lerna</code></a>.
+					More detailed documentation about the mapper&#39;s constituent packages is available
+				by viewing those packages directly.</p>
 				<ul>
 					<li><a href="packages/dynamodb-auto-marshaller/">Amazon DynamoDB Automarshaller</a></li>
 					<li><a href="packages/dynamodb-batch-iterator/">Amazon DynamoDB Batch Iterator</a></li>

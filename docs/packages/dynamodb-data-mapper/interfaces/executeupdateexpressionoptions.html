@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>GreaterThanOrEqualToExpressionPredicate | @aws/dynamodb-expressions</title>
+	<title>ExecuteUpdateExpressionOptions | @aws/dynamodb-data-mapper</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="../index.html" class="title">@aws/dynamodb-expressions</a>
+					<a href="../index.html" class="title">@aws/dynamodb-data-mapper</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -54,34 +54,21 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="greaterthanorequaltoexpressionpredicate.html">GreaterThanOrEqualToExpressionPredicate</a>
+					<a href="executeupdateexpressionoptions.html">ExecuteUpdateExpressionOptions</a>
 				</li>
 			</ul>
-			<h1>Interface GreaterThanOrEqualToExpressionPredicate</h1>
+			<h1>Interface ExecuteUpdateExpressionOptions</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-comment">
-				<div class="tsd-comment tsd-typography">
-					<div class="lead">
-						<p>A comparison predicate asserting that the subject is greater than or equal
-						to the object.</p>
-					</div>
-				</div>
-			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="binarycomparisonpredicate.html" class="tsd-signature-type">BinaryComparisonPredicate</a>
-						<ul class="tsd-hierarchy">
-							<li>
-								<span class="target">GreaterThanOrEqualToExpressionPredicate</span>
-							</li>
-						</ul>
+						<span class="target">ExecuteUpdateExpressionOptions</span>
 					</li>
 				</ul>
 			</section>
@@ -92,8 +79,7 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="greaterthanorequaltoexpressionpredicate.html#object" class="tsd-kind-icon">object</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="greaterthanorequaltoexpressionpredicate.html#type" class="tsd-kind-icon">type</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="executeupdateexpressionoptions.html#condition" class="tsd-kind-icon">condition</a></li>
 							</ul>
 						</section>
 					</div>
@@ -101,31 +87,21 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-					<a name="object" class="tsd-anchor"></a>
-					<h3>object</h3>
-					<div class="tsd-signature tsd-kind-icon">object<span class="tsd-signature-symbol">:</span> <a href="../globals.html#comparisonoperand" class="tsd-signature-type">ComparisonOperand</a></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="condition" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> condition</h3>
+					<div class="tsd-signature tsd-kind-icon">condition<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ConditionExpression</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="binarycomparisonpredicate.html">BinaryComparisonPredicate</a>.<a href="binarycomparisonpredicate.html#object">object</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/432282e/packages/dynamodb-expressions/src/ConditionExpression.ts#L12">ConditionExpression.ts:12</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/432282e/packages/dynamodb-data-mapper/src/namedParameters/ExecuteUpdateExpressionOptions.ts#L8">namedParameters/ExecuteUpdateExpressionOptions.ts:8</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>The value against which the comparison subject will be compared.</p>
+							<p>A condition on which this update operation&#39;s completion will be
+							predicated.</p>
 						</div>
 					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="type" class="tsd-anchor"></a>
-					<h3>type</h3>
-					<div class="tsd-signature tsd-kind-icon">type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"GreaterThanOrEqualTo"</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/432282e/packages/dynamodb-expressions/src/ConditionExpression.ts#L105">ConditionExpression.ts:105</a></li>
-						</ul>
-					</aside>
 				</section>
 			</section>
 		</div>
@@ -142,13 +118,10 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface">
-						<a href="greaterthanorequaltoexpressionpredicate.html" class="tsd-kind-icon">Greater<wbr>Than<wbr>OrEqual<wbr>ToExpression<wbr>Predicate</a>
+						<a href="executeupdateexpressionoptions.html" class="tsd-kind-icon">Execute<wbr>Update<wbr>Expression<wbr>Options</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="greaterthanorequaltoexpressionpredicate.html#object" class="tsd-kind-icon">object</a>
-							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="greaterthanorequaltoexpressionpredicate.html#type" class="tsd-kind-icon">type</a>
+								<a href="executeupdateexpressionoptions.html#condition" class="tsd-kind-icon">condition</a>
 							</li>
 						</ul>
 					</li>
