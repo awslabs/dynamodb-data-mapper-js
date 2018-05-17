@@ -1,6 +1,6 @@
 {
   "name": "@aws/dynamodb-batch-iterator",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Abstraction for DynamoDB batch reads and writes for that handles batch splitting and partial retries with exponential backoff",
   "keywords": [
     "aws",
