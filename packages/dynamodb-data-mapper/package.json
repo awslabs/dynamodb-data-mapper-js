@@ -30,10 +30,10 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "@types/jest": "^22",
+    "@types/jest": "^23",
     "@types/node": "^8.0.4",
     "aws-sdk": "^2.7.0",
-    "jest": "^22",
+    "jest": "^23",
     "typedoc": "^0.11.0",
     "typescript": "^2.7"
   },
