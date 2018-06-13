@@ -47,6 +47,12 @@ export abstract class Paginator<
      * @inheritDoc
      */
     return(): Promise<IteratorResult<Array<T>>> {
+        // Prevent any further use of this iterator
+        this.lastResolved = Promise.reject(new Error(
+            'Iteration has been manually interrupted and may not be resumed'
+        ));
+        this.lastResolved.catch(() => {});
+
         return this.paginator.return() as any;
     }
 

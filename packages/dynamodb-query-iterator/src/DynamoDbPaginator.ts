@@ -71,6 +71,12 @@ export abstract class DynamoDbPaginator implements DynamoDbPaginatorInterface {
      * @inheritDoc
      */
     return(): Promise<IteratorResult<DynamoDbResultsPage>> {
+        // Prevent any further use of this iterator
+        this.lastResolved = Promise.reject(new Error(
+            'Iteration has been manually interrupted and may not be resumed'
+        ));
+        this.lastResolved.catch(() => {});
+
         return Promise.resolve(
             {done: true} as IteratorResult<DynamoDbResultsPage>
         );

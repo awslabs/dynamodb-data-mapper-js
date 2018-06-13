@@ -14,14 +14,6 @@ export class ScanPaginator extends DynamoDbPaginator {
         this.nextRequest = {...input};
     }
 
-    /**
-     * @inheritDoc
-     */
-    return(): Promise<IteratorResult<DynamoDbResultsPage>> {
-        this.nextRequest = undefined;
-        return super.return();
-    }
-
     protected getNext(): Promise<IteratorResult<DynamoDbResultsPage>> {
         if (this.nextRequest) {
             return this.client.scan(this.nextRequest).promise().then(output => {

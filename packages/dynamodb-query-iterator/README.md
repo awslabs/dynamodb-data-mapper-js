@@ -1,90 +1,476 @@
-# Amazon DynamoDB Batch Iteration
+# Amazon DynamoDB Query and Scan Iteration
 
 [![Apache 2 License](https://img.shields.io/github/license/awslabs/dynamodb-data-mapper-js.svg?style=flat)](http://aws.amazon.com/apache-2-0/)
 
-This library provides utilities for automatically submitting arbitrarily-sized
-batches of reads and writes to DynamoDB using well-formed `BatchGetItem` and
-`BatchWriteItem` operations, respectively. Partial successes (i.e.,
-`BatchGetItem` operations that return some responses and some unprocessed keys
-or `BatchWriteItem` operations that return some unprocessed items) will retry
-the unprocessed items automatically using exponential backoff.
+This library provides utilities for automatically iterating over all DynamoDB
+records returned by a query or scan operation using [async iterables](https://tc39.github.io/ecma262/#sec-asynciterable-interface).
+Each iterator and paginator included in this package automatically tracks 
+DynamoDB metadata and supports resuming iteration from any point within a full
+query or scan.
 
-## Getting started
+## Paginators
 
-### Reading batches of items
+Paginators are asynchronous iterables that yield each page of results returned 
+by a DynamoDB `query` or `scan` operation. For sequential paginators, each 
+invocation of the `next` method corresponds to an invocation of the underlying 
+API operation until all no more pages are available.
 
-Create a `BatchGet` object, supplying an instantiated DynamoDB client from the
-AWS SDK for JavaScript and an iterable of keys that you wish to retrieve. The
-iterable may be synchronous (such as an array) or asynchronous (such as an
-object stream wrapped with [async-iter-stream](https://github.com/calvinmetcalf/async-iter-stream)'s
-`wrap` method).
+### QueryPaginator
+
+Retrieves all pages of a DynamoDB `query` in order.
+
+#### Example usage
 
 ```typescript
-import { BatchGet } from '@aws/dynamodb-batch-iterator';
+import { QueryPaginator } from '@aws/dynamodb-query-iterator';
+import DynamoDB = require('aws-sdk/clients/dynamodb');
+
+const paginator = new QueryPaginator(
+    new DynamoDB({region: 'us-west-2'}),
+    {
+        TableName: 'my_table',
+        KeyConditionExpression: 'partitionKey = :value',
+        ExpressionAttributeValues: {
+            ':value': {S: 'foo'}
+        },
+        ReturnConsumedCapacity: 'INDEXES'
+    }
+);
+
+for await (const page of paginator) {
+    // do something with `page`
+}
+
+// Inspect the total number of items yielded
+console.log(paginator.count);
+
+// Inspect the total number of items scanned by this operation
+console.log(paginator.scannedCount);
+
+// Inspect the capacity consumed by this operation 
+// This will only be available if `ReturnConsumedCapacity` was set on the input
+console.log(paginator.consumedCapacity);
+```
+
+#### Suspending and resuming queries
+
+You can suspend any running query from within the `for` loop by using the 
+`break` keyword. If there are still pages that have not been fetched, the 
+`lastEvaluatedKey` property of paginator will be defined. This can be provided 
+as the `ExclusiveStartKey` for another `QueryPaginator` instance:
+
+```typescript
+import { QueryPaginator } from '@aws/dynamodb-query-iterator';
+import { QueryInput } from 'aws-sdk/clients/dynamodb';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const dynamoDb = new DynamoDB({region: 'us-west-2'});
-const keys = [
-    ['tableName', {keyProperty: {N: '0'}}],
-    ['tableName', {keyProperty: {N: '1'}}],
-    ['tableName', {keyProperty: {N: '2'}}],
-    // etc., continuing to count up to
-    ['tableName', {keyProperty: {N: '1001'}}],
-];
+const input: QueryInput = {
+    TableName: 'my_table',
+    KeyConditionExpression: 'partitionKey = :value',
+    ExpressionAttributeValues: {
+        ':value': {S: 'foo'}
+    },
+    ReturnConsumedCapacity: 'INDEXES'
+};
 
-for await (const item of new BatchGet(dynamoDb, keys)) {
-    console.log(item);
+const paginator = new QueryPaginator(dynamoDb, input);
+
+for await (const page of paginator) {
+    // do something with the first page of results
+    break
+}
+
+for await (const page of new QueryPaginator(dynamoDb, {
+    ...input,
+    ExclusiveStartKey: paginator.lastEvaluatedKey
+})) {
+    // do something with the remaining pages
 }
 ```
 
-The above code snippet will automatically split the provided keys into
-`BatchGetItem` requests of 100 or fewer keys, and any unprocessed keys will be
-automatically retried until they are handled. The above code will execute at
-least 11 `BatchGetItem` operations, dependening on how many items are returned
-without processing due to insufficient provisioned read capacity.
+Suspending and resuming the same paginator instance is not supported.
 
-Each item yielded in the `for...await...of` loop will be a single DynamoDB
-record. Iteration will stop once each key has been retrieved or an error has
-been encountered.
+### ScanPaginator
 
-### Writing batches of items
+Retrieves all pages of a DynamoDB `scan` in order.
 
-Create a `BatchWrite` object, supplying an instantiated DynamoDB client from the
-AWS SDK for JavaScript and an iterable of write requests that you wish to
-execute. The iterable may be synchronous (such as an array) or asynchronous
-(such as an object stream wrapped with [async-iter-stream](https://github.com/calvinmetcalf/async-iter-stream)'s
-`wrap` method).
-
-Each write request should contain either a `DeleteRequest` key or a `PutRequest`
-key as described [in the Amazon DynamoDB API reference](http://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_WriteRequest.html#DDB-Type-WriteRequest-DeleteRequest).
+#### Example usage
 
 ```typescript
-import { BatchWrite } from '@aws/dynamodb-batch-iterator';
+import { ScanPaginator } from '@aws/dynamodb-query-iterator';
+import DynamoDB = require('aws-sdk/clients/dynamodb');
+
+const paginator = new ScanPaginator(
+    new DynamoDB({region: 'us-west-2'}),
+    {
+        TableName: 'my_table',
+        ReturnConsumedCapacity: 'INDEXES'
+    }
+);
+
+for await (const page of paginator) {
+    // do something with `page`
+}
+
+// Inspect the total number of items yielded
+console.log(paginator.count);
+
+// Inspect the total number of items scanned by this operation
+console.log(paginator.scannedCount);
+
+// Inspect the capacity consumed by this operation 
+// This will only be available if `ReturnConsumedCapacity` was set on the input
+console.log(paginator.consumedCapacity);
+```
+
+#### Suspending and resuming scans
+
+You can suspend any running scan from within the `for` loop by using the `break`
+keyword. If there are still pages that have not been fetched, the
+`lastEvaluatedKey` property of paginator will be defined. This can be provided
+as the `ExclusiveStartKey` for another `ScanPaginator` instance:
+
+```typescript
+import { ScanPaginator } from '@aws/dynamodb-query-iterator';
+import { ScanInput } from 'aws-sdk/clients/dynamodb';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const dynamoDb = new DynamoDB({region: 'us-west-2'});
-const keys = [
-    ['tableName', {DeleteRequest: {Key: {keyProperty: {N: '0'}}}}],
-    ['tableName', {PutRequest: {Item: {keyProperty: {N: '1'}, otherProperty: {BOOL: false}}}}],
-    ['tableName', {DeleteRequest: {Key: {keyProperty: {N: '2'}}}}],
-    ['tableName', {PutRequest: {Item: {keyProperty: {N: '3'}, otherProperty: {BOOL: false}}}}],
-    ['tableName', {N: '2'}],
-    // etc., continuing to count up to
-    ['tableName', {DeleteRequest: {Key: {keyProperty: {N: '102'}}}}],
-];
+const input: ScanInput = {
+    TableName: 'my_table',
+    ReturnConsumedCapacity: 'INDEXES'
+};
 
-for await (const item of new BatchGet(dynamoDb, keys)) {
-    console.log(item);
+const paginator = new ScanPaginator(dynamoDb, input);
+
+for await (const page of paginator) {
+    // do something with the first page of results
+    break
+}
+
+for await (const page of new ScanPaginator(dynamoDb, {
+    ...input,
+    ExclusiveStartKey: paginator.lastEvaluatedKey
+})) {
+    // do something with the remaining pages
 }
 ```
 
-The above code snippet will automatically split the provided keys into
-`BatchWriteItem` requests of 25 or fewer write request objects, and any
-unprocessed request objects will be automatically retried until they are
-handled. The above code will execute at least 5 `BatchWriteItem` operations,
-dependening on how many items are returned without processing due to
-insufficient provisioned write capacity.
+Suspending and resuming the same paginator instance is not supported.
 
-Each item yielded in the `for...await...of` loop will be a single write request
-that has succeeded. Iteration will stop once each request has been handled or an
-error has been encountered.
+### ParallelScanPaginator
+
+Retrieves all pages of a DynamoDB `scan` utilizing a configurable number of scan
+segments that operate in parallel. When performing a parallel scan, you must
+specify the total number of segments you wish to use, and neither an 
+`ExclusiveStartKey` nor a `Segment` identifier may be included with the input
+provided.
+
+#### Example usage
+
+```typescript
+import { ParallelScanPaginator } from '@aws/dynamodb-query-iterator';
+import DynamoDB = require('aws-sdk/clients/dynamodb');
+
+const paginator = new ParallelScanPaginator(
+    new DynamoDB({region: 'us-west-2'}),
+    {
+        TableName: 'my_table',
+        TotalSegments: 4,
+        ReturnConsumedCapacity: 'INDEXES'
+    }
+);
+
+for await (const page of paginator) {
+    // do something with `page`
+}
+
+// Inspect the total number of items yielded
+console.log(paginator.count);
+
+// Inspect the total number of items scanned by this operation
+console.log(paginator.scannedCount);
+
+// Inspect the capacity consumed by this operation 
+// This will only be available if `ReturnConsumedCapacity` was set on the input
+console.log(paginator.consumedCapacity);
+```
+
+#### Suspending and resuming parallel scans
+
+You can suspend any running scan from within the `for` loop by using the `break`
+keyword. If there are still pages that have not been fetched, the `scanState`
+property of interrupted paginator can be provided to the constructor of another
+`ParallelScanPaginator` instance:
+
+```typescript
+import { 
+    ParallelScanInput,
+    ParallelScanPaginator,
+} from '@aws/dynamodb-query-iterator';
+import DynamoDB = require('aws-sdk/clients/dynamodb');
+
+const client = new DynamoDB({region: 'us-west-2'});
+const input: ParallelScanInput = {
+    TableName: 'my_table',
+    TotalSegments: 4,
+    ReturnConsumedCapacity: 'INDEXES'
+};
+
+const paginator = new ParallelScanPaginator(client, input);
+
+for await (const page of paginator) {
+    // do something with the first page of results
+    break
+}
+
+for await (const page of new ParallelScanPaginator(
+    client,
+    input,
+    paginator.scanState
+)) {
+    // do something with the remaining pages
+}
+```
+
+Suspending and resuming the same paginator instance is not supported.
+
+
+## Iterators
+
+Iterators are asynchronous iterables that yield each of record returned by a 
+DynamoDB `query` or `scan` operation. Each invocation of the `next` method may
+invoke the underlying API operation until all no more pages are available.
+
+### QueryIterator
+
+Retrieves all records of a DynamoDB `query` in order.
+
+#### Example usage
+
+```typescript
+import { QueryIterator } from '@aws/dynamodb-query-iterator';
+import DynamoDB = require('aws-sdk/clients/dynamodb');
+
+const iterator = new QueryIterator(
+    new DynamoDB({region: 'us-west-2'}),
+    {
+        TableName: 'my_table',
+        KeyConditionExpression: 'partitionKey = :value',
+        ExpressionAttributeValues: {
+            ':value': {S: 'foo'}
+        },
+        ReturnConsumedCapacity: 'INDEXES'
+    },
+    ['partitionKey']
+);
+
+for await (const record of iterator) {
+    // do something with `record`
+}
+
+// Inspect the total number of items yielded
+console.log(iterator.count);
+
+// Inspect the total number of items scanned by this operation
+console.log(iterator.scannedCount);
+
+// Inspect the capacity consumed by this operation 
+// This will only be available if `ReturnConsumedCapacity` was set on the input
+console.log(iterator.consumedCapacity);
+```
+
+#### Suspending and resuming queries
+
+You can suspend any running query from within the `for` loop by using the 
+`break` keyword. If there are still pages that have not been fetched, the 
+`lastEvaluatedKey` property of iterator will be defined. This can be provided 
+as the `ExclusiveStartKey` for another `QueryIterator` instance:
+
+```typescript
+import { QueryIterator } from '@aws/dynamodb-query-iterator';
+import { QueryInput } from 'aws-sdk/clients/dynamodb';
+import DynamoDB = require('aws-sdk/clients/dynamodb');
+
+const dynamoDb = new DynamoDB({region: 'us-west-2'});
+const input: QueryInput = {
+    TableName: 'my_table',
+    KeyConditionExpression: 'partitionKey = :value',
+    ExpressionAttributeValues: {
+        ':value': {S: 'foo'}
+    },
+    ReturnConsumedCapacity: 'INDEXES'
+};
+const keyProperties = ['partitionKey'];
+
+const iterator = new QueryIterator(dynamoDb, input, keyProperties);
+
+for await (const record of iterator) {
+    // do something with the first result
+    break
+}
+
+for await (const with of new QueryIterator(
+    dynamoDb, 
+    {...input, ExclusiveStartKey: iterator.lastEvaluatedKey},
+    keyProperties
+)) {
+    // do something with the remaining records
+}
+```
+
+Suspending and resuming the same iterator instance is not supported.
+
+### ScanIterator
+
+Retrieves all records of a DynamoDB `scan` in order.
+
+#### Example usage
+
+```typescript
+import { ScanIterator } from '@aws/dynamodb-query-iterator';
+import DynamoDB = require('aws-sdk/clients/dynamodb');
+
+const iterator = new ScanIterator(
+    new DynamoDB({region: 'us-west-2'}),
+    {
+        TableName: 'my_table',
+        ReturnConsumedCapacity: 'INDEXES'
+    },
+    ['partitionKey', 'sortKey']
+);
+
+for await (const record of iterator) {
+    // do something with `record`
+}
+
+// Inspect the total number of items yielded
+console.log(iterator.count);
+
+// Inspect the total number of items scanned by this operation
+console.log(iterator.scannedCount);
+
+// Inspect the capacity consumed by this operation 
+// This will only be available if `ReturnConsumedCapacity` was set on the input
+console.log(iterator.consumedCapacity);
+```
+
+#### Suspending and resuming scans
+
+You can suspend any running scan from within the `for` loop by using the `break`
+keyword. If there are still pages that have not been fetched, the
+`lastEvaluatedKey` property of iterator will be defined. This can be provided
+as the `ExclusiveStartKey` for another `ScanIterator` instance:
+
+```typescript
+import { ScanIterator } from '@aws/dynamodb-query-iterator';
+import { ScanInput } from 'aws-sdk/clients/dynamodb';
+import DynamoDB = require('aws-sdk/clients/dynamodb');
+
+const dynamoDb = new DynamoDB({region: 'us-west-2'});
+const input: ScanInput = {
+    TableName: 'my_table',
+    ReturnConsumedCapacity: 'INDEXES'
+};
+const keyProperties = ['partitionKey'];
+
+const iterator = new ScanIterator(dynamoDb, input, keyProperties);
+
+for await (const record of iterator) {
+    // do something with the first result
+    break
+}
+
+for await (const page of new ScanIterator(
+    dynamoDb, 
+    {...input, ExclusiveStartKey: iterator.lastEvaluatedKey},
+    keyProperties
+)) {
+    // do something with the remaining records
+}
+```
+
+Suspending and resuming the same iterator instance is not supported.
+
+### ParallelScanIterator
+
+Retrieves all pages of a DynamoDB `scan` utilizing a configurable number of scan
+segments that operate in parallel. When performing a parallel scan, you must
+specify the total number of segments you wish to use, and neither an 
+`ExclusiveStartKey` nor a `Segment` identifier may be included with the input
+provided.
+
+#### Example usage
+
+```typescript
+import { ParallelScanIterator} from '@aws/dynamodb-query-iterator';
+import DynamoDB = require('aws-sdk/clients/dynamodb');
+
+const iterator = new ParallelScanIterator(
+    new DynamoDB({region: 'us-west-2'}),
+    {
+        TableName: 'my_table',
+        TotalSegments: 4,
+        ReturnConsumedCapacity: 'INDEXES'
+    },
+    ['partitionKey']
+);
+
+for await (const record of iterator) {
+    // do something with `record`
+}
+
+// Inspect the total number of items yielded
+console.log(iterator.count);
+
+// Inspect the total number of items scanned by this operation
+console.log(iterator.scannedCount);
+
+// Inspect the capacity consumed by this operation 
+// This will only be available if `ReturnConsumedCapacity` was set on the input
+console.log(iterator.consumedCapacity);
+```
+
+#### Suspending and resuming parallel scans
+
+You can suspend any running scan from within the `for` loop by using the `break`
+keyword. If there are still pages that have not been fetched, the `scanState`
+property of interrupted iterator can be provided to the constructor of another
+`ParallelScanIterator` instance:
+
+```typescript
+import { 
+    ParallelScanInput,
+    ParallelScanIterator,
+} from '@aws/dynamodb-query-iterator';
+import DynamoDB = require('aws-sdk/clients/dynamodb');
+
+const client = new DynamoDB({region: 'us-west-2'});
+const input: ParallelScanInput = {
+    TableName: 'my_table',
+    TotalSegments: 4,
+    ReturnConsumedCapacity: 'INDEXES'
+};
+const keyProperties = ['foo', 'bar'];
+
+const paginator = new ParallelScanIterator(client, input, keyProperties);
+
+for await (const page of paginator) {
+    // do something with the first page of results
+    break
+}
+
+for await (const page of new ParallelScanIterator(
+    client,
+    input,
+    keyProperties,
+    paginator.scanState
+)) {
+    // do something with the remaining pages
+}
+```
+
+Suspending and resuming the same iterator instance is not supported.
+
+

@@ -4,7 +4,6 @@ import { Key, QueryInput } from 'aws-sdk/clients/dynamodb';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 export class QueryIterator extends ItemIterator<QueryPaginator> {
-    private iterationCeased = false;
     private finalKey?: Key;
 
     constructor(
@@ -20,12 +19,11 @@ export class QueryIterator extends ItemIterator<QueryPaginator> {
      */
     return() {
         this.finalKey = this.lastEvaluatedKey;
-        this.iterationCeased = true;
         return super.return();
     }
 
     get lastEvaluatedKey(): Key|undefined {
-        if (this.iterationCeased) {
+        if (this.finalKey) {
             return this.finalKey;
         }
 

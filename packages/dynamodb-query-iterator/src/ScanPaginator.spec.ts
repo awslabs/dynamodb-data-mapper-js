@@ -168,7 +168,7 @@ describe('ScanPaginator', () => {
         expect(paginator.scannedCount).toBe(expectedCount);
         for await (const _ of paginator) {
             expect(paginator.count).toBe(++expectedCount);
-            expect(paginator.scannedCount).toBe(expectedScanCounts.shift());
+            expect(paginator.scannedCount).toBe(expectedScanCounts.shift()!);
         }
 
         expect(paginator.count).toBe(3);

@@ -18,7 +18,7 @@ export class ParallelScanIterator extends ItemIterator<ParallelScanPaginator> {
         scanState?: ParallelScanState
     ) {
         super(
-            new ParallelScanPaginator({client, input, scanState}),
+            new ParallelScanPaginator(client, input, scanState),
             keyProperties
         );
     }

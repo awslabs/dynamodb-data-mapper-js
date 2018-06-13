@@ -63,7 +63,7 @@ export class ParallelScanPaginator<T> extends
             );
         }
 
-        const paginator = new BasePaginator({client, input, scanState});
+        const paginator = new BasePaginator(client, input, scanState);
         super(paginator, itemConstructor);
 
         this._paginator = paginator;

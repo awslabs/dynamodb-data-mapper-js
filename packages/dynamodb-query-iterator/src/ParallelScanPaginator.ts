@@ -42,10 +42,8 @@ export type ScanState = UninitializedScanState|InitializedScanState;
  */
 export type ParallelScanState = Array<ScanState>;
 
-export interface ParallelScanPaginatorParameters {
-    client: DynamoDB;
-    input: ParallelScanInput;
-    scanState?: ParallelScanState;
+if (Symbol && !Symbol.asyncIterator) {
+    (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
 }
 
 export class ParallelScanPaginator implements DynamoDbPaginatorInterface {
@@ -56,11 +54,11 @@ export class ParallelScanPaginator implements DynamoDbPaginatorInterface {
         IteratorResult<DynamoDbResultsPage & {segment: number}>
     > = Promise.resolve() as any;
 
-    constructor({
-        client,
-        input,
-        scanState = nullScanState(input.TotalSegments)
-    }: ParallelScanPaginatorParameters) {
+    constructor(
+        client: DynamoDB,
+        input: ParallelScanInput,
+        scanState: ParallelScanState = nullScanState(input.TotalSegments)
+    ) {
         const { TotalSegments } = input;
 
         if (scanState.length !== TotalSegments) {

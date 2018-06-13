@@ -236,3 +236,4 @@ by viewing those packages directly.
 * [Amazon DynamoDB DataMapper Annotations](packages/dynamodb-data-mapper-annotations/)
 * [Amazon DynamoDB Data Marshaller](packages/dynamodb-data-marshaller/)
 * [Amazon DynamoDB Expressions](packages/dynamodb-expressions/)
+* [Amazon DynamoDB Query Iterator](packages/dynamodb-query-iterator/)

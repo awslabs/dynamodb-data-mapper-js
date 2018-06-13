@@ -2,6 +2,10 @@ import { DynamoDbPaginatorInterface } from './DynamoDbPaginatorInterface';
 import { DynamoDbResultsPage } from './DynamoDbResultsPage';
 import { AttributeMap, ConsumedCapacity, Key } from 'aws-sdk/clients/dynamodb';
 
+if (Symbol && !Symbol.asyncIterator) {
+    (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
+}
+
 export abstract class ItemIterator<
     Paginator extends DynamoDbPaginatorInterface
 > implements AsyncIterableIterator<AttributeMap> {
@@ -46,6 +50,13 @@ export abstract class ItemIterator<
     }
 
     return(): Promise<IteratorResult<AttributeMap>> {
+        // Prevent any further use of this iterator
+        this.lastResolved = Promise.reject(new Error(
+            'Iteration has been manually interrupted and may not be resumed'
+        ));
+        this.lastResolved.catch(() => {});
+
+        // Clear the pending queue to free up memory
         this.pending.length = 0;
         return this.paginator.return().then(doneSigil);
     }

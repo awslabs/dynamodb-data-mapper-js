@@ -1,6 +1,8 @@
 import { Paginator as AbstractPaginator } from './Paginator';
 import { ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
 
+require('./asyncIteratorSymbolPolyfill');
+
 export abstract class Iterator<
     T,
     Paginator extends AbstractPaginator<T, any>
@@ -56,6 +58,15 @@ export abstract class Iterator<
      */
     return(): Promise<IteratorResult<T>> {
         this.finalKey = this.lastEvaluatedKey;
+
+        // Prevent any further use of this iterator
+        this.lastResolved = Promise.reject(new Error(
+            'Iteration has been manually interrupted and may not be resumed'
+        ));
+        this.lastResolved.catch(() => {});
+
+        // Empty the pending queue to free up memory
+        this.pending.length = 0;
         return this.paginator.return() as any;
     }
 

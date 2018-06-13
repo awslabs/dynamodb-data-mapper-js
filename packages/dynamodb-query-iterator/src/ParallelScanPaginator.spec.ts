@@ -66,13 +66,13 @@ describe('ParallelScanPaginator', () => {
             promiseFunc.mockImplementationOnce(() => Promise.resolve({Items: []}));
 
             const result: Array<any> = [];
-            for await (const res of new ParallelScanPaginator({
-                client: mockDynamoDbClient as any,
-                input: {
+            for await (const res of new ParallelScanPaginator(
+                mockDynamoDbClient as any,
+                {
                     TableName: 'foo',
                     TotalSegments: segments,
                 },
-            })) {
+            )) {
                 result.push(res);
             }
 
@@ -161,59 +161,6 @@ describe('ParallelScanPaginator', () => {
         }
     );
 
-    it('should provide access to the last evaluated key', async () => {
-        promiseFunc.mockImplementationOnce(() => Promise.resolve({
-            Items: [
-                {
-                    fizz: {S: 'snap'},
-                    bar: {NS: ['1', '2', '3']},
-                    baz: {L: [{BOOL: true}, {N: '4'}]}
-                },
-            ],
-            LastEvaluatedKey: {fizz: {S: 'snap'}},
-        }));
-        promiseFunc.mockImplementationOnce(() => Promise.resolve({
-            Items: [
-                {
-                    fizz: {S: 'crackle'},
-                    bar: {NS: ['5', '6', '7']},
-                    baz: {L: [{BOOL: false}, {N: '8'}]}
-                },
-            ],
-            LastEvaluatedKey: {fizz: {S: 'crackle'}},
-        }));
-        promiseFunc.mockImplementationOnce(() => Promise.resolve({
-            Items: [
-                {
-                    fizz: {S: 'pop'},
-                    bar: {NS: ['9', '12', '30']},
-                    baz: {L: [{BOOL: true}, {N: '24'}]}
-                },
-            ],
-            LastEvaluatedKey: {fizz: {S: 'pop'}},
-        }));
-        promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
-
-        const paginator = new ParallelScanPaginator({
-            client: mockDynamoDbClient as any,
-            input: {
-                TableName: 'foo',
-                TotalSegments: 2
-            }
-        });
-        // const expectedLastKeys = [
-        //     {fizz: {S: 'snap'}},
-        //     {fizz: {S: 'crackle'}},
-        //     {fizz: {S: 'pop'}},
-        // ];
-
-        for await (const _ of paginator) {
-            // expect(paginator.scanState).toEqual(expectedLastKeys.shift());
-        }
-
-        // expect(paginator.lastEvaluatedKey).toBeUndefined();
-    });
-
     it('should merge counts', async () => {
         promiseFunc.mockImplementationOnce(() => Promise.resolve({
             Items: [
@@ -251,13 +198,13 @@ describe('ParallelScanPaginator', () => {
             ScannedCount: 3
         }));
 
-        const paginator = new ParallelScanPaginator({
-            client: mockDynamoDbClient as any,
-            input: {
+        const paginator = new ParallelScanPaginator(
+            mockDynamoDbClient as any,
+            {
                 TableName: 'foo',
                 TotalSegments: 2
             }
-        });
+        );
 
         for await (const _ of paginator) {
             // pass
@@ -310,13 +257,13 @@ describe('ParallelScanPaginator', () => {
             }
         }));
 
-        const paginator = new ParallelScanPaginator({
-            client: mockDynamoDbClient as any,
-            input: {
+        const paginator = new ParallelScanPaginator(
+            mockDynamoDbClient as any,
+            {
                 TableName: 'foo',
                 TotalSegments: 2
             }
-        });
+        );
 
         for await (const _ of paginator) {
             // pass
@@ -341,13 +288,13 @@ describe('ParallelScanPaginator', () => {
                 LastEvaluatedKey: {fizz: {S: 'snap'}},
             }));
 
-            const paginator = new ParallelScanPaginator({
-                client: mockDynamoDbClient as any,
-                input: {
+            const paginator = new ParallelScanPaginator(
+                mockDynamoDbClient as any,
+                {
                     TableName: 'foo',
                     TotalSegments: 1
                 }
-            });
+            );
 
             for await (const _ of paginator) {
                 break;
@@ -371,19 +318,19 @@ describe('ParallelScanPaginator', () => {
             ],
         }));
 
-        const paginator = new ParallelScanPaginator({
-            client: mockDynamoDbClient as any,
-            input: {
+        const paginator = new ParallelScanPaginator(
+            mockDynamoDbClient as any,
+            {
                 TableName: 'foo',
                 TotalSegments: 1
             },
-            scanState: [
+            [
                 {
                     initialized: true,
                     LastEvaluatedKey: {fizz: {S: 'snap'}}
                 }
             ]
-        });
+        );
 
         for await (const _ of paginator) {
             break
@@ -412,14 +359,14 @@ describe('ParallelScanPaginator', () => {
             ],
         }));
 
-        const paginator = new ParallelScanPaginator({
-            client: mockDynamoDbClient as any,
-            input: {
+        const paginator = new ParallelScanPaginator(
+            mockDynamoDbClient as any,
+            {
                 TableName: 'foo',
                 TotalSegments: 1
             },
-            scanState: [ { initialized: true } ]
-        });
+            [ { initialized: true } ]
+        );
 
         for await (const _ of paginator) {
             throw new Error('This block should never have been entered');
@@ -429,13 +376,13 @@ describe('ParallelScanPaginator', () => {
     it(
         'should throw when a parallel scan paginator is created with a scan state with the wrong number of segments',
         () => {
-            expect(() => new ParallelScanPaginator({
-                client: mockDynamoDbClient as any,
-                input: {
+            expect(() => new ParallelScanPaginator(
+                mockDynamoDbClient as any,
+                {
                     TableName: 'foo',
                     TotalSegments: 1
                 },
-                scanState: [
+                [
                     {
                         initialized: true,
                         LastEvaluatedKey: {fizz: {S: 'snap'}}
@@ -445,7 +392,7 @@ describe('ParallelScanPaginator', () => {
                         LastEvaluatedKey: {fizz: {S: 'crackle'}}
                     }
                 ]
-            })).toThrow();
+            )).toThrow();
         }
     );
 });
