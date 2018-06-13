@@ -6,9 +6,8 @@ import {
     VERSION,
     WriteType,
 } from './constants';
-import { ItemNotFoundException } from "./ItemNotFoundException";
+import { ItemNotFoundException } from './ItemNotFoundException';
 import {
-    BaseScanOptions,
     BatchGetOptions,
     BatchGetTableOptions,
     CreateTableOptions,
@@ -18,6 +17,7 @@ import {
     ExecuteUpdateExpressionOptions,
     GetOptions,
     GetParameters,
+    ParallelScanOptions,
     ParallelScanParameters,
     ParallelScanWorkerOptions,
     ParallelScanWorkerParameters,
@@ -32,11 +32,10 @@ import {
     UpdateOptions,
     UpdateParameters,
 } from './namedParameters';
-import {
-    DynamoDbTable,
-    getSchema,
-    getTableName,
-} from './protocols';
+import { ParallelScanIterator } from './ParallelScanIterator';
+import { DynamoDbTable, getSchema, getTableName } from './protocols';
+import { QueryIterator } from './QueryIterator';
+import { ScanIterator } from './ScanIterator';
 import {
     BatchGet,
     BatchWrite,
@@ -53,7 +52,6 @@ import {
     marshallConditionExpression,
     marshallItem,
     marshallKey,
-    marshallProjectionExpression,
     marshallUpdateExpression,
     marshallValue,
     PerIndexKeys,
@@ -62,7 +60,7 @@ import {
     toSchemaName,
     unmarshallItem,
     ZeroArgumentsConstructor,
-} from "@aws/dynamodb-data-marshaller";
+} from '@aws/dynamodb-data-marshaller';
 import {
     AttributePath,
     AttributeValue,
@@ -70,13 +68,11 @@ import {
     ConditionExpressionPredicate,
     ExpressionAttributes,
     FunctionExpression,
-    isConditionExpression,
-    isConditionExpressionPredicate,
     MathematicalExpression,
     PathElement,
     serializeProjectionExpression,
     UpdateExpression,
-} from "@aws/dynamodb-expressions";
+} from '@aws/dynamodb-expressions';
 import {
     AttributeDefinition,
     AttributeMap,
@@ -87,12 +83,8 @@ import {
     LocalSecondaryIndexList,
     Projection,
     PutItemInput,
-    QueryInput,
-    QueryOutput,
-    ScanInput,
-    ScanOutput,
     UpdateItemInput,
-} from "aws-sdk/clients/dynamodb";
+} from 'aws-sdk/clients/dynamodb';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 require('./asyncIteratorSymbolPolyfill');
@@ -585,21 +577,21 @@ export class DataMapper {
     parallelScan<T extends StringToAnyObjectMap>(
         valueConstructor: ZeroArgumentsConstructor<T>,
         segments: number,
-        options?: BaseScanOptions
-    ): AsyncIterableIterator<T>;
+        options?: ParallelScanOptions
+    ): ParallelScanIterator<T>;
 
     /**
      * @deprecated
      */
     parallelScan<T extends StringToAnyObjectMap>(
         parameters: ParallelScanParameters<T>
-    ): AsyncIterableIterator<T>;
+    ): ParallelScanIterator<T>;
 
-    async *parallelScan<T extends StringToAnyObjectMap>(
+    parallelScan<T extends StringToAnyObjectMap>(
         ctorOrParams: ZeroArgumentsConstructor<T>|ParallelScanParameters<T>,
         segments?: number,
-        options: BaseScanOptions = {}
-    ): AsyncIterableIterator<T> {
+        options: ParallelScanOptions = {}
+    ): ParallelScanIterator<T> {
         let valueConstructor: ZeroArgumentsConstructor<T>;
         if (typeof segments !== 'number') {
             valueConstructor = (ctorOrParams as ParallelScanParameters<T>).valueConstructor;
@@ -609,55 +601,16 @@ export class DataMapper {
             valueConstructor = ctorOrParams as ZeroArgumentsConstructor<T>;
         }
 
-        const req = this.buildScanInput(valueConstructor, options);
-        const schema = getSchema(valueConstructor.prototype);
-
-        interface PendingResult {
-            iterator: AsyncIterator<T>;
-            result: Promise<{
-                iterator: AsyncIterator<T>;
-                result: IteratorResult<T>
-            }>;
-        }
-
-        const pendingResults: Array<PendingResult> = [];
-        function addToPending(iterator: AsyncIterator<T>): void {
-            const result = iterator.next().then(resolved => ({
-                iterator,
-                result: resolved
-            }));
-            pendingResults.push({iterator, result});
-        }
-
-        for (let i = 0; i < segments; i++) {
-            addToPending(this.doSequentialScan(
-                {
-                    ...req,
-                    TotalSegments: segments,
-                    Segment: i
-                },
-                schema,
-                valueConstructor
-            ));
-        }
-
-        while (pendingResults.length > 0) {
-            const {
-                result: {value, done},
-                iterator
-            } = await Promise.race(pendingResults.map(val => val.result));
-
-            for (let i = pendingResults.length - 1; i >= 0; i--) {
-                if (pendingResults[i].iterator === iterator) {
-                    pendingResults.splice(i, 1);
-                }
+        return new ParallelScanIterator(
+            this.client,
+            valueConstructor,
+            segments,
+            {
+                readConsistency: this.readConsistency,
+                ...options,
+                tableNamePrefix: this.tableNamePrefix,
             }
-
-            if (!done) {
-                addToPending(iterator);
-                yield value;
-            }
-        }
+        );
     }
 
     /**
@@ -776,16 +729,18 @@ export class DataMapper {
         keyCondition: ConditionExpression |
             {[propertyName: string]: ConditionExpressionPredicate|any},
         options?: QueryOptions
-    ): AsyncIterableIterator<T>;
+    ): QueryIterator<T>;
 
     /**
      * @deprecated
+     *
+     * @param parameters Named parameter object
      */
     query<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
         parameters: QueryParameters<T>
-    ): AsyncIterableIterator<T>;
+    ): QueryIterator<T>;
 
-    async *query<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
+    query<T extends StringToAnyObjectMap = StringToAnyObjectMap>(
         valueConstructorOrParameters: ZeroArgumentsConstructor<T>|QueryParameters<T>,
         keyCondition?: ConditionExpression |
             {[propertyName: string]: ConditionExpressionPredicate|any},
@@ -799,72 +754,17 @@ export class DataMapper {
         } else {
             valueConstructor = valueConstructorOrParameters as ZeroArgumentsConstructor<T>;
         }
-        let {
-            filter,
-            indexName,
-            limit,
-            pageSize = limit,
-            projection,
-            readConsistency = this.readConsistency,
-            scanIndexForward,
-            startKey,
-        } = options;
 
-        const req: QueryInput = {
-            TableName: this.getTableName(valueConstructor.prototype),
-            ConsistentRead: readConsistency === 'strong',
-            ScanIndexForward: scanIndexForward,
-            Limit: pageSize,
-            IndexName: indexName,
-        };
-
-        const schema = getSchema(valueConstructor.prototype);
-
-        const attributes = new ExpressionAttributes();
-        req.KeyConditionExpression = marshallConditionExpression(
-            normalizeKeyCondition(keyCondition),
-            schema,
-            attributes
-        ).expression;
-
-        if (filter) {
-            req.FilterExpression = marshallConditionExpression(
-                filter,
-                schema,
-                attributes
-            ).expression;
-        }
-
-        if (projection) {
-            req.ProjectionExpression = marshallProjectionExpression(
-                projection,
-                schema,
-                attributes
-            ).expression;
-        }
-
-        if (Object.keys(attributes.names).length > 0) {
-            req.ExpressionAttributeNames = attributes.names;
-        }
-
-        if (Object.keys(attributes.values).length > 0) {
-            req.ExpressionAttributeValues = attributes.values;
-        }
-
-        if (startKey) {
-            req.ExclusiveStartKey = marshallKey(schema, startKey, indexName);
-        }
-
-        let result: QueryOutput;
-        do {
-            result = await this.client.query(req).promise();
-            req.ExclusiveStartKey = result.LastEvaluatedKey;
-            if (result.Items) {
-                for (const item of result.Items) {
-                    yield unmarshallItem<T>(schema, item, valueConstructor);
-                }
+        return new QueryIterator(
+            this.client,
+            valueConstructor,
+            keyCondition,
+            {
+                readConsistency: this.readConsistency,
+                ...options,
+                tableNamePrefix: this.tableNamePrefix,
             }
-        } while (result.LastEvaluatedKey !== undefined);
+        );
     }
 
     /**
@@ -883,21 +783,21 @@ export class DataMapper {
     scan<T extends StringToAnyObjectMap>(
         valueConstructor: ZeroArgumentsConstructor<T>,
         options?: ScanOptions|ParallelScanWorkerOptions
-    ): AsyncIterableIterator<T>;
+    ): ScanIterator<T>;
 
     /**
      * @deprecated
      */
     scan<T extends StringToAnyObjectMap>(
         parameters: ScanParameters<T>|ParallelScanWorkerParameters<T>
-    ): AsyncIterableIterator<T>;
+    ): ScanIterator<T>;
 
-    async *scan<T extends StringToAnyObjectMap>(
+    scan<T extends StringToAnyObjectMap>(
         ctorOrParams: ZeroArgumentsConstructor<T> |
                       ScanParameters<T> |
                       ParallelScanWorkerParameters<T>,
         options: ScanOptions|ParallelScanWorkerOptions = {}
-    ): AsyncIterableIterator<T> {
+    ): ScanIterator<T> {
         let valueConstructor: ZeroArgumentsConstructor<T>;
         if (
             'valueConstructor' in ctorOrParams &&
@@ -910,13 +810,14 @@ export class DataMapper {
             valueConstructor = ctorOrParams as ZeroArgumentsConstructor<T>;
         }
 
-        const req = this.buildScanInput(valueConstructor, options);
-        const schema = getSchema(valueConstructor.prototype);
-
-        yield* this.doSequentialScan(
-            req,
-            schema,
-            valueConstructor as ZeroArgumentsConstructor<T>
+        return new ScanIterator(
+            this.client,
+            valueConstructor,
+            {
+                readConsistency: this.readConsistency,
+                ...options,
+                tableNamePrefix: this.tableNamePrefix,
+            }
         );
     }
 
@@ -1115,81 +1016,6 @@ export class DataMapper {
         throw new Error(
             'Update operation completed successfully, but the updated value was not returned'
         );
-    }
-
-    private buildScanInput(
-        valueConstructor: ZeroArgumentsConstructor<any>,
-        {
-            filter,
-            indexName,
-            limit,
-            pageSize = limit,
-            projection,
-            readConsistency = this.readConsistency,
-            segment,
-            startKey,
-            totalSegments,
-        }: ScanOptions|ParallelScanWorkerOptions
-    ): ScanInput {
-        const req: ScanInput = {
-            TableName: this.getTableName(valueConstructor.prototype),
-            ConsistentRead: readConsistency === 'strong',
-            Limit: pageSize,
-            IndexName: indexName,
-            Segment: segment,
-            TotalSegments: totalSegments,
-        };
-
-        const schema = getSchema(valueConstructor.prototype);
-
-        const attributes = new ExpressionAttributes();
-
-        if (filter) {
-            req.FilterExpression = marshallConditionExpression(
-                filter,
-                schema,
-                attributes
-            ).expression;
-        }
-
-        if (projection) {
-            req.ProjectionExpression = marshallProjectionExpression(
-                projection,
-                schema,
-                attributes
-            ).expression;
-        }
-
-        if (Object.keys(attributes.names).length > 0) {
-            req.ExpressionAttributeNames = attributes.names;
-        }
-
-        if (Object.keys(attributes.values).length > 0) {
-            req.ExpressionAttributeValues = attributes.values;
-        }
-
-        if (startKey) {
-            req.ExclusiveStartKey = marshallKey(schema, startKey, indexName);
-        }
-
-        return req;
-    }
-
-    private async *doSequentialScan<T>(
-        req: ScanInput,
-        schema: Schema,
-        ctor: ZeroArgumentsConstructor<T>
-    ) {
-        let result: ScanOutput;
-        do {
-            result = await this.client.scan(req).promise();
-            req.ExclusiveStartKey = result.LastEvaluatedKey;
-            if (result.Items) {
-                for (const item of result.Items) {
-                    yield unmarshallItem(schema, item, ctor);
-                }
-            }
-        } while (result.LastEvaluatedKey !== undefined);
     }
 
     private getTableName(item: StringToAnyObjectMap): string {
@@ -1428,36 +1254,4 @@ function keyTypesToElementList(keys: KeyTypeMap): Array<KeySchemaElement> {
         AttributeName: name,
         KeyType: keys[name]
     }));
-}
-
-function normalizeKeyCondition(
-    keyCondition: ConditionExpression |
-        {[key: string]: ConditionExpressionPredicate|any}
-): ConditionExpression {
-    if (isConditionExpression(keyCondition)) {
-        return keyCondition;
-    }
-
-    const conditions: Array<ConditionExpression> = [];
-    for (const property of Object.keys(keyCondition)) {
-        const predicate = keyCondition[property];
-        if (isConditionExpressionPredicate(predicate)) {
-            conditions.push({
-                ...predicate,
-                subject: property,
-            });
-        } else {
-            conditions.push({
-                type: 'Equals',
-                subject: property,
-                object: predicate,
-            });
-        }
-    }
-
-    if (conditions.length === 1) {
-        return conditions[0];
-    }
-
-    return {type: 'And', conditions};
 }

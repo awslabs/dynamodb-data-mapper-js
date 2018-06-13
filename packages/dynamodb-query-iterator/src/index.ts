@@ -1,3 +1,4 @@
+export * from './DynamoDbPaginatorInterface';
 export * from './ParallelScanInput';
 export * from './ParallelScanIterator';
 export * from './ParallelScanPaginator';

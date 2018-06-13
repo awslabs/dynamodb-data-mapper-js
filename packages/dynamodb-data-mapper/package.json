@@ -42,6 +42,7 @@
     "@aws/dynamodb-batch-iterator": "^0.5.0",
     "@aws/dynamodb-data-marshaller": "^0.5.0",
     "@aws/dynamodb-expressions": "^0.5.0",
+    "@aws/dynamodb-query-iterator": "^0.5.0",
     "tslib": "^1.8.1"
   },
   "peerDependencies": {

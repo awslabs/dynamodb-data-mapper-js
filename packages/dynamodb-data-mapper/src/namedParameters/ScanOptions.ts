@@ -80,6 +80,55 @@ export interface ScanOptions extends BaseSequentialScanOptions {
 }
 
 /**
+ * Pagination state for a scan segment for which the first page has not yet been
+ * retrieved.
+ */
+export interface UninitializedScanState {
+    initialized: false;
+    lastEvaluatedKey?: undefined;
+}
+
+/**
+ * Pagination state for a scan segment for which one or more pages have been
+ * retrieved. If `lastEvaluatedKey` is defined, there are more pages to fetch;
+ * otherwise, all pages for this segment have been returned.
+ */
+export interface InitializedScanState {
+    initialized: true;
+    lastEvaluatedKey?: {[attributeName: string]: any};
+}
+
+export type ScanState = UninitializedScanState|InitializedScanState;
+
+/**
+ * ParallelScanState is represented as an array whose length is equal to the
+ * number of segments being scanned independently, with each segment's state
+ * being stored at the array index corresponding to its segment number.
+ *
+ * Segment state is represented with a tagged union with the following keys:
+ *   - `initialized` -- whether the first page of results has been retrieved
+ *   - `lastEvaluatedKey` -- the key to provide (if any) when requesting the
+ *      next page of results.
+ *
+ * If `lastEvaluatedKey` is undefined and `initialized` is true, then all pages
+ * for the given segment have been returned.
+ */
+export type ParallelScanState = Array<ScanState>;
+
+export interface ParallelScanOptions extends BaseScanOptions {
+    /**
+     * The segment identifier must not be supplied when initiating a parallel
+     * scan. This identifier will be created for each worker on your behalf.
+     */
+    segment?: undefined;
+
+    /**
+     * The point from which a parallel scan should resume.
+     */
+    scanState?: ParallelScanState;
+}
+
+/**
  * @deprecated
  */
 export type ScanParameters<
@@ -111,3 +160,10 @@ export type ParallelScanParameters<
      */
     segments: number;
 };
+
+/**
+ * @internal
+ */
+export type SequentialScanOptions = (ScanOptions|ParallelScanWorkerOptions) & {tableNamePrefix?: string};
+
+

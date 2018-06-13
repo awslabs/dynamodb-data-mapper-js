@@ -13,7 +13,7 @@ import {
     UpdateExpression,
 } from "@aws/dynamodb-expressions";
 import {ItemNotFoundException} from "./ItemNotFoundException";
-import { BatchGetOptions } from './index';
+import {BatchGetOptions, ParallelScanState} from './index';
 
 type BinaryValue = ArrayBuffer|ArrayBufferView;
 
@@ -209,7 +209,6 @@ describe('DataMapper', () => {
         it('should allow setting an overall read consistency', async () => {
             const gets = [new Item(0)];
             for await (const _ of mapper.batchGet(gets, {readConsistency: 'strong'})) {
-                console.log(_ === undefined);
                 // pass
             }
 
@@ -2128,6 +2127,8 @@ describe('DataMapper', () => {
         });
 
         class ScannableItem {
+            foo!: string;
+
             get [DynamoDbTable]() { return 'foo'; }
             get [DynamoDbSchema]() {
                 return {
@@ -2145,6 +2146,12 @@ describe('DataMapper', () => {
                         members: [{type: 'Boolean'}, {type: 'Number'}]
                     },
                 };
+            }
+
+            static fromKey(key: string) {
+                const target = new ScannableItem();
+                target.foo = key;
+                return target;
             }
         }
 
@@ -2247,6 +2254,131 @@ describe('DataMapper', () => {
                 }
             }
         );
+
+        it('should return undefined for lastEvaluatedKey', async () => {
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                Items: [
+                    {
+                        fizz: {S: 'snap'},
+                        bar: {NS: ['1', '2']},
+                        baz: {L: [
+                                {BOOL: true},
+                                {N: '3'}
+                            ]},
+                    },
+                    {
+                        fizz: {S: 'crackle'},
+                        bar: {NS: ['4', '5']},
+                        baz: {L: [
+                                {BOOL: true},
+                                {N: '6'}
+                            ]},
+                    },
+                ],
+                LastEvaluatedKey: {fizz: {S: 'pop'}},
+            }));
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
+
+            const iterator = mapper.parallelScan(ScannableItem, 2);
+
+            for await (const _ of iterator) {
+                expect(iterator.lastEvaluatedKey).toBeUndefined();
+            }
+        });
+
+        it('should return undefined for lastEvaluatedKey on the paginator', async () => {
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                Items: [
+                    {
+                        fizz: {S: 'snap'},
+                        bar: {NS: ['1', '2']},
+                        baz: {L: [
+                                {BOOL: true},
+                                {N: '3'}
+                            ]},
+                    },
+                ],
+                LastEvaluatedKey: {fizz: {S: 'snap'}},
+            }));
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
+
+            const paginator = mapper.parallelScan(ScannableItem, 2).pages();
+
+            for await (const _ of paginator) {
+                expect(paginator.lastEvaluatedKey).toBeUndefined();
+            }
+        });
+
+        it('should return the current state for all segments', async () => {
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                Items: [
+                    {
+                        fizz: {S: 'snap'},
+                        bar: {NS: ['1', '2']},
+                        baz: {L: [
+                                {BOOL: true},
+                                {N: '3'}
+                            ]},
+                    },
+                    {
+                        fizz: {S: 'crackle'},
+                        bar: {NS: ['4', '5']},
+                        baz: {L: [
+                                {BOOL: true},
+                                {N: '6'}
+                            ]},
+                    },
+                ],
+                LastEvaluatedKey: {fizz: {S: 'pop'}},
+            }));
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
+
+            const iterator = mapper.parallelScan(ScannableItem, 2);
+
+            const expectedKeys = ['snap', 'pop'];
+
+            for await (const _ of iterator) {
+                expect(iterator.scanState)
+                    .toMatchObject([{initialized: true}, {initialized: false}]);
+                expect(iterator.scanState[0].lastEvaluatedKey)
+                    .toMatchObject(ScannableItem.fromKey(expectedKeys.shift()!));
+            }
+        });
+
+        it('should resume from a provided scanState', async () => {
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
+
+            const scanState: ParallelScanState = [
+                {initialized: true},
+                {initialized: true, lastEvaluatedKey: {foo: 'bar'}},
+                {initialized: true, lastEvaluatedKey: {foo: 'baz'}},
+            ];
+
+            for await (const _ of mapper.parallelScan(ScannableItem, 3, {scanState})) {
+                // pass
+            }
+
+            expect(mockDynamoDbClient.scan.mock.calls).toEqual([
+                [{
+                    TableName: 'foo',
+                    ExclusiveStartKey: {fizz: {S: 'bar'}},
+                    Segment: 1,
+                    TotalSegments: 3,
+                    ConsistentRead: false
+                }],
+                [{
+                    TableName: 'foo',
+                    ExclusiveStartKey: {fizz: {S: 'baz'}},
+                    Segment: 2,
+                    TotalSegments: 3,
+                    ConsistentRead: false
+                }],
+            ]);
+        });
 
         it('should support the legacy call pattern', async () => {
             const iter = mapper.parallelScan({
@@ -2639,36 +2771,39 @@ describe('DataMapper', () => {
                     },
                 };
             }
+
+            static fromKey(key: string) {
+                const target = new QueryableItem();
+                target.snap = key;
+                return target;
+            }
         }
 
         it(
             'should throw if the item does not provide a schema per the data mapper protocol',
-            async () => {
-                const iter = mapper.query(
+            () => {
+                expect(() => mapper.query(
                     class {
                         get [DynamoDbTable]() { return 'foo'; }
                     },
                     {foo: 'buzz'}
-                );
-                await expect(iter.next()).rejects.toMatchObject(new Error(
+                )).toThrow(
                     'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
-                ));
+                );
             }
         );
 
         it(
             'should throw if the item does not provide a table name per the data mapper protocol',
-            async () => {
-                const iter = mapper.query(
+            () => {
+                expect(() => mapper.query(
                     class {
                         get [DynamoDbSchema]() { return {}; }
                     },
                     {foo: 'buzz'}
-                );
-
-                await expect(iter.next()).rejects.toMatchObject(new Error(
+                )).toThrow(
                     'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
-                ));
+                );
             }
         );
 
@@ -2728,14 +2863,12 @@ describe('DataMapper', () => {
                     }
                 }
 
-                const results = mapper.query(QueryableItem, {foo: 'buzz'});
-
-                const result: any[] = [];
-                for await (const res of results) {
-                    result.push(res);
+                const results: any[] = [];
+                for await (const res of mapper.query(QueryableItem, {foo: 'buzz'})) {
+                    results.push(res);
                 }
 
-                expect(result).toEqual([
+                expect(results).toEqual([
                     {
                         foo: 'snap',
                         bar: new Set([1, 2, 3]),
@@ -2753,7 +2886,7 @@ describe('DataMapper', () => {
                     },
                 ]);
 
-                for (const queriedItem of result) {
+                for (const queriedItem of results) {
                     expect(queriedItem).toBeInstanceOf(QueryableItem);
                 }
             }
@@ -2768,14 +2901,14 @@ describe('DataMapper', () => {
                     {readConsistency: 'strong'}
                 );
 
-                results.next();
+                await results.next();
 
                 expect(mockDynamoDbClient.query.mock.calls[0][0])
                     .toMatchObject({ConsistentRead: true});
             }
         );
 
-        it('should allow a condition expression as the keyCondition', () => {
+        it('should allow a condition expression as the keyCondition', async () => {
             const results =  mapper.query(
                 class {
                     get [DynamoDbTable]() { return 'foo'; }
@@ -2809,7 +2942,7 @@ describe('DataMapper', () => {
                 },
             );
 
-            results.next();
+            await results.next();
 
             expect(mockDynamoDbClient.query.mock.calls[0][0])
                 .toMatchObject({
@@ -2827,7 +2960,7 @@ describe('DataMapper', () => {
 
         it(
             'should allow a condition expression predicate in the keyCondition',
-            () => {
+            async () => {
                 const results =  mapper.query(
                     QueryableItem,
                     {
@@ -2836,7 +2969,7 @@ describe('DataMapper', () => {
                     },
                 );
 
-                results.next();
+                await results.next();
 
                 expect(mockDynamoDbClient.query.mock.calls[0][0])
                     .toMatchObject({
@@ -2854,7 +2987,7 @@ describe('DataMapper', () => {
             }
         );
 
-        it('should allow a filter expression', () => {
+        it('should allow a filter expression', async () => {
             const results =  mapper.query(
                 QueryableItem,
                 {snap: 'crackle'},
@@ -2866,7 +2999,7 @@ describe('DataMapper', () => {
                 }
             );
 
-            results.next();
+            await results.next();
 
             expect(mockDynamoDbClient.query.mock.calls[0][0])
                 .toMatchObject({
@@ -2883,14 +3016,14 @@ describe('DataMapper', () => {
                 });
         });
 
-        it('should allow a projection expression', () => {
+        it('should allow a projection expression', async () => {
             const results =  mapper.query(
                 QueryableItem,
                 {snap: 'crackle'},
                 {projection: ['snap', 'fizz[1]']}
             );
 
-            results.next();
+            await results.next();
 
             expect(mockDynamoDbClient.query.mock.calls[0][0])
                 .toMatchObject({
@@ -2905,7 +3038,7 @@ describe('DataMapper', () => {
                 });
         });
 
-        it('should allow a start key', () => {
+        it('should allow a start key', async () => {
             const results =  mapper.query(
                 class {
                     get [DynamoDbTable]() { return 'foo'; }
@@ -2926,7 +3059,7 @@ describe('DataMapper', () => {
                 {startKey: {fizz: 100}}
             );
 
-            results.next();
+            await results.next();
 
             expect(mockDynamoDbClient.query.mock.calls[0][0])
                 .toMatchObject({
@@ -2962,6 +3095,104 @@ describe('DataMapper', () => {
                     ScanIndexForward: true,
                     ConsistentRead: false
                 });
+        });
+
+        it('should provide the last evaluated key', async () => {
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                Items: [
+                    { snap: {S: 'foo'} },
+                    { snap: {S: 'bar'} },
+                ],
+                LastEvaluatedKey: {snap: {S: 'bar'}},
+            }));
+
+            const iterator = mapper.query(QueryableItem, {snap: 'crackle'});
+            for await (const item of iterator) {
+                expect(item.snap).toBe('foo');
+                break;
+            }
+
+            expect(iterator.lastEvaluatedKey).toBeDefined();
+            expect(iterator.lastEvaluatedKey!.snap).toBe('foo');
+        });
+
+        it(
+            'should use the last evaluated key from the API response if the pending queue is empty',
+            async () => {
+                promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                    Items: [
+                        { snap: {S: 'foo'} },
+                        { snap: {S: 'bar'} },
+                    ],
+                    LastEvaluatedKey: {snap: {S: 'baz'}},
+                }));
+
+                let i = 0;
+                const iterator = mapper.query(QueryableItem, {snap: 'crackle'});
+                for await (const _ of iterator) {
+                    if (i++ > 0) break;
+                }
+
+                expect(iterator.lastEvaluatedKey).toBeDefined();
+                expect(iterator.lastEvaluatedKey!.snap).toBe('baz');
+            }
+        );
+
+        it('should track usage metadata the last evaluated key', async () => {
+            const ScannedCount = 3;
+            const ConsumedCapacity = {
+                TableName: 'foo',
+                CapacityUnits: 4
+            };
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                Items: [
+                    { snap: {S: 'foo'} },
+                    { snap: {S: 'bar'} },
+                ],
+                LastEvaluatedKey: {snap: {S: 'bar'}},
+                Count: 2,
+                ScannedCount,
+                ConsumedCapacity,
+            }));
+
+            const iterator = mapper.query(QueryableItem, {snap: 'crackle'});
+            await iterator.next();
+
+            // only items actually yielded should be counted in `count`
+            expect(iterator.count).toBe(1);
+            // `consumedCapacity` and `scannedCount` should relay information
+            // from the API response
+            expect(iterator.scannedCount).toBe(ScannedCount);
+            expect(iterator.consumedCapacity).toEqual(ConsumedCapacity);
+        });
+
+        it('should support detaching the paginator', async () => {
+            const ScannedCount = 3;
+            const ConsumedCapacity = {
+                TableName: 'foo',
+                CapacityUnits: 4
+            };
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                Items: [
+                    { snap: {S: 'foo'} },
+                    { snap: {S: 'bar'} },
+                ],
+                Count: 2,
+                ScannedCount,
+                ConsumedCapacity,
+            }));
+
+            const paginator = mapper.query(QueryableItem, {snap: 'crackle'}).pages();
+            for await (const page of paginator) {
+                expect(page).toEqual([
+                    QueryableItem.fromKey('foo'),
+                    QueryableItem.fromKey('bar'),
+                ]);
+            }
+
+            expect(paginator.count).toBe(2);
+            expect(paginator.scannedCount).toBe(ScannedCount);
+            expect(paginator.consumedCapacity).toEqual(ConsumedCapacity);
         });
 
         describe('startKey serialization', () => {
@@ -3000,13 +3231,13 @@ describe('DataMapper', () => {
                 }
             }
 
-            it('should only serialize key properties from the startKey', () => {
+            it('should only serialize key properties from the startKey', async () => {
                 const iter = mapper.query(
                     MyItem,
                     { snap: 'key' },
                     { startKey: new MyItem('key') }
                 );
-                iter.next();
+                await iter.next();
 
                 expect(mockDynamoDbClient.query.mock.calls[0][0].ExclusiveStartKey)
                     .toEqual({
@@ -3015,7 +3246,7 @@ describe('DataMapper', () => {
                     });
             });
 
-            it('should serialize keys from the correct index', () => {
+            it('should serialize keys from the correct index', async () => {
                 const startKey = new MyItem;
                 startKey.pop = new Date(1000);
                 const iter = mapper.query(
@@ -3023,7 +3254,8 @@ describe('DataMapper', () => {
                     { snap: 'key' },
                     { startKey, indexName: 'myIndex' }
                 );
-                iter.next();
+
+                await iter.next();
 
                 expect(mockDynamoDbClient.query.mock.calls[0][0].ExclusiveStartKey)
                     .toEqual({
@@ -3076,28 +3308,25 @@ describe('DataMapper', () => {
 
         it(
             'should throw if the item does not provide a schema per the data mapper protocol',
-            async () => {
-                const iter = mapper.scan(
+            () => {
+                expect(() => mapper.scan(
                     class {
                         get [DynamoDbTable]() { return 'foo'; }
                     },
-                );
-                await expect(iter.next()).rejects.toMatchObject(new Error(
+                )).toThrow(
                     'The provided item did not adhere to the DynamoDbDocument protocol. No object property was found at the `DynamoDbSchema` symbol'
-                ));
+                );
             }
         );
 
         it(
             'should throw if the item does not provide a table name per the data mapper protocol',
-            async () => {
-                const iter = mapper.scan(class {
+            () => {
+                expect(() => mapper.scan(class {
                     get [DynamoDbSchema]() { return {}; }
-                });
-
-                await expect(iter.next()).rejects.toMatchObject(new Error(
+                })).toThrow(
                     'The provided item did not adhere to the DynamoDbTable protocol. No string property was found at the `DynamoDbTable` symbol'
-                ));
+                );
             }
         );
 
@@ -3196,14 +3425,14 @@ describe('DataMapper', () => {
                     {readConsistency: 'strong'}
                 );
 
-                results.next();
+                await results.next();
 
                 expect(mockDynamoDbClient.scan.mock.calls[0][0])
                     .toMatchObject({ConsistentRead: true});
             }
         );
 
-        it('should allow a filter expression', () => {
+        it('should allow a filter expression', async () => {
             const results =  mapper.scan(
                 ScannableItem,
                 {
@@ -3217,7 +3446,7 @@ describe('DataMapper', () => {
                 }
             );
 
-            results.next();
+            await results.next();
 
             expect(mockDynamoDbClient.scan.mock.calls[0][0])
                 .toMatchObject({
@@ -3231,13 +3460,13 @@ describe('DataMapper', () => {
                 });
         });
 
-        it('should allow a projection expression', () => {
+        it('should allow a projection expression', async () => {
             const results =  mapper.scan(
                 ScannableItem,
                 {projection: ['snap', 'fizz[1]']}
             );
 
-            results.next();
+            await results.next();
 
             expect(mockDynamoDbClient.scan.mock.calls[0][0])
                 .toMatchObject({
@@ -3249,7 +3478,7 @@ describe('DataMapper', () => {
                 });
         });
 
-        it('should allow a start key', () => {
+        it('should allow a start key', async () => {
             const results =  mapper.scan(
                 class {
                     get [DynamoDbTable]() { return 'foo'; }
@@ -3269,7 +3498,7 @@ describe('DataMapper', () => {
                 {startKey: {fizz: 100}}
             );
 
-            results.next();
+            await results.next();
 
             expect(mockDynamoDbClient.scan.mock.calls[0][0])
                 .toMatchObject({
@@ -3279,7 +3508,7 @@ describe('DataMapper', () => {
                 });
         });
 
-        it('should allow the page size to be set', () => {
+        it('should allow the page size to be set', async () => {
             const results =  mapper.scan(
                 class {
                     get [DynamoDbTable]() { return 'foo'; }
@@ -3295,13 +3524,13 @@ describe('DataMapper', () => {
                 {pageSize: 20}
             );
 
-            results.next();
+            await results.next();
 
             expect(mockDynamoDbClient.scan.mock.calls[0][0])
                 .toMatchObject({Limit: 20});
         });
 
-        it('should allow the page size to be set using the deprecated "limit" parameter', () => {
+        it('should allow the page size to be set using the deprecated "limit" parameter', async () => {
             const results =  mapper.scan(
                 class {
                     get [DynamoDbTable]() { return 'foo'; }
@@ -3317,13 +3546,13 @@ describe('DataMapper', () => {
                 {limit: 20}
             );
 
-            results.next();
+            await results.next();
 
             expect(mockDynamoDbClient.scan.mock.calls[0][0])
                 .toMatchObject({Limit: 20});
         });
 
-        it('should prefer the "pageSize" parameter over the "limit" parameter', () => {
+        it('should prefer the "pageSize" parameter over the "limit" parameter', async () => {
             const results =  mapper.scan(
                 class {
                     get [DynamoDbTable]() { return 'foo'; }
@@ -3342,7 +3571,7 @@ describe('DataMapper', () => {
                 }
             );
 
-            results.next();
+            await results.next();
 
             expect(mockDynamoDbClient.scan.mock.calls[0][0])
                 .toMatchObject({Limit: 20});
@@ -3399,12 +3628,12 @@ describe('DataMapper', () => {
                 }
             }
 
-            it('should only serialize key properties from the startKey', () => {
+            it('should only serialize key properties from the startKey', async () => {
                 const iter = mapper.scan(
                     MyItem,
                     { startKey: new MyItem('key') }
                 );
-                iter.next();
+                await iter.next();
 
                 expect(mockDynamoDbClient.scan.mock.calls[0][0].ExclusiveStartKey)
                     .toEqual({
@@ -3413,14 +3642,14 @@ describe('DataMapper', () => {
                     });
             });
 
-            it('should serialize keys from the correct index', () => {
+            it('should serialize keys from the correct index', async () => {
                 const startKey = new MyItem;
                 startKey.pop = new Date(1000);
                 const iter = mapper.scan(
                     MyItem,
                     { startKey, indexName: 'myIndex' }
                 );
-                iter.next();
+                await iter.next();
 
                 expect(mockDynamoDbClient.scan.mock.calls[0][0].ExclusiveStartKey)
                     .toEqual({
