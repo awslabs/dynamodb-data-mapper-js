@@ -148,8 +148,8 @@ export class DataMapper {
             }()
         );
 
-        for await (const [_, unmarshalled] of iter) {
-            yield unmarshalled;
+        for await (const written of iter) {
+            yield written[1];
         }
     }
 
@@ -223,8 +223,8 @@ export class DataMapper {
                 }
             }();
 
-        for await (const [_, unmarshalled] of this.batchWrite(generator)) {
-            yield unmarshalled;
+        for await (const written of this.batchWrite(generator)) {
+            yield written[1];
         }
     }
 
@@ -341,7 +341,7 @@ export class DataMapper {
         let item: T;
         if (
             'item' in itemOrParameters &&
-            (itemOrParameters as DeleteParameters<T>).item[DynamoDbTable]
+            (itemOrParameters as any).item[DynamoDbTable]
         ) {
             item = (itemOrParameters as DeleteParameters<T>).item;
             options = itemOrParameters as DeleteParameters<T>;
@@ -521,7 +521,7 @@ export class DataMapper {
         let item: T;
         if (
             'item' in itemOrParameters &&
-            (itemOrParameters as GetParameters<T>).item[DynamoDbTable]
+            (itemOrParameters as any).item[DynamoDbTable]
         ) {
             item = (itemOrParameters as GetParameters<T>).item;
             options = itemOrParameters as GetParameters<T>;
@@ -687,7 +687,7 @@ export class DataMapper {
         let item: T;
         if (
             'item' in itemOrParameters &&
-            (itemOrParameters as PutParameters<T>).item[DynamoDbTable]
+            (itemOrParameters as any).item[DynamoDbTable]
         ) {
             item = (itemOrParameters as PutParameters<T>).item;
             options = itemOrParameters as PutParameters<T>;
@@ -902,7 +902,7 @@ export class DataMapper {
         if (
             'valueConstructor' in ctorOrParams &&
             (ctorOrParams as ScanParameters<T>).valueConstructor.prototype &&
-            (ctorOrParams as ScanParameters<T>).valueConstructor.prototype[DynamoDbTable]
+            (ctorOrParams as any).valueConstructor.prototype[DynamoDbTable]
         ) {
             valueConstructor = (ctorOrParams as ScanParameters<T>).valueConstructor;
             options = ctorOrParams as ScanParameters<T>;
@@ -947,7 +947,7 @@ export class DataMapper {
         let item: T;
         if (
             'item' in itemOrParameters &&
-            (itemOrParameters as UpdateParameters<T>).item[DynamoDbTable]
+            (itemOrParameters as any).item[DynamoDbTable]
         ) {
             item = (itemOrParameters as UpdateParameters<T>).item;
             options = itemOrParameters as UpdateParameters<T>;

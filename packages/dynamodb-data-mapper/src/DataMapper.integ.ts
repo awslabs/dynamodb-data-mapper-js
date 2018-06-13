@@ -128,7 +128,7 @@ describe('DataMapper', () => {
             .toMatchObject(new ItemNotFoundException({
                 TableName,
                 ConsistentRead: true,
-                Key: {key: {N: key.toString(10)}}
+                Key: {testIndex: {N: key.toString(10)}}
             }));
     });
 
