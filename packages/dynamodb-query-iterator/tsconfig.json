@@ -21,7 +21,7 @@
   },
   "typedocOptions": {
     "mode": "file",
-    "out": "../../docs/packages/dynamodb-paginators",
+    "out": "../../docs/packages/dynamodb-query-iterator",
     "excludeNotExported": true,
     "excludePrivate": true,
     "hideGenerator": true

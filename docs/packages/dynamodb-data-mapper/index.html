@@ -372,9 +372,9 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 					</li>
 				</ul>
 				<h3 id="query"><code>query</code></h3>
-				<p>Retrieves multiple values from a table based on the primary key attributes.
-					Queries must target a single partition key value but may read multiple items
-				with different range keys.</p>
+				<p>Retrieves multiple values from a table or index based on the primary key
+					attributes. Queries must target a single partition key value but may read
+				multiple items with different range keys.</p>
 				<p>This method is implemented as an async iterator and the results can be consumed
 					with a <code>for-await-of</code> loop. If you are using TypeScript, you will need to
 					include <code>esnext.asynciterable</code> in your <code>lib</code> declaration (as well as enabling
@@ -418,7 +418,9 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 							<li><p><code>indexName</code> - The name of the index against which to execute this query.
 								If not specified, the query will be executed against the base table.</p>
 							</li>
-							<li><p><code>pageSize</code> - The maximum number of items to return.</p>
+							<li><p><code>limit</code> - The maximum number of items to return.</p>
+							</li>
+							<li><p><code>pageSize</code> - The maximum number of items to return <strong>per page of results</strong>.</p>
 							</li>
 							<li><p><code>projection</code> - A projection expression directing DynamoDB to return a
 									subset of any fetched item&#39;s attributes. Please refer to the
@@ -439,8 +441,52 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 						</ul>
 					</li>
 				</ul>
+				<h4 id="query-metadata">Query metadata</h4>
+				<p>The iterator returned by <code>query</code> will keep track of the number of items yielded
+				and the number of items scanned via its <code>count</code> and <code>scannedCount</code> properties:</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">const</span> iterator = mapper.query(
+    MyClass, 
+    {partitionKey: <span class="hljs-string">'foo'</span>, rangeKey: between(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>)}
+);
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> record of iterator) {
+    <span class="hljs-built_in">console</span>.log(record, iterator.count, iterator.scannedCount);
+}
+</code></pre>
+				<h4 id="pagination">Pagination</h4>
+				<p>If you wish to perform a resumable query, you can use the <code>.pages()</code> method of
+					the iterator returned by <code>query</code> to access the underlying paginator. The
+					paginator differs from the iterator in that it yields arrays of unmarshalled
+					records and has a <code>lastEvaluatedKey</code> property that may be provided to a new
+				call to <code>mapper.query</code> to resume the query later or in a separate process:</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">const</span> paginator = mapper.query(
+    MyClass,
+    {partitionKey: <span class="hljs-string">'foo'</span>, rangeKey: between(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>)},
+    {
+        <span class="hljs-comment">// automatically stop after 25 items or the entire result set has been</span>
+        <span class="hljs-comment">// fetched, whichever is smaller</span>
+        limit: <span class="hljs-number">25</span>
+    }
+).pages();
+
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> page of paginator) {
+    <span class="hljs-built_in">console</span>.log(
+        paginator.count,
+        paginator.scannedCount,
+        paginator.lastEvaluatedKey
+    );
+}
+
+<span class="hljs-keyword">const</span> newPaginator = mapper.query(
+    MyClass,
+    {partitionKey: <span class="hljs-string">'foo'</span>, rangeKey: between(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>)},
+    {
+        <span class="hljs-comment">// start this new paginator where the previous one stopped</span>
+        startKey: paginator.lastEvaluatedKey
+    }
+).pages();
+</code></pre>
 				<h3 id="scan"><code>scan</code></h3>
-				<p>Retrieves all values in a table.</p>
+				<p>Retrieves all values in a table or index.</p>
 				<p>This method is implemented as an async iterator and the results can be consumed
 					with a <code>for-await-of</code> loop. If you are using TypeScript, you will need to
 					include <code>esnext.asynciterable</code> in your <code>lib</code> declaration (as well as enabling
@@ -469,6 +515,8 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 							</li>
 							<li><p><code>limit</code> - The maximum number of items to return.</p>
 							</li>
+							<li><p><code>pageSize</code> - The maximum number of items to return <strong>per page of results</strong>.</p>
+							</li>
 							<li><p><code>projection</code> - A projection expression directing DynamoDB to return a
 									subset of any fetched item&#39;s attributes. Please refer to the
 									documentation for the <code>@aws/dynamodb-expressions</code> package for guidance
@@ -491,6 +539,44 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 						</ul>
 					</li>
 				</ul>
+				<h4 id="scan-metadata">Scan metadata</h4>
+				<p>The iterator returned by <code>scan</code> will keep track of the number of items yielded
+				and the number of items scanned via its <code>count</code> and <code>scannedCount</code> properties:</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">const</span> iterator = mapper.scan(MyClass);
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> record of iterator) {
+    <span class="hljs-built_in">console</span>.log(record, iterator.count, iterator.scannedCount);
+}
+</code></pre>
+				<h4 id="pagination">Pagination</h4>
+				<p>If you wish to perform a resumable scan, you can use the <code>.pages()</code> method of
+					the iterator returned by <code>scan</code> to access the underlying paginator. The
+					paginator differs from the iterator in that it yields arrays of unmarshalled
+					records and has a <code>lastEvaluatedKey</code> property that may be provided to a new
+				call to <code>mapper.scan</code> to resume the scan later or in a separate process:</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">const</span> paginator = mapper.scan(
+    MyClass,
+    {
+        <span class="hljs-comment">// automatically stop after 25 items or the entire result set has been</span>
+        <span class="hljs-comment">// fetched, whichever is smaller</span>
+        limit: <span class="hljs-number">25</span>
+    }
+).pages();
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> page of paginator) {
+    <span class="hljs-built_in">console</span>.log(
+        paginator.count,
+        paginator.scannedCount,
+        paginator.lastEvaluatedKey
+    );
+}
+
+<span class="hljs-keyword">const</span> newPaginator = mapper.scan(
+    MyClass,
+    {
+        <span class="hljs-comment">// start this new paginator where the previous one stopped</span>
+        startKey: paginator.lastEvaluatedKey
+    }
+).pages();
+</code></pre>
 				<h3 id="parallelscan"><code>parallelScan</code></h3>
 				<p>Retrieves all values in a table by dividing the table into segments, all of
 				which are scanned in parallel.</p>
@@ -522,7 +608,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 							<li><p><code>indexName</code> - The name of the index against which to execute this query.
 								If not specified, the query will be executed against the base table.</p>
 							</li>
-							<li><p><code>limit</code> - The maximum number of items to return.</p>
+							<li><p><code>pageSize</code> - The maximum number of items to return <strong>per page of results</strong>.</p>
 							</li>
 							<li><p><code>projection</code> - A projection expression directing DynamoDB to return a
 									subset of any fetched item&#39;s attributes. Please refer to the
@@ -539,6 +625,45 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 						</ul>
 					</li>
 				</ul>
+				<h4 id="scan-metadata">Scan metadata</h4>
+				<p>The iterator returned by <code>parallelScan</code> will keep track of the number of items
+					yielded and the number of items scanned via its <code>count</code> and <code>scannedCount</code>
+				properties:</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">const</span> iterator = mapper.parallelScan(MyClass, <span class="hljs-number">4</span>);
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> record of iterator) {
+    <span class="hljs-built_in">console</span>.log(record, iterator.count, iterator.scannedCount);
+}
+</code></pre>
+				<h4 id="pagination">Pagination</h4>
+				<p>If you wish to perform a resumable parallel scan, you can use the <code>.pages()</code>
+					method of the iterator returned by <code>parallelScan</code> to access the underlying
+					paginator. The  paginator differs from the iterator in that it yields arrays of
+					unmarshalled records and has a <code>scanState</code> property that may be provided
+					to a new call to <code>mapper.parallelScan</code> to resume the scan later or in a separate
+				process:</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">const</span> paginator = mapper.parallelScan(
+    MyClass,
+    <span class="hljs-number">4</span>
+).pages();
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> page of paginator) {
+    <span class="hljs-built_in">console</span>.log(
+        paginator.count,
+        paginator.scannedCount,
+        paginator.lastEvaluatedKey
+    );
+
+    <span class="hljs-keyword">break</span>;
+}
+
+<span class="hljs-keyword">const</span> newPaginator = mapper.parallelScan(
+    MyClass,
+    <span class="hljs-number">4</span>,
+    {
+        <span class="hljs-comment">// start this new paginator where the previous one stopped</span>
+        scanState: paginator.scanState
+    }
+).pages();
+</code></pre>
 				<h3 id="update"><code>update</code></h3>
 				<p>Updates an item in a DynamoDB table. Will leave attributes not defined in the
 				schema in place.</p>
@@ -567,6 +692,32 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 						</ul>
 					</li>
 				</ul>
+				<h3 id="executeupdateexpression"><code>executeUpdateExpression</code></h3>
+				<p>Executes a custom update expression. This method will <strong>not</strong> automatically
+					apply a version check, as the current state of the object being updated is not
+				known.</p>
+				<p>Takes four parameters:</p>
+				<ul>
+					<li><p>The expression to execute. Please refer to the documentation for the
+							<code>@aws/dynamodb-expressions</code> package for guidance on creating update
+						expression objects.</p>
+					</li>
+					<li><p>The key of the item being updated.</p>
+					</li>
+					<li><p>The constructor for the class mapped to the table against which the expression
+							should be run. Must have a prototype with a table name accessible via a
+							property identified with the <code>DynamoDbTable</code> symbol and a schema accessible
+						via a property identified with the <code>DynamoDbSchema</code> symbol.</p>
+					</li>
+					<li><p>(Optional) An object specifying any of the following options:</p>
+						<ul>
+							<li><code>condition</code> - A condition expression whose assertion must be satisfied in
+								order for the update operation to be executed. Please refer to the
+								documentation for the <code>@aws/dynamodb-expressions</code> package for guidance
+							on creating condition expression objects.</li>
+						</ul>
+					</li>
+				</ul>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -584,6 +735,30 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 					</li>
 					<li class=" tsd-kind-class">
 						<a href="classes/itemnotfoundexception.html" class="tsd-kind-icon">Item<wbr>Not<wbr>Found<wbr>Exception</a>
+					</li>
+					<li class=" tsd-kind-class tsd-has-type-parameter">
+						<a href="classes/iterator.html" class="tsd-kind-icon">Iterator</a>
+					</li>
+					<li class=" tsd-kind-class tsd-has-type-parameter">
+						<a href="classes/paginator.html" class="tsd-kind-icon">Paginator</a>
+					</li>
+					<li class=" tsd-kind-class tsd-has-type-parameter">
+						<a href="classes/parallelscaniterator.html" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>Iterator</a>
+					</li>
+					<li class=" tsd-kind-class tsd-has-type-parameter">
+						<a href="classes/parallelscanpaginator.html" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>Paginator</a>
+					</li>
+					<li class=" tsd-kind-class tsd-has-type-parameter">
+						<a href="classes/queryiterator.html" class="tsd-kind-icon">Query<wbr>Iterator</a>
+					</li>
+					<li class=" tsd-kind-class tsd-has-type-parameter">
+						<a href="classes/querypaginator.html" class="tsd-kind-icon">Query<wbr>Paginator</a>
+					</li>
+					<li class=" tsd-kind-class tsd-has-type-parameter">
+						<a href="classes/scaniterator.html" class="tsd-kind-icon">Scan<wbr>Iterator</a>
+					</li>
+					<li class=" tsd-kind-class tsd-has-type-parameter">
+						<a href="classes/scanpaginator.html" class="tsd-kind-icon">Scan<wbr>Paginator</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/basescanoptions.html" class="tsd-kind-icon">Base<wbr>Scan<wbr>Options</a>
@@ -631,7 +806,13 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 						<a href="interfaces/globalsecondaryindexoptions.html" class="tsd-kind-icon">Global<wbr>Secondary<wbr>Index<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface">
+						<a href="interfaces/initializedscanstate.html" class="tsd-kind-icon">Initialized<wbr>Scan<wbr>State</a>
+					</li>
+					<li class=" tsd-kind-interface">
 						<a href="interfaces/localsecondaryindexoptions.html" class="tsd-kind-icon">Local<wbr>Secondary<wbr>Index<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/parallelscanoptions.html" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/parallelscanworkeroptions.html" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>Worker<wbr>Options</a>
@@ -667,6 +848,9 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 						<a href="interfaces/stringtoanyobjectmap.html" class="tsd-kind-icon">String<wbr>ToAny<wbr>Object<wbr>Map</a>
 					</li>
 					<li class=" tsd-kind-interface">
+						<a href="interfaces/uninitializedscanstate.html" class="tsd-kind-icon">Uninitialized<wbr>Scan<wbr>State</a>
+					</li>
+					<li class=" tsd-kind-interface">
 						<a href="interfaces/updateoptions.html" class="tsd-kind-icon">Update<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
@@ -678,6 +862,9 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 					<li class=" tsd-kind-type-alias tsd-has-type-parameter">
 						<a href="globals.html#parallelscanparameters" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>Parameters</a>
 					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#parallelscanstate" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>State</a>
+					</li>
 					<li class=" tsd-kind-type-alias tsd-has-type-parameter">
 						<a href="globals.html#parallelscanworkerparameters" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>Worker<wbr>Parameters</a>
 					</li>
@@ -688,10 +875,16 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 						<a href="globals.html#scanparameters" class="tsd-kind-icon">Scan<wbr>Parameters</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#scanstate" class="tsd-kind-icon">Scan<wbr>State</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
 						<a href="globals.html#secondaryindexoptions" class="tsd-kind-icon">Secondary<wbr>Index<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="globals.html#secondaryindexprojection" class="tsd-kind-icon">Secondary<wbr>Index<wbr>Projection</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#sequentialscanoptions" class="tsd-kind-icon">Sequential<wbr>Scan<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="globals.html#streamviewtype" class="tsd-kind-icon">Stream<wbr>View<wbr>Type</a>
@@ -721,6 +914,9 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 						<a href="globals.html#version" class="tsd-kind-icon">VERSION</a>
 					</li>
 					<li class=" tsd-kind-function tsd-has-type-parameter">
+						<a href="globals.html#buildscaninput" class="tsd-kind-icon">build<wbr>Scan<wbr>Input</a>
+					</li>
+					<li class=" tsd-kind-function tsd-has-type-parameter">
 						<a href="globals.html#embed" class="tsd-kind-icon">embed</a>
 					</li>
 					<li class=" tsd-kind-function">
@@ -728,6 +924,9 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 					</li>
 					<li class=" tsd-kind-function">
 						<a href="globals.html#gettablename" class="tsd-kind-icon">get<wbr>Table<wbr>Name</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#marshallstartkey" class="tsd-kind-icon">marshall<wbr>Start<wbr>Key</a>
 					</li>
 				</ul>
 			</nav>

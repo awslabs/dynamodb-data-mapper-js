@@ -1,0 +1,496 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>@aws/dynamodb-query-iterator</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.js" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">@aws/dynamodb-query-iterator</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1> @aws/dynamodb-query-iterator</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<h1 id="amazon-dynamodb-query-and-scan-iteration">Amazon DynamoDB Query and Scan Iteration</h1>
+				<p><a href="http://aws.amazon.com/apache-2-0/"><img src="https://img.shields.io/github/license/awslabs/dynamodb-data-mapper-js.svg?style=flat" alt="Apache 2 License"></a></p>
+				<p>This library provides utilities for automatically iterating over all DynamoDB
+					records returned by a query or scan operation using <a href="https://tc39.github.io/ecma262/#sec-asynciterable-interface">async iterables</a>.
+					Each iterator and paginator included in this package automatically tracks
+					DynamoDB metadata and supports resuming iteration from any point within a full
+				query or scan.</p>
+				<h2 id="paginators">Paginators</h2>
+				<p>Paginators are asynchronous iterables that yield each page of results returned
+					by a DynamoDB <code>query</code> or <code>scan</code> operation. For sequential paginators, each
+					invocation of the <code>next</code> method corresponds to an invocation of the underlying
+				API operation until all no more pages are available.</p>
+				<h3 id="querypaginator">QueryPaginator</h3>
+				<p>Retrieves all pages of a DynamoDB <code>query</code> in order.</p>
+				<h4 id="example-usage">Example usage</h4>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { QueryPaginator } <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-query-iterator'</span>;
+<span class="hljs-keyword">import</span> DynamoDB = <span class="hljs-built_in">require</span>(<span class="hljs-string">'aws-sdk/clients/dynamodb'</span>);
+
+<span class="hljs-keyword">const</span> paginator = <span class="hljs-keyword">new</span> QueryPaginator(
+    <span class="hljs-keyword">new</span> DynamoDB({region: <span class="hljs-string">'us-west-2'</span>}),
+    {
+        TableName: <span class="hljs-string">'my_table'</span>,
+        KeyConditionExpression: <span class="hljs-string">'partitionKey = :value'</span>,
+        ExpressionAttributeValues: {
+            <span class="hljs-string">':value'</span>: {S: <span class="hljs-string">'foo'</span>}
+        },
+        ReturnConsumedCapacity: <span class="hljs-string">'INDEXES'</span>
+    }
+);
+
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> page of paginator) {
+    <span class="hljs-comment">// do something with `page`</span>
+}
+
+<span class="hljs-comment">// Inspect the total number of items yielded</span>
+<span class="hljs-built_in">console</span>.log(paginator.count);
+
+<span class="hljs-comment">// Inspect the total number of items scanned by this operation</span>
+<span class="hljs-built_in">console</span>.log(paginator.scannedCount);
+
+<span class="hljs-comment">// Inspect the capacity consumed by this operation </span>
+<span class="hljs-comment">// This will only be available if `ReturnConsumedCapacity` was set on the input</span>
+<span class="hljs-built_in">console</span>.log(paginator.consumedCapacity);
+</code></pre>
+				<h4 id="suspending-and-resuming-queries">Suspending and resuming queries</h4>
+				<p>You can suspend any running query from within the <code>for</code> loop by using the
+					<code>break</code> keyword. If there are still pages that have not been fetched, the
+					<code>lastEvaluatedKey</code> property of paginator will be defined. This can be provided
+				as the <code>ExclusiveStartKey</code> for another <code>QueryPaginator</code> instance:</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { QueryPaginator } <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-query-iterator'</span>;
+<span class="hljs-keyword">import</span> { QueryInput } <span class="hljs-keyword">from</span> <span class="hljs-string">'aws-sdk/clients/dynamodb'</span>;
+<span class="hljs-keyword">import</span> DynamoDB = <span class="hljs-built_in">require</span>(<span class="hljs-string">'aws-sdk/clients/dynamodb'</span>);
+
+<span class="hljs-keyword">const</span> dynamoDb = <span class="hljs-keyword">new</span> DynamoDB({region: <span class="hljs-string">'us-west-2'</span>});
+<span class="hljs-keyword">const</span> input: QueryInput = {
+    TableName: <span class="hljs-string">'my_table'</span>,
+    KeyConditionExpression: <span class="hljs-string">'partitionKey = :value'</span>,
+    ExpressionAttributeValues: {
+        <span class="hljs-string">':value'</span>: {S: <span class="hljs-string">'foo'</span>}
+    },
+    ReturnConsumedCapacity: <span class="hljs-string">'INDEXES'</span>
+};
+
+<span class="hljs-keyword">const</span> paginator = <span class="hljs-keyword">new</span> QueryPaginator(dynamoDb, input);
+
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> page of paginator) {
+    <span class="hljs-comment">// do something with the first page of results</span>
+    <span class="hljs-keyword">break</span>
+}
+
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> page of <span class="hljs-keyword">new</span> QueryPaginator(dynamoDb, {
+    ...input,
+    ExclusiveStartKey: paginator.lastEvaluatedKey
+})) {
+    <span class="hljs-comment">// do something with the remaining pages</span>
+}
+</code></pre>
+				<p>Suspending and resuming the same paginator instance is not supported.</p>
+				<h3 id="scanpaginator">ScanPaginator</h3>
+				<p>Retrieves all pages of a DynamoDB <code>scan</code> in order.</p>
+				<h4 id="example-usage">Example usage</h4>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { ScanPaginator } <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-query-iterator'</span>;
+<span class="hljs-keyword">import</span> DynamoDB = <span class="hljs-built_in">require</span>(<span class="hljs-string">'aws-sdk/clients/dynamodb'</span>);
+
+<span class="hljs-keyword">const</span> paginator = <span class="hljs-keyword">new</span> ScanPaginator(
+    <span class="hljs-keyword">new</span> DynamoDB({region: <span class="hljs-string">'us-west-2'</span>}),
+    {
+        TableName: <span class="hljs-string">'my_table'</span>,
+        ReturnConsumedCapacity: <span class="hljs-string">'INDEXES'</span>
+    }
+);
+
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> page of paginator) {
+    <span class="hljs-comment">// do something with `page`</span>
+}
+
+<span class="hljs-comment">// Inspect the total number of items yielded</span>
+<span class="hljs-built_in">console</span>.log(paginator.count);
+
+<span class="hljs-comment">// Inspect the total number of items scanned by this operation</span>
+<span class="hljs-built_in">console</span>.log(paginator.scannedCount);
+
+<span class="hljs-comment">// Inspect the capacity consumed by this operation </span>
+<span class="hljs-comment">// This will only be available if `ReturnConsumedCapacity` was set on the input</span>
+<span class="hljs-built_in">console</span>.log(paginator.consumedCapacity);
+</code></pre>
+				<h4 id="suspending-and-resuming-scans">Suspending and resuming scans</h4>
+				<p>You can suspend any running scan from within the <code>for</code> loop by using the <code>break</code>
+					keyword. If there are still pages that have not been fetched, the
+					<code>lastEvaluatedKey</code> property of paginator will be defined. This can be provided
+				as the <code>ExclusiveStartKey</code> for another <code>ScanPaginator</code> instance:</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { ScanPaginator } <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-query-iterator'</span>;
+<span class="hljs-keyword">import</span> { ScanInput } <span class="hljs-keyword">from</span> <span class="hljs-string">'aws-sdk/clients/dynamodb'</span>;
+<span class="hljs-keyword">import</span> DynamoDB = <span class="hljs-built_in">require</span>(<span class="hljs-string">'aws-sdk/clients/dynamodb'</span>);
+
+<span class="hljs-keyword">const</span> dynamoDb = <span class="hljs-keyword">new</span> DynamoDB({region: <span class="hljs-string">'us-west-2'</span>});
+<span class="hljs-keyword">const</span> input: ScanInput = {
+    TableName: <span class="hljs-string">'my_table'</span>,
+    ReturnConsumedCapacity: <span class="hljs-string">'INDEXES'</span>
+};
+
+<span class="hljs-keyword">const</span> paginator = <span class="hljs-keyword">new</span> ScanPaginator(dynamoDb, input);
+
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> page of paginator) {
+    <span class="hljs-comment">// do something with the first page of results</span>
+    <span class="hljs-keyword">break</span>
+}
+
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> page of <span class="hljs-keyword">new</span> ScanPaginator(dynamoDb, {
+    ...input,
+    ExclusiveStartKey: paginator.lastEvaluatedKey
+})) {
+    <span class="hljs-comment">// do something with the remaining pages</span>
+}
+</code></pre>
+				<p>Suspending and resuming the same paginator instance is not supported.</p>
+				<h3 id="parallelscanpaginator">ParallelScanPaginator</h3>
+				<p>Retrieves all pages of a DynamoDB <code>scan</code> utilizing a configurable number of scan
+					segments that operate in parallel. When performing a parallel scan, you must
+					specify the total number of segments you wish to use, and neither an
+					<code>ExclusiveStartKey</code> nor a <code>Segment</code> identifier may be included with the input
+				provided.</p>
+				<h4 id="example-usage">Example usage</h4>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { ParallelScanPaginator } <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-query-iterator'</span>;
+<span class="hljs-keyword">import</span> DynamoDB = <span class="hljs-built_in">require</span>(<span class="hljs-string">'aws-sdk/clients/dynamodb'</span>);
+
+<span class="hljs-keyword">const</span> paginator = <span class="hljs-keyword">new</span> ParallelScanPaginator(
+    <span class="hljs-keyword">new</span> DynamoDB({region: <span class="hljs-string">'us-west-2'</span>}),
+    {
+        TableName: <span class="hljs-string">'my_table'</span>,
+        TotalSegments: <span class="hljs-number">4</span>,
+        ReturnConsumedCapacity: <span class="hljs-string">'INDEXES'</span>
+    }
+);
+
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> page of paginator) {
+    <span class="hljs-comment">// do something with `page`</span>
+}
+
+<span class="hljs-comment">// Inspect the total number of items yielded</span>
+<span class="hljs-built_in">console</span>.log(paginator.count);
+
+<span class="hljs-comment">// Inspect the total number of items scanned by this operation</span>
+<span class="hljs-built_in">console</span>.log(paginator.scannedCount);
+
+<span class="hljs-comment">// Inspect the capacity consumed by this operation </span>
+<span class="hljs-comment">// This will only be available if `ReturnConsumedCapacity` was set on the input</span>
+<span class="hljs-built_in">console</span>.log(paginator.consumedCapacity);
+</code></pre>
+				<h4 id="suspending-and-resuming-parallel-scans">Suspending and resuming parallel scans</h4>
+				<p>You can suspend any running scan from within the <code>for</code> loop by using the <code>break</code>
+					keyword. If there are still pages that have not been fetched, the <code>scanState</code>
+					property of interrupted paginator can be provided to the constructor of another
+				<code>ParallelScanPaginator</code> instance:</p>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
+    ParallelScanInput,
+    ParallelScanPaginator,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-query-iterator'</span>;
+<span class="hljs-keyword">import</span> DynamoDB = <span class="hljs-built_in">require</span>(<span class="hljs-string">'aws-sdk/clients/dynamodb'</span>);
+
+<span class="hljs-keyword">const</span> client = <span class="hljs-keyword">new</span> DynamoDB({region: <span class="hljs-string">'us-west-2'</span>});
+<span class="hljs-keyword">const</span> input: ParallelScanInput = {
+    TableName: <span class="hljs-string">'my_table'</span>,
+    TotalSegments: <span class="hljs-number">4</span>,
+    ReturnConsumedCapacity: <span class="hljs-string">'INDEXES'</span>
+};
+
+<span class="hljs-keyword">const</span> paginator = <span class="hljs-keyword">new</span> ParallelScanPaginator(client, input);
+
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> page of paginator) {
+    <span class="hljs-comment">// do something with the first page of results</span>
+    <span class="hljs-keyword">break</span>
+}
+
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> page of <span class="hljs-keyword">new</span> ParallelScanPaginator(
+    client,
+    input,
+    paginator.scanState
+)) {
+    <span class="hljs-comment">// do something with the remaining pages</span>
+}
+</code></pre>
+				<p>Suspending and resuming the same paginator instance is not supported.</p>
+				<h2 id="iterators">Iterators</h2>
+				<p>Iterators are asynchronous iterables that yield each of record returned by a
+					DynamoDB <code>query</code> or <code>scan</code> operation. Each invocation of the <code>next</code> method may
+				invoke the underlying API operation until all no more pages are available.</p>
+				<h3 id="queryiterator">QueryIterator</h3>
+				<p>Retrieves all records of a DynamoDB <code>query</code> in order.</p>
+				<h4 id="example-usage">Example usage</h4>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { QueryIterator } <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-query-iterator'</span>;
+<span class="hljs-keyword">import</span> DynamoDB = <span class="hljs-built_in">require</span>(<span class="hljs-string">'aws-sdk/clients/dynamodb'</span>);
+
+<span class="hljs-keyword">const</span> iterator = <span class="hljs-keyword">new</span> QueryIterator(
+    <span class="hljs-keyword">new</span> DynamoDB({region: <span class="hljs-string">'us-west-2'</span>}),
+    {
+        TableName: <span class="hljs-string">'my_table'</span>,
+        KeyConditionExpression: <span class="hljs-string">'partitionKey = :value'</span>,
+        ExpressionAttributeValues: {
+            <span class="hljs-string">':value'</span>: {S: <span class="hljs-string">'foo'</span>}
+        },
+        ReturnConsumedCapacity: <span class="hljs-string">'INDEXES'</span>
+    },
+    [<span class="hljs-string">'partitionKey'</span>]
+);
+
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> record of iterator) {
+    <span class="hljs-comment">// do something with `record`</span>
+}
+
+<span class="hljs-comment">// Inspect the total number of items yielded</span>
+<span class="hljs-built_in">console</span>.log(iterator.count);
+
+<span class="hljs-comment">// Inspect the total number of items scanned by this operation</span>
+<span class="hljs-built_in">console</span>.log(iterator.scannedCount);
+
+<span class="hljs-comment">// Inspect the capacity consumed by this operation </span>
+<span class="hljs-comment">// This will only be available if `ReturnConsumedCapacity` was set on the input</span>
+<span class="hljs-built_in">console</span>.log(iterator.consumedCapacity);
+</code></pre>
+				<h3 id="scaniterator">ScanIterator</h3>
+				<p>Retrieves all records of a DynamoDB <code>scan</code> in order.</p>
+				<h4 id="example-usage">Example usage</h4>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { ScanIterator } <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-query-iterator'</span>;
+<span class="hljs-keyword">import</span> DynamoDB = <span class="hljs-built_in">require</span>(<span class="hljs-string">'aws-sdk/clients/dynamodb'</span>);
+
+<span class="hljs-keyword">const</span> iterator = <span class="hljs-keyword">new</span> ScanIterator(
+    <span class="hljs-keyword">new</span> DynamoDB({region: <span class="hljs-string">'us-west-2'</span>}),
+    {
+        TableName: <span class="hljs-string">'my_table'</span>,
+        ReturnConsumedCapacity: <span class="hljs-string">'INDEXES'</span>
+    },
+    [<span class="hljs-string">'partitionKey'</span>, <span class="hljs-string">'sortKey'</span>]
+);
+
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> record of iterator) {
+    <span class="hljs-comment">// do something with `record`</span>
+}
+
+<span class="hljs-comment">// Inspect the total number of items yielded</span>
+<span class="hljs-built_in">console</span>.log(iterator.count);
+
+<span class="hljs-comment">// Inspect the total number of items scanned by this operation</span>
+<span class="hljs-built_in">console</span>.log(iterator.scannedCount);
+
+<span class="hljs-comment">// Inspect the capacity consumed by this operation </span>
+<span class="hljs-comment">// This will only be available if `ReturnConsumedCapacity` was set on the input</span>
+<span class="hljs-built_in">console</span>.log(iterator.consumedCapacity);
+</code></pre>
+				<h3 id="parallelscaniterator">ParallelScanIterator</h3>
+				<p>Retrieves all pages of a DynamoDB <code>scan</code> utilizing a configurable number of scan
+					segments that operate in parallel. When performing a parallel scan, you must
+					specify the total number of segments you wish to use, and neither an
+					<code>ExclusiveStartKey</code> nor a <code>Segment</code> identifier may be included with the input
+				provided.</p>
+				<h4 id="example-usage">Example usage</h4>
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { ParallelScanIterator} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-query-iterator'</span>;
+<span class="hljs-keyword">import</span> DynamoDB = <span class="hljs-built_in">require</span>(<span class="hljs-string">'aws-sdk/clients/dynamodb'</span>);
+
+<span class="hljs-keyword">const</span> iterator = <span class="hljs-keyword">new</span> ParallelScanIterator(
+    <span class="hljs-keyword">new</span> DynamoDB({region: <span class="hljs-string">'us-west-2'</span>}),
+    {
+        TableName: <span class="hljs-string">'my_table'</span>,
+        TotalSegments: <span class="hljs-number">4</span>,
+        ReturnConsumedCapacity: <span class="hljs-string">'INDEXES'</span>
+    },
+    [<span class="hljs-string">'partitionKey'</span>]
+);
+
+<span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> record of iterator) {
+    <span class="hljs-comment">// do something with `record`</span>
+}
+
+<span class="hljs-comment">// Inspect the total number of items yielded</span>
+<span class="hljs-built_in">console</span>.log(iterator.count);
+
+<span class="hljs-comment">// Inspect the total number of items scanned by this operation</span>
+<span class="hljs-built_in">console</span>.log(iterator.scannedCount);
+
+<span class="hljs-comment">// Inspect the capacity consumed by this operation </span>
+<span class="hljs-comment">// This will only be available if `ReturnConsumedCapacity` was set on the input</span>
+<span class="hljs-built_in">console</span>.log(iterator.consumedCapacity);
+</code></pre>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-class">
+						<a href="classes/dynamodbpaginator.html" class="tsd-kind-icon">Dynamo<wbr>DbPaginator</a>
+					</li>
+					<li class=" tsd-kind-class tsd-has-type-parameter">
+						<a href="classes/itemiterator.html" class="tsd-kind-icon">Item<wbr>Iterator</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/parallelscaniterator.html" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>Iterator</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/parallelscanpaginator.html" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>Paginator</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/queryiterator.html" class="tsd-kind-icon">Query<wbr>Iterator</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/querypaginator.html" class="tsd-kind-icon">Query<wbr>Paginator</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/scaniterator.html" class="tsd-kind-icon">Scan<wbr>Iterator</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/scanpaginator.html" class="tsd-kind-icon">Scan<wbr>Paginator</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/dynamodbpaginatorinterface.html" class="tsd-kind-icon">Dynamo<wbr>DbPaginator<wbr>Interface</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/dynamodbresultspage.html" class="tsd-kind-icon">Dynamo<wbr>DbResults<wbr>Page</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/initializedscanstate.html" class="tsd-kind-icon">Initialized<wbr>Scan<wbr>State</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/parallelscaninput.html" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>Input</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/uninitializedscanstate.html" class="tsd-kind-icon">Uninitialized<wbr>Scan<wbr>State</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#parallelscanstate" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>State</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#scanstate" class="tsd-kind-icon">Scan<wbr>State</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#mergeconsumedcapacities" class="tsd-kind-icon">merge<wbr>Consumed<wbr>Capacities</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer>
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>

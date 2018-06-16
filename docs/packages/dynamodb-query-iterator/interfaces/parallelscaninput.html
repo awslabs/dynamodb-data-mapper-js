@@ -1,0 +1,550 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>ParallelScanInput | @aws/dynamodb-query-iterator</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.js" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../index.html" class="title">@aws/dynamodb-query-iterator</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../globals.html">Globals</a>
+				</li>
+				<li>
+					<a href="parallelscaninput.html">ParallelScanInput</a>
+				</li>
+			</ul>
+			<h1>Interface ParallelScanInput</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="tsd-signature-type">ScanInput</span>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">ParallelScanInput</span>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="parallelscaninput.html#attributestoget" class="tsd-kind-icon">Attributes<wbr>ToGet</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="parallelscaninput.html#conditionaloperator" class="tsd-kind-icon">Conditional<wbr>Operator</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="parallelscaninput.html#consistentread" class="tsd-kind-icon">Consistent<wbr>Read</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite"><a href="parallelscaninput.html#exclusivestartkey" class="tsd-kind-icon">Exclusive<wbr>Start<wbr>Key</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="parallelscaninput.html#expressionattributenames" class="tsd-kind-icon">Expression<wbr>Attribute<wbr>Names</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="parallelscaninput.html#expressionattributevalues" class="tsd-kind-icon">Expression<wbr>Attribute<wbr>Values</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="parallelscaninput.html#filterexpression" class="tsd-kind-icon">Filter<wbr>Expression</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="parallelscaninput.html#indexname" class="tsd-kind-icon">Index<wbr>Name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="parallelscaninput.html#limit" class="tsd-kind-icon">Limit</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="parallelscaninput.html#projectionexpression" class="tsd-kind-icon">Projection<wbr>Expression</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="parallelscaninput.html#returnconsumedcapacity" class="tsd-kind-icon">Return<wbr>Consumed<wbr>Capacity</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="parallelscaninput.html#scanfilter" class="tsd-kind-icon">Scan<wbr>Filter</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite"><a href="parallelscaninput.html#segment" class="tsd-kind-icon">Segment</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="parallelscaninput.html#select" class="tsd-kind-icon">Select</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="parallelscaninput.html#tablename" class="tsd-kind-icon">Table<wbr>Name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite"><a href="parallelscaninput.html#totalsegments" class="tsd-kind-icon">Total<wbr>Segments</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="attributestoget" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> Attributes<wbr>ToGet</h3>
+					<div class="tsd-signature tsd-kind-icon">Attributes<wbr>ToGet<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">AttributeNameList</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from ScanInput.AttributesToGet</p>
+						<ul>
+							<li>Defined in /Users/eskewj/Workspace/dynamo-data-mapper/node_modules/aws-sdk/clients/dynamodb.d.ts:1668</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>This is a legacy parameter. Use ProjectionExpression instead. For more information, see AttributesToGet in the Amazon DynamoDB Developer Guide.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="conditionaloperator" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> Conditional<wbr>Operator</h3>
+					<div class="tsd-signature tsd-kind-icon">Conditional<wbr>Operator<span class="tsd-signature-symbol">:</span> <a href="parallelscaninput.html#conditionaloperator" class="tsd-signature-type">ConditionalOperator</a></div>
+					<aside class="tsd-sources">
+						<p>Inherited from ScanInput.ConditionalOperator</p>
+						<ul>
+							<li>Defined in /Users/eskewj/Workspace/dynamo-data-mapper/node_modules/aws-sdk/clients/dynamodb.d.ts:1684</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>This is a legacy parameter. Use FilterExpression instead. For more information, see ConditionalOperator in the Amazon DynamoDB Developer Guide.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="consistentread" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> Consistent<wbr>Read</h3>
+					<div class="tsd-signature tsd-kind-icon">Consistent<wbr>Read<span class="tsd-signature-symbol">:</span> <a href="parallelscaninput.html#consistentread" class="tsd-signature-type">ConsistentRead</a></div>
+					<aside class="tsd-sources">
+						<p>Inherited from ScanInput.ConsistentRead</p>
+						<ul>
+							<li>Defined in /Users/eskewj/Workspace/dynamo-data-mapper/node_modules/aws-sdk/clients/dynamodb.d.ts:1717</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A Boolean value that determines the read consistency model during the scan:   If ConsistentRead is false, then the data returned from Scan might not contain the results from other recently completed write operations (PutItem, UpdateItem or DeleteItem).   If ConsistentRead is true, then all of the write operations that completed before the Scan began are guaranteed to be contained in the Scan response.   The default setting for ConsistentRead is false. The ConsistentRead parameter is not supported on global secondary indexes. If you scan a global secondary index with ConsistentRead set to true, you will receive a ValidationException.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
+					<a name="exclusivestartkey" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> Exclusive<wbr>Start<wbr>Key</h3>
+					<div class="tsd-signature tsd-kind-icon">Exclusive<wbr>Start<wbr>Key<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span></div>
+					<aside class="tsd-sources">
+						<p>Overrides ScanInput.ExclusiveStartKey</p>
+						<ul>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/6e4b75b/packages/dynamodb-query-iterator/src/ParallelScanInput.ts#L10">ParallelScanInput.ts:10</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The exclusive start key for a particular scan segment must be coordinated
+								across all active segments. To resume a previously suspending parallel
+								scan, provide a <code>scanState</code> initializer when creating a
+							ParallelScanPaginator.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="expressionattributenames" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> Expression<wbr>Attribute<wbr>Names</h3>
+					<div class="tsd-signature tsd-kind-icon">Expression<wbr>Attribute<wbr>Names<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ExpressionAttributeNameMap</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from ScanInput.ExpressionAttributeNames</p>
+						<ul>
+							<li>Defined in /Users/eskewj/Workspace/dynamo-data-mapper/node_modules/aws-sdk/clients/dynamodb.d.ts:1709</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>One or more substitution tokens for attribute names in an expression. The following are some use cases for using ExpressionAttributeNames:   To access an attribute whose name conflicts with a DynamoDB reserved word.   To create a placeholder for repeating occurrences of an attribute name in an expression.   To prevent special characters in an attribute name from being misinterpreted in an expression.   Use the # character in an expression to dereference an attribute name. For example, consider the following attribute name:    Percentile    The name of this attribute conflicts with a reserved word, so it cannot be used directly in an expression. (For the complete list of reserved words, see Reserved Words in the Amazon DynamoDB Developer Guide). To work around this, you could specify the following for ExpressionAttributeNames:    {&quot;#P&quot;:&quot;Percentile&quot;}    You could then use this substitution in an expression, as in this example:    #P = :val     Tokens that begin with the : character are expression attribute values, which are placeholders for the actual value at runtime.  For more information on expression attribute names, see Accessing Item Attributes in the Amazon DynamoDB Developer Guide.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="expressionattributevalues" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> Expression<wbr>Attribute<wbr>Values</h3>
+					<div class="tsd-signature tsd-kind-icon">Expression<wbr>Attribute<wbr>Values<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ExpressionAttributeValueMap</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from ScanInput.ExpressionAttributeValues</p>
+						<ul>
+							<li>Defined in /Users/eskewj/Workspace/dynamo-data-mapper/node_modules/aws-sdk/clients/dynamodb.d.ts:1713</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>One or more values that can be substituted in an expression. Use the : (colon) character in an expression to dereference an attribute value. For example, suppose that you wanted to check whether the value of the ProductStatus attribute was one of the following:   Available | Backordered | Discontinued  You would first need to specify ExpressionAttributeValues as follows:  { &quot;:avail&quot;:{&quot;S&quot;:&quot;Available&quot;}, &quot;:back&quot;:{&quot;S&quot;:&quot;Backordered&quot;}, &quot;:disc&quot;:{&quot;S&quot;:&quot;Discontinued&quot;} }  You could then use these values in an expression, such as this:  ProductStatus IN (:avail, :back, :disc)  For more information on expression attribute values, see Specifying Conditions in the Amazon DynamoDB Developer Guide.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="filterexpression" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> Filter<wbr>Expression</h3>
+					<div class="tsd-signature tsd-kind-icon">Filter<wbr>Expression<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ConditionExpression</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from ScanInput.FilterExpression</p>
+						<ul>
+							<li>Defined in /Users/eskewj/Workspace/dynamo-data-mapper/node_modules/aws-sdk/clients/dynamodb.d.ts:1705</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A string that contains conditions that DynamoDB applies after the Scan operation, but before the data is returned to you. Items that do not satisfy the FilterExpression criteria are not returned.  A FilterExpression is applied after the items have already been read; the process of filtering does not consume any additional read capacity units.  For more information, see Filter Expressions in the Amazon DynamoDB Developer Guide.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="indexname" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> Index<wbr>Name</h3>
+					<div class="tsd-signature tsd-kind-icon">Index<wbr>Name<span class="tsd-signature-symbol">:</span> <a href="parallelscaninput.html#indexname" class="tsd-signature-type">IndexName</a></div>
+					<aside class="tsd-sources">
+						<p>Inherited from ScanInput.IndexName</p>
+						<ul>
+							<li>Defined in /Users/eskewj/Workspace/dynamo-data-mapper/node_modules/aws-sdk/clients/dynamodb.d.ts:1664</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The name of a secondary index to scan. This index can be any local secondary index or global secondary index. Note that if you use the IndexName parameter, you must also provide TableName.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="limit" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> Limit</h3>
+					<div class="tsd-signature tsd-kind-icon">Limit<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">PositiveIntegerObject</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from ScanInput.Limit</p>
+						<ul>
+							<li>Defined in /Users/eskewj/Workspace/dynamo-data-mapper/node_modules/aws-sdk/clients/dynamodb.d.ts:1672</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The maximum number of items to evaluate (not necessarily the number of matching items). If DynamoDB processes the number of items up to the limit while processing the results, it stops the operation and returns the matching values up to that point, and a key in LastEvaluatedKey to apply in a subsequent operation, so that you can pick up where you left off. Also, if the processed data set size exceeds 1 MB before DynamoDB reaches this limit, it stops the operation and returns the matching values up to the limit, and a key in LastEvaluatedKey to apply in a subsequent operation to continue the operation. For more information, see Query and Scan in the Amazon DynamoDB Developer Guide.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="projectionexpression" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> Projection<wbr>Expression</h3>
+					<div class="tsd-signature tsd-kind-icon">Projection<wbr>Expression<span class="tsd-signature-symbol">:</span> <a href="parallelscaninput.html#projectionexpression" class="tsd-signature-type">ProjectionExpression</a></div>
+					<aside class="tsd-sources">
+						<p>Inherited from ScanInput.ProjectionExpression</p>
+						<ul>
+							<li>Defined in /Users/eskewj/Workspace/dynamo-data-mapper/node_modules/aws-sdk/clients/dynamodb.d.ts:1701</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A string that identifies one or more attributes to retrieve from the specified table or index. These attributes can include scalars, sets, or elements of a JSON document. The attributes in the expression must be separated by commas. If no attribute names are specified, then all attributes will be returned. If any of the requested attributes are not found, they will not appear in the result. For more information, see Accessing Item Attributes in the Amazon DynamoDB Developer Guide.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="returnconsumedcapacity" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> Return<wbr>Consumed<wbr>Capacity</h3>
+					<div class="tsd-signature tsd-kind-icon">Return<wbr>Consumed<wbr>Capacity<span class="tsd-signature-symbol">:</span> <a href="parallelscaninput.html#returnconsumedcapacity" class="tsd-signature-type">ReturnConsumedCapacity</a></div>
+					<aside class="tsd-sources">
+						<p>Inherited from ScanInput.ReturnConsumedCapacity</p>
+						<ul>
+							<li>Defined in /Users/eskewj/Workspace/dynamo-data-mapper/node_modules/aws-sdk/clients/dynamodb.d.ts:1689</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="scanfilter" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> Scan<wbr>Filter</h3>
+					<div class="tsd-signature tsd-kind-icon">Scan<wbr>Filter<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">FilterConditionMap</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from ScanInput.ScanFilter</p>
+						<ul>
+							<li>Defined in /Users/eskewj/Workspace/dynamo-data-mapper/node_modules/aws-sdk/clients/dynamodb.d.ts:1680</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>This is a legacy parameter. Use FilterExpression instead. For more information, see ScanFilter in the Amazon DynamoDB Developer Guide.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
+					<a name="segment" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> Segment</h3>
+					<div class="tsd-signature tsd-kind-icon">Segment<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span></div>
+					<aside class="tsd-sources">
+						<p>Overrides ScanInput.Segment</p>
+						<ul>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/6e4b75b/packages/dynamodb-query-iterator/src/ParallelScanInput.ts#L16">ParallelScanInput.ts:16</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The segment identifier for each request will be assigned by the parallel
+							scan orchestrator.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="select" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> Select</h3>
+					<div class="tsd-signature tsd-kind-icon">Select<span class="tsd-signature-symbol">:</span> <a href="parallelscaninput.html#select" class="tsd-signature-type">Select</a></div>
+					<aside class="tsd-sources">
+						<p>Inherited from ScanInput.Select</p>
+						<ul>
+							<li>Defined in /Users/eskewj/Workspace/dynamo-data-mapper/node_modules/aws-sdk/clients/dynamodb.d.ts:1676</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The attributes to be returned in the result. You can retrieve all item attributes, specific item attributes, the count of matching items, or in the case of an index, some or all of the attributes projected into the index.    ALL_ATTRIBUTES - Returns all of the item attributes from the specified table or index. If you query a local secondary index, then for each matching item in the index DynamoDB will fetch the entire item from the parent table. If the index is configured to project all item attributes, then all of the data can be obtained from the local secondary index, and no fetching is required.    ALL_PROJECTED_ATTRIBUTES - Allowed only when querying an index. Retrieves all attributes that have been projected into the index. If the index is configured to project all attributes, this return value is equivalent to specifying ALL_ATTRIBUTES.    COUNT - Returns the number of matching items, rather than the matching items themselves.    SPECIFIC_ATTRIBUTES - Returns only the attributes listed in AttributesToGet. This return value is equivalent to specifying AttributesToGet without specifying any value for Select. If you query or scan a local secondary index and request only attributes that are projected into that index, the operation will read only the index and not the table. If any of the requested attributes are not projected into the local secondary index, DynamoDB will fetch each of these attributes from the parent table. This extra fetching incurs additional throughput cost and latency. If you query or scan a global secondary index, you can only request attributes that are projected into the index. Global secondary index queries cannot fetch attributes from the parent table.   If neither Select nor AttributesToGet are specified, DynamoDB defaults to ALL_ATTRIBUTES when accessing a table, and ALL_PROJECTED_ATTRIBUTES when accessing an index. You cannot use both Select and AttributesToGet together in a single request, unless the value for Select is SPECIFIC_ATTRIBUTES. (This usage is equivalent to specifying AttributesToGet without any value for Select.)  If you use the ProjectionExpression parameter, then the value for Select can only be SPECIFIC_ATTRIBUTES. Any other value for Select will return an error.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="tablename" class="tsd-anchor"></a>
+					<h3>Table<wbr>Name</h3>
+					<div class="tsd-signature tsd-kind-icon">Table<wbr>Name<span class="tsd-signature-symbol">:</span> <a href="parallelscaninput.html#tablename" class="tsd-signature-type">TableName</a></div>
+					<aside class="tsd-sources">
+						<p>Inherited from ScanInput.TableName</p>
+						<ul>
+							<li>Defined in /Users/eskewj/Workspace/dynamo-data-mapper/node_modules/aws-sdk/clients/dynamodb.d.ts:1660</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The name of the table containing the requested items; or, if you provide IndexName, the name of the table to which that index belongs.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
+					<a name="totalsegments" class="tsd-anchor"></a>
+					<h3>Total<wbr>Segments</h3>
+					<div class="tsd-signature tsd-kind-icon">Total<wbr>Segments<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<p>Overrides ScanInput.TotalSegments</p>
+						<ul>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/6e4b75b/packages/dynamodb-query-iterator/src/ParallelScanInput.ts#L24">ParallelScanInput.ts:24</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<dl class="tsd-comment-tags">
+							<dt>inheritdoc</dt>
+							<dd><p><code>TotalSegments</code> <strong>MUST</strong> be specified when initializing or resuming a
+								parallel scan.</p>
+							</dd>
+						</dl>
+					</div>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="../globals.html"><em>Globals</em></a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-class">
+						<a href="../classes/dynamodbpaginator.html" class="tsd-kind-icon">Dynamo<wbr>DbPaginator</a>
+					</li>
+					<li class=" tsd-kind-class tsd-has-type-parameter">
+						<a href="../classes/itemiterator.html" class="tsd-kind-icon">Item<wbr>Iterator</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="../classes/parallelscaniterator.html" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>Iterator</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="../classes/parallelscanpaginator.html" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>Paginator</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="../classes/queryiterator.html" class="tsd-kind-icon">Query<wbr>Iterator</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="../classes/querypaginator.html" class="tsd-kind-icon">Query<wbr>Paginator</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="../classes/scaniterator.html" class="tsd-kind-icon">Scan<wbr>Iterator</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="../classes/scanpaginator.html" class="tsd-kind-icon">Scan<wbr>Paginator</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="dynamodbpaginatorinterface.html" class="tsd-kind-icon">Dynamo<wbr>DbPaginator<wbr>Interface</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="dynamodbresultspage.html" class="tsd-kind-icon">Dynamo<wbr>DbResults<wbr>Page</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="initializedscanstate.html" class="tsd-kind-icon">Initialized<wbr>Scan<wbr>State</a>
+					</li>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-interface">
+						<a href="parallelscaninput.html" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>Input</a>
+						<ul>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="parallelscaninput.html#attributestoget" class="tsd-kind-icon">Attributes<wbr>ToGet</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="parallelscaninput.html#conditionaloperator" class="tsd-kind-icon">Conditional<wbr>Operator</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="parallelscaninput.html#consistentread" class="tsd-kind-icon">Consistent<wbr>Read</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
+								<a href="parallelscaninput.html#exclusivestartkey" class="tsd-kind-icon">Exclusive<wbr>Start<wbr>Key</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="parallelscaninput.html#expressionattributenames" class="tsd-kind-icon">Expression<wbr>Attribute<wbr>Names</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="parallelscaninput.html#expressionattributevalues" class="tsd-kind-icon">Expression<wbr>Attribute<wbr>Values</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="parallelscaninput.html#filterexpression" class="tsd-kind-icon">Filter<wbr>Expression</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="parallelscaninput.html#indexname" class="tsd-kind-icon">Index<wbr>Name</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="parallelscaninput.html#limit" class="tsd-kind-icon">Limit</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="parallelscaninput.html#projectionexpression" class="tsd-kind-icon">Projection<wbr>Expression</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="parallelscaninput.html#returnconsumedcapacity" class="tsd-kind-icon">Return<wbr>Consumed<wbr>Capacity</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="parallelscaninput.html#scanfilter" class="tsd-kind-icon">Scan<wbr>Filter</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
+								<a href="parallelscaninput.html#segment" class="tsd-kind-icon">Segment</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="parallelscaninput.html#select" class="tsd-kind-icon">Select</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="parallelscaninput.html#tablename" class="tsd-kind-icon">Table<wbr>Name</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
+								<a href="parallelscaninput.html#totalsegments" class="tsd-kind-icon">Total<wbr>Segments</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-interface">
+						<a href="uninitializedscanstate.html" class="tsd-kind-icon">Uninitialized<wbr>Scan<wbr>State</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="../globals.html#parallelscanstate" class="tsd-kind-icon">Parallel<wbr>Scan<wbr>State</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="../globals.html#scanstate" class="tsd-kind-icon">Scan<wbr>State</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="../globals.html#mergeconsumedcapacities" class="tsd-kind-icon">merge<wbr>Consumed<wbr>Capacities</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer>
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="../assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>
