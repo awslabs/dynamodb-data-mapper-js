@@ -115,6 +115,39 @@ describe('QueryPaginator', () => {
         expect(paginator.lastEvaluatedKey).toEqual({fizz: {S: 'crackle'}});
     });
 
+    it('should not request a page size that will exceed $limit', async () => {
+        promiseFunc.mockImplementationOnce(() => Promise.resolve({
+            Items: [
+                {
+                    fizz: {S: 'snap'},
+                    bar: {NS: ['1', '2', '3']},
+                    baz: {L: [{BOOL: true}, {N: '4'}]}
+                },
+                {
+                    fizz: {S: 'crackle'},
+                    bar: {NS: ['5', '6', '7']},
+                    baz: {L: [{BOOL: false}, {N: '8'}]}
+                },
+            ],
+            LastEvaluatedKey: {fizz: {S: 'crackle'}},
+        }));
+        promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
+
+        const paginator = new QueryPaginator(mockDynamoDbClient as any, {TableName: 'foo'}, 3);
+        for await (const _ of paginator) {
+            // pass
+        }
+
+        expect(mockDynamoDbClient.query.mock.calls).toEqual([
+            [{TableName: 'foo', Limit: 3}],
+            [{
+                TableName: 'foo',
+                Limit: 1,
+                ExclusiveStartKey: {fizz: {S: 'crackle'}}
+            }],
+        ]);
+    });
+
     it('should provide access to the last evaluated key', async () => {
         promiseFunc.mockImplementationOnce(() => Promise.resolve({
             Items: [
