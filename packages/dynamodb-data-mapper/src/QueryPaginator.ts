@@ -1,10 +1,10 @@
+import { marshallStartKey } from './marshallStartKey';
 import { QueryOptions } from './namedParameters';
 import { Paginator } from './Paginator';
 import { getSchema, getTableName } from './protocols';
 import { QueryPaginator as BasePaginator } from '@aws/dynamodb-query-iterator';
 import {
     marshallConditionExpression,
-    marshallKey,
     marshallProjectionExpression,
     ZeroArgumentsConstructor,
 } from '@aws/dynamodb-data-marshaller';
@@ -87,11 +87,7 @@ export class QueryPaginator<T> extends Paginator<T> {
         }
 
         if (startKey) {
-            req.ExclusiveStartKey = marshallKey(
-                itemSchema,
-                startKey,
-                indexName
-            );
+            req.ExclusiveStartKey = marshallStartKey(itemSchema, startKey);
         }
 
         super(

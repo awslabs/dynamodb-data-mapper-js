@@ -1,8 +1,8 @@
+import { marshallStartKey } from './marshallStartKey';
 import { SequentialScanOptions } from './namedParameters';
 import { getSchema, getTableName } from './protocols';
 import {
     marshallConditionExpression,
-    marshallKey,
     marshallProjectionExpression,
     ZeroArgumentsConstructor,
 } from '@aws/dynamodb-data-marshaller';
@@ -69,7 +69,7 @@ export function buildScanInput<T>(
     }
 
     if (startKey) {
-        req.ExclusiveStartKey = marshallKey(schema, startKey, indexName);
+        req.ExclusiveStartKey = marshallStartKey(schema, startKey);
     }
 
     return req;

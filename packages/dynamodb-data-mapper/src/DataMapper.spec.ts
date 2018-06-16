@@ -3205,7 +3205,7 @@ describe('DataMapper', () => {
                 }
             }
 
-            it('should only serialize key properties from the startKey', async () => {
+            it('should not inject default values into the startKey', async () => {
                 const iter = mapper.query(
                     MyItem,
                     { snap: 'key' },
@@ -3216,25 +3216,6 @@ describe('DataMapper', () => {
                 expect(mockDynamoDbClient.query.mock.calls[0][0].ExclusiveStartKey)
                     .toEqual({
                         snap: {S: 'key'},
-                        crackle: {N: '0'},
-                    });
-            });
-
-            it('should serialize keys from the correct index', async () => {
-                const startKey = new MyItem;
-                startKey.pop = new Date(1000);
-                const iter = mapper.query(
-                    MyItem,
-                    { snap: 'key' },
-                    { startKey, indexName: 'myIndex' }
-                );
-
-                await iter.next();
-
-                expect(mockDynamoDbClient.query.mock.calls[0][0].ExclusiveStartKey)
-                    .toEqual({
-                        pop: {N: '1'},
-                        crackle: {N: '0'},
                     });
             });
         });
@@ -3624,7 +3605,7 @@ describe('DataMapper', () => {
                 }
             }
 
-            it('should only serialize key properties from the startKey', async () => {
+            it('should not inject default properties into the startKey', async () => {
                 const iter = mapper.scan(
                     MyItem,
                     { startKey: new MyItem('key') }
@@ -3634,23 +3615,6 @@ describe('DataMapper', () => {
                 expect(mockDynamoDbClient.scan.mock.calls[0][0].ExclusiveStartKey)
                     .toEqual({
                         snap: {S: 'key'},
-                        crackle: {N: '0'},
-                    });
-            });
-
-            it('should serialize keys from the correct index', async () => {
-                const startKey = new MyItem;
-                startKey.pop = new Date(1000);
-                const iter = mapper.scan(
-                    MyItem,
-                    { startKey, indexName: 'myIndex' }
-                );
-                await iter.next();
-
-                expect(mockDynamoDbClient.scan.mock.calls[0][0].ExclusiveStartKey)
-                    .toEqual({
-                        pop: {N: '1'},
-                        crackle: {N: '0'},
                     });
             });
         });

@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.6.0]
 ### Fixed
+ - Update `query` and `scan` to serialize whatever key properties are provided
+    without injecting any defaulted values.
  - Update `DataMapper` for TypeScript 2.9 compatibility.
 
 ### Added
