@@ -1,6 +1,6 @@
 {
   "name": "@aws/dynamodb-data-mapper-annotations",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Annotations providing easy integration between TypeScript domain objects and the @aws/dynamodb-data-mapper library",
   "keywords": [
     "aws",
@@ -39,9 +39,9 @@
     "typescript": "^2.7"
   },
   "dependencies": {
-    "@aws/dynamodb-auto-marshaller": "^0.5.0",
-    "@aws/dynamodb-data-mapper": "^0.5.0",
-    "@aws/dynamodb-data-marshaller": "^0.5.0",
+    "@aws/dynamodb-auto-marshaller": "^0.6.0",
+    "@aws/dynamodb-data-mapper": "^0.6.0",
+    "@aws/dynamodb-data-marshaller": "^0.6.0",
     "reflect-metadata": "^0.1.10",
     "tslib": "^1.8.1",
     "uuid": "^3.0.0"
