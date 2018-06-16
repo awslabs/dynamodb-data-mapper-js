@@ -85,8 +85,7 @@ describe('ParallelScanPaginator', () => {
                             baz: {L: [{BOOL: true}, {N: '3'}]}
                         },
                     ],
-                    LastEvaluatedKey: {fizz: {S: 'snap'}},
-                    segment: 1
+                    LastEvaluatedKey: {fizz: {S: 'snap'}}
                 },
                 {
                     Items: [
@@ -96,8 +95,7 @@ describe('ParallelScanPaginator', () => {
                             baz: {L: [{BOOL: false}, {N: '6'}]}
                         },
                     ],
-                    LastEvaluatedKey: {fizz: {S: 'crackle'}},
-                    segment: 1
+                    LastEvaluatedKey: {fizz: {S: 'crackle'}}
                 },
                 {
                     Items: [
@@ -107,8 +105,7 @@ describe('ParallelScanPaginator', () => {
                             baz: {L: [{BOOL: true}, {N: '9'}]}
                         },
                     ],
-                    LastEvaluatedKey: {fizz: {S: 'pop'}},
-                    segment: 1
+                    LastEvaluatedKey: {fizz: {S: 'pop'}}
                 },
                 {
                     Items: [
@@ -118,8 +115,7 @@ describe('ParallelScanPaginator', () => {
                             baz: {L: [{BOOL: false}, {N: '12'}]}
                         },
                     ],
-                    LastEvaluatedKey: {fizz: {S: 'foo'}},
-                    segment: 1
+                    LastEvaluatedKey: {fizz: {S: 'foo'}}
                 },
                 {
                     Items: [
@@ -129,8 +125,7 @@ describe('ParallelScanPaginator', () => {
                             baz: {L: [{BOOL: true}, {N: '15'}]}
                         },
                     ],
-                    LastEvaluatedKey: {fizz: {S: 'bar'}},
-                    segment: 1
+                    LastEvaluatedKey: {fizz: {S: 'bar'}}
                 },
                 {
                     Items: [
@@ -140,12 +135,10 @@ describe('ParallelScanPaginator', () => {
                             baz: {L: [{BOOL: false}, {N: '18'}]}
                         },
                     ],
-                    LastEvaluatedKey: {fizz: {S: 'baz'}},
-                    segment: 1
+                    LastEvaluatedKey: {fizz: {S: 'baz'}}
                 },
                 {
-                    Items: [],
-                    segment: 1
+                    Items: []
                 },
                 {
                     Items: [
@@ -154,8 +147,7 @@ describe('ParallelScanPaginator', () => {
                             bar: {NS: ['5', '12', '13']},
                             baz: {L: [{BOOL: true}, {N: '101'}]}
                         },
-                    ],
-                    segment: 0
+                    ]
                 },
             ]);
         }

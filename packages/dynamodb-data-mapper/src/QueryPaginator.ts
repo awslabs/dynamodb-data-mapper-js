@@ -15,14 +15,14 @@ import {
     isConditionExpression,
     isConditionExpressionPredicate,
 } from '@aws/dynamodb-expressions';
-import { QueryInput, QueryOutput } from 'aws-sdk/clients/dynamodb';
+import { QueryInput } from 'aws-sdk/clients/dynamodb';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 /**
  * Iterates over each page of items returned by a DynamoDB query until no more
  * pages are available.
  */
-export class QueryPaginator<T> extends Paginator<T, QueryOutput> {
+export class QueryPaginator<T> extends Paginator<T> {
     constructor(
         client: DynamoDB,
         valueConstructor: ZeroArgumentsConstructor<T>,
@@ -36,7 +36,7 @@ export class QueryPaginator<T> extends Paginator<T, QueryOutput> {
             filter,
             indexName,
             limit,
-            pageSize = limit,
+            pageSize,
             projection,
             readConsistency,
             scanIndexForward,
@@ -92,7 +92,7 @@ export class QueryPaginator<T> extends Paginator<T, QueryOutput> {
         }
 
         super(
-            new BasePaginator(client, req),
+            new BasePaginator(client, req, limit),
             valueConstructor
         );
     }

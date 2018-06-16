@@ -2255,38 +2255,6 @@ describe('DataMapper', () => {
             }
         );
 
-        it('should return undefined for lastEvaluatedKey', async () => {
-            promiseFunc.mockImplementationOnce(() => Promise.resolve({
-                Items: [
-                    {
-                        fizz: {S: 'snap'},
-                        bar: {NS: ['1', '2']},
-                        baz: {L: [
-                                {BOOL: true},
-                                {N: '3'}
-                            ]},
-                    },
-                    {
-                        fizz: {S: 'crackle'},
-                        bar: {NS: ['4', '5']},
-                        baz: {L: [
-                                {BOOL: true},
-                                {N: '6'}
-                            ]},
-                    },
-                ],
-                LastEvaluatedKey: {fizz: {S: 'pop'}},
-            }));
-            promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
-            promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
-
-            const iterator = mapper.parallelScan(ScannableItem, 2);
-
-            for await (const _ of iterator) {
-                expect(iterator.lastEvaluatedKey).toBeUndefined();
-            }
-        });
-
         it('should return undefined for lastEvaluatedKey on the paginator', async () => {
             promiseFunc.mockImplementationOnce(() => Promise.resolve({
                 Items: [
@@ -2338,13 +2306,16 @@ describe('DataMapper', () => {
 
             const iterator = mapper.parallelScan(ScannableItem, 2);
 
-            const expectedKeys = ['snap', 'pop'];
-
             for await (const _ of iterator) {
-                expect(iterator.scanState)
-                    .toMatchObject([{initialized: true}, {initialized: false}]);
-                expect(iterator.scanState[0].lastEvaluatedKey)
-                    .toMatchObject(ScannableItem.fromKey(expectedKeys.shift()!));
+                expect(iterator.pages().scanState)
+                    .toMatchObject([
+                        {
+                            initialized: true,
+                            lastEvaluatedKey: ScannableItem.fromKey('pop')
+                        },
+                        {initialized: false},
+                    ]);
+                break;
             }
         });
 
@@ -3097,48 +3068,7 @@ describe('DataMapper', () => {
                 });
         });
 
-        it('should provide the last evaluated key', async () => {
-            promiseFunc.mockImplementationOnce(() => Promise.resolve({
-                Items: [
-                    { snap: {S: 'foo'} },
-                    { snap: {S: 'bar'} },
-                ],
-                LastEvaluatedKey: {snap: {S: 'bar'}},
-            }));
-
-            const iterator = mapper.query(QueryableItem, {snap: 'crackle'});
-            for await (const item of iterator) {
-                expect(item.snap).toBe('foo');
-                break;
-            }
-
-            expect(iterator.lastEvaluatedKey).toBeDefined();
-            expect(iterator.lastEvaluatedKey!.snap).toBe('foo');
-        });
-
-        it(
-            'should use the last evaluated key from the API response if the pending queue is empty',
-            async () => {
-                promiseFunc.mockImplementationOnce(() => Promise.resolve({
-                    Items: [
-                        { snap: {S: 'foo'} },
-                        { snap: {S: 'bar'} },
-                    ],
-                    LastEvaluatedKey: {snap: {S: 'baz'}},
-                }));
-
-                let i = 0;
-                const iterator = mapper.query(QueryableItem, {snap: 'crackle'});
-                for await (const _ of iterator) {
-                    if (i++ > 0) break;
-                }
-
-                expect(iterator.lastEvaluatedKey).toBeDefined();
-                expect(iterator.lastEvaluatedKey!.snap).toBe('baz');
-            }
-        );
-
-        it('should track usage metadata the last evaluated key', async () => {
+        it('should track usage metadata', async () => {
             const ScannedCount = 3;
             const ConsumedCapacity = {
                 TableName: 'foo',

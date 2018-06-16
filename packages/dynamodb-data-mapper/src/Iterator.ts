@@ -5,10 +5,9 @@ require('./asyncIteratorSymbolPolyfill');
 
 export abstract class Iterator<
     T,
-    Paginator extends AbstractPaginator<T, any>
+    Paginator extends AbstractPaginator<T>
 > implements AsyncIterableIterator<T> {
     private _count = 0;
-    private finalKey?: Partial<T>;
     private lastResolved: Promise<IteratorResult<T>> = Promise.resolve() as any;
     private readonly pending: Array<T> = [];
 
@@ -48,8 +47,6 @@ export abstract class Iterator<
         ));
         this.lastResolved.catch(() => {});
 
-        this.finalKey = this.lastEvaluatedKey;
-
         return this.paginator;
     }
 
@@ -57,8 +54,6 @@ export abstract class Iterator<
      * @inheritDoc
      */
     return(): Promise<IteratorResult<T>> {
-        this.finalKey = this.lastEvaluatedKey;
-
         // Prevent any further use of this iterator
         this.lastResolved = Promise.reject(new Error(
             'Iteration has been manually interrupted and may not be resumed'
@@ -83,22 +78,6 @@ export abstract class Iterator<
      */
     get count() {
         return this._count;
-    }
-
-    /**
-     * Retrieve the last reported `LastEvaluatedKey`, unmarshalled according to
-     * the schema used by this iterator.
-     */
-    get lastEvaluatedKey(): Partial<T>|undefined {
-        if (this.finalKey) {
-            return this.finalKey;
-        }
-
-        if (this.hasPendingItems() && this.lastYielded) {
-            return this.lastYielded;
-        }
-
-        return this.paginator.lastEvaluatedKey;
     }
 
     /**

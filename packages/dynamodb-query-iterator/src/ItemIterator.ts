@@ -1,6 +1,5 @@
 import { DynamoDbPaginatorInterface } from './DynamoDbPaginatorInterface';
-import { DynamoDbResultsPage } from './DynamoDbResultsPage';
-import { AttributeMap, ConsumedCapacity, Key } from 'aws-sdk/clients/dynamodb';
+import { AttributeMap, ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
 
 if (Symbol && !Symbol.asyncIterator) {
     (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
@@ -12,13 +11,9 @@ export abstract class ItemIterator<
 
     private _iteratedCount = 0;
     private lastResolved: Promise<IteratorResult<AttributeMap>> = <any>Promise.resolve();
-    private lastYielded?: AttributeMap;
     private readonly pending: Array<AttributeMap> = [];
 
-    protected constructor(
-        protected readonly paginator: Paginator,
-        private readonly keyProperties: Array<string>
-    ) {}
+    protected constructor(private readonly paginator: Paginator) {}
 
     /**
      * @inheritDoc
@@ -44,11 +39,37 @@ export abstract class ItemIterator<
         return this._iteratedCount;
     }
 
+    /**
+     * @inheritDoc
+     */
     next(): Promise<IteratorResult<AttributeMap>> {
         this.lastResolved = this.lastResolved.then(() => this.getNext());
         return this.lastResolved;
     }
 
+    /**
+     * Detaches the underlying paginator from this iterator and returns it. The
+     * paginator will yield arrays of unmarshalled items, with each yielded
+     * array corresponding to a single call to the underlying API. As with the
+     * underlying API, pages may contain a variable number of items or no items,
+     * in which case an empty array will be yielded.
+     *
+     * Calling this method will disable further iteration.
+     */
+    pages(): Paginator {
+        // Prevent the iterator from being used further and squelch any uncaught
+        // promise rejection warnings
+        this.lastResolved = Promise.reject(new Error(
+            'The underlying paginator has been detached from this iterator.'
+        ));
+        this.lastResolved.catch(() => {});
+
+        return this.paginator;
+    }
+
+    /**
+     * @inheritDoc
+     */
     return(): Promise<IteratorResult<AttributeMap>> {
         // Prevent any further use of this iterator
         this.lastResolved = Promise.reject(new Error(
@@ -71,31 +92,11 @@ export abstract class ItemIterator<
         return this.paginator.scannedCount;
     }
 
-    protected handlePage(page: DynamoDbResultsPage): void {
-        this.pending.push(...page.Items || []);
-    }
-
-    protected hasPendingItems(): boolean {
-        return this.pending.length > 0;
-    }
-
-    protected lastYieldedAsKey(): Key|undefined {
-        const key: Key = {};
-        for (const keyAttribute of this.keyProperties) {
-            // This method will only be invoked if any items have been enqueued
-            // for iteration, after which `this.lastYielded` will always be set
-            key[keyAttribute] = this.lastYielded![keyAttribute];
-        }
-
-        return key;
-    }
-
     private getNext(): Promise<IteratorResult<AttributeMap>> {
-        if (this.hasPendingItems()) {
+        if (this.pending.length > 0) {
             this._iteratedCount++;
-            this.lastYielded = this.pending.shift();
             return Promise.resolve({
-                value: this.lastYielded!,
+                value: this.pending.shift()!,
                 done: false
             });
         }
@@ -105,7 +106,7 @@ export abstract class ItemIterator<
                 return {done} as IteratorResult<AttributeMap>;
             }
 
-            this.handlePage(value);
+            this.pending.push(...value.Items || []);
             return this.getNext();
         });
     }

@@ -19,8 +19,7 @@ export function buildScanInput<T>(
     const {
         filter,
         indexName,
-        limit,
-        pageSize = limit,
+        pageSize,
         projection,
         readConsistency,
         segment,

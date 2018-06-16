@@ -5,18 +5,11 @@ import {
     unmarshallItem,
     ZeroArgumentsConstructor,
 } from '@aws/dynamodb-data-marshaller';
-import {
-    ConsumedCapacity,
-    QueryOutput,
-    ScanOutput,
-} from 'aws-sdk/clients/dynamodb';
+import { ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
 
 require('./asyncIteratorSymbolPolyfill');
 
-export abstract class Paginator<
-    T,
-    PageResponse extends QueryOutput|ScanOutput
-> implements AsyncIterableIterator<Array<T>> {
+export abstract class Paginator<T> implements AsyncIterableIterator<Array<T>> {
     private readonly itemSchema: Schema;
     private lastKey?: T;
     private lastResolved: Promise<IteratorResult<Array<T>>> = Promise.resolve() as any;
@@ -88,27 +81,23 @@ export abstract class Paginator<
         return this.paginator.scannedCount;
     }
 
-    protected handlePage(value: PageResponse) {
-        this.lastKey = value.LastEvaluatedKey && unmarshallItem(
-            this.itemSchema,
-            value.LastEvaluatedKey,
-            this.valueConstructor
-        );
-
-        return {
-            value: (value.Items || []).map(item => unmarshallItem(
-                this.itemSchema,
-                item,
-                this.valueConstructor
-            )),
-            done: false
-        }
-    }
-
     private async getNext(): Promise<IteratorResult<Array<T>>> {
         return this.paginator.next().then(({value = {}, done}) => {
             if (!done) {
-                return this.handlePage(value as PageResponse);
+                this.lastKey = value.LastEvaluatedKey && unmarshallItem(
+                    this.itemSchema,
+                    value.LastEvaluatedKey,
+                    this.valueConstructor
+                );
+
+                return {
+                    value: (value.Items || []).map(item => unmarshallItem(
+                        this.itemSchema,
+                        item,
+                        this.valueConstructor
+                    )),
+                    done: false
+                };
             }
 
             this.lastKey = undefined;

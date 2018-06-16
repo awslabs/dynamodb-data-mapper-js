@@ -8,29 +8,35 @@ export class QueryPaginator extends DynamoDbPaginator {
 
     constructor(
         private readonly client: DynamoDB,
-        input: QueryInput
+        input: QueryInput,
+        limit?: number
     ) {
-        super();
+        super(limit);
         this.nextRequest = {...input};
     }
 
     protected getNext(): Promise<IteratorResult<DynamoDbResultsPage>> {
         if (this.nextRequest) {
-            return this.client.query(this.nextRequest).promise().then(output => {
-                if (this.nextRequest && output.LastEvaluatedKey) {
-                    this.nextRequest = {
-                        ...this.nextRequest,
-                        ExclusiveStartKey: output.LastEvaluatedKey,
-                    };
-                } else {
-                    this.nextRequest = undefined;
-                }
+            return this.client.query({
+                ...this.nextRequest,
+                Limit: this.getNextPageSize(this.nextRequest.Limit)
+            })
+                .promise()
+                .then(output => {
+                    if (this.nextRequest && output.LastEvaluatedKey) {
+                        this.nextRequest = {
+                            ...this.nextRequest,
+                            ExclusiveStartKey: output.LastEvaluatedKey
+                        };
+                    } else {
+                        this.nextRequest = undefined;
+                    }
 
-                return Promise.resolve({
-                    value: output,
-                    done: false
+                    return Promise.resolve({
+                        value: output,
+                        done: false
+                    });
                 });
-            });
         }
 
         return Promise.resolve(

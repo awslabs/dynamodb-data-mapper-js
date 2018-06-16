@@ -25,13 +25,6 @@ export interface BaseScanOptions extends ReadConsistencyConfiguration {
 
     /**
      * The maximum number of items to fetch per page of results.
-     *
-     * @deprecated
-     */
-    limit?: number;
-
-    /**
-     * The maximum number of items to fetch per page of results.
      */
     pageSize?: number;
 
@@ -50,6 +43,11 @@ export interface CtorBearer<T extends StringToAnyObjectMap = StringToAnyObjectMa
 }
 
 export interface BaseSequentialScanOptions extends BaseScanOptions {
+    /**
+     * The maximum number of items to fetch over all pages of scan.
+     */
+    limit?: number;
+
     /**
      * For a parallel Scan request, Segment identifies an individual segment to
      * be scanned by an application worker.

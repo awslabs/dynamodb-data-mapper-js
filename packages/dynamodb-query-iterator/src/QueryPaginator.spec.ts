@@ -76,6 +76,45 @@ describe('QueryPaginator', () => {
         }
     );
 
+    it('should fetch up to $limit records', async () => {
+        promiseFunc.mockImplementationOnce(() => Promise.resolve({
+            Items: [
+                {
+                    fizz: {S: 'snap'},
+                    bar: {NS: ['1', '2', '3']},
+                    baz: {L: [{BOOL: true}, {N: '4'}]}
+                },
+                {
+                    fizz: {S: 'crackle'},
+                    bar: {NS: ['5', '6', '7']},
+                    baz: {L: [{BOOL: false}, {N: '8'}]}
+                },
+            ],
+            LastEvaluatedKey: {fizz: {S: 'crackle'}},
+        }));
+
+        const paginator = new QueryPaginator(mockDynamoDbClient as any, {TableName: 'foo'}, 2);
+        const result: any[] = [];
+        for await (const res of paginator) {
+            result.push(...res.Items || []);
+        }
+
+        expect(result).toEqual([
+            {
+                fizz: {S: 'snap'},
+                bar: {NS: ['1', '2', '3']},
+                baz: {L: [{BOOL: true}, {N: '4'}]}
+            },
+            {
+                fizz: {S: 'crackle'},
+                bar: {NS: ['5', '6', '7']},
+                baz: {L: [{BOOL: false}, {N: '8'}]}
+            }
+        ]);
+
+        expect(paginator.lastEvaluatedKey).toEqual({fizz: {S: 'crackle'}});
+    });
+
     it('should provide access to the last evaluated key', async () => {
         promiseFunc.mockImplementationOnce(() => Promise.resolve({
             Items: [

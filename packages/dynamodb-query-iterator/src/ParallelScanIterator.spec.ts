@@ -71,8 +71,7 @@ describe('ParallelScanIterator', () => {
                 {
                     TableName: 'foo',
                     TotalSegments: segments,
-                },
-                ['fizz']
+                }
             )) {
                 result.push(res);
             }
@@ -116,61 +115,6 @@ describe('ParallelScanIterator', () => {
             ]);
         }
     );
-
-    it('should provide access to the current scan state', async () => {
-        promiseFunc.mockImplementationOnce(() => Promise.resolve({
-            Items: [
-                {
-                    fizz: {S: 'snap'},
-                    bar: {NS: ['1', '2', '3']},
-                    baz: {L: [{BOOL: true}, {N: '4'}]}
-                },
-                {
-                    fizz: {S: 'crackle'},
-                    bar: {NS: ['5', '6', '7']},
-                    baz: {L: [{BOOL: false}, {N: '8'}]}
-                },
-                {
-                    fizz: {S: 'pop'},
-                    bar: {NS: ['9', '12', '30']},
-                    baz: {L: [{BOOL: true}, {N: '24'}]}
-                },
-            ],
-            LastEvaluatedKey: {fizz: {S: 'pop'}},
-        }));
-        promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
-        promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
-
-        const iterator = new ParallelScanIterator(
-            mockDynamoDbClient as any,
-            {TableName: 'foo', TotalSegments: 2},
-            ['fizz']
-        );
-
-        // each segment should be uninitialized before iteration starts
-        expect(iterator.scanState).toEqual([
-            {initialized: false},
-            {initialized: false},
-        ]);
-
-        const expectedLastKeys = [
-            {fizz: {S: 'snap'}},
-            {fizz: {S: 'crackle'}},
-            {fizz: {S: 'pop'}},
-        ];
-
-        for await (const _ of iterator) {
-            expect(iterator.scanState).toEqual([
-                {initialized: true, LastEvaluatedKey: expectedLastKeys.shift()},
-                {initialized: false},
-            ]);
-        }
-
-        expect(iterator.scanState).toEqual([
-            {initialized: true},
-            {initialized: true},
-        ]);
-    });
 
     it('should provide access to paginator metadata', async () => {
         promiseFunc.mockImplementationOnce(() => Promise.resolve({
@@ -225,8 +169,7 @@ describe('ParallelScanIterator', () => {
 
         const iterator = new ParallelScanIterator(
             mockDynamoDbClient as any,
-            {TableName: 'foo', TotalSegments: 2},
-            ['fizz']
+            {TableName: 'foo', TotalSegments: 2}
         );
 
         for await (const _ of iterator) {
@@ -240,46 +183,4 @@ describe('ParallelScanIterator', () => {
             CapacityUnits: 6
         });
     });
-
-    it(
-        'should report the scan state even after ceasing iteration',
-        async () => {
-            promiseFunc.mockImplementationOnce(() => Promise.resolve({
-                Items: [
-                    {
-                        fizz: {S: 'snap'},
-                        bar: {NS: ['1', '2', '3']},
-                        baz: {L: [{BOOL: true}, {N: '4'}]}
-                    },
-                    {
-                        fizz: {S: 'crackle'},
-                        bar: {NS: ['5', '6', '7']},
-                        baz: {L: [{BOOL: false}, {N: '8'}]}
-                    },
-                    {
-                        fizz: {S: 'pop'},
-                        bar: {NS: ['9', '12', '30']},
-                        baz: {L: [{BOOL: true}, {N: '24'}]}
-                    },
-                ],
-                LastEvaluatedKey: {fizz: {S: 'pop'}},
-            }));
-            promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
-
-            const iterator = new ParallelScanIterator(
-                mockDynamoDbClient as any,
-                {TableName: 'foo', TotalSegments: 2},
-                ['fizz']
-            );
-
-            for await (const _ of iterator) {
-                break;
-            }
-
-            expect(iterator.scanState).toEqual([
-                {initialized: true, LastEvaluatedKey: {fizz: {S: 'snap'}}},
-                {initialized: false},
-            ]);
-        }
-    );
 });

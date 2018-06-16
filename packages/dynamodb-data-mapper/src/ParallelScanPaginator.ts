@@ -18,24 +18,16 @@ import {
     unmarshallItem,
     ZeroArgumentsConstructor,
 } from '@aws/dynamodb-data-marshaller';
-import { ScanOutput } from 'aws-sdk/clients/dynamodb';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 /**
  * Iterates over each page of items returned by a parallel DynamoDB scan until
  * no more pages are available.
  */
-export class ParallelScanPaginator<T> extends
-    Paginator<T, ScanOutput & {segment: number}>
-{
+export class ParallelScanPaginator<T> extends Paginator<T> {
     private readonly _ctor: ZeroArgumentsConstructor<T>;
     private readonly _paginator: BasePaginator;
     private readonly _schema: Schema;
-
-    /**
-     * @internal
-     */
-    currentSegment?: number;
 
     constructor(
         client: DynamoDB,
@@ -92,10 +84,5 @@ export class ParallelScanPaginator<T> extends
                     : undefined
             } as ScanState)
         );
-    }
-
-    protected handlePage(value: ScanOutput & {segment: number}) {
-        this.currentSegment = value.segment;
-        return super.handlePage(value);
     }
 }

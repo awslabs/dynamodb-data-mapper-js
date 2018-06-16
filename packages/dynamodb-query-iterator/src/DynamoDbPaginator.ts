@@ -15,6 +15,8 @@ export abstract class DynamoDbPaginator implements DynamoDbPaginatorInterface {
     private lastResolved: Promise<IteratorResult<DynamoDbResultsPage>>
         = <any>Promise.resolve();
 
+    protected constructor(private readonly limit?: number) {}
+
     /**
      * @inheritDoc
      */
@@ -48,20 +50,25 @@ export abstract class DynamoDbPaginator implements DynamoDbPaginatorInterface {
      * @inheritDoc
      */
     next(): Promise<IteratorResult<DynamoDbResultsPage>> {
-        this.lastResolved = this.lastResolved.then(
-            () => this.getNext().then(({done, value}) => {
-                if (value && !done) {
-                    this._lastKey = value.LastEvaluatedKey;
-                    this._count += (value.Count || 0);
-                    this._scannedCount += (value.ScannedCount || 0);
-                    this._consumedCapacity = mergeConsumedCapacities(
-                        this._consumedCapacity,
-                        value.ConsumedCapacity
-                    );
-                }
+        this.lastResolved = this.lastResolved.then(() => {
+            if (this.count >= (this.limit === undefined ? Infinity : this.limit)) {
+                return {done: true} as IteratorResult<DynamoDbResultsPage>;
+            }
 
-                return { value, done };
-            })
+            return this.getNext().then(({done, value}) => {
+                    if (value && !done) {
+                        this._lastKey = value.LastEvaluatedKey;
+                        this._count += (value.Items || []).length;
+                        this._scannedCount += (value.ScannedCount || 0);
+                        this._consumedCapacity = mergeConsumedCapacities(
+                            this._consumedCapacity,
+                            value.ConsumedCapacity
+                        );
+                    }
+
+                    return { value, done };
+                })
+            }
         );
 
         return this.lastResolved;
@@ -93,4 +100,15 @@ export abstract class DynamoDbPaginator implements DynamoDbPaginatorInterface {
      * Perform the next iteration
      */
     protected abstract getNext(): Promise<IteratorResult<DynamoDbResultsPage>>;
+
+    protected getNextPageSize(requestedPageSize?: number): number|undefined {
+        if (this.limit === undefined) {
+            return requestedPageSize;
+        }
+
+        return Math.min(
+            requestedPageSize === undefined ? Infinity : requestedPageSize,
+            this.limit - this.count
+        );
+    }
 }

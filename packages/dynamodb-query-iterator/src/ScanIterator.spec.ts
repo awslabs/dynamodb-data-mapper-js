@@ -52,7 +52,7 @@ describe('ScanIterator', () => {
             promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
 
             const result: any[] = [];
-            for await (const item of new ScanIterator(mockDynamoDbClient as any, {TableName: 'foo'}, ['fizz'])) {
+            for await (const item of new ScanIterator(mockDynamoDbClient as any, {TableName: 'foo'})) {
                 result.push(item);
             }
 
@@ -75,47 +75,6 @@ describe('ScanIterator', () => {
             ]);
         }
     );
-
-    it('should provide access to the last evaluated key', async () => {
-        promiseFunc.mockImplementationOnce(() => Promise.resolve({
-            Items: [
-                {
-                    fizz: {S: 'snap'},
-                    bar: {NS: ['1', '2', '3']},
-                    baz: {L: [{BOOL: true}, {N: '4'}]}
-                },
-                {
-                    fizz: {S: 'crackle'},
-                    bar: {NS: ['5', '6', '7']},
-                    baz: {L: [{BOOL: false}, {N: '8'}]}
-                },
-                {
-                    fizz: {S: 'pop'},
-                    bar: {NS: ['9', '12', '30']},
-                    baz: {L: [{BOOL: true}, {N: '24'}]}
-                },
-            ],
-            LastEvaluatedKey: {fizz: {S: 'pop'}},
-        }));
-        promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
-
-        const iterator = new ScanIterator(mockDynamoDbClient as any, {TableName: 'foo'}, ['fizz']);
-
-        // lastEvaluatedKey should be undefined before iteration starts
-        expect(iterator.lastEvaluatedKey).toBeUndefined();
-
-        const expectedLastKeys = [
-            {fizz: {S: 'snap'}},
-            {fizz: {S: 'crackle'}},
-            {fizz: {S: 'pop'}},
-        ];
-
-        for await (const _ of iterator) {
-            expect(iterator.lastEvaluatedKey).toEqual(expectedLastKeys.shift());
-        }
-
-        expect(iterator.lastEvaluatedKey).toBeUndefined();
-    });
 
     it('should provide access to paginator metadata', async () => {
         promiseFunc.mockImplementationOnce(() => Promise.resolve({
@@ -166,7 +125,7 @@ describe('ScanIterator', () => {
             }
         }));
 
-        const iterator = new ScanIterator(mockDynamoDbClient as any, {TableName: 'foo'}, ['fizz']);
+        const iterator = new ScanIterator(mockDynamoDbClient as any, {TableName: 'foo'});
 
         let expectedCount = 0;
         const expectedScanCounts = [1, 3, 6];
@@ -184,38 +143,4 @@ describe('ScanIterator', () => {
             CapacityUnits: 6
         });
     });
-
-    it(
-        'should report the last evaluated key even after ceasing iteration',
-        async () => {
-            promiseFunc.mockImplementationOnce(() => Promise.resolve({
-                Items: [
-                    {
-                        fizz: {S: 'snap'},
-                        bar: {NS: ['1', '2', '3']},
-                        baz: {L: [{BOOL: true}, {N: '4'}]}
-                    },
-                    {
-                        fizz: {S: 'crackle'},
-                        bar: {NS: ['5', '6', '7']},
-                        baz: {L: [{BOOL: false}, {N: '8'}]}
-                    },
-                    {
-                        fizz: {S: 'pop'},
-                        bar: {NS: ['9', '12', '30']},
-                        baz: {L: [{BOOL: true}, {N: '24'}]}
-                    },
-                ],
-                LastEvaluatedKey: {fizz: {S: 'pop'}},
-            }));
-            promiseFunc.mockImplementationOnce(() => Promise.resolve({}));
-
-            const iterator = new ScanIterator(mockDynamoDbClient as any, {TableName: 'foo'}, ['fizz']);
-            for await (const _ of iterator) {
-                break;
-            }
-
-            expect(iterator.lastEvaluatedKey).toEqual({fizz: {S: 'snap'}});
-        }
-    );
 });

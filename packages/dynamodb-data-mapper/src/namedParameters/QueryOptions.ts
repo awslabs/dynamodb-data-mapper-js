@@ -25,9 +25,7 @@ export interface QueryOptions extends ReadConsistencyConfiguration {
     indexName?: string;
 
     /**
-     * The maximum number of items to fetch per page of results.
-     *
-     * @deprecated
+     * The maximum number of items to fetch over all pages of the query.
      */
     limit?: number;
 

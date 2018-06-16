@@ -51,7 +51,7 @@ export class ParallelScanPaginator implements DynamoDbPaginatorInterface {
     private readonly iterators: Array<ScanPaginator>;
     private readonly pending: Array<PendingResult> = [];
     private lastResolved: Promise<
-        IteratorResult<DynamoDbResultsPage & {segment: number}>
+        IteratorResult<DynamoDbResultsPage>
     > = Promise.resolve() as any;
 
     constructor(
@@ -124,12 +124,12 @@ export class ParallelScanPaginator implements DynamoDbPaginatorInterface {
     /**
      * @inheritDoc
      */
-    next(): Promise<IteratorResult<DynamoDbResultsPage & {segment: number}>> {
+    next(): Promise<IteratorResult<DynamoDbResultsPage>> {
         this.lastResolved = this.lastResolved.then(() => this.getNext());
         return this.lastResolved;
     }
 
-    private async getNext(): Promise<IteratorResult<DynamoDbResultsPage & {segment: number}>> {
+    private async getNext(): Promise<IteratorResult<DynamoDbResultsPage>> {
         if (this.pending.length === 0) {
             return doneSigil();
         }
@@ -160,10 +160,7 @@ export class ParallelScanPaginator implements DynamoDbPaginatorInterface {
         // set.
         if (!done) {
             this.refillPending(iterator, segment);
-            return {
-                value: value ? {...value, segment} : value,
-                done,
-            };
+            return { value, done };
         } else {
             // If a segment has finished but there are still outstanding
             // requests, recur. A done sigil will be returned when the pending
