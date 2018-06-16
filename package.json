@@ -13,10 +13,10 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "@types/jest": "^22",
+    "@types/jest": "^23",
     "@types/node": "^8.0.4",
-    "jest": "^22",
-    "lerna": "^2.5.1",
+    "jest": "^23",
+    "lerna": "^2.11.0",
     "typedoc": "^0.11.0",
     "typescript": "^2.7"
   },

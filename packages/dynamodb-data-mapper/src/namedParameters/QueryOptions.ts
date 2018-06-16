@@ -25,9 +25,7 @@ export interface QueryOptions extends ReadConsistencyConfiguration {
     indexName?: string;
 
     /**
-     * The maximum number of items to fetch per page of results.
-     *
-     * @deprecated
+     * The maximum number of items to fetch over all pages of the query.
      */
     limit?: number;
 
@@ -55,7 +53,9 @@ export interface QueryOptions extends ReadConsistencyConfiguration {
     scanIndexForward?: boolean;
 
     /**
-     * The primary key of the first item that this operation will evaluate.
+     * The primary key of the first item that this operation will evaluate. When
+     * querying an index, only the `lastEvaluatedKey` derived from a previous
+     * query operation on the same index should be supplied for this parameter.
      */
     startKey?: {[key: string]: any};
 }

@@ -326,9 +326,9 @@ Inserts an item into a DynamoDB table. Takes two parameters:
 
 ### `query`
 
-Retrieves multiple values from a table based on the primary key attributes.
-Queries must target a single partition key value but may read multiple items
-with different range keys.
+Retrieves multiple values from a table or index based on the primary key
+attributes. Queries must target a single partition key value but may read
+multiple items with different range keys.
 
 This method is implemented as an async iterator and the results can be consumed
 with a `for-await-of` loop. If you are using TypeScript, you will need to
@@ -380,7 +380,9 @@ Takes three parameters:
     * `indexName` - The name of the index against which to execute this query.
         If not specified, the query will be executed against the base table.
 
-    * `pageSize` - The maximum number of items to return.
+    * `limit` - The maximum number of items to return.
+
+    * `pageSize` - The maximum number of items to return **per page of results**.
 
     * `projection` - A projection expression directing DynamoDB to return a
         subset of any fetched item's attributes. Please refer to the
@@ -398,9 +400,61 @@ Takes three parameters:
     * `startKey` - The primary key of the first item that this operation will
         evaluate.
 
+#### Query metadata
+
+The iterator returned by `query` will keep track of the number of items yielded
+and the number of items scanned via its `count` and `scannedCount` properties:
+
+```typescript
+const iterator = mapper.query(
+    MyClass, 
+    {partitionKey: 'foo', rangeKey: between(0, 10)}
+);
+for await (const record of iterator) {
+    console.log(record, iterator.count, iterator.scannedCount);
+}
+```
+
+#### Pagination
+
+If you wish to perform a resumable query, you can use the `.pages()` method of
+the iterator returned by `query` to access the underlying paginator. The
+paginator differs from the iterator in that it yields arrays of unmarshalled
+records and has a `lastEvaluatedKey` property that may be provided to a new
+call to `mapper.query` to resume the query later or in a separate process:
+
+```typescript
+const paginator = mapper.query(
+    MyClass,
+    {partitionKey: 'foo', rangeKey: between(0, 10)},
+    {
+        // automatically stop after 25 items or the entire result set has been
+        // fetched, whichever is smaller
+        limit: 25
+    }
+).pages();
+
+for await (const page of paginator) {
+    console.log(
+        paginator.count,
+        paginator.scannedCount,
+        paginator.lastEvaluatedKey
+    );
+}
+
+const newPaginator = mapper.query(
+    MyClass,
+    {partitionKey: 'foo', rangeKey: between(0, 10)},
+    {
+        // start this new paginator where the previous one stopped
+        startKey: paginator.lastEvaluatedKey
+    }
+).pages();
+```
+
 ### `scan`
 
-Retrieves all values in a table.
+Retrieves all values in a table or index.
 
 This method is implemented as an async iterator and the results can be consumed
 with a `for-await-of` loop. If you are using TypeScript, you will need to
@@ -433,6 +487,8 @@ Takes two parameters:
 
     * `limit` - The maximum number of items to return.
 
+    * `pageSize` - The maximum number of items to return **per page of results**.
+
     * `projection` - A projection expression directing DynamoDB to return a
         subset of any fetched item's attributes. Please refer to the
         documentation for the `@aws/dynamodb-expressions` package for guidance
@@ -451,6 +507,52 @@ Takes two parameters:
     * `totalSegments` - The number of segments into which this scan has been
         divided (if this scan is being performed as part of a parallel scan
         operation).
+
+#### Scan metadata
+
+The iterator returned by `scan` will keep track of the number of items yielded
+and the number of items scanned via its `count` and `scannedCount` properties:
+
+```typescript
+const iterator = mapper.scan(MyClass);
+for await (const record of iterator) {
+    console.log(record, iterator.count, iterator.scannedCount);
+}
+```
+
+#### Pagination
+
+If you wish to perform a resumable scan, you can use the `.pages()` method of
+the iterator returned by `scan` to access the underlying paginator. The
+paginator differs from the iterator in that it yields arrays of unmarshalled
+records and has a `lastEvaluatedKey` property that may be provided to a new
+call to `mapper.scan` to resume the scan later or in a separate process:
+
+```typescript
+const paginator = mapper.scan(
+    MyClass,
+    {
+        // automatically stop after 25 items or the entire result set has been
+        // fetched, whichever is smaller
+        limit: 25
+    }
+).pages();
+for await (const page of paginator) {
+    console.log(
+        paginator.count,
+        paginator.scannedCount,
+        paginator.lastEvaluatedKey
+    );
+}
+
+const newPaginator = mapper.scan(
+    MyClass,
+    {
+        // start this new paginator where the previous one stopped
+        startKey: paginator.lastEvaluatedKey
+    }
+).pages();
+```
 
 ### `parallelScan`
 
@@ -488,7 +590,7 @@ Takes three parameters:
     * `indexName` - The name of the index against which to execute this query.
         If not specified, the query will be executed against the base table.
 
-    * `limit` - The maximum number of items to return.
+    * `pageSize` - The maximum number of items to return **per page of results**.
 
     * `projection` - A projection expression directing DynamoDB to return a
         subset of any fetched item's attributes. Please refer to the
@@ -501,6 +603,53 @@ Takes three parameters:
 
     * `startKey` - The primary key of the first item that this operation will
         evaluate.
+
+#### Scan metadata
+
+The iterator returned by `parallelScan` will keep track of the number of items
+yielded and the number of items scanned via its `count` and `scannedCount`
+properties:
+
+```typescript
+const iterator = mapper.parallelScan(MyClass, 4);
+for await (const record of iterator) {
+    console.log(record, iterator.count, iterator.scannedCount);
+}
+```
+
+#### Pagination
+
+If you wish to perform a resumable parallel scan, you can use the `.pages()`
+method of the iterator returned by `parallelScan` to access the underlying
+paginator. The  paginator differs from the iterator in that it yields arrays of
+unmarshalled records and has a `scanState` property that may be provided
+to a new call to `mapper.parallelScan` to resume the scan later or in a separate
+process:
+
+```typescript
+const paginator = mapper.parallelScan(
+    MyClass,
+    4
+).pages();
+for await (const page of paginator) {
+    console.log(
+        paginator.count,
+        paginator.scannedCount,
+        paginator.lastEvaluatedKey
+    );
+
+    break;
+}
+
+const newPaginator = mapper.parallelScan(
+    MyClass,
+    4,
+    {
+        // start this new paginator where the previous one stopped
+        scanState: paginator.scanState
+    }
+).pages();
+```
 
 ### `update`
 
@@ -528,3 +677,29 @@ Takes two parameters:
 
     * `skipVersionCheck` - Whether to forgo creating a condition expression
         based on a defined `versionAttribute` in the schema.
+
+### `executeUpdateExpression`
+
+Executes a custom update expression. This method will **not** automatically
+apply a version check, as the current state of the object being updated is not
+known.
+
+Takes four parameters:
+
+* The expression to execute. Please refer to the documentation for the
+    `@aws/dynamodb-expressions` package for guidance on creating update
+    expression objects.
+
+* The key of the item being updated.
+
+* The constructor for the class mapped to the table against which the expression
+    should be run. Must have a prototype with a table name accessible via a
+    property identified with the `DynamoDbTable` symbol and a schema accessible
+    via a property identified with the `DynamoDbSchema` symbol.
+
+* (Optional) An object specifying any of the following options:
+
+    * `condition` - A condition expression whose assertion must be satisfied in
+        order for the update operation to be executed. Please refer to the
+        documentation for the `@aws/dynamodb-expressions` package for guidance
+        on creating condition expression objects.

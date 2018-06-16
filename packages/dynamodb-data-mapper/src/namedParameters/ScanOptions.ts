@@ -25,13 +25,6 @@ export interface BaseScanOptions extends ReadConsistencyConfiguration {
 
     /**
      * The maximum number of items to fetch per page of results.
-     *
-     * @deprecated
-     */
-    limit?: number;
-
-    /**
-     * The maximum number of items to fetch per page of results.
      */
     pageSize?: number;
 
@@ -51,6 +44,11 @@ export interface CtorBearer<T extends StringToAnyObjectMap = StringToAnyObjectMa
 
 export interface BaseSequentialScanOptions extends BaseScanOptions {
     /**
+     * The maximum number of items to fetch over all pages of scan.
+     */
+    limit?: number;
+
+    /**
      * For a parallel Scan request, Segment identifies an individual segment to
      * be scanned by an application worker.
      *
@@ -62,7 +60,9 @@ export interface BaseSequentialScanOptions extends BaseScanOptions {
     segment?: number;
 
     /**
-     * The primary key of the first item that this operation will evaluate.
+     * The primary key of the first item that this operation will evaluate. When
+     * scanning an index, only the `lastEvaluatedKey` derived from a previous
+     * scan operation on the same index should be supplied for this parameter.
      */
     startKey?: {[key: string]: any};
 
@@ -77,6 +77,55 @@ export interface BaseSequentialScanOptions extends BaseScanOptions {
 export interface ScanOptions extends BaseSequentialScanOptions {
     segment?: undefined;
     totalSegments?: undefined;
+}
+
+/**
+ * Pagination state for a scan segment for which the first page has not yet been
+ * retrieved.
+ */
+export interface UninitializedScanState {
+    initialized: false;
+    lastEvaluatedKey?: undefined;
+}
+
+/**
+ * Pagination state for a scan segment for which one or more pages have been
+ * retrieved. If `lastEvaluatedKey` is defined, there are more pages to fetch;
+ * otherwise, all pages for this segment have been returned.
+ */
+export interface InitializedScanState {
+    initialized: true;
+    lastEvaluatedKey?: {[attributeName: string]: any};
+}
+
+export type ScanState = UninitializedScanState|InitializedScanState;
+
+/**
+ * ParallelScanState is represented as an array whose length is equal to the
+ * number of segments being scanned independently, with each segment's state
+ * being stored at the array index corresponding to its segment number.
+ *
+ * Segment state is represented with a tagged union with the following keys:
+ *   - `initialized` -- whether the first page of results has been retrieved
+ *   - `lastEvaluatedKey` -- the key to provide (if any) when requesting the
+ *      next page of results.
+ *
+ * If `lastEvaluatedKey` is undefined and `initialized` is true, then all pages
+ * for the given segment have been returned.
+ */
+export type ParallelScanState = Array<ScanState>;
+
+export interface ParallelScanOptions extends BaseScanOptions {
+    /**
+     * The segment identifier must not be supplied when initiating a parallel
+     * scan. This identifier will be created for each worker on your behalf.
+     */
+    segment?: undefined;
+
+    /**
+     * The point from which a parallel scan should resume.
+     */
+    scanState?: ParallelScanState;
 }
 
 /**
@@ -111,3 +160,10 @@ export type ParallelScanParameters<
      */
     segments: number;
 };
+
+/**
+ * @internal
+ */
+export type SequentialScanOptions = (ScanOptions|ParallelScanWorkerOptions) & {tableNamePrefix?: string};
+
+

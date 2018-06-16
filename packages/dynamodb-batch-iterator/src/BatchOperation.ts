@@ -7,7 +7,9 @@ import {
 } from './types';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
-require('./asyncIteratorSymbolPolyfill');
+if (Symbol && !Symbol.asyncIterator) {
+    (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
+}
 
 export abstract class BatchOperation<
     Element extends TableStateElement

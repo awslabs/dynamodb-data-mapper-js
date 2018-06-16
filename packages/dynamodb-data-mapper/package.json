@@ -30,10 +30,10 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "@types/jest": "^22",
+    "@types/jest": "^23",
     "@types/node": "^8.0.4",
     "aws-sdk": "^2.7.0",
-    "jest": "^22",
+    "jest": "^23",
     "typedoc": "^0.11.0",
     "typescript": "^2.7"
   },
@@ -42,6 +42,7 @@
     "@aws/dynamodb-batch-iterator": "^0.5.0",
     "@aws/dynamodb-data-marshaller": "^0.5.0",
     "@aws/dynamodb-expressions": "^0.5.0",
+    "@aws/dynamodb-query-iterator": "^0.5.0",
     "tslib": "^1.8.1"
   },
   "peerDependencies": {

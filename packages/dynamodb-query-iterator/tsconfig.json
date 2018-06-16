@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "es5",
+      "es2015.iterable",
+      "es2015.promise",
+      "es2015.collection",
+      "es2015.symbol.wellknown",
+      "esnext.asynciterable"
+    ],
+    "downlevelIteration": true,
+    "importHelpers": true,
+    "module": "commonjs",
+    "noUnusedLocals": true,
+    "strict": true,
+    "declaration": true,
+    "sourceMap": true,
+    "rootDir": "./src",
+    "outDir": "./build"
+  },
+  "typedocOptions": {
+    "mode": "file",
+    "out": "../../docs/packages/dynamodb-paginators",
+    "excludeNotExported": true,
+    "excludePrivate": true,
+    "hideGenerator": true
+  }
+}

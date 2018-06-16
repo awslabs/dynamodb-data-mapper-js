@@ -1,7 +1,7 @@
 {
-  "name": "@aws/dynamodb-data-mapper-annotations",
+  "name": "@aws/dynamodb-query-iterator",
   "version": "0.5.0",
-  "description": "Annotations providing easy integration between TypeScript domain objects and the @aws/dynamodb-data-mapper library",
+  "description": "Abstraction for DynamoDB queries and scans that handles pagination and parallel worker coordination",
   "keywords": [
     "aws",
     "dynamodb"
@@ -13,14 +13,12 @@
   "bugs": {
     "url": "https://github.com/awslabs/dynamodb-data-mapper-js/issues"
   },
-  "homepage": "https://awslabs.github.io/dynamodb-data-mapper-js/packages/dynamodb-data-mapper-annotations/",
+  "homepage": "https://awslabs.github.io/dynamodb-data-mapper-js/packages/dynamodb-scan-iterator/",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "scripts": {
-    "build": "tsc",
     "docs": "typedoc src",
-    "integ": "npm run pretest && jest --config=jest.integration.js",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "tsc",
     "pretest": "tsc -p tsconfig.test.json",
     "test": "jest"
   },
@@ -32,18 +30,15 @@
   "devDependencies": {
     "@types/jest": "^23",
     "@types/node": "^8.0.4",
-    "@types/uuid": "^3.0.0",
     "aws-sdk": "^2.7.0",
     "jest": "^23",
     "typedoc": "^0.11.0",
     "typescript": "^2.7"
   },
+  "peerDependencies": {
+    "aws-sdk": "^2.7.0"
+  },
   "dependencies": {
-    "@aws/dynamodb-auto-marshaller": "^0.5.0",
-    "@aws/dynamodb-data-mapper": "^0.5.0",
-    "@aws/dynamodb-data-marshaller": "^0.5.0",
-    "reflect-metadata": "^0.1.10",
-    "tslib": "^1.8.1",
-    "uuid": "^3.0.0"
+    "tslib": "^1.8.1"
   }
 }
