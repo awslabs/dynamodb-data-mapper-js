@@ -281,47 +281,6 @@ console.log(iterator.scannedCount);
 console.log(iterator.consumedCapacity);
 ```
 
-#### Suspending and resuming queries
-
-You can suspend any running query from within the `for` loop by using the 
-`break` keyword. If there are still pages that have not been fetched, the 
-`lastEvaluatedKey` property of iterator will be defined. This can be provided 
-as the `ExclusiveStartKey` for another `QueryIterator` instance:
-
-```typescript
-import { QueryIterator } from '@aws/dynamodb-query-iterator';
-import { QueryInput } from 'aws-sdk/clients/dynamodb';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
-
-const dynamoDb = new DynamoDB({region: 'us-west-2'});
-const input: QueryInput = {
-    TableName: 'my_table',
-    KeyConditionExpression: 'partitionKey = :value',
-    ExpressionAttributeValues: {
-        ':value': {S: 'foo'}
-    },
-    ReturnConsumedCapacity: 'INDEXES'
-};
-const keyProperties = ['partitionKey'];
-
-const iterator = new QueryIterator(dynamoDb, input, keyProperties);
-
-for await (const record of iterator) {
-    // do something with the first result
-    break
-}
-
-for await (const with of new QueryIterator(
-    dynamoDb, 
-    {...input, ExclusiveStartKey: iterator.lastEvaluatedKey},
-    keyProperties
-)) {
-    // do something with the remaining records
-}
-```
-
-Suspending and resuming the same iterator instance is not supported.
-
 ### ScanIterator
 
 Retrieves all records of a DynamoDB `scan` in order.
@@ -355,43 +314,6 @@ console.log(iterator.scannedCount);
 // This will only be available if `ReturnConsumedCapacity` was set on the input
 console.log(iterator.consumedCapacity);
 ```
-
-#### Suspending and resuming scans
-
-You can suspend any running scan from within the `for` loop by using the `break`
-keyword. If there are still pages that have not been fetched, the
-`lastEvaluatedKey` property of iterator will be defined. This can be provided
-as the `ExclusiveStartKey` for another `ScanIterator` instance:
-
-```typescript
-import { ScanIterator } from '@aws/dynamodb-query-iterator';
-import { ScanInput } from 'aws-sdk/clients/dynamodb';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
-
-const dynamoDb = new DynamoDB({region: 'us-west-2'});
-const input: ScanInput = {
-    TableName: 'my_table',
-    ReturnConsumedCapacity: 'INDEXES'
-};
-const keyProperties = ['partitionKey'];
-
-const iterator = new ScanIterator(dynamoDb, input, keyProperties);
-
-for await (const record of iterator) {
-    // do something with the first result
-    break
-}
-
-for await (const page of new ScanIterator(
-    dynamoDb, 
-    {...input, ExclusiveStartKey: iterator.lastEvaluatedKey},
-    keyProperties
-)) {
-    // do something with the remaining records
-}
-```
-
-Suspending and resuming the same iterator instance is not supported.
 
 ### ParallelScanIterator
 
@@ -431,46 +353,5 @@ console.log(iterator.scannedCount);
 // This will only be available if `ReturnConsumedCapacity` was set on the input
 console.log(iterator.consumedCapacity);
 ```
-
-#### Suspending and resuming parallel scans
-
-You can suspend any running scan from within the `for` loop by using the `break`
-keyword. If there are still pages that have not been fetched, the `scanState`
-property of interrupted iterator can be provided to the constructor of another
-`ParallelScanIterator` instance:
-
-```typescript
-import { 
-    ParallelScanInput,
-    ParallelScanIterator,
-} from '@aws/dynamodb-query-iterator';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
-
-const client = new DynamoDB({region: 'us-west-2'});
-const input: ParallelScanInput = {
-    TableName: 'my_table',
-    TotalSegments: 4,
-    ReturnConsumedCapacity: 'INDEXES'
-};
-const keyProperties = ['foo', 'bar'];
-
-const paginator = new ParallelScanIterator(client, input, keyProperties);
-
-for await (const page of paginator) {
-    // do something with the first page of results
-    break
-}
-
-for await (const page of new ParallelScanIterator(
-    client,
-    input,
-    keyProperties,
-    paginator.scanState
-)) {
-    // do something with the remaining pages
-}
-```
-
-Suspending and resuming the same iterator instance is not supported.
 
 

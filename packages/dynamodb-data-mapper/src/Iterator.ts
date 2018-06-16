@@ -89,10 +89,6 @@ export abstract class Iterator<
         return this.paginator.scannedCount;
     }
 
-    protected hasPendingItems() {
-        return this.pending.length > 0;
-    }
-
     private async getNext(): Promise<IteratorResult<T>> {
         if (this.pending.length > 0) {
             this.lastYielded = this.pending.shift()!;

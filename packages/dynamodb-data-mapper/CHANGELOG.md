@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.6.0]
+### Fixed
+ - Update `DataMapper` for TypeScript 2.9 compatibility.
+
+### Added
+ - Use purpose-built async iterable objects as the return value for `query`, 
+    `scan`, and `parallelScan`.
+ - Report the `count`, `scannedCount`, and `consumedCapacity` tallied over the
+    lifetime of a `query`, `scan`, or `parallelScan` as properties on the
+    returned iterable.
+ - Provide a method to get the underlying paginator for a `query`, `scan`, or
+    `parallelScan` iterator. The paginator may be used to suspend and resume
+    iteration at any page boundary.
+
 ## [0.5.0]
 ### Fixed
  - Add default message to `ItemNotFoundException`

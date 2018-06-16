@@ -60,7 +60,9 @@ export interface BaseSequentialScanOptions extends BaseScanOptions {
     segment?: number;
 
     /**
-     * The primary key of the first item that this operation will evaluate.
+     * The primary key of the first item that this operation will evaluate. When
+     * scanning an index, only the `lastEvaluatedKey` derived from a previous
+     * scan operation on the same index should be supplied for this parameter.
      */
     startKey?: {[key: string]: any};
 
