@@ -100,7 +100,6 @@ export abstract class Paginator<T> implements AsyncIterableIterator<Array<T>> {
                 };
             }
 
-            this.lastKey = undefined;
             return {done: true} as IteratorResult<Array<T>>;
         });
     }

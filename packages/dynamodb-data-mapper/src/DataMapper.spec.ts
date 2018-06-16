@@ -263,7 +263,6 @@ describe('DataMapper', () => {
                                 Keys: [
                                     {fizz: {N: '0'}}
                                 ],
-                                ConsistentRead: false
                             },
                             bar: {
                                 Keys: [
@@ -324,14 +323,12 @@ describe('DataMapper', () => {
                             foo: {
                                 Keys: [
                                     {fizz: {N: '0'}}
-                                ],
-                                ConsistentRead: false
+                                ]
                             },
                             bar: {
                                 Keys: [
                                     {quux: {N: '1'}}
                                 ],
-                                ConsistentRead: false,
                                 ProjectionExpression: '#attr0.#attr1, #attr2[2]',
                                 ExpressionAttributeNames: {
                                     '#attr0': 'crackle',
@@ -351,22 +348,10 @@ describe('DataMapper', () => {
                 async () => {
                     const gets: Array<Item> = [];
                     const expected: any = [
-                        [{RequestItems: {foo: {
-                            Keys: [],
-                            ConsistentRead: false
-                        }}}],
-                        [{RequestItems: {foo: {
-                            Keys: [],
-                            ConsistentRead: false
-                        }}}],
-                        [{RequestItems: {foo: {
-                            Keys: [],
-                            ConsistentRead: false
-                        }}}],
-                        [{RequestItems: {foo: {
-                            Keys: [],
-                            ConsistentRead: false
-                        }}}],
+                        [ { RequestItems: { foo: { Keys: [] } } } ],
+                        [ { RequestItems: { foo: { Keys: [] } } } ],
+                        [ { RequestItems: { foo: { Keys: [] } } } ],
+                        [ { RequestItems: { foo: { Keys: [] } } } ],
                     ];
                     const responses: any = [
                         {Responses: {foo: []}},
@@ -2338,15 +2323,13 @@ describe('DataMapper', () => {
                     TableName: 'foo',
                     ExclusiveStartKey: {fizz: {S: 'bar'}},
                     Segment: 1,
-                    TotalSegments: 3,
-                    ConsistentRead: false
+                    TotalSegments: 3
                 }],
                 [{
                     TableName: 'foo',
                     ExclusiveStartKey: {fizz: {S: 'baz'}},
                     Segment: 2,
-                    TotalSegments: 3,
-                    ConsistentRead: false
+                    TotalSegments: 3
                 }],
             ]);
         });
@@ -3063,8 +3046,7 @@ describe('DataMapper', () => {
                     },
                     IndexName: 'baz-index',
                     Limit: 1,
-                    ScanIndexForward: true,
-                    ConsistentRead: false
+                    ScanIndexForward: true
                 });
         });
 
@@ -3123,6 +3105,68 @@ describe('DataMapper', () => {
             expect(paginator.count).toBe(2);
             expect(paginator.scannedCount).toBe(ScannedCount);
             expect(paginator.consumedCapacity).toEqual(ConsumedCapacity);
+        });
+
+        it('should cease iteration once the limit has been reached', async () => {
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                Items: [
+                    { snap: {S: 'snap'} },
+                    { snap: {S: 'crackle'} },
+                    { snap: {S: 'pop'} },
+                ],
+                LastEvaluatedKey: {snap: {S: 'pop'}},
+            }));
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                Items: [
+                    { snap: {S: 'fizz'} },
+                ],
+                LastEvaluatedKey: {snap: {S: 'fizz'}},
+            }));
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                Items: [
+                    { snap: {S: 'buzz'} },
+                ],
+                LastEvaluatedKey: {snap: {S: 'buzz'}},
+            }));
+
+            const results =  mapper.query(QueryableItem, {snap: 'crackle'}, { limit: 5 });
+
+            for await (const _ of results) {
+                // pass
+            }
+
+            expect(results.pages().lastEvaluatedKey)
+                .toEqual(QueryableItem.fromKey('buzz'));
+
+            expect(mockDynamoDbClient.query.mock.calls).toEqual([
+                [{
+                    TableName: 'foo',
+                    Limit: 5,
+                    KeyConditionExpression: '#attr0 = :val1',
+                    ExpressionAttributeNames: { '#attr0': 'snap' },
+                    ExpressionAttributeValues: { ':val1': {S: 'crackle'} },
+                }],
+                [{
+                    TableName: 'foo',
+                    Limit: 2,
+                    KeyConditionExpression: '#attr0 = :val1',
+                    ExpressionAttributeNames: { '#attr0': 'snap' },
+                    ExpressionAttributeValues: { ':val1': {S: 'crackle'} },
+                    ExclusiveStartKey: {
+                        snap: {S: 'pop'}
+                    }
+                }],
+                [{
+                    TableName: 'foo',
+                    Limit: 1,
+                    KeyConditionExpression: '#attr0 = :val1',
+                    ExpressionAttributeNames: { '#attr0': 'snap' },
+                    ExpressionAttributeValues: { ':val1': {S: 'crackle'} },
+                    ExclusiveStartKey: {
+                        snap: {S: 'fizz'}
+                    }
+                }]
+            ]);
         });
 
         describe('startKey serialization', () => {
@@ -3233,6 +3277,12 @@ describe('DataMapper', () => {
                         attributeName: 'fizzes',
                     },
                 };
+            }
+
+            static fromKey(key: string) {
+                const target = new ScannableItem;
+                target.snap = key;
+                return target;
             }
         }
 
@@ -3439,20 +3489,7 @@ describe('DataMapper', () => {
         });
 
         it('should allow the page size to be set', async () => {
-            const results =  mapper.scan(
-                class {
-                    get [DynamoDbTable]() { return 'foo'; }
-                    get [DynamoDbSchema]() {
-                        return {
-                            snap: {
-                                type: 'String',
-                                keyType: 'HASH',
-                            },
-                        };
-                    }
-                },
-                {pageSize: 20}
-            );
+            const results =  mapper.scan(ScannableItem, {pageSize: 20});
 
             await results.next();
 
@@ -3460,21 +3497,11 @@ describe('DataMapper', () => {
                 .toMatchObject({Limit: 20});
         });
 
-        it('should allow the page size to be set using the deprecated "limit" parameter', async () => {
-            const results =  mapper.scan(
-                class {
-                    get [DynamoDbTable]() { return 'foo'; }
-                    get [DynamoDbSchema]() {
-                        return {
-                            snap: {
-                                type: 'String',
-                                keyType: 'HASH',
-                            },
-                        };
-                    }
-                },
-                {limit: 20}
-            );
+        it('should not use a page size greater than the "limit" parameter', async () => {
+            const results =  mapper.scan(ScannableItem, {
+                limit: 20,
+                pageSize: 200
+            });
 
             await results.next();
 
@@ -3482,29 +3509,69 @@ describe('DataMapper', () => {
                 .toMatchObject({Limit: 20});
         });
 
-        it('should prefer the "pageSize" parameter over the "limit" parameter', async () => {
-            const results =  mapper.scan(
-                class {
-                    get [DynamoDbTable]() { return 'foo'; }
-                    get [DynamoDbSchema]() {
-                        return {
-                            snap: {
-                                type: 'String',
-                                keyType: 'HASH',
-                            },
-                        };
-                    }
-                },
-                {
-                    pageSize: 20,
-                    limit: 200,
-                }
-            );
+        it('should not use a page size greater than the "pageSize" parameter', async () => {
+            const results =  mapper.scan(ScannableItem, {
+                pageSize: 20,
+                limit: 200,
+            });
 
             await results.next();
 
             expect(mockDynamoDbClient.scan.mock.calls[0][0])
                 .toMatchObject({Limit: 20});
+        });
+
+        it('should cease iteration once the limit has been reached', async () => {
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                Items: [
+                    { snap: {S: 'snap'} },
+                    { snap: {S: 'crackle'} },
+                    { snap: {S: 'pop'} },
+                ],
+                LastEvaluatedKey: {snap: {S: 'pop'}},
+            }));
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                Items: [
+                    { snap: {S: 'fizz'} },
+                ],
+                LastEvaluatedKey: {snap: {S: 'fizz'}},
+            }));
+            promiseFunc.mockImplementationOnce(() => Promise.resolve({
+                Items: [
+                    { snap: {S: 'buzz'} },
+                ],
+                LastEvaluatedKey: {snap: {S: 'buzz'}},
+            }));
+
+            const results =  mapper.scan(ScannableItem, { limit: 5 });
+
+            for await (const _ of results) {
+                // pass
+            }
+
+            expect(results.pages().lastEvaluatedKey)
+                .toEqual(ScannableItem.fromKey('buzz'));
+
+            expect(mockDynamoDbClient.scan.mock.calls).toEqual([
+                [{
+                    TableName: 'foo',
+                    Limit: 5
+                }],
+                [{
+                    TableName: 'foo',
+                    Limit: 2,
+                    ExclusiveStartKey: {
+                        snap: {S: 'pop'}
+                    }
+                }],
+                [{
+                    TableName: 'foo',
+                    Limit: 1,
+                    ExclusiveStartKey: {
+                        snap: {S: 'fizz'}
+                    }
+                }]
+            ]);
         });
 
         it('should support the legacy call pattern', async () => {
@@ -3517,8 +3584,7 @@ describe('DataMapper', () => {
 
             expect(mockDynamoDbClient.scan.mock.calls[0][0]).toEqual({
                 TableName: 'foo',
-                IndexName: 'baz-index',
-                ConsistentRead: false
+                IndexName: 'baz-index'
             });
         });
 

@@ -172,7 +172,7 @@ export class DataMapper {
             this.client,
             this.mapGetBatch(items, state, perTableOptions, options),
             {
-                ConsistentRead: readConsistency === 'strong',
+                ConsistentRead: readConsistency === 'strong' ? true : undefined,
                 PerTableOptions: options
             }
         );
@@ -528,9 +528,12 @@ export class DataMapper {
         const schema = getSchema(item);
         const req: GetItemInput = {
             TableName: this.getTableName(item),
-            Key: marshallKey(schema, item),
-            ConsistentRead: readConsistency === 'strong',
+            Key: marshallKey(schema, item)
         };
+
+        if (readConsistency === 'strong') {
+            req.ConsistentRead = true;
+        }
 
         if (projection) {
             const attributes = new ExpressionAttributes();
@@ -1106,8 +1109,8 @@ function convertBatchGetOptions(
 ): TableOptions {
     const out: TableOptions = {};
 
-    if (options.readConsistency) {
-        out.ConsistentRead = options.readConsistency === 'strong';
+    if (options.readConsistency === 'strong') {
+        out.ConsistentRead = true;
     }
 
     if (options.projection) {

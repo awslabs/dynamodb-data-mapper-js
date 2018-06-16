@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Provide a method to get the underlying paginator for a `query`, `scan`, or
     `parallelScan` iterator. The paginator may be used to suspend and resume
     iteration at any page boundary.
+ - Add `limit` parameter to `scan` and `query` to automatically cease iteration
+    once a certain number of items have been returned or the results have been
+    exhausted, whichever comes first.
 
 ## [0.5.0]
 ### Fixed

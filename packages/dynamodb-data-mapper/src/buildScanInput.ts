@@ -30,12 +30,15 @@ export function buildScanInput<T>(
 
     const req: ScanInput = {
         TableName: getTableName(valueConstructor.prototype, prefix),
-        ConsistentRead: readConsistency === 'strong',
         Limit: pageSize,
         IndexName: indexName,
         Segment: segment,
         TotalSegments: totalSegments,
     };
+
+    if (readConsistency === 'strong') {
+        req.ConsistentRead = true;
+    }
 
     const schema = getSchema(valueConstructor.prototype);
 

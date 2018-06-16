@@ -46,11 +46,14 @@ export class QueryPaginator<T> extends Paginator<T> {
 
         const req: QueryInput = {
             TableName: getTableName(valueConstructor.prototype, prefix),
-            ConsistentRead: readConsistency === 'strong',
             ScanIndexForward: scanIndexForward,
             Limit: pageSize,
             IndexName: indexName,
         };
+
+        if (readConsistency === 'strong') {
+            req.ConsistentRead = true;
+        }
 
         const attributes = new ExpressionAttributes();
         req.KeyConditionExpression = marshallConditionExpression(
