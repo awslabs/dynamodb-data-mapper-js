@@ -7,7 +7,7 @@ document mapper for JavaScript applications using Amazon DynamoDB.
 
 ## Getting started
 
-[The `@aws/dynamodb-data-mapper`package](packages/dynamodb-data-mapper) provides
+[The `@aws/dynamodb-data-mapper` package](packages/dynamodb-data-mapper) provides
 a simple way to persist and load an application's domain objects to and from
 Amazon DynamoDB. When used together with the decorators provided by [the
 `@aws/dynamodb-data-mapper-annotations` package](packages/dynamodb-data-mapper-annotations),
