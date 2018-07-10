@@ -16,10 +16,12 @@
   "homepage": "https://awslabs.github.io/dynamodb-data-mapper-js/packages/dynamodb-expressions/",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
+  "module": "./build/index.mjs",
   "scripts": {
     "docs": "typedoc src",
-    "prepublishOnly": "tsc",
+    "prepublishOnly": "tsc && npm run rollup",
     "pretest": "tsc -p tsconfig.test.json",
+    "rollup": "rollup -c rollup.config.js",
     "test": "jest"
   },
   "author": {
@@ -32,6 +34,8 @@
     "@types/node": "^8.0.4",
     "aws-sdk": "^2.7.0",
     "jest": "^23",
+    "rollup": "^0.62",
+    "rollup-plugin-typescript": "^0.8",
     "typedoc": "^0.11.0",
     "typescript": "^2.7"
   },

@@ -16,12 +16,14 @@
   "homepage": "https://awslabs.github.io/dynamodb-data-mapper-js/packages/dynamodb-data-mapper-annotations/",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
+  "module": "./build/index.mjs",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run rollup",
     "docs": "typedoc src",
     "integ": "npm run pretest && jest --config=jest.integration.js",
     "prepublishOnly": "npm run build",
     "pretest": "tsc -p tsconfig.test.json",
+    "rollup": "rollup -c rollup.config.js",
     "test": "jest"
   },
   "author": {
@@ -35,6 +37,8 @@
     "@types/uuid": "^3.0.0",
     "aws-sdk": "^2.7.0",
     "jest": "^23",
+    "rollup": "^0.62",
+    "rollup-plugin-typescript": "^0.8",
     "typedoc": "^0.11.0",
     "typescript": "^2.7"
   },
