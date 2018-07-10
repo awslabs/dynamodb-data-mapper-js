@@ -5,6 +5,7 @@
     "bootstrap": "lerna bootstrap",
     "docs": "typedoc src && lerna run docs",
     "pretest": "lerna run pretest",
+    "rollup": "lerna run rollup",
     "test": "jest"
   },
   "author": {
