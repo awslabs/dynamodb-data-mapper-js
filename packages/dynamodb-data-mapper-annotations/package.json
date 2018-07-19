@@ -14,7 +14,7 @@
     "url": "https://github.com/awslabs/dynamodb-data-mapper-js/issues"
   },
   "homepage": "https://awslabs.github.io/dynamodb-data-mapper-js/packages/dynamodb-data-mapper-annotations/",
-  "main": "./build/index.js",
+  "main": "./build/index",
   "types": "./build/index.d.ts",
   "module": "./build/index.mjs",
   "scripts": {
