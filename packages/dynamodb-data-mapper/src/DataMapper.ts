@@ -1253,8 +1253,20 @@ function itemIdentifier(
 }
 
 function keyTypesToElementList(keys: KeyTypeMap): Array<KeySchemaElement> {
-    return Object.keys(keys).map(name => ({
+    const elementList = Object.keys(keys).map(name => ({
         AttributeName: name,
         KeyType: keys[name]
     }));
+
+    elementList.sort((a, b) => {
+        if (a.KeyType === 'HASH' && b.KeyType !== 'HASH') {
+            return -1;
+        }
+        if (a.KeyType !== 'HASH' && b.KeyType === 'HASH') {
+            return 1;
+        }
+        return 0;
+    });
+
+    return elementList;
 }
