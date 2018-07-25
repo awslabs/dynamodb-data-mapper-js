@@ -903,12 +903,12 @@ describe('DataMapper', () => {
                                     IndexName: 'globalIndex',
                                     KeySchema: [
                                         {
-                                            AttributeName: 'timestamp',
-                                            KeyType: 'RANGE',
-                                        },
-                                        {
                                             AttributeName: 'creator',
                                             KeyType: 'HASH',
+                                        },
+                                        {
+                                            AttributeName: 'timestamp',
+                                            KeyType: 'RANGE',
                                         },
                                     ],
                                     Projection: { ProjectionType: 'ALL' },
