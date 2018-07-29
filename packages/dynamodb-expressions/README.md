@@ -499,3 +499,37 @@ expr.add('string_set', 'foo');
 // delete a value from the same set
 expr.delete('string_set', 'bar');
 ```
+## Aplication example
+
+```js
+// given the anotation bellow
+@table(config.DDB_TABLE)
+class MyRecord {
+    @hashKey()
+    email?: string;
+
+    @attribute()
+    passwordHash?: string;
+
+    @attribute()
+    passwordSalt?: string;
+
+    @attribute()
+    verified?: boolean;
+
+    @attribute()
+    verifyToken?: string;
+}
+
+// you make a mapper operation as follows
+const aRecord = Object.assign(new MyRecord(), {
+    email,
+    passwordHash: password,
+    passwordSalt: salt,
+    verified: false,
+    verifyToken: token,
+});
+mapper.put(aRecord, { 
+    condition: new FunctionExpression('attribute_not_exists', new AttributePath('email') 
+}).then( /* result handler */ );
+``` 
