@@ -128,7 +128,40 @@ describe('marshallConditionExpression', () => {
                 '#attr2': 'nested_scalar',
             },
             ExpressionAttributeValues: {},
-        })
+        });
+
+        expect(marshallConditionExpression(
+            {type: 'Function', name: 'attribute_exists', subject: 'nested.nested.scalar'},
+            schema
+        )).toEqual({
+            expression: 'attribute_exists(#attr0.#attr1.#attr2)',
+            ExpressionAttributeNames: {
+                '#attr0': 'nested_level_1',
+                '#attr1': 'nested_level_2',
+                '#attr2': 'nested_scalar',
+            },
+            ExpressionAttributeValues: {},
+        });
+
+        expect(marshallConditionExpression(
+            {
+                type: 'Function',
+                name: 'contains',
+                subject: 'nested.nested.scalar',
+                expected: 'substr'
+            },
+            schema
+        )).toEqual({
+            expression: 'contains(#attr0.#attr1.#attr2, :val3)',
+            ExpressionAttributeNames: {
+                '#attr0': 'nested_level_1',
+                '#attr1': 'nested_level_2',
+                '#attr2': 'nested_scalar',
+            },
+            ExpressionAttributeValues: {
+                ':val3': {S: 'substr'}
+            },
+        });
     });
 });
 

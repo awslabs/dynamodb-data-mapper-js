@@ -184,6 +184,23 @@ function normalizeConditionExpression(
                 object: normalizeIfPath(expression.object, schema),
             };
 
+        case 'Function':
+            switch (expression.name) {
+                case 'attribute_exists':
+                case 'attribute_not_exists':
+                    return {
+                        ...expression,
+                        subject: toSchemaName(expression.subject, schema)
+                    };
+                case 'attribute_type':
+                case 'begins_with':
+                case 'contains':
+                    return {
+                        ...expression,
+                        subject: toSchemaName(expression.subject, schema)
+                    };
+            }
+
         case 'Between':
             return {
                 ...expression,

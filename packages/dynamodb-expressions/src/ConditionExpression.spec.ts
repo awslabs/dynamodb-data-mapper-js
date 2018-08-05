@@ -11,6 +11,11 @@ import {
     isConditionExpressionPredicate,
     isConditionExpressionSubject,
     serializeConditionExpression,
+    attributeExists,
+    attributeNotExists,
+    attributeType,
+    beginsWith,
+    contains,
 } from "./ConditionExpression";
 import {ExpressionAttributes} from "./ExpressionAttributes";
 import {AttributePath} from "./AttributePath";
@@ -89,6 +94,54 @@ describe('inList', () => {
                 'quux',
             ]
         });
+    });
+});
+
+describe('attributeExists', () => {
+    it('should return an attribute_exists function predicate', () => {
+        const pred = attributeExists();
+        expect(isConditionExpressionPredicate(pred)).toBe(true);
+        expect(pred.type).toBe('Function');
+        expect(pred.name).toBe('attribute_exists');
+    });
+});
+
+describe('attributeNotExists', () => {
+    it('should return an attribute_not_exists function predicate', () => {
+        const pred = attributeNotExists();
+        expect(isConditionExpressionPredicate(pred)).toBe(true);
+        expect(pred.type).toBe('Function');
+        expect(pred.name).toBe('attribute_not_exists');
+    });
+});
+
+describe('attributeType', () => {
+    it('should return an attribute_type function predicate', () => {
+        const pred = attributeType('BOOL');
+        expect(isConditionExpressionPredicate(pred)).toBe(true);
+        expect(pred.type).toBe('Function');
+        expect(pred.name).toBe('attribute_type');
+        expect(pred.expected).toBe('BOOL');
+    });
+});
+
+describe('beginsWith', () => {
+    it('should return an begins_with function predicate', () => {
+        const pred = beginsWith('prefix');
+        expect(isConditionExpressionPredicate(pred)).toBe(true);
+        expect(pred.type).toBe('Function');
+        expect(pred.name).toBe('begins_with');
+        expect(pred.expected).toBe('prefix');
+    });
+});
+
+describe('contains', () => {
+    it('should return an contains function predicate', () => {
+        const pred = contains('substr');
+        expect(isConditionExpressionPredicate(pred)).toBe(true);
+        expect(pred.type).toBe('Function');
+        expect(pred.name).toBe('contains');
+        expect(pred.expected).toBe('substr');
     });
 });
 
@@ -287,14 +340,17 @@ describe('serializeConditionExpression', () => {
             {
                 type: 'GreaterThan',
                 subject: 'foo',
-                object: 'bar',
+                object: new FunctionExpression('size', new AttributePath('bar')),
             },
             attributes
         );
 
-        expect(serialized).toBe('#attr0 > :val1');
-        expect(attributes.names).toEqual({'#attr0': 'foo'});
-        expect(attributes.values).toEqual({':val1': {S: 'bar'}});
+        expect(serialized).toBe('#attr0 > size(#attr1)');
+        expect(attributes.names).toEqual({
+            '#attr0': 'foo',
+            '#attr1': 'bar'
+        });
+        expect(attributes.values).toEqual({});
     });
 
     it('should serialize less than or equal to expressions', () => {
@@ -373,6 +429,83 @@ describe('serializeConditionExpression', () => {
             ':val1': {N: '1'},
             ':val2': {N: '10'},
             ':val3': {N: '100'},
+        });
+    });
+
+    describe('function expressions', () => {
+        it('should serialize attribute_exists expressions', () => {
+            const attributes = new ExpressionAttributes();
+            const serialized = serializeConditionExpression(
+                {type: 'Function', subject: 'foo', name: 'attribute_exists'},
+                attributes
+            );
+
+            expect(serialized).toBe('attribute_exists(#attr0)');
+            expect(attributes.names).toEqual({'#attr0': 'foo'});
+            expect(attributes.values).toEqual({});
+        });
+
+        it('should serialize attribute_not_exists expressions', () => {
+            const attributes = new ExpressionAttributes();
+            const serialized = serializeConditionExpression(
+                {type: 'Function', subject: 'foo', name: 'attribute_not_exists'},
+                attributes
+            );
+
+            expect(serialized).toBe('attribute_not_exists(#attr0)');
+            expect(attributes.names).toEqual({'#attr0': 'foo'});
+            expect(attributes.values).toEqual({});
+        });
+
+        it('should serialize attribute_type expressions', () => {
+            const attributes = new ExpressionAttributes();
+            const serialized = serializeConditionExpression(
+                {
+                    type: 'Function',
+                    subject: 'foo',
+                    name: 'attribute_type',
+                    expected: 'S'
+                },
+                attributes
+            );
+
+            expect(serialized).toBe('attribute_type(#attr0, :val1)');
+            expect(attributes.names).toEqual({'#attr0': 'foo'});
+            expect(attributes.values).toEqual({':val1': {S: 'S'}});
+        });
+
+        it('should serialize begins_with expressions', () => {
+            const attributes = new ExpressionAttributes();
+            const serialized = serializeConditionExpression(
+                {
+                    type: 'Function',
+                    subject: 'foo',
+                    name: 'begins_with',
+                    expected: 'prefix'
+                },
+                attributes
+            );
+
+            expect(serialized).toBe('begins_with(#attr0, :val1)');
+            expect(attributes.names).toEqual({'#attr0': 'foo'});
+            expect(attributes.values).toEqual({':val1': {S: 'prefix'}});
+        });
+
+        it('should serialize contains expressions', () => {
+            const attributes = new ExpressionAttributes();
+            const serialized = serializeConditionExpression(
+                {
+                    type: 'Function',
+                    subject: 'foo',
+                    name: 'contains',
+                    expected: 'substr'
+                },
+                attributes
+            );
+
+            expect(serialized).toBe('contains(#attr0, :val1)');
+            expect(attributes.names).toEqual({'#attr0': 'foo'});
+            expect(attributes.values).toEqual({':val1': {S: 'substr'}});
         });
     });
 
