@@ -25,5 +25,8 @@
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "jest": {
+    "testEnvironment": "node"
+  }
 }
