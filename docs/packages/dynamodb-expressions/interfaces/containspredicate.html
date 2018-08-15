@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>LessThanExpressionPredicate | @aws/dynamodb-expressions</title>
+	<title>ContainsPredicate | @aws/dynamodb-expressions</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -54,10 +54,10 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="lessthanexpressionpredicate.html">LessThanExpressionPredicate</a>
+					<a href="containspredicate.html">ContainsPredicate</a>
 				</li>
 			</ul>
-			<h1>Interface LessThanExpressionPredicate</h1>
+			<h1>Interface ContainsPredicate</h1>
 		</div>
 	</div>
 </header>
@@ -67,7 +67,8 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>A comparison predicate asserting that the subject is less than the object.</p>
+						<p>A comparison predicate asserting that the value of the subject in a given
+						record contains the specified string.</p>
 					</div>
 				</div>
 			</section>
@@ -75,10 +76,10 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="binarycomparisonpredicate.html" class="tsd-signature-type">BinaryComparisonPredicate</a>
+						<a href="basefunctionexpressionpredicate.html" class="tsd-signature-type">BaseFunctionExpressionPredicate</a>
 						<ul class="tsd-hierarchy">
 							<li>
-								<span class="target">LessThanExpressionPredicate</span>
+								<span class="target">ContainsPredicate</span>
 							</li>
 						</ul>
 					</li>
@@ -91,8 +92,9 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="lessthanexpressionpredicate.html#object" class="tsd-kind-icon">object</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="lessthanexpressionpredicate.html#type" class="tsd-kind-icon">type</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="containspredicate.html#expected" class="tsd-kind-icon">expected</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite"><a href="containspredicate.html#name" class="tsd-kind-icon">name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="containspredicate.html#type" class="tsd-kind-icon">type</a></li>
 							</ul>
 						</section>
 					</div>
@@ -100,29 +102,35 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-					<a name="object" class="tsd-anchor"></a>
-					<h3>object</h3>
-					<div class="tsd-signature tsd-kind-icon">object<span class="tsd-signature-symbol">:</span> <a href="../globals.html#comparisonoperand" class="tsd-signature-type">ComparisonOperand</a></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="expected" class="tsd-anchor"></a>
+					<h3>expected</h3>
+					<div class="tsd-signature tsd-kind-icon">expected<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="binarycomparisonpredicate.html">BinaryComparisonPredicate</a>.<a href="binarycomparisonpredicate.html#object">object</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L12">ConditionExpression.ts:12</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L245">ConditionExpression.ts:245</a></li>
 						</ul>
 					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>The value against which the comparison subject will be compared.</p>
-						</div>
-					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
+					<a name="name" class="tsd-anchor"></a>
+					<h3>name</h3>
+					<div class="tsd-signature tsd-kind-icon">name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"contains"</span></div>
+					<aside class="tsd-sources">
+						<p>Overrides <a href="basefunctionexpressionpredicate.html">BaseFunctionExpressionPredicate</a>.<a href="basefunctionexpressionpredicate.html#name">name</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L244">ConditionExpression.ts:244</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 					<a name="type" class="tsd-anchor"></a>
 					<h3>type</h3>
-					<div class="tsd-signature tsd-kind-icon">type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"LessThan"</span></div>
+					<div class="tsd-signature tsd-kind-icon">type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"Function"</span></div>
 					<aside class="tsd-sources">
+						<p>Inherited from <a href="basefunctionexpressionpredicate.html">BaseFunctionExpressionPredicate</a>.<a href="basefunctionexpressionpredicate.html#type">type</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L55">ConditionExpression.ts:55</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L159">ConditionExpression.ts:159</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -141,13 +149,16 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface">
-						<a href="lessthanexpressionpredicate.html" class="tsd-kind-icon">Less<wbr>Than<wbr>Expression<wbr>Predicate</a>
+						<a href="containspredicate.html" class="tsd-kind-icon">Contains<wbr>Predicate</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="lessthanexpressionpredicate.html#object" class="tsd-kind-icon">object</a>
-							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="lessthanexpressionpredicate.html#type" class="tsd-kind-icon">type</a>
+								<a href="containspredicate.html#expected" class="tsd-kind-icon">expected</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
+								<a href="containspredicate.html#name" class="tsd-kind-icon">name</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="containspredicate.html#type" class="tsd-kind-icon">type</a>
 							</li>
 						</ul>
 					</li>

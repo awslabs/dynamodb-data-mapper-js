@@ -81,10 +81,16 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-interface"><a href="interfaces/andexpression.html" class="tsd-kind-icon">And<wbr>Expression</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/attributebearingexpression.html" class="tsd-kind-icon">Attribute<wbr>Bearing<wbr>Expression</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/attributeexistspredicate.html" class="tsd-kind-icon">Attribute<wbr>Exists<wbr>Predicate</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/attributename.html" class="tsd-kind-icon">Attribute<wbr>Name</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/attributenotexistspredicate.html" class="tsd-kind-icon">Attribute<wbr>Not<wbr>Exists<wbr>Predicate</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/attributetypepredicate.html" class="tsd-kind-icon">Attribute<wbr>Type<wbr>Predicate</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/basefunctionexpressionpredicate.html" class="tsd-kind-icon">Base<wbr>Function<wbr>Expression<wbr>Predicate</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/beginswithpredicate.html" class="tsd-kind-icon">Begins<wbr>With<wbr>Predicate</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/betweenexpressionpredicate.html" class="tsd-kind-icon">Between<wbr>Expression<wbr>Predicate</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/binarycomparisonpredicate.html" class="tsd-kind-icon">Binary<wbr>Comparison<wbr>Predicate</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/conditionexpressionsubject.html" class="tsd-kind-icon">Condition<wbr>Expression<wbr>Subject</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/containspredicate.html" class="tsd-kind-icon">Contains<wbr>Predicate</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/equalityexpressionpredicate.html" class="tsd-kind-icon">Equality<wbr>Expression<wbr>Predicate</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/greaterthanexpressionpredicate.html" class="tsd-kind-icon">Greater<wbr>Than<wbr>Expression<wbr>Predicate</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/greaterthanorequaltoexpressionpredicate.html" class="tsd-kind-icon">Greater<wbr>Than<wbr>OrEqual<wbr>ToExpression<wbr>Predicate</a></li>
@@ -100,9 +106,11 @@
 						<section class="tsd-index-section ">
 							<h3>Type aliases</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-type-alias"><a href="globals.html#attributetype" class="tsd-kind-icon">Attribute<wbr>Type</a></li>
 								<li class="tsd-kind-type-alias"><a href="globals.html#comparisonoperand" class="tsd-kind-icon">Comparison<wbr>Operand</a></li>
 								<li class="tsd-kind-type-alias"><a href="globals.html#conditionexpression" class="tsd-kind-icon">Condition<wbr>Expression</a></li>
 								<li class="tsd-kind-type-alias"><a href="globals.html#conditionexpressionpredicate" class="tsd-kind-icon">Condition<wbr>Expression<wbr>Predicate</a></li>
+								<li class="tsd-kind-type-alias"><a href="globals.html#functionexpressionpredicate" class="tsd-kind-icon">Function<wbr>Expression<wbr>Predicate</a></li>
 								<li class="tsd-kind-type-alias"><a href="globals.html#mathematicalexpressionoperand" class="tsd-kind-icon">Mathematical<wbr>Expression<wbr>Operand</a></li>
 								<li class="tsd-kind-type-alias"><a href="globals.html#pathelement" class="tsd-kind-icon">Path<wbr>Element</a></li>
 								<li class="tsd-kind-type-alias"><a href="globals.html#projectionexpression" class="tsd-kind-icon">Projection<wbr>Expression</a></li>
@@ -112,7 +120,12 @@
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-function"><a href="globals.html#attributeexists" class="tsd-kind-icon">attribute<wbr>Exists</a></li>
+								<li class="tsd-kind-function"><a href="globals.html#attributenotexists" class="tsd-kind-icon">attribute<wbr>Not<wbr>Exists</a></li>
+								<li class="tsd-kind-function"><a href="globals.html#attributetype" class="tsd-kind-icon">attribute<wbr>Type</a></li>
+								<li class="tsd-kind-function"><a href="globals.html#beginswith" class="tsd-kind-icon">begins<wbr>With</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#between" class="tsd-kind-icon">between</a></li>
+								<li class="tsd-kind-function"><a href="globals.html#contains" class="tsd-kind-icon">contains</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#equals" class="tsd-kind-icon">equals</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#greaterthan" class="tsd-kind-icon">greater<wbr>Than</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#greaterthanorequalto" class="tsd-kind-icon">greater<wbr>Than<wbr>OrEqual<wbr>To</a></li>
@@ -133,12 +146,22 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Type aliases</h2>
 				<section class="tsd-panel tsd-member tsd-kind-type-alias">
-					<a name="comparisonoperand" class="tsd-anchor"></a>
-					<h3>Comparison<wbr>Operand</h3>
-					<div class="tsd-signature tsd-kind-icon">Comparison<wbr>Operand<span class="tsd-signature-symbol">:</span> <a href="classes/attributepath.html" class="tsd-signature-type">AttributePath</a><span class="tsd-signature-symbol"> | </span><a href="classes/attributevalue.html" class="tsd-signature-type">AttributeValue</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">any</span></div>
+					<a name="attributetype" class="tsd-anchor"></a>
+					<h3>Attribute<wbr>Type</h3>
+					<div class="tsd-signature tsd-kind-icon">Attribute<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"S"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"SS"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"N"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"NS"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"B"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"BS"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"BOOL"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"NULL"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"L"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"M"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ConditionExpression.ts#L6">ConditionExpression.ts:6</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L198">ConditionExpression.ts:198</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias">
+					<a name="comparisonoperand" class="tsd-anchor"></a>
+					<h3>Comparison<wbr>Operand</h3>
+					<div class="tsd-signature tsd-kind-icon">Comparison<wbr>Operand<span class="tsd-signature-symbol">:</span> <a href="classes/attributepath.html" class="tsd-signature-type">AttributePath</a><span class="tsd-signature-symbol"> | </span><a href="classes/attributevalue.html" class="tsd-signature-type">AttributeValue</a><span class="tsd-signature-symbol"> | </span><a href="classes/functionexpression.html" class="tsd-signature-type">FunctionExpression</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">any</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L6">ConditionExpression.ts:6</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -148,17 +171,27 @@
 					<div class="tsd-signature tsd-kind-icon">Condition<wbr>Expression<span class="tsd-signature-symbol">:</span> <a href="globals.html#simpleconditionexpression" class="tsd-signature-type">SimpleConditionExpression</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/andexpression.html" class="tsd-signature-type">AndExpression</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/orexpression.html" class="tsd-signature-type">OrExpression</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/notexpression.html" class="tsd-signature-type">NotExpression</a><span class="tsd-signature-symbol"> | </span><a href="classes/functionexpression.html" class="tsd-signature-type">FunctionExpression</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ConditionExpression.ts#L210">ConditionExpression.ts:210</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L329">ConditionExpression.ts:329</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-type-alias">
 					<a name="conditionexpressionpredicate" class="tsd-anchor"></a>
 					<h3>Condition<wbr>Expression<wbr>Predicate</h3>
-					<div class="tsd-signature tsd-kind-icon">Condition<wbr>Expression<wbr>Predicate<span class="tsd-signature-symbol">:</span> <a href="interfaces/equalityexpressionpredicate.html" class="tsd-signature-type">EqualityExpressionPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/inequalityexpressionpredicate.html" class="tsd-signature-type">InequalityExpressionPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/lessthanexpressionpredicate.html" class="tsd-signature-type">LessThanExpressionPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/lessthanorequaltoexpressionpredicate.html" class="tsd-signature-type">LessThanOrEqualToExpressionPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/greaterthanexpressionpredicate.html" class="tsd-signature-type">GreaterThanExpressionPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/greaterthanexpressionpredicate.html" class="tsd-signature-type">GreaterThanExpressionPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/greaterthanorequaltoexpressionpredicate.html" class="tsd-signature-type">GreaterThanOrEqualToExpressionPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/betweenexpressionpredicate.html" class="tsd-signature-type">BetweenExpressionPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/membershipexpressionpredicate.html" class="tsd-signature-type">MembershipExpressionPredicate</a></div>
+					<div class="tsd-signature tsd-kind-icon">Condition<wbr>Expression<wbr>Predicate<span class="tsd-signature-symbol">:</span> <a href="interfaces/equalityexpressionpredicate.html" class="tsd-signature-type">EqualityExpressionPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/inequalityexpressionpredicate.html" class="tsd-signature-type">InequalityExpressionPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/lessthanexpressionpredicate.html" class="tsd-signature-type">LessThanExpressionPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/lessthanorequaltoexpressionpredicate.html" class="tsd-signature-type">LessThanOrEqualToExpressionPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/greaterthanexpressionpredicate.html" class="tsd-signature-type">GreaterThanExpressionPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/greaterthanexpressionpredicate.html" class="tsd-signature-type">GreaterThanExpressionPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/greaterthanorequaltoexpressionpredicate.html" class="tsd-signature-type">GreaterThanOrEqualToExpressionPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/betweenexpressionpredicate.html" class="tsd-signature-type">BetweenExpressionPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/membershipexpressionpredicate.html" class="tsd-signature-type">MembershipExpressionPredicate</a><span class="tsd-signature-symbol"> | </span><a href="globals.html#functionexpressionpredicate" class="tsd-signature-type">FunctionExpressionPredicate</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ConditionExpression.ts#L155">ConditionExpression.ts:155</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L263">ConditionExpression.ts:263</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias">
+					<a name="functionexpressionpredicate" class="tsd-anchor"></a>
+					<h3>Function<wbr>Expression<wbr>Predicate</h3>
+					<div class="tsd-signature tsd-kind-icon">Function<wbr>Expression<wbr>Predicate<span class="tsd-signature-symbol">:</span> <a href="interfaces/attributeexistspredicate.html" class="tsd-signature-type">AttributeExistsPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/attributenotexistspredicate.html" class="tsd-signature-type">AttributeNotExistsPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/attributetypepredicate.html" class="tsd-signature-type">AttributeTypePredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/beginswithpredicate.html" class="tsd-signature-type">BeginsWithPredicate</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/containspredicate.html" class="tsd-signature-type">ContainsPredicate</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L256">ConditionExpression.ts:256</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -168,7 +201,7 @@
 					<div class="tsd-signature tsd-kind-icon">Mathematical<wbr>Expression<wbr>Operand<span class="tsd-signature-symbol">:</span> <a href="classes/attributepath.html" class="tsd-signature-type">AttributePath</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/MathematicalExpression.ts#L5">MathematicalExpression.ts:5</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/MathematicalExpression.ts#L5">MathematicalExpression.ts:5</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -178,7 +211,7 @@
 					<div class="tsd-signature tsd-kind-icon">Path<wbr>Element<span class="tsd-signature-symbol">:</span> <a href="interfaces/attributename.html" class="tsd-signature-type">AttributeName</a><span class="tsd-signature-symbol"> | </span><a href="interfaces/listindex.html" class="tsd-signature-type">ListIndex</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/AttributePath.ts#L52">AttributePath.ts:52</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/AttributePath.ts#L52">AttributePath.ts:52</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -188,7 +221,7 @@
 					<div class="tsd-signature tsd-kind-icon">Projection<wbr>Expression<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="classes/attributepath.html" class="tsd-signature-type">AttributePath</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ProjectionExpression.ts#L8">ProjectionExpression.ts:8</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ProjectionExpression.ts#L8">ProjectionExpression.ts:8</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -204,13 +237,93 @@
 					<div class="tsd-signature tsd-kind-icon">Simple<wbr>Condition<wbr>Expression<span class="tsd-signature-symbol">:</span> <a href="interfaces/conditionexpressionsubject.html" class="tsd-signature-type">ConditionExpressionSubject</a><span class="tsd-signature-symbol"> &amp; </span><a href="globals.html#conditionexpressionpredicate" class="tsd-signature-type">ConditionExpressionPredicate</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ConditionExpression.ts#L207">ConditionExpression.ts:207</a></li>
+							<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L326">ConditionExpression.ts:326</a></li>
 						</ul>
 					</aside>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
+				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="attributeexists" class="tsd-anchor"></a>
+					<h3>attribute<wbr>Exists</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">attribute<wbr>Exists<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="interfaces/attributeexistspredicate.html" class="tsd-signature-type">AttributeExistsPredicate</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L173">ConditionExpression.ts:173</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="interfaces/attributeexistspredicate.html" class="tsd-signature-type">AttributeExistsPredicate</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="attributenotexists" class="tsd-anchor"></a>
+					<h3>attribute<wbr>Not<wbr>Exists</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">attribute<wbr>Not<wbr>Exists<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="interfaces/attributenotexistspredicate.html" class="tsd-signature-type">AttributeNotExistsPredicate</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L191">ConditionExpression.ts:191</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="interfaces/attributenotexistspredicate.html" class="tsd-signature-type">AttributeNotExistsPredicate</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="attributetype" class="tsd-anchor"></a>
+					<h3>attribute<wbr>Type</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">attribute<wbr>Type<span class="tsd-signature-symbol">(</span>expected<span class="tsd-signature-symbol">: </span><a href="globals.html#attributetype" class="tsd-signature-type">AttributeType</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="interfaces/attributetypepredicate.html" class="tsd-signature-type">AttributeTypePredicate</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L210">ConditionExpression.ts:210</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>expected: <a href="globals.html#attributetype" class="tsd-signature-type">AttributeType</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="interfaces/attributetypepredicate.html" class="tsd-signature-type">AttributeTypePredicate</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="beginswith" class="tsd-anchor"></a>
+					<h3>begins<wbr>With</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">begins<wbr>With<span class="tsd-signature-symbol">(</span>expected<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="interfaces/beginswithpredicate.html" class="tsd-signature-type">BeginsWithPredicate</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L229">ConditionExpression.ts:229</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>expected: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="interfaces/beginswithpredicate.html" class="tsd-signature-type">BeginsWithPredicate</a></h4>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function">
 					<a name="between" class="tsd-anchor"></a>
 					<h3>between</h3>
@@ -221,7 +334,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ConditionExpression.ts#L126">ConditionExpression.ts:126</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L126">ConditionExpression.ts:126</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -238,6 +351,29 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="contains" class="tsd-anchor"></a>
+					<h3>contains</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">contains<span class="tsd-signature-symbol">(</span>expected<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="interfaces/containspredicate.html" class="tsd-signature-type">ContainsPredicate</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L248">ConditionExpression.ts:248</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>expected: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="interfaces/containspredicate.html" class="tsd-signature-type">ContainsPredicate</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function">
 					<a name="equals" class="tsd-anchor"></a>
 					<h3>equals</h3>
 					<ul class="tsd-signatures tsd-kind-function">
@@ -247,7 +383,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ConditionExpression.ts#L26">ConditionExpression.ts:26</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L26">ConditionExpression.ts:26</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -276,7 +412,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ConditionExpression.ts#L91">ConditionExpression.ts:91</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L91">ConditionExpression.ts:91</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -299,7 +435,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ConditionExpression.ts#L108">ConditionExpression.ts:108</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L108">ConditionExpression.ts:108</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -322,7 +458,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ConditionExpression.ts#L146">ConditionExpression.ts:146</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L146">ConditionExpression.ts:146</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -345,7 +481,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ConditionExpression.ts#L246">ConditionExpression.ts:246</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L365">ConditionExpression.ts:365</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -373,7 +509,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ConditionExpression.ts#L169">ConditionExpression.ts:169</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L278">ConditionExpression.ts:278</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -401,7 +537,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ConditionExpression.ts#L199">ConditionExpression.ts:199</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L318">ConditionExpression.ts:318</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -424,7 +560,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ConditionExpression.ts#L58">ConditionExpression.ts:58</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L58">ConditionExpression.ts:58</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -447,7 +583,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ConditionExpression.ts#L75">ConditionExpression.ts:75</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L75">ConditionExpression.ts:75</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -470,7 +606,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ConditionExpression.ts#L42">ConditionExpression.ts:42</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L42">ConditionExpression.ts:42</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -493,7 +629,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ConditionExpression.ts#L282">ConditionExpression.ts:282</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ConditionExpression.ts#L401">ConditionExpression.ts:401</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -526,7 +662,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/9263020/packages/dynamodb-expressions/src/ProjectionExpression.ts#L15">ProjectionExpression.ts:15</a></li>
+									<li>Defined in <a href="https://github.com/awslabs/dynamodb-data-mapper-js/blob/c504011/packages/dynamodb-expressions/src/ProjectionExpression.ts#L15">ProjectionExpression.ts:15</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -586,7 +722,22 @@
 						<a href="interfaces/attributebearingexpression.html" class="tsd-kind-icon">Attribute<wbr>Bearing<wbr>Expression</a>
 					</li>
 					<li class=" tsd-kind-interface">
+						<a href="interfaces/attributeexistspredicate.html" class="tsd-kind-icon">Attribute<wbr>Exists<wbr>Predicate</a>
+					</li>
+					<li class=" tsd-kind-interface">
 						<a href="interfaces/attributename.html" class="tsd-kind-icon">Attribute<wbr>Name</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/attributenotexistspredicate.html" class="tsd-kind-icon">Attribute<wbr>Not<wbr>Exists<wbr>Predicate</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/attributetypepredicate.html" class="tsd-kind-icon">Attribute<wbr>Type<wbr>Predicate</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/basefunctionexpressionpredicate.html" class="tsd-kind-icon">Base<wbr>Function<wbr>Expression<wbr>Predicate</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/beginswithpredicate.html" class="tsd-kind-icon">Begins<wbr>With<wbr>Predicate</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/betweenexpressionpredicate.html" class="tsd-kind-icon">Between<wbr>Expression<wbr>Predicate</a>
@@ -596,6 +747,9 @@
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/conditionexpressionsubject.html" class="tsd-kind-icon">Condition<wbr>Expression<wbr>Subject</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/containspredicate.html" class="tsd-kind-icon">Contains<wbr>Predicate</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/equalityexpressionpredicate.html" class="tsd-kind-icon">Equality<wbr>Expression<wbr>Predicate</a>
@@ -628,6 +782,9 @@
 						<a href="interfaces/orexpression.html" class="tsd-kind-icon">Or<wbr>Expression</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#attributetype" class="tsd-kind-icon">Attribute<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
 						<a href="globals.html#comparisonoperand" class="tsd-kind-icon">Comparison<wbr>Operand</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
@@ -635,6 +792,9 @@
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="globals.html#conditionexpressionpredicate" class="tsd-kind-icon">Condition<wbr>Expression<wbr>Predicate</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#functionexpressionpredicate" class="tsd-kind-icon">Function<wbr>Expression<wbr>Predicate</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="globals.html#mathematicalexpressionoperand" class="tsd-kind-icon">Mathematical<wbr>Expression<wbr>Operand</a>
@@ -649,7 +809,22 @@
 						<a href="globals.html#simpleconditionexpression" class="tsd-kind-icon">Simple<wbr>Condition<wbr>Expression</a>
 					</li>
 					<li class=" tsd-kind-function">
+						<a href="globals.html#attributeexists" class="tsd-kind-icon">attribute<wbr>Exists</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#attributenotexists" class="tsd-kind-icon">attribute<wbr>Not<wbr>Exists</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#attributetype" class="tsd-kind-icon">attribute<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#beginswith" class="tsd-kind-icon">begins<wbr>With</a>
+					</li>
+					<li class=" tsd-kind-function">
 						<a href="globals.html#between" class="tsd-kind-icon">between</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#contains" class="tsd-kind-icon">contains</a>
 					</li>
 					<li class=" tsd-kind-function">
 						<a href="globals.html#equals" class="tsd-kind-icon">equals</a>
