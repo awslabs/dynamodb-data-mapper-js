@@ -1,6 +1,6 @@
 {
   "name": "@aws/dynamodb-expressions",
-  "version": "0.7.1",
+  "version": "0.7.3",
   "description": "Composable expression objects for Amazon DynamoDB",
   "keywords": [
     "aws",
