@@ -216,7 +216,7 @@ Deletes the table for the mapped class and waits for it to be removed:
 await mapper.deleteTable(MyDomainObject)
 ```
 
-##### `ensureTableNoExists`
+##### `ensureTableNotExists`
 
 Like `deleteTable`, but only deletes the table if it exists:
 
