@@ -2,7 +2,7 @@ import {ClassAnnotation} from './annotationShapes';
 import {DynamoDbTable} from '@aws/dynamodb-data-mapper';
 
 /**
- * Declare a TypeScript class to be represent items in a table in a way
+ * Declare a TypeScript class to represent items in a table in a way that is
  * understandable by the AWS DynamoDB DataMapper for JavaScript. Meant to be
  * used as a TypeScript class decorator in projects compiled with the
  * `experimentalDecorators` option enabled.
