@@ -307,10 +307,6 @@ export class DataMapper {
         }
     }
 
-    private delay(duration: number) {
-        return new Promise(resolve => setTimeout(resolve, duration));
-    }
-
     /**
      * Perform a UpdateTable operation using the schema accessible via the
      * {DynamoDbSchema} property and the table name accessible via the
@@ -325,19 +321,16 @@ export class DataMapper {
     async createGlobalSecondaryIndex(
         valueConstructor: ZeroArgumentsConstructor<any>,
         {
-            readCapacityUnits,
-            streamViewType = 'NONE',
-            writeCapacityUnits,
             indexOptions = {},
         }: CreateTableOptions,
         indexName: string
     ) {
         const schema = getSchema(valueConstructor.prototype);
-        const { attributes, indexKeys, tableKeys } = keysFromSchema(schema);
+        const { attributes, indexKeys } = keysFromSchema(schema);
         const TableName = this.getTableName(valueConstructor.prototype);
 
         const globalSecondaryIndexes = indexDefinitions(indexKeys, indexOptions, schema).GlobalSecondaryIndexes;
-        const indexSearch = globalSecondaryIndexes.filter(function(index) {
+        const indexSearch = globalSecondaryIndexes === undefined ? [] : globalSecondaryIndexes.filter(function(index) {
             return index.IndexName === indexName;
         });
         const indexDefinition: CreateGlobalSecondaryIndexAction = indexSearch[0];
@@ -354,18 +347,8 @@ export class DataMapper {
             AttributeDefinitions: attributeDefinitionList(attributes),
         }).promise();
 
-        var remainingAttempts = 25;
-        while (TableStatus !== 'ACTIVE') {
-            const pollResult = await this.client.describeTable({TableName}).promise();
-            TableStatus = pollResult.Table.TableStatus;
-
-            if (TableStatus !== 'ACTIVE') {
-                this.delay(20000);
-                remainingAttempts--;
-                if (remainingAttempts === 0) {
-                    throw Error('Exceeded maximum poll waits for table to return to ACTIVE status');
-                }
-            }
+        if (TableStatus !== 'ACTIVE') {
+            await this.client.waitFor('tableExists', {TableName}).promise();
         }
     }
 
@@ -388,9 +371,10 @@ export class DataMapper {
     ) {
         const TableName = this.getTableName(valueConstructor.prototype);
         try {
-            const describeTableResult = await this.client.describeTable({TableName}).promise();
-            const globalIndexes = describeTableResult.Table.GlobalSecondaryIndexes;
-            const indexSearch = globalIndexes === undefined ? [] : globalIndexes.filter(function(index) {
+            const {
+                Table: {GlobalSecondaryIndexes } = {GlobalSecondaryIndexes: []}
+            } = await this.client.describeTable({TableName}).promise();
+            const indexSearch = GlobalSecondaryIndexes === undefined ? [] : GlobalSecondaryIndexes.filter(function(index) {
                 return index.IndexName === indexName;
             });
             if (indexSearch.length === 0) {
