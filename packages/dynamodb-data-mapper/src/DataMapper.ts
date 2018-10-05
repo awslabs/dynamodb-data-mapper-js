@@ -320,10 +320,10 @@ export class DataMapper {
      */
     async createGlobalSecondaryIndex(
         valueConstructor: ZeroArgumentsConstructor<any>,
+        indexName: string,
         {
             indexOptions = {},
-        }: CreateTableOptions,
-        indexName: string
+        }: CreateTableOptions
     ) {
         const schema = getSchema(valueConstructor.prototype);
         const { attributes, indexKeys } = keysFromSchema(schema);
@@ -366,8 +366,8 @@ export class DataMapper {
      */
     async ensureGlobalSecondaryIndexExists(
         valueConstructor: ZeroArgumentsConstructor<any>,
-        options: CreateTableOptions,
-        indexName: string
+        indexName: string,
+        options: CreateTableOptions
     ) {
         const TableName = this.getTableName(valueConstructor.prototype);
         try {
@@ -378,7 +378,7 @@ export class DataMapper {
                 return index.IndexName === indexName;
             });
             if (indexSearch.length === 0) {
-                await this.createGlobalSecondaryIndex(valueConstructor, options, indexName);
+                await this.createGlobalSecondaryIndex(valueConstructor, indexName, options);
             }
         } catch (err) {
             throw err;
