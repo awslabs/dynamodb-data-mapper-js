@@ -335,7 +335,7 @@ export class DataMapper {
         });
         const indexDefinition: CreateGlobalSecondaryIndexAction = indexSearch[0];
 
-        var {
+        const {
             TableDescription: {TableStatus} = {TableStatus: 'UPDATING'}
         } = await this.client.updateTable({
             GlobalSecondaryIndexUpdates: [{
