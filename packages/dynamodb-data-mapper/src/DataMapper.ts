@@ -76,6 +76,7 @@ import {
 import {
     AttributeDefinition,
     AttributeMap,
+    CreateGlobalSecondaryIndexAction,
     DeleteItemInput,
     GetItemInput,
     GlobalSecondaryIndexList,
@@ -303,6 +304,100 @@ export class DataMapper {
 
         if (TableStatus !== 'ACTIVE') {
             await this.client.waitFor('tableExists', {TableName}).promise();
+        }
+    }
+
+    private delay(duration: number) {
+        return new Promise(resolve => setTimeout(resolve, duration));
+    }
+
+    /**
+     * Perform a UpdateTable operation using the schema accessible via the
+     * {DynamoDbSchema} property and the table name accessible via the
+     * {DynamoDbTable} property on the prototype of the constructor supplied.
+     *
+     * The promise returned by this method will not resolve until the table is
+     * active and ready for use.
+     *
+     * @param valueConstructor  The constructor used for values in the table.
+     * @param options           Options to configure the CreateTable operation
+     */
+    async createGlobalSecondaryIndex(
+        valueConstructor: ZeroArgumentsConstructor<any>,
+        {
+            readCapacityUnits,
+            streamViewType = 'NONE',
+            writeCapacityUnits,
+            indexOptions = {},
+        }: CreateTableOptions,
+        indexName: string
+    ) {
+        const schema = getSchema(valueConstructor.prototype);
+        const { attributes, indexKeys, tableKeys } = keysFromSchema(schema);
+        const TableName = this.getTableName(valueConstructor.prototype);
+
+        const globalSecondaryIndexes = indexDefinitions(indexKeys, indexOptions, schema).GlobalSecondaryIndexes;
+        const indexSearch = globalSecondaryIndexes.filter(function(index) {
+            return index.IndexName === indexName;
+        });
+        const indexDefinition: CreateGlobalSecondaryIndexAction = indexSearch[0];
+
+        var {
+            TableDescription: {TableStatus} = {TableStatus: 'UPDATING'}
+        } = await this.client.updateTable({
+            GlobalSecondaryIndexUpdates: [{
+                Create: {
+                    ...indexDefinition
+                }
+            }],
+            TableName,
+            AttributeDefinitions: attributeDefinitionList(attributes),
+        }).promise();
+
+        var remainingAttempts = 25;
+        while (TableStatus !== 'ACTIVE') {
+            const pollResult = await this.client.describeTable({TableName}).promise();
+            TableStatus = pollResult.Table.TableStatus;
+
+            if (TableStatus !== 'ACTIVE') {
+                this.delay(20000);
+                remainingAttempts--;
+                if (remainingAttempts === 0) {
+                    throw Error('Exceeded maximum poll waits for table to return to ACTIVE status');
+                }
+            }
+        }
+    }
+
+    /**
+     * If the table does not already exist, perform a CreateTable operation
+     * using the schema accessible via the {DynamoDbSchema} property and the
+     * table name accessible via the {DynamoDbTable} property on the prototype
+     * of the constructor supplied.
+     *
+     * The promise returned by this method will not resolve until the table is
+     * active and ready for use.
+     *
+     * @param valueConstructor  The constructor used for values in the table.
+     * @param options           Options to configure the CreateTable operation
+     */
+    async ensureGlobalSecondaryIndexExists(
+        valueConstructor: ZeroArgumentsConstructor<any>,
+        options: CreateTableOptions,
+        indexName: string
+    ) {
+        const TableName = this.getTableName(valueConstructor.prototype);
+        try {
+            const describeTableResult = await this.client.describeTable({TableName}).promise();
+            const globalIndexes = describeTableResult.Table.GlobalSecondaryIndexes;
+            const indexSearch = globalIndexes === undefined ? [] : globalIndexes.filter(function(index) {
+                return index.IndexName === indexName;
+            });
+            if (indexSearch.length === 0) {
+                await this.createGlobalSecondaryIndex(valueConstructor, options, indexName);
+            }
+        } catch (err) {
+            throw err;
         }
     }
 
