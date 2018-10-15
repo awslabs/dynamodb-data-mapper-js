@@ -309,14 +309,15 @@ export class DataMapper {
 
     /**
      * Perform a UpdateTable operation using the schema accessible via the
-     * {DynamoDbSchema} property and the table name accessible via the
-     * {DynamoDbTable} property on the prototype of the constructor supplied.
+     * {DynamoDbSchema} property, the table name accessible via the
+     * {DynamoDbTable} property on the prototype of the constructor supplied,
+     * and the specified global secondary index name.
      *
      * The promise returned by this method will not resolve until the table is
      * active and ready for use.
      *
      * @param valueConstructor  The constructor used for values in the table.
-     * @param options           Options to configure the CreateTable operation
+     * @param options           Options to configure the UpdateTable operation
      */
     async createGlobalSecondaryIndex(
         valueConstructor: ZeroArgumentsConstructor<any>,
@@ -353,16 +354,17 @@ export class DataMapper {
     }
 
     /**
-     * If the table does not already exist, perform a CreateTable operation
-     * using the schema accessible via the {DynamoDbSchema} property and the
+     * If the index does not already exist, perform a UpdateTable operation
+     * using the schema accessible via the {DynamoDbSchema} property, the
      * table name accessible via the {DynamoDbTable} property on the prototype
-     * of the constructor supplied.
+     * of the constructor supplied, and the index name.
      *
      * The promise returned by this method will not resolve until the table is
-     * active and ready for use.
+     * active and ready for use. Note that the index will not be usable for queries
+     * until it has finished backfilling
      *
      * @param valueConstructor  The constructor used for values in the table.
-     * @param options           Options to configure the CreateTable operation
+     * @param options           Options to configure the UpdateTable operation
      */
     async ensureGlobalSecondaryIndexExists(
         valueConstructor: ZeroArgumentsConstructor<any>,
