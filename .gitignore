@@ -11,6 +11,7 @@ pids
 *.pid
 *.seed
 *.pid.lock
+.vscode
 lib-cov
 coverage
 build
