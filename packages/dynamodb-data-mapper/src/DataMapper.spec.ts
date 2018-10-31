@@ -13,7 +13,7 @@ import {
     UpdateExpression,
 } from "@aws/dynamodb-expressions";
 import {ItemNotFoundException} from "./ItemNotFoundException";
-import {BatchGetOptions, ParallelScanState} from './index';
+import {BatchGetOptions, ParallelScanState, GlobalSecondaryIndexOptions} from './index';
 
 type BinaryValue = ArrayBuffer|ArrayBufferView;
 
@@ -663,6 +663,105 @@ describe('DataMapper', () => {
             });
         }
     });
+
+    describe('#createGlobalSecondaryIndex', () => {
+        const waitPromiseFunc = jest.fn(() => Promise.resolve());
+        const updateTablePromiseFunc = jest.fn(() => Promise.resolve({}));
+        const mockDynamoDbClient = {
+            config: {},
+            updateTable: jest.fn(() => ({promise: updateTablePromiseFunc})),
+            waitFor: jest.fn(() => ({promise: waitPromiseFunc})),
+        };
+
+        beforeEach(() => {
+            updateTablePromiseFunc.mockClear();
+            mockDynamoDbClient.updateTable.mockClear();
+            waitPromiseFunc.mockClear();
+            mockDynamoDbClient.waitFor.mockClear();
+        });
+
+        const mapper = new DataMapper({
+            client: mockDynamoDbClient as any,
+        });    
+
+        class Item {
+            get [DynamoDbTable]() { return 'foo' }
+
+            get [DynamoDbSchema]() {
+                return {
+                    id: {
+                        type: 'String',
+                        keyType: 'HASH'
+                    },
+                    description: {
+                        type: 'String',
+                        indexKeyConfigurations: {
+                            DescriptionIndex: 'HASH'
+                        }
+                    }
+                };
+            }
+        }
+
+        const DescriptionIndex: GlobalSecondaryIndexOptions = {
+            projection: 'all',
+            readCapacityUnits: 1,
+            type: 'global',
+            writeCapacityUnits: 1
+        };
+
+        it('should make and send an UpdateTable request', async () => {
+            await mapper.createGlobalSecondaryIndex(Item, 'DescriptionIndex', {
+                indexOptions: {
+                    DescriptionIndex
+                },
+                readCapacityUnits: 5,
+                writeCapacityUnits: 5,
+            });
+
+            expect(mockDynamoDbClient.updateTable.mock.calls).toEqual([
+                [
+                    {
+                        TableName: 'foo',
+                        AttributeDefinitions: [
+                            {
+                                AttributeName: 'id',
+                                AttributeType: 'S'
+                            },
+                            {
+                                AttributeName: 'description',
+                                AttributeType: 'S'
+                            }
+                        ],
+                        GlobalSecondaryIndexUpdates: [
+                            {
+                                Create: {
+                                    IndexName: 'DescriptionIndex',
+                                    KeySchema: [
+                                        {
+                                            AttributeName: 'description',
+                                            KeyType: 'HASH'
+                                        }
+                                    ],
+                                    Projection: {
+                                        ProjectionType: 'ALL'
+                                    },
+                                    ProvisionedThroughput: {
+                                        ReadCapacityUnits: 1,
+                                        WriteCapacityUnits: 1
+                                    }
+                                }
+                            }
+                        ],
+                    },
+                ]
+            ]);
+
+            expect(mockDynamoDbClient.waitFor.mock.calls).toEqual([
+                [ 'tableExists', { TableName: 'foo' } ],
+            ]);
+        });
+    })
 
     describe('#createTable', () => {
         const waitPromiseFunc = jest.fn(() => Promise.resolve());
@@ -1485,6 +1584,135 @@ describe('DataMapper', () => {
                 [ 'tableNotExists', { TableName: 'foo' } ],
             ]);
         });
+    });
+
+
+    describe('#ensureGlobalSecondaryIndexExists', () => {
+        const waitPromiseFunc = jest.fn(() => Promise.resolve());
+        const describeTablePromiseFunc = jest.fn(() => Promise.resolve({
+            Table: {
+                TableStatus: 'ACTIVE',
+                GlobalSecondaryIndexes: [ 
+                    {
+                        IndexName: 'DescriptionIndex'
+                    }
+                ],
+            }
+        }));
+        const mockDynamoDbClient = {
+            config: {},
+            describeTable: jest.fn(() => ({promise: describeTablePromiseFunc})),
+            waitFor: jest.fn(() => ({promise: waitPromiseFunc})),
+        };
+
+        const mapper = new DataMapper({
+            client: mockDynamoDbClient as any,
+        });
+        mapper.createGlobalSecondaryIndex = jest.fn(() => Promise.resolve());
+
+        beforeEach(() => {
+            (mapper.createGlobalSecondaryIndex as any).mockClear();
+            mockDynamoDbClient.describeTable.mockClear();
+            waitPromiseFunc.mockClear();
+            mockDynamoDbClient.waitFor.mockClear();
+        });
+
+        let tableName = 'foo';
+        let schema = {
+            id: {
+                type: 'String',
+                keyType: 'HASH'
+            },
+            description: {
+                type: 'String',
+                indexKeyConfigurations: {
+                    DescriptionIndex: 'HASH'
+                }
+            }
+        };
+
+        class Item {
+            get [DynamoDbTable]() { return tableName }
+
+            get [DynamoDbSchema]() { return schema; }
+        }
+
+        const DescriptionIndex: GlobalSecondaryIndexOptions = {
+            projection: 'all',
+            readCapacityUnits: 1,
+            type: 'global',
+            writeCapacityUnits: 1
+        };
+
+        it(
+            'should resolve immediately if the table exists, is active, and the GSI already exists',
+            async () => {
+                await mapper.ensureGlobalSecondaryIndexExists(Item, 'DescriptionIndex', {
+                    indexOptions: {
+                        DescriptionIndex
+                    },
+                    readCapacityUnits: 5,
+                    writeCapacityUnits: 5,
+                });
+
+                expect(mockDynamoDbClient.describeTable.mock.calls).toEqual([
+                    [{ TableName: tableName }]
+                ]);
+
+                expect(mockDynamoDbClient.waitFor.mock.calls.length).toBe(0);
+                expect((mapper.createGlobalSecondaryIndex as any).mock.calls.length).toBe(0);
+            }
+        );
+
+        it(
+            'should attempt to create the index if the table exists in the ACTIVE state but the specified index does not exist',
+            async () => {
+                describeTablePromiseFunc.mockImplementationOnce(() => Promise.resolve({
+                    Table: { TableStatus: 'ACTIVE' }
+                }))
+                await mapper.ensureGlobalSecondaryIndexExists(Item, 'DescriptionIndex', {
+                    indexOptions: {
+                        DescriptionIndex
+                    },
+                    readCapacityUnits: 5,
+                    writeCapacityUnits: 5,
+                });
+
+                expect(mockDynamoDbClient.describeTable.mock.calls).toEqual([
+                    [{ TableName: tableName }]
+                ]);
+
+                expect((mapper.createGlobalSecondaryIndex as any).mock.calls.length).toBe(1);
+                expect(mockDynamoDbClient.waitFor.mock.calls.length).toBe(0);
+            }
+        );
+
+        it(
+            'should rethrow if "describeTable" throws a "ResourceNotFoundException"',
+            async () => {
+                const expectedError = new Error('No such table!');
+                expectedError.name = 'ResourceNotFoundException';
+                describeTablePromiseFunc.mockImplementationOnce(async () => {
+                    throw expectedError;
+                });
+
+                await expect(mapper.ensureGlobalSecondaryIndexExists(Item, 'DescriptionIndex', {
+                    indexOptions: {
+                        DescriptionIndex
+                    },
+                    readCapacityUnits: 5,
+                    writeCapacityUnits: 5,
+                }))
+                .rejects
+                .toMatchObject(expectedError);
+
+                expect(mockDynamoDbClient.describeTable.mock.calls).toEqual([
+                    [{ TableName: tableName }]
+                ]);
+
+                expect(mockDynamoDbClient.waitFor.mock.calls.length).toBe(0);
+            }
+        );
     });
 
     describe('#ensureTableExists', () => {

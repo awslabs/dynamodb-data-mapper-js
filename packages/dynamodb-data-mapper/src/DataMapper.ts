@@ -76,6 +76,7 @@ import {
 import {
     AttributeDefinition,
     AttributeMap,
+    CreateGlobalSecondaryIndexAction,
     DeleteItemInput,
     GetItemInput,
     GlobalSecondaryIndexList,
@@ -303,6 +304,86 @@ export class DataMapper {
 
         if (TableStatus !== 'ACTIVE') {
             await this.client.waitFor('tableExists', {TableName}).promise();
+        }
+    }
+
+    /**
+     * Perform a UpdateTable operation using the schema accessible via the
+     * {DynamoDbSchema} property, the table name accessible via the
+     * {DynamoDbTable} property on the prototype of the constructor supplied,
+     * and the specified global secondary index name.
+     *
+     * The promise returned by this method will not resolve until the table is
+     * active and ready for use.
+     *
+     * @param valueConstructor  The constructor used for values in the table.
+     * @param options           Options to configure the UpdateTable operation
+     */
+    async createGlobalSecondaryIndex(
+        valueConstructor: ZeroArgumentsConstructor<any>,
+        indexName: string,
+        {
+            indexOptions = {},
+        }: CreateTableOptions
+    ) {
+        const schema = getSchema(valueConstructor.prototype);
+        const { attributes, indexKeys } = keysFromSchema(schema);
+        const TableName = this.getTableName(valueConstructor.prototype);
+
+        const globalSecondaryIndexes = indexDefinitions(indexKeys, indexOptions, schema).GlobalSecondaryIndexes;
+        const indexSearch = globalSecondaryIndexes === undefined ? [] : globalSecondaryIndexes.filter(function(index) {
+            return index.IndexName === indexName;
+        });
+        const indexDefinition: CreateGlobalSecondaryIndexAction = indexSearch[0];
+
+        const {
+            TableDescription: {TableStatus} = {TableStatus: 'UPDATING'}
+        } = await this.client.updateTable({
+            GlobalSecondaryIndexUpdates: [{
+                Create: {
+                    ...indexDefinition
+                }
+            }],
+            TableName,
+            AttributeDefinitions: attributeDefinitionList(attributes),
+        }).promise();
+
+        if (TableStatus !== 'ACTIVE') {
+            await this.client.waitFor('tableExists', {TableName}).promise();
+        }
+    }
+
+    /**
+     * If the index does not already exist, perform a UpdateTable operation
+     * using the schema accessible via the {DynamoDbSchema} property, the
+     * table name accessible via the {DynamoDbTable} property on the prototype
+     * of the constructor supplied, and the index name.
+     *
+     * The promise returned by this method will not resolve until the table is
+     * active and ready for use. Note that the index will not be usable for queries
+     * until it has finished backfilling
+     *
+     * @param valueConstructor  The constructor used for values in the table.
+     * @param options           Options to configure the UpdateTable operation
+     */
+    async ensureGlobalSecondaryIndexExists(
+        valueConstructor: ZeroArgumentsConstructor<any>,
+        indexName: string,
+        options: CreateTableOptions
+    ) {
+        const TableName = this.getTableName(valueConstructor.prototype);
+        try {
+            const {
+                Table: {GlobalSecondaryIndexes } = {GlobalSecondaryIndexes: []}
+            } = await this.client.describeTable({TableName}).promise();
+            const indexSearch = GlobalSecondaryIndexes === undefined ? [] : GlobalSecondaryIndexes.filter(function(index) {
+                return index.IndexName === indexName;
+            });
+            if (indexSearch.length === 0) {
+                await this.createGlobalSecondaryIndex(valueConstructor, indexName, options);
+            }
+        } catch (err) {
+            throw err;
         }
     }
 
