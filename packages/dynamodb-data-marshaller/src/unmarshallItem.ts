@@ -52,7 +52,12 @@ function unmarshallValue(schemaType: SchemaType, input: AttributeValue): any {
         case 'Any':
         case 'Collection':
         case 'Hash':
-            const autoMarshaller = new Marshaller();
+            const {
+                onEmpty = 'leave',
+                onInvalid = 'throw',
+                unwrapNumbers = false,
+            } = schemaType;
+            const autoMarshaller = new Marshaller({onEmpty, onInvalid, unwrapNumbers});
             return autoMarshaller.unmarshallValue(input);
         case 'Binary':
             if (input.NULL) {

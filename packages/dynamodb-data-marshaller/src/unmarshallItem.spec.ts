@@ -89,6 +89,40 @@ describe('unmarshallItem', () => {
                 ],
             });
         });
+
+        it('should marshall of untyped data, considering provided marshalling options', () => {
+          const schema: Schema = {
+            mixedList: {
+              type: 'Any',
+              unwrapNumbers: true
+            }
+          };
+          const input = {
+              mixedList: {
+                  L: [
+                      {S: 'string'},
+                      {N: '123'},
+                      {B: new ArrayBuffer(12)},
+                      {M: {foo: {S: 'bar'}}},
+                      {L: [
+                          {S: 'one string'},
+                          {N: '234'},
+                          {B: new ArrayBuffer(5)},
+                      ]},
+                  ],
+              }
+          };
+
+          expect(unmarshallItem(schema, input)).toEqual({
+              mixedList: [
+                  'string',
+                  123,
+                  new ArrayBuffer(12),
+                  {foo: 'bar'},
+                  ['one string', 234, new ArrayBuffer(5)],
+              ],
+          });
+      });
     });
 
     describe('binary set fields', () => {
