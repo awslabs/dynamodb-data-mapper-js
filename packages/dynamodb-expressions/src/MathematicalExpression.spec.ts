@@ -1,20 +1,50 @@
-import {AttributePath} from "./AttributePath";
-import {ExpressionAttributes} from "./ExpressionAttributes";
-import {MathematicalExpression} from "./MathematicalExpression";
+import { AttributePath } from './AttributePath';
+import { ExpressionAttributes } from './ExpressionAttributes';
+import { FunctionExpression } from './FunctionExpression';
+import { MathematicalExpression } from './MathematicalExpression';
+import {
+    ExpressionAttributeNameMap,
+    ExpressionAttributeValueMap
+} from 'aws-sdk/clients/dynamodb';
 
 describe('MathematicalExpression', () => {
-    const basicMathematicalExpression = new MathematicalExpression(
-        new AttributePath('foo'),
-        '+',
-        1
-    );
+    const validExpressions: Array<[
+        MathematicalExpression,
+        string,
+        ExpressionAttributeNameMap,
+        ExpressionAttributeValueMap
+    ]> = [
+        [
+            new MathematicalExpression(new AttributePath('foo'), '+', 1),
+            '#attr0 + :val1',
+            { '#attr0': 'foo' },
+            { ':val1': {N: '1'} },
+        ],
+        [
+            new MathematicalExpression(
+                new FunctionExpression(
+                    'if_not_exists',
+                    new AttributePath('current_id'),
+                    0
+                ),
+                '+',
+                1
+            ),
+            'if_not_exists(#attr0, :val1) + :val2',
+            { '#attr0': 'current_id' },
+            {
+                ':val1': {N: '0'},
+                ':val2': {N: '1'},
+            },
+        ]
+    ];
 
     describe('::isMathematicalExpression', () => {
         it('should accept valid mathematical expressions', () => {
-            expect(
-                MathematicalExpression
-                    .isMathematicalExpression(basicMathematicalExpression)
-            ).toBe(true);
+            for (const [expr, _1, _2, _3] of validExpressions) {
+                expect(MathematicalExpression.isMathematicalExpression(expr))
+                    .toBe(true);
+            }
         });
 
         it('should reject non-matching values', () => {
@@ -40,17 +70,17 @@ describe('MathematicalExpression', () => {
 
     describe('#serialize', () => {
         it('should serialize basic mathematical expressions', () => {
-            const attributes = new ExpressionAttributes();
-            expect(basicMathematicalExpression.serialize(attributes))
-                .toBe('#attr0 + :val1');
-
-            expect(attributes.names).toEqual({
-                '#attr0': 'foo',
-            });
-
-            expect(attributes.values).toEqual({
-                ':val1': {N: '1'},
-            });
+            for (const [
+                expression,
+                serialized,
+                expectedNames,
+                expectedValues,
+            ] of validExpressions) {
+                const attributes = new ExpressionAttributes();
+                expect(expression.serialize(attributes)).toBe(serialized);
+                expect(attributes.names).toEqual(expectedNames);
+                expect(attributes.values).toEqual(expectedValues);
+            }
         });
     });
 });
