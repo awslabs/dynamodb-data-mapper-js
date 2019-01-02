@@ -83,7 +83,7 @@ import {
     KeySchemaElement,
     LocalSecondaryIndexList,
     Projection,
-    PutItemInput, TimeToLiveDescription,
+    PutItemInput,
     UpdateItemInput,
 } from 'aws-sdk/clients/dynamodb';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
