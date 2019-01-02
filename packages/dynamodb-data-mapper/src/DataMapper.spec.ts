@@ -1621,10 +1621,6 @@ describe('DataMapper', () => {
                 expect(mockDynamoDbClient.updateTimeToLive.mock.calls).toEqual([
                     [ { TableName: 'foo', TimeToLiveSpecification: { Enabled: true, AttributeName: 'date' } } ],
                 ]);
-
-                expect(mockDynamoDbClient.waitFor.mock.calls).toEqual([
-                    [ 'tableExists', { TableName: 'foo' } ],
-                ]);
             });
     });
 
