@@ -1586,6 +1586,47 @@ describe('DataMapper', () => {
         });
     });
 
+    describe('#updateTimeToLive', () => {
+        const waitPromiseFunc = jest.fn(() => Promise.resolve());
+        const updateTimeToLivePromiseFunc = jest.fn(() => Promise.resolve({}));
+        const mockDynamoDbClient = {
+            config: {},
+            updateTimeToLive: jest.fn(() => ({promise: updateTimeToLivePromiseFunc})),
+            waitFor: jest.fn(() => ({promise: waitPromiseFunc})),
+        };
+
+        beforeEach(() => {
+            updateTimeToLivePromiseFunc.mockClear();
+            mockDynamoDbClient.updateTimeToLive.mockClear();
+            waitPromiseFunc.mockClear();
+            mockDynamoDbClient.waitFor.mockClear();
+        });
+
+        const mapper = new DataMapper({
+            client: mockDynamoDbClient as any,
+        });
+
+        class Item {
+            get [DynamoDbTable]() { return 'foo' }
+
+            get [DynamoDbSchema]() {
+                return { id: { type: 'String', keyType: 'HASH' }, date: {type: 'Date'} };
+            }
+        }
+
+        it('should create and send UpdateTimeToLive request',
+            async () => {
+                await mapper.updateTimeToLive(Item, true, 'date');
+
+                expect(mockDynamoDbClient.updateTimeToLive.mock.calls).toEqual([
+                    [ { TableName: 'foo', TimeToLiveSpecification: { Enabled: true, AttributeName: 'date' } } ],
+                ]);
+
+                expect(mockDynamoDbClient.waitFor.mock.calls).toEqual([
+                    [ 'tableExists', { TableName: 'foo' } ],
+                ]);
+            });
+    });
 
     describe('#ensureGlobalSecondaryIndexExists', () => {
         const waitPromiseFunc = jest.fn(() => Promise.resolve());
