@@ -280,6 +280,7 @@ export class DataMapper {
             streamViewType = 'NONE',
             writeCapacityUnits,
             indexOptions = {},
+            sseSpecification = { enabled: false },
         }: CreateTableOptions
     ) {
         const schema = getSchema(valueConstructor.prototype);
@@ -300,6 +301,13 @@ export class DataMapper {
             StreamSpecification: streamViewType === 'NONE'
                 ? { StreamEnabled: false }
                 : { StreamEnabled: true, StreamViewType: streamViewType },
+            SSESpecification: sseSpecification.enabled
+                ? {
+                    Enabled: true,
+                    SSEType: sseSpecification.sseType,
+                    KMSMasterKeyId: sseSpecification.kmsMasterKeyId,
+                  }
+                : { Enabled: false },
         }).promise();
 
         if (TableStatus !== 'ACTIVE') {
