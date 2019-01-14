@@ -817,7 +817,8 @@ describe('DataMapper', () => {
                             ReadCapacityUnits: 5,
                             WriteCapacityUnits: 5,
                         },
-                        StreamSpecification: { StreamEnabled: false }
+                        StreamSpecification: { StreamEnabled: false },
+                        SSESpecification: { Enabled: false },
                     },
                 ]
             ]);
@@ -875,6 +876,47 @@ describe('DataMapper', () => {
                         StreamSpecification: {
                             StreamEnabled: true,
                             StreamViewType: 'NEW_AND_OLD_IMAGES'
+                        },
+                        SSESpecification: { Enabled: false },
+                    },
+                ]
+            ]);
+        });
+
+        it('should allow enabling sse using kms', async () => {
+            await mapper.createTable(Item, {
+                readCapacityUnits: 5,
+                writeCapacityUnits: 5,
+                sseSpecification: {
+                    enabled: true,
+                    sseType: 'KMS',
+                },
+            });
+
+            expect(mockDynamoDbClient.createTable.mock.calls).toEqual([
+                [
+                    {
+                        TableName: 'foo',
+                        AttributeDefinitions: [
+                            {
+                                AttributeName: 'id',
+                                AttributeType: 'S'
+                            }
+                        ],
+                        KeySchema: [
+                            {
+                                AttributeName: 'id',
+                                KeyType: 'HASH',
+                            }
+                        ],
+                        ProvisionedThroughput: {
+                            ReadCapacityUnits: 5,
+                            WriteCapacityUnits: 5,
+                        },
+                        StreamSpecification: { StreamEnabled: false },
+                        SSESpecification: {
+                            Enabled: true,
+                            SSEType: 'KMS',
                         },
                     },
                 ]
@@ -1068,6 +1110,7 @@ describe('DataMapper', () => {
                                 WriteCapacityUnits: 5,
                             },
                             StreamSpecification: { StreamEnabled: false },
+                            SSESpecification: { Enabled: false },
                             TableName: 'foo',
                         },
                     ],
