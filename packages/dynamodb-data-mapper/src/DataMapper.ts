@@ -83,6 +83,7 @@ import {
     KeySchemaElement,
     LocalSecondaryIndexList,
     Projection,
+    ProvisionedThroughput,
     PutItemInput,
     UpdateItemInput,
 } from 'aws-sdk/clients/dynamodb';
@@ -280,6 +281,7 @@ export class DataMapper {
             streamViewType = 'NONE',
             writeCapacityUnits,
             indexOptions = {},
+            billingMode = 'PROVISIONED',
         }: CreateTableOptions
     ) {
         const schema = getSchema(valueConstructor.prototype);
@@ -291,10 +293,8 @@ export class DataMapper {
         } = await this.client.createTable({
             ...indexDefinitions(indexKeys, indexOptions, schema),
             TableName,
-            ProvisionedThroughput: {
-                ReadCapacityUnits: readCapacityUnits,
-                WriteCapacityUnits: writeCapacityUnits,
-            },
+            ...provisionedThroughput(readCapacityUnits, writeCapacityUnits),
+            BillingMode: billingMode,
             AttributeDefinitions: attributeDefinitionList(attributes),
             KeySchema: keyTypesToElementList(tableKeys),
             StreamSpecification: streamViewType === 'NONE'
@@ -1281,10 +1281,7 @@ function indexDefinitions(
         } else {
             globalIndices.push({
                 ...indexInfo,
-                ProvisionedThroughput: {
-                    ReadCapacityUnits: indexOptions.readCapacityUnits,
-                    WriteCapacityUnits: indexOptions.writeCapacityUnits,
-                },
+                ...provisionedThroughput(indexOptions.readCapacityUnits, indexOptions.writeCapacityUnits),
             });
         }
     }
@@ -1351,3 +1348,23 @@ function keyTypesToElementList(keys: KeyTypeMap): Array<KeySchemaElement> {
 
     return elementList;
 }
+
+function provisionedThroughput(
+    readCapacityUnits?: number,
+    writeCapacityUnits?: number
+): {
+    ProvisionedThroughput?: ProvisionedThroughput
+} {
+    let capacityUnits;
+    if (typeof readCapacityUnits === 'number' && typeof writeCapacityUnits === 'number') {
+        capacityUnits = {
+            ReadCapacityUnits: readCapacityUnits,
+            WriteCapacityUnits: writeCapacityUnits,
+        };
+    }
+
+    return {
+        ...(capacityUnits && { ProvisionedThroughput: capacityUnits })
+    };
+}
+

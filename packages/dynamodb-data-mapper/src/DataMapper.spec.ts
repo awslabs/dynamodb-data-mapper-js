@@ -817,6 +817,7 @@ describe('DataMapper', () => {
                             ReadCapacityUnits: 5,
                             WriteCapacityUnits: 5,
                         },
+                        BillingMode: 'PROVISIONED',
                         StreamSpecification: { StreamEnabled: false }
                     },
                 ]
@@ -872,10 +873,39 @@ describe('DataMapper', () => {
                             ReadCapacityUnits: 5,
                             WriteCapacityUnits: 5,
                         },
+                        BillingMode: 'PROVISIONED',
                         StreamSpecification: {
                             StreamEnabled: true,
                             StreamViewType: 'NEW_AND_OLD_IMAGES'
                         },
+                    },
+                ]
+            ]);
+        });
+
+        it('should create new table with on-demand capacity mode', async () => {
+            await mapper.createTable(Item, {
+                billingMode: 'PAY_PER_REQUEST',
+            });
+
+            expect(mockDynamoDbClient.createTable.mock.calls).toEqual([
+                [
+                    {
+                        TableName: 'foo',
+                        AttributeDefinitions: [
+                            {
+                                AttributeName: 'id',
+                                AttributeType: 'S'
+                            }
+                        ],
+                        KeySchema: [
+                            {
+                                AttributeName: 'id',
+                                KeyType: 'HASH',
+                            }
+                        ],
+                        BillingMode: 'PAY_PER_REQUEST',
+                        StreamSpecification: { StreamEnabled: false },
                     },
                 ]
             ]);
@@ -1067,6 +1097,7 @@ describe('DataMapper', () => {
                                 ReadCapacityUnits: 5,
                                 WriteCapacityUnits: 5,
                             },
+                            BillingMode: 'PROVISIONED',
                             StreamSpecification: { StreamEnabled: false },
                             TableName: 'foo',
                         },
