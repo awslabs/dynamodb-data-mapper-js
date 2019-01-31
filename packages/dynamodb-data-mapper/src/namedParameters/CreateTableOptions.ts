@@ -1,9 +1,6 @@
 import { ProvisionedThroughput } from './ProvisionedThroughput';
 import { PerIndexOptions } from './SecondaryIndexOptions';
 
-export interface CreateTableOptions extends ProvisionedThroughput {
-    streamViewType?: StreamViewType;
-    indexOptions?: PerIndexOptions;
 interface BaseCreateTableOptions {
     streamViewType?: StreamViewType;
     indexOptions?: PerIndexOptions;
@@ -19,7 +16,6 @@ export interface OnDemandCreateTableOptions extends BaseCreateTableOptions {
 }
 
 export type CreateTableOptions = ProvisionedCreateTableOptions | OnDemandCreateTableOptions;
-}
 
 export type BillingMode = 'PROVISIONED' | 'PAY_PER_REQUEST';
 

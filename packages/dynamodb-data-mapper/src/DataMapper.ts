@@ -276,24 +276,31 @@ export class DataMapper {
      */
     async createTable(
         valueConstructor: ZeroArgumentsConstructor<any>,
-        {
-            readCapacityUnits,
-            streamViewType = 'NONE',
-            writeCapacityUnits,
-            indexOptions = {},
-            billingMode = 'PROVISIONED',
-        }: CreateTableOptions
+        options: CreateTableOptions
     ) {
         const schema = getSchema(valueConstructor.prototype);
         const { attributes, indexKeys, tableKeys } = keysFromSchema(schema);
         const TableName = this.getTableName(valueConstructor.prototype);
+
+        let throughput: { ProvisionedThroughput?: ProvisionedThroughput } = {};
+        if (options.billingMode !== 'PAY_PER_REQUEST') {
+            throughput = {
+                ...provisionedThroughput(options.readCapacityUnits, options.writeCapacityUnits),
+            };
+        }
+
+        const {
+            streamViewType = 'NONE',
+            indexOptions = {},
+            billingMode,
+        } = options;
 
         const {
             TableDescription: {TableStatus} = {TableStatus: 'CREATING'}
         } = await this.client.createTable({
             ...indexDefinitions(indexKeys, indexOptions, schema),
             TableName,
-            ...provisionedThroughput(readCapacityUnits, writeCapacityUnits),
+            ...throughput,
             BillingMode: billingMode,
             AttributeDefinitions: attributeDefinitionList(attributes),
             KeySchema: keyTypesToElementList(tableKeys),
