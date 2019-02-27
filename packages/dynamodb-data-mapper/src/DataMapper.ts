@@ -293,6 +293,7 @@ export class DataMapper {
             streamViewType = 'NONE',
             indexOptions = {},
             billingMode,
+            sseSpecification,
         } = options;
 
         const {
@@ -307,6 +308,13 @@ export class DataMapper {
             StreamSpecification: streamViewType === 'NONE'
                 ? { StreamEnabled: false }
                 : { StreamEnabled: true, StreamViewType: streamViewType },
+            SSESpecification: sseSpecification
+                ? {
+                    Enabled: true,
+                    SSEType: sseSpecification.sseType,
+                    KMSMasterKeyId: sseSpecification.kmsMasterKeyId,
+                }
+                : { Enabled: false },
         }).promise();
 
         if (TableStatus !== 'ACTIVE') {
