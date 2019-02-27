@@ -5,6 +5,12 @@ interface BaseCreateTableOptions {
     streamViewType?: StreamViewType;
     indexOptions?: PerIndexOptions;
     billingMode?: BillingMode;
+    sseSpecification?: SseSpecification;
+}
+
+export interface SseSpecification {
+    sseType: SseType;
+    kmsMasterKeyId?: string;
 }
 
 export interface ProvisionedCreateTableOptions extends ProvisionedThroughput, BaseCreateTableOptions {
@@ -18,6 +24,13 @@ export interface OnDemandCreateTableOptions extends BaseCreateTableOptions {
 export type CreateTableOptions = ProvisionedCreateTableOptions | OnDemandCreateTableOptions;
 
 export type BillingMode = 'PROVISIONED' | 'PAY_PER_REQUEST';
+
+/**
+ * Server-side encryption type:
+ *   AES256 - Server-side encryption which uses the AES256 algorithm (not applicable).
+ *   KMS - Server-side encryption which uses AWS Key Management Service.
+ */
+export type SseType = 'AES256' | 'KMS';
 
 export type StreamViewType =
     'NEW_IMAGE' |
