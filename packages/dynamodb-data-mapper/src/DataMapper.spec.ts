@@ -881,6 +881,34 @@ describe('DataMapper', () => {
             ]);
         });
 
+        it('should create new table with on-demand capacity mode', async () => {
+            await mapper.createTable(Item, {
+                billingMode: 'PAY_PER_REQUEST',
+            });
+
+            expect(mockDynamoDbClient.createTable.mock.calls).toEqual([
+                [
+                    {
+                        TableName: 'foo',
+                        AttributeDefinitions: [
+                            {
+                                AttributeName: 'id',
+                                AttributeType: 'S'
+                            }
+                        ],
+                        KeySchema: [
+                            {
+                                AttributeName: 'id',
+                                KeyType: 'HASH',
+                            }
+                        ],
+                        BillingMode: 'PAY_PER_REQUEST',
+                        StreamSpecification: { StreamEnabled: false },
+                    },
+                ]
+            ]);
+        });
+
         describe('index keys', () => {
             class IndexedItem {
                 get [DynamoDbTable]() { return 'foo' }
@@ -1067,6 +1095,130 @@ describe('DataMapper', () => {
                                 ReadCapacityUnits: 5,
                                 WriteCapacityUnits: 5,
                             },
+                            StreamSpecification: { StreamEnabled: false },
+                            TableName: 'foo',
+                        },
+                    ],
+                ]);
+            });
+
+            it('should identify and report index keys with on-demand capacity mode', async () => {
+                await mapper.createTable(IndexedItem, {
+                    billingMode: 'PAY_PER_REQUEST',
+                    indexOptions: {
+                        binaryIndex: {
+                            type: 'global',
+                            projection: ['createdBy', 'createdAt'],
+                        },
+                        chronological: {
+                            type: 'global',
+                            projection: 'all',
+                        },
+                        globalIndex: {
+                            type: 'global',
+                            projection: 'all',
+                        },
+                        localIndex: {
+                            type: 'local',
+                            projection: 'keys',
+                        },
+                    }
+                });
+
+                expect(mockDynamoDbClient.createTable.mock.calls).toEqual([
+                    [
+                        {
+                            AttributeDefinitions: [
+                                {
+                                    AttributeName: 'partitionKey',
+                                    AttributeType: 'N'
+                                },
+                                {
+                                    AttributeName: 'timestamp',
+                                    AttributeType: 'N'
+                                },
+                                {
+                                    AttributeName: 'creator',
+                                    AttributeType: 'S'
+                                },
+                                {
+                                    AttributeName: 'binaryKey',
+                                    AttributeType: 'B'
+                                },
+                                {
+                                    AttributeName: 'customKey',
+                                    AttributeType: 'S'
+                                },
+                            ],
+                            GlobalSecondaryIndexes: [
+                                {
+                                    IndexName: 'chronological',
+                                    KeySchema: [
+                                        {
+                                            AttributeName: 'timestamp',
+                                            KeyType: 'HASH',
+                                        },
+                                    ],
+                                    Projection: { ProjectionType: 'ALL' },
+                                },
+                                {
+                                    IndexName: 'globalIndex',
+                                    KeySchema: [
+                                        {
+                                            AttributeName: 'creator',
+                                            KeyType: 'HASH',
+                                        },
+                                        {
+                                            AttributeName: 'timestamp',
+                                            KeyType: 'RANGE',
+                                        },
+                                    ],
+                                    Projection: { ProjectionType: 'ALL' },
+                                },
+                                {
+                                    IndexName: 'binaryIndex',
+                                    KeySchema: [
+                                        {
+                                            AttributeName: 'binaryKey',
+                                            KeyType: 'HASH',
+                                        },
+                                        {
+                                            AttributeName: 'customKey',
+                                            KeyType: 'RANGE',
+                                        },
+                                    ],
+                                    Projection: {
+                                        ProjectionType: 'INCLUDE',
+                                        NonKeyAttributes: [
+                                            'creator',
+                                            'timestamp',
+                                        ],
+                                    },
+                                },
+                            ],
+                            KeySchema: [
+                                {
+                                    AttributeName: 'partitionKey',
+                                    KeyType: 'HASH',
+                                },
+                                {
+                                    AttributeName: 'timestamp',
+                                    KeyType: 'RANGE',
+                                },
+                            ],
+                            LocalSecondaryIndexes: [
+                                {
+                                    IndexName: 'localIndex',
+                                    KeySchema: [
+                                        {
+                                            AttributeName: 'creator',
+                                            KeyType: 'RANGE',
+                                        },
+                                    ],
+                                    Projection: { ProjectionType: 'KEYS_ONLY' },
+                                },
+                            ],
+                            BillingMode: 'PAY_PER_REQUEST',
                             StreamSpecification: { StreamEnabled: false },
                             TableName: 'foo',
                         },

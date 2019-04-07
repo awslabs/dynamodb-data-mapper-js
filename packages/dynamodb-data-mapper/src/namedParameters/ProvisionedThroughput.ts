@@ -1,4 +1,4 @@
 export interface ProvisionedThroughput {
-    readCapacityUnits: number;
-    writeCapacityUnits: number;
+    readCapacityUnits?: number;
+    writeCapacityUnits?: number;
 }

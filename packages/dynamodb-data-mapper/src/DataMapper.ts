@@ -83,6 +83,7 @@ import {
     KeySchemaElement,
     LocalSecondaryIndexList,
     Projection,
+    ProvisionedThroughput,
     PutItemInput,
     UpdateItemInput,
 } from 'aws-sdk/clients/dynamodb';
@@ -275,26 +276,32 @@ export class DataMapper {
      */
     async createTable(
         valueConstructor: ZeroArgumentsConstructor<any>,
-        {
-            readCapacityUnits,
-            streamViewType = 'NONE',
-            writeCapacityUnits,
-            indexOptions = {},
-        }: CreateTableOptions
+        options: CreateTableOptions
     ) {
         const schema = getSchema(valueConstructor.prototype);
         const { attributes, indexKeys, tableKeys } = keysFromSchema(schema);
         const TableName = this.getTableName(valueConstructor.prototype);
+
+        let throughput: { ProvisionedThroughput?: ProvisionedThroughput } = {};
+        if (options.billingMode !== 'PAY_PER_REQUEST') {
+            throughput = {
+                ...provisionedThroughput(options.readCapacityUnits, options.writeCapacityUnits),
+            };
+        }
+
+        const {
+            streamViewType = 'NONE',
+            indexOptions = {},
+            billingMode,
+        } = options;
 
         const {
             TableDescription: {TableStatus} = {TableStatus: 'CREATING'}
         } = await this.client.createTable({
             ...indexDefinitions(indexKeys, indexOptions, schema),
             TableName,
-            ProvisionedThroughput: {
-                ReadCapacityUnits: readCapacityUnits,
-                WriteCapacityUnits: writeCapacityUnits,
-            },
+            ...throughput,
+            BillingMode: billingMode,
             AttributeDefinitions: attributeDefinitionList(attributes),
             KeySchema: keyTypesToElementList(tableKeys),
             StreamSpecification: streamViewType === 'NONE'
@@ -1281,10 +1288,7 @@ function indexDefinitions(
         } else {
             globalIndices.push({
                 ...indexInfo,
-                ProvisionedThroughput: {
-                    ReadCapacityUnits: indexOptions.readCapacityUnits,
-                    WriteCapacityUnits: indexOptions.writeCapacityUnits,
-                },
+                ...provisionedThroughput(indexOptions.readCapacityUnits, indexOptions.writeCapacityUnits),
             });
         }
     }
@@ -1351,3 +1355,23 @@ function keyTypesToElementList(keys: KeyTypeMap): Array<KeySchemaElement> {
 
     return elementList;
 }
+
+function provisionedThroughput(
+    readCapacityUnits?: number,
+    writeCapacityUnits?: number
+): {
+    ProvisionedThroughput?: ProvisionedThroughput
+} {
+    let capacityUnits;
+    if (typeof readCapacityUnits === 'number' && typeof writeCapacityUnits === 'number') {
+        capacityUnits = {
+            ReadCapacityUnits: readCapacityUnits,
+            WriteCapacityUnits: writeCapacityUnits,
+        };
+    }
+
+    return {
+        ...(capacityUnits && { ProvisionedThroughput: capacityUnits })
+    };
+}
+
