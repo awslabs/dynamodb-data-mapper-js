@@ -66,7 +66,7 @@ describe('annotations', () => {
 
         await mapper.put(post);
 
-        expect(mockDynamoDbClient.putItem.mock.calls[0][0])
+        expect((mockDynamoDbClient.putItem.mock.calls[0] as any)[0])
             .toMatchObject({
                 ConditionExpression: 'attribute_not_exists(#attr0)',
                 ExpressionAttributeNames: {'#attr0': 'version'},

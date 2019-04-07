@@ -14,6 +14,13 @@ import {
 } from "@aws/dynamodb-expressions";
 import {ItemNotFoundException} from "./ItemNotFoundException";
 import {BatchGetOptions, ParallelScanState, GlobalSecondaryIndexOptions} from './index';
+import {
+    BatchGetItemInput,
+    BatchWriteItemInput,
+    DescribeTableOutput,
+    GetItemOutput,
+    PutItemOutput
+} from "aws-sdk/clients/dynamodb";
 
 type BinaryValue = ArrayBuffer|ArrayBufferView;
 
@@ -141,12 +148,12 @@ describe('DataMapper', () => {
 
                 const {calls} = mockDynamoDbClient.batchWriteItem.mock;
                 expect(calls.length).toBe(4);
-                const callCount: {[key: string]: number} = calls.reduce(
+                const callCount: {[key: string]: number} = (calls as Array<Array<BatchWriteItemInput>>).reduce(
                     (
                         keyUseCount: {[key: string]: number},
                         [{RequestItems: {foo}}]
                     ) => {
-                        for (const {DeleteRequest: {Key: {fizz: {N: key}}}} of foo) {
+                        for (const {DeleteRequest: {Key: {fizz: {N: key}}}} of (foo as any)) {
                             if (key in keyUseCount) {
                                 keyUseCount[key]++;
                             } else {
@@ -479,12 +486,12 @@ describe('DataMapper', () => {
                 expect(itemsReturned).toBe(325);
 
                 const {calls} = mockDynamoDbClient.batchGetItem.mock;
-                const callCount: {[key: string]: number} = calls.reduce(
+                const callCount: {[key: string]: number} = (calls as Array<Array<BatchGetItemInput>>).reduce(
                     (
                         keyUseCount: {[key: string]: number},
                         [{RequestItems: {foo: {Keys}}}]
                     ) => {
-                        for (const {fizz: {N: key}} of Keys) {
+                        for (const {fizz: {N: key}} of (Keys as any)) {
                             if (key in keyUseCount) {
                                 keyUseCount[key]++;
                             } else {
@@ -639,12 +646,12 @@ describe('DataMapper', () => {
 
                 const {calls} = mockDynamoDbClient.batchWriteItem.mock;
                 expect(calls.length).toBe(4);
-                const callCount: {[key: string]: number} = calls.reduce(
+                const callCount: {[key: string]: number} = (calls as Array<Array<BatchWriteItemInput>>).reduce(
                     (
                         keyUseCount: {[key: string]: number},
                         [{RequestItems: {foo}}]
                     ) => {
-                        for (const {PutRequest: {Item: {fizz: {N: key}}}} of foo) {
+                        for (const {PutRequest: {Item: {fizz: {N: key}}}} of (foo as any)) {
                             if (key in keyUseCount) {
                                 keyUseCount[key]++;
                             } else {
@@ -1093,7 +1100,7 @@ describe('DataMapper', () => {
     });
 
     describe('#delete', () => {
-        const promiseFunc = jest.fn(() => Promise.resolve({Item: {}}));
+        const promiseFunc = jest.fn(() => Promise.resolve({Attributes: {}}));
         const mockDynamoDbClient = {
             config: {},
             deleteItem: jest.fn(() => ({promise: promiseFunc})),
@@ -1139,7 +1146,7 @@ describe('DataMapper', () => {
                     [DynamoDbSchema]: {},
                 });
 
-                expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.deleteItem.mock.calls[0] as any)[0])
                     .toMatchObject({TableName: tableName});
             }
         );
@@ -1158,7 +1165,7 @@ describe('DataMapper', () => {
                     [DynamoDbSchema]: {},
                 });
 
-                expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.deleteItem.mock.calls[0] as any)[0])
                     .toMatchObject({TableName: tableNamePrefix + tableName});
             }
         );
@@ -1182,7 +1189,7 @@ describe('DataMapper', () => {
                     },
                 });
 
-                expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.deleteItem.mock.calls[0] as any)[0])
                     .toMatchObject({
                         Key: {
                             fizz: {S: 'buzz'},
@@ -1210,7 +1217,7 @@ describe('DataMapper', () => {
                     },
                 });
 
-                expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.deleteItem.mock.calls[0] as any)[0])
                     .toMatchObject({
                         Key: {fizz: {S: 'buzz'}}
                     });
@@ -1236,7 +1243,7 @@ describe('DataMapper', () => {
                     },
                 });
 
-                expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.deleteItem.mock.calls[0] as any)[0])
                     .toMatchObject({
                         Key: {foo: {S: 'buzz'}}
                     });
@@ -1263,7 +1270,7 @@ describe('DataMapper', () => {
                     },
                 });
 
-                expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.deleteItem.mock.calls[0] as any)[0])
                     .toMatchObject({
                         ConditionExpression: '#attr0 = :val1',
                         ExpressionAttributeNames: {'#attr0': 'pop'},
@@ -1291,7 +1298,7 @@ describe('DataMapper', () => {
                     },
                 });
 
-                expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.deleteItem.mock.calls[0] as any)[0])
                     .not.toHaveProperty('ConditionExpression');
             }
         );
@@ -1319,7 +1326,7 @@ describe('DataMapper', () => {
                     {skipVersionCheck: true},
                 );
 
-                expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.deleteItem.mock.calls[0] as any)[0])
                     .not.toHaveProperty('ConditionExpression');
             }
         );
@@ -1348,7 +1355,7 @@ describe('DataMapper', () => {
                     },
                 });
 
-                expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.deleteItem.mock.calls[0] as any)[0])
                     .not.toHaveProperty('ConditionExpression');
             }
         );
@@ -1383,7 +1390,7 @@ describe('DataMapper', () => {
                     }
                 );
 
-                expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.deleteItem.mock.calls[0] as any)[0])
                     .toMatchObject({
                         ConditionExpression: '(#attr0 < :val1) AND (#attr2 = :val3)',
                         ExpressionAttributeNames: {
@@ -1421,7 +1428,7 @@ describe('DataMapper', () => {
                     }
                 );
 
-                expect(mockDynamoDbClient.deleteItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.deleteItem.mock.calls[0] as any)[0])
                     .toEqual({
                         ConditionExpression: 'attribute_not_exists(#attr0)',
                         ExpressionAttributeNames: {
@@ -1598,7 +1605,7 @@ describe('DataMapper', () => {
                     }
                 ],
             }
-        }));
+        } as DescribeTableOutput));
         const mockDynamoDbClient = {
             config: {},
             describeTable: jest.fn(() => ({promise: describeTablePromiseFunc})),
@@ -1669,7 +1676,7 @@ describe('DataMapper', () => {
             async () => {
                 describeTablePromiseFunc.mockImplementationOnce(() => Promise.resolve({
                     Table: { TableStatus: 'ACTIVE' }
-                }))
+                } as DescribeTableOutput));
                 await mapper.ensureGlobalSecondaryIndexExists(Item, 'DescriptionIndex', {
                     indexOptions: {
                         DescriptionIndex
@@ -1719,7 +1726,7 @@ describe('DataMapper', () => {
         const waitPromiseFunc = jest.fn(() => Promise.resolve());
         const describeTablePromiseFunc = jest.fn(() => Promise.resolve({
             Table: { TableStatus: 'ACTIVE' }
-        }));
+        } as DescribeTableOutput));
         const mockDynamoDbClient = {
             config: {},
             describeTable: jest.fn(() => ({promise: describeTablePromiseFunc})),
@@ -1978,7 +1985,7 @@ describe('DataMapper', () => {
     });
 
     describe('#get', () => {
-        const promiseFunc = jest.fn(() => Promise.resolve({Item: {}}));
+        const promiseFunc = jest.fn(() => Promise.resolve({Item: {}} as GetItemOutput));
         const mockDynamoDbClient = {
             config: {},
             getItem: jest.fn(() => ({promise: promiseFunc})),
@@ -2024,7 +2031,7 @@ describe('DataMapper', () => {
                     [DynamoDbSchema]: {},
                 });
 
-                expect(mockDynamoDbClient.getItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.getItem.mock.calls[0] as any)[0])
                     .toMatchObject({TableName: tableName});
             }
         );
@@ -2043,7 +2050,7 @@ describe('DataMapper', () => {
                     [DynamoDbSchema]: {},
                 });
 
-                expect(mockDynamoDbClient.getItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.getItem.mock.calls[0] as any)[0])
                     .toMatchObject({TableName: tableNamePrefix + tableName});
             }
         );
@@ -2067,7 +2074,7 @@ describe('DataMapper', () => {
                     },
                 });
 
-                expect(mockDynamoDbClient.getItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.getItem.mock.calls[0] as any)[0])
                     .toMatchObject({
                         Key: {
                             fizz: {S: 'buzz'},
@@ -2095,7 +2102,7 @@ describe('DataMapper', () => {
                     },
                 });
 
-                expect(mockDynamoDbClient.getItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.getItem.mock.calls[0] as any)[0])
                     .toMatchObject({
                         Key: {fizz: {S: 'buzz'}}
                     });
@@ -2121,7 +2128,7 @@ describe('DataMapper', () => {
                     },
                 });
 
-                expect(mockDynamoDbClient.getItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.getItem.mock.calls[0] as any)[0])
                     .toMatchObject({
                         Key: {foo: {S: 'buzz'}}
                     });
@@ -2139,7 +2146,7 @@ describe('DataMapper', () => {
                     {readConsistency: 'strong'}
                 );
 
-                expect(mockDynamoDbClient.getItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.getItem.mock.calls[0] as any)[0])
                     .toMatchObject({ConsistentRead: true});
             }
         );
@@ -2156,7 +2163,7 @@ describe('DataMapper', () => {
                     [DynamoDbSchema]: {},
                 });
 
-                expect(mockDynamoDbClient.getItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.getItem.mock.calls[0] as any)[0])
                     .toMatchObject({ConsistentRead: true});
             }
         );
@@ -2179,7 +2186,7 @@ describe('DataMapper', () => {
                 {projection: ['fizz', 'pop']},
             );
 
-            expect(mockDynamoDbClient.getItem.mock.calls[0][0])
+            expect((mockDynamoDbClient.getItem.mock.calls[0] as any)[0])
                 .toMatchObject({
                     ProjectionExpression: '#attr0, #attr1',
                     ExpressionAttributeNames: {
@@ -2572,7 +2579,7 @@ describe('DataMapper', () => {
     });
 
     describe('#put', () => {
-        const promiseFunc = jest.fn(() => Promise.resolve({Item: {}}));
+        const promiseFunc = jest.fn(() => Promise.resolve({Item: {}} as PutItemOutput));
         const mockDynamoDbClient = {
             config: {},
             putItem: jest.fn(() => ({promise: promiseFunc})),
@@ -2618,7 +2625,7 @@ describe('DataMapper', () => {
                     [DynamoDbSchema]: {},
                 });
 
-                expect(mockDynamoDbClient.putItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.putItem.mock.calls[0] as any)[0])
                     .toMatchObject({TableName: tableName});
             }
         );
@@ -2637,7 +2644,7 @@ describe('DataMapper', () => {
                     [DynamoDbSchema]: {},
                 });
 
-                expect(mockDynamoDbClient.putItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.putItem.mock.calls[0] as any)[0])
                     .toMatchObject({TableName: tableNamePrefix + tableName});
             }
         );
@@ -2660,7 +2667,7 @@ describe('DataMapper', () => {
                     },
                 });
 
-                expect(mockDynamoDbClient.putItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.putItem.mock.calls[0] as any)[0])
                     .toMatchObject({
                         Item: {
                             fizz: {S: 'buzz'},
@@ -2691,7 +2698,7 @@ describe('DataMapper', () => {
                     },
                 });
 
-                expect(mockDynamoDbClient.putItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.putItem.mock.calls[0] as any)[0])
                     .toMatchObject({
                         Item: {
                             foo: {S: 'buzz'},
@@ -2723,7 +2730,7 @@ describe('DataMapper', () => {
                     },
                 });
 
-                expect(mockDynamoDbClient.putItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.putItem.mock.calls[0] as any)[0])
                     .toEqual({
                         Item: {
                             foo: {S: 'buzz'},
@@ -2759,7 +2766,7 @@ describe('DataMapper', () => {
                     {skipVersionCheck: true},
                 );
 
-                expect(mockDynamoDbClient.putItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.putItem.mock.calls[0] as any)[0])
                     .not.toHaveProperty('ConditionExpression');
             }
         );
@@ -2788,7 +2795,7 @@ describe('DataMapper', () => {
                     },
                 });
 
-                expect(mockDynamoDbClient.putItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.putItem.mock.calls[0] as any)[0])
                     .not.toHaveProperty('ConditionExpression');
             }
         );
@@ -2823,7 +2830,7 @@ describe('DataMapper', () => {
                     }
                 );
 
-                expect(mockDynamoDbClient.putItem.mock.calls[0][0])
+                expect((mockDynamoDbClient.putItem.mock.calls[0] as any)[0])
                     .toMatchObject({
                         ConditionExpression: '(#attr0 < :val1) AND (#attr2 = :val3)',
                         ExpressionAttributeNames: {
@@ -2839,7 +2846,7 @@ describe('DataMapper', () => {
         );
 
         it('should return the unmarshalled input', async () => {
-            promiseFunc.mockImplementation(() => Promise.resolve({}));
+            promiseFunc.mockImplementation(() => Promise.resolve({} as PutItemOutput));
 
             const result = await mapper.put({
                 [DynamoDbTable]: 'foo',
