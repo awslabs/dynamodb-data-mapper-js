@@ -1,14 +1,14 @@
 import { BatchGet, MAX_READ_BATCH_SIZE } from './BatchGet';
-import { AttributeMap, BatchGetItemOutput } from 'aws-sdk/clients/dynamodb';
+import {AttributeMap, BatchGetItemInput, BatchGetItemOutput} from 'aws-sdk/clients/dynamodb';
 
 describe('BatchGet', () => {
     const promiseFunc = jest.fn(() => Promise.resolve({
-        UnprocessedItems: {}
-    }));
+        UnprocessedKeys: {}
+    } as BatchGetItemOutput));
     const mockDynamoDbClient = {
         config: {},
         batchGetItem: jest.fn(() => ({promise: promiseFunc})),
-    };
+    } as any;
 
     beforeEach(() => {
         promiseFunc.mockClear();
@@ -279,7 +279,7 @@ describe('BatchGet', () => {
                 const buzz = { S: 'Static string' };
                 const response: BatchGetItemOutput = {};
 
-                const {RequestItems} = mockDynamoDbClient.batchGetItem.mock.calls.slice(-1)[0][0];
+                const {RequestItems} = (mockDynamoDbClient.batchGetItem.mock.calls.slice(-1)[0] as any)[0];
                 for (const tableName of Object.keys(RequestItems)) {
                     for (const item of RequestItems[tableName].Keys) {
                         if (toBeFailed.has(item.fizz.N)) {
@@ -310,7 +310,7 @@ describe('BatchGet', () => {
                     }
                 }
 
-                return response;
+                return Promise.resolve(response);
             });
 
             const input = asyncInput
@@ -348,8 +348,7 @@ describe('BatchGet', () => {
             const {calls} = mockDynamoDbClient.batchGetItem.mock;
             expect(calls.length).toBe(Math.ceil(gets.length / MAX_READ_BATCH_SIZE));
 
-
-            const callCount: {[key: string]: number} = calls.reduce(
+            const callCount: {[key: string]: number} = (calls as Array<Array<BatchGetItemInput>>).reduce(
                 (
                     keyUseCount: {[key: string]: number},
                     [{RequestItems}]
@@ -359,10 +358,12 @@ describe('BatchGet', () => {
                         keys.push(...RequestItems[table].Keys);
                     }
                     for (const {fizz: {N: key}} of keys) {
-                        if (key in keyUseCount) {
-                            keyUseCount[key]++;
-                        } else {
-                            keyUseCount[key] = 1;
+                        if (key) {
+                            if (key in keyUseCount) {
+                                keyUseCount[key]++;
+                            } else {
+                                keyUseCount[key] = 1;
+                            }
                         }
                     }
 

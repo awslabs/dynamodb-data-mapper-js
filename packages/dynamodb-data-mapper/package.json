@@ -22,7 +22,7 @@
     "integ": "npm run pretest && jest --config=jest.integration.js",
     "prepublishOnly": "npm run build",
     "pretest": "tsc -p tsconfig.test.json",
-    "test": "jest"
+    "test": "jest \"build/(.+).spec.js\""
   },
   "author": {
     "name": "AWS SDK for JavaScript Team",
@@ -30,12 +30,12 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "@types/jest": "^23",
+    "@types/jest": "^24",
     "@types/node": "^8.0.4",
     "aws-sdk": "^2.7.0",
-    "jest": "^23",
-    "typedoc": "^0.11.0",
-    "typescript": "^2.7"
+    "jest": "^24",
+    "typedoc": "^0.14.0",
+    "typescript": "^3.4"
   },
   "dependencies": {
     "@aws/dynamodb-auto-marshaller": "^0.7.1",
@@ -43,7 +43,7 @@
     "@aws/dynamodb-data-marshaller": "^0.7.3",
     "@aws/dynamodb-expressions": "^0.7.3",
     "@aws/dynamodb-query-iterator": "^0.7.1",
-    "tslib": "^1.8.1"
+    "tslib": "^1.9"
   },
   "peerDependencies": {
     "aws-sdk": "^2.7.0"

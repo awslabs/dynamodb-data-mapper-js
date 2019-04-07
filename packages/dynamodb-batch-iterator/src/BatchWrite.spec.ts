@@ -1,11 +1,11 @@
 import { BatchWrite, MAX_WRITE_BATCH_SIZE } from './BatchWrite';
 import { WriteRequest } from './types';
-import { BatchWriteItemOutput } from 'aws-sdk/clients/dynamodb';
+import {BatchWriteItemInput, BatchWriteItemOutput} from 'aws-sdk/clients/dynamodb';
 
 describe('BatchWrite', () => {
     const promiseFunc = jest.fn(() => Promise.resolve({
         UnprocessedItems: {}
-    }));
+    } as BatchWriteItemOutput));
     const mockDynamoDbClient = {
         config: {},
         batchWriteItem: jest.fn(() => ({promise: promiseFunc})),
@@ -138,10 +138,10 @@ describe('BatchWrite', () => {
                 }
             }
 
-            promiseFunc.mockImplementation(() => {
+            promiseFunc.mockImplementation(async () => {
                 const response: BatchWriteItemOutput = {};
 
-                const {RequestItems} = mockDynamoDbClient.batchWriteItem.mock.calls.slice(-1)[0][0];
+                const {RequestItems} = (mockDynamoDbClient.batchWriteItem.mock.calls.slice(-1)[0] as any)[0];
                 for (const tableName of Object.keys(RequestItems)) {
                     for (const {DeleteRequest, PutRequest} of RequestItems[tableName]) {
                         const item = DeleteRequest ? DeleteRequest.Key : PutRequest.Item;
@@ -201,7 +201,7 @@ describe('BatchWrite', () => {
             expect(calls.length)
                 .toBe(Math.ceil(writes.length / MAX_WRITE_BATCH_SIZE));
 
-            const callCount: {[key: string]: number} = calls.reduce(
+            const callCount: {[key: string]: number} = (calls as Array<Array<BatchWriteItemInput>>).reduce(
                 (
                     keyUseCount: {[key: string]: number},
                     [{RequestItems}]
@@ -210,7 +210,7 @@ describe('BatchWrite', () => {
                         for (const {PutRequest, DeleteRequest} of RequestItems[table]) {
                             let key = DeleteRequest
                                 ? DeleteRequest.Key.fizz.N
-                                : PutRequest.Item.fizz.N;
+                                : (PutRequest as any).Item.fizz.N;
                             if (key in keyUseCount) {
                                 keyUseCount[key]++;
                             } else {

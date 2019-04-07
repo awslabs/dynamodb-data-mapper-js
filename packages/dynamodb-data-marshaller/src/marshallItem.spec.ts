@@ -245,7 +245,7 @@ describe('marshallItem', () => {
                 .toEqual({custom: {S: 'stubbed'}});
 
             expect(marshaller.mock.calls.length).toBe(1);
-            expect(marshaller.mock.calls[0][0]).toBe(document.custom);
+            expect((marshaller.mock.calls[0] as any)[0]).toBe(document.custom);
         });
     });
 

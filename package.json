@@ -13,12 +13,12 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "@types/jest": "^23",
+    "@types/jest": "^24",
     "@types/node": "^8.0.4",
-    "jest": "^23",
-    "lerna": "^2.11.0",
-    "typedoc": "^0.11.0",
-    "typescript": "^2.7"
+    "jest": "^24",
+    "lerna": "^3.13",
+    "typedoc": "^0.14.0",
+    "typescript": "^3.4"
   },
   "dependencies": {
     "aws-sdk": "^2.7.0"
@@ -27,6 +27,7 @@
     "packages/*"
   ],
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": ["/node_modules/", ".ts"]
   }
 }
