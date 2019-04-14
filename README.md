@@ -184,6 +184,51 @@ for await (const found of mapper.batchDelete(toRemove)) {
 }
 ```
 
+#### Operations with Expressions
+
+##### Aplication example
+
+```js
+import {
+    AttributePath,
+    FunctionExpression,
+    UpdateExpression,
+} from '@aws/dynamodb-expressions';
+
+const expr = new UpdateExpression();
+
+// given the anotation bellow
+@table('tableName')
+class MyRecord {
+    @hashKey()
+    email?: string;
+
+    @attribute()
+    passwordHash?: string;
+
+    @attribute()
+    passwordSalt?: string;
+
+    @attribute()
+    verified?: boolean;
+
+    @attribute()
+    verifyToken?: string;
+}
+
+// you make a mapper operation as follows
+const aRecord = Object.assign(new MyRecord(), {
+    email,
+    passwordHash: password,
+    passwordSalt: salt,
+    verified: false,
+    verifyToken: token,
+});
+mapper.put(aRecord, { 
+    condition: new FunctionExpression('attribute_not_exists', new AttributePath('email') 
+}).then( /* result handler */ );
+``` 
+
 #### Table lifecycle operations
 
 ##### `createTable`
