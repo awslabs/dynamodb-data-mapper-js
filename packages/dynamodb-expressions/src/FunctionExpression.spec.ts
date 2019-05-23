@@ -52,5 +52,27 @@ describe('FunctionExpression', () => {
                 ':val1': {S: 'baz'},
             });
         });
+
+        it('should support nested function expressions', () => {
+            const nestedFunction = new FunctionExpression(
+                'foo',
+                new AttributePath('bar'),
+                'baz',
+                new FunctionExpression('fizz', new FunctionExpression('buzz', new AttributePath('bar')))
+            )
+            const attributes = new ExpressionAttributes();
+
+            expect(
+                nestedFunction.serialize(attributes)
+            ).toBe('foo(#attr0, :val1, fizz(buzz(#attr0)))');
+
+            expect(attributes.names).toEqual({
+                '#attr0': 'bar',
+            });
+
+            expect(attributes.values).toEqual({
+                ':val1': {S: 'baz'},
+            });
+        });
     });
 });

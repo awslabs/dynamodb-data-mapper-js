@@ -20,11 +20,16 @@ export class FunctionExpression implements AttributeBearingExpression {
     }
 
     serialize(attributes: ExpressionAttributes) {
-        const expressionSafeArgs = this.args.map(
-            arg => AttributePath.isAttributePath(arg)
-                ? attributes.addName(arg)
-                : attributes.addValue(arg)
-        );
+        const expressionSafeArgs: Array<string> = this.args.map(arg => {
+            if (AttributePath.isAttributePath(arg)) {
+                return attributes.addName(arg);
+            } else if (FunctionExpression.isFunctionExpression(arg)) {
+                return arg.serialize(attributes);
+            }
+
+            return attributes.addValue(arg);
+        });
+
         return `${this.name}(${expressionSafeArgs.join(', ')})`;
     }
 
