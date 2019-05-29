@@ -73,7 +73,7 @@ const keys = [
     ['tableName', {DeleteRequest: {Key: {keyProperty: {N: '102'}}}}],
 ];
 
-for await (const item of new BatchGet(dynamoDb, keys)) {
+for await (const item of new BatchWrite(dynamoDb, keys)) {
     console.log(item);
 }
 ```
