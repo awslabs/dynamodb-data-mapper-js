@@ -1127,7 +1127,7 @@ export class DataMapper {
         options: {[tableName: string]: BatchGetTableOptions},
         convertedOptions: PerTableOptions
     ): Promise<Array<[string, AttributeMap]>> {
-        let keys: Array<[string, AttributeMap]> = [];
+        let marshalledItems: Array<[string, AttributeMap]> = [];
         for await (const item of items) {
             const unprefixed = getTableName(item);
             const tableName = this.tableNamePrefix + unprefixed;
@@ -1154,16 +1154,16 @@ export class DataMapper {
                 schema,
             };
 
-            keys.push([tableName, marshalled]);
+            marshalledItems.push([tableName, marshalled]);
         }
-        return keys;
+        return marshalledItems;
     }
 
     private async mapWriteBatch<T extends StringToAnyObjectMap>(
         items: SyncOrAsyncIterable<[WriteType, T]>,
         state: BatchState<T>
     ): Promise<Array<[string, WriteRequest]>> {
-        let keys: Array<[string, WriteRequest]> = [];
+        let marshalledItems: Array<[string, WriteRequest]> = [];
         for await (const [type, item] of items) {
             const unprefixed = getTableName(item);
             const tableName = this.tableNamePrefix + unprefixed;
@@ -1188,9 +1188,9 @@ export class DataMapper {
                 schema,
             };
 
-            keys.push([tableName, marshalled]);
+            marshalledItems.push([tableName, marshalled]);
         }
-        return keys;
+        return marshalledItems;
     }
 }
 
