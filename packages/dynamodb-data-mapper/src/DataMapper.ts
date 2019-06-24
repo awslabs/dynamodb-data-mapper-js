@@ -1128,7 +1128,6 @@ export class DataMapper {
         convertedOptions: PerTableOptions
     ): Promise<Array<[string, AttributeMap]>> {
         let keys: Array<[string, AttributeMap]> = [];
-
         for await (const item of items) {
             const unprefixed = getTableName(item);
             const tableName = this.tableNamePrefix + unprefixed;
@@ -1157,7 +1156,6 @@ export class DataMapper {
 
             keys.push([tableName, marshalled]);
         }
-
         return keys;
     }
 
@@ -1166,7 +1164,6 @@ export class DataMapper {
         state: BatchState<T>
     ): Promise<Array<[string, WriteRequest]>> {
         let keys: Array<[string, WriteRequest]> = [];
-
         for await (const [type, item] of items) {
             const unprefixed = getTableName(item);
             const tableName = this.tableNamePrefix + unprefixed;
