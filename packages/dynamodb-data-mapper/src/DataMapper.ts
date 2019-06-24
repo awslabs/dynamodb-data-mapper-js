@@ -1339,7 +1339,7 @@ function itemIdentifier(
     const keyAttributes: Array<string> = [];
     for (const key of keyProperties) {
         const value = marshalled[key];
-        `${key}=${value.B || value.N || value.S}`;
+        keyAttributes.push(`${key}=${value.B || value.N || value.S}`);
     }
 
     return keyAttributes.join(':');
