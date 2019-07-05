@@ -172,7 +172,7 @@ export class DataMapper {
 
         const batch = new BatchGet(
             this.client,
-            await this.mapGetBatch(items, state, perTableOptions, options),
+            this.mapGetBatch(items, state, perTableOptions, options),
             {
                 ConsistentRead: readConsistency === 'strong' ? true : undefined,
                 PerTableOptions: options
@@ -243,7 +243,7 @@ export class DataMapper {
         const state: BatchState<T> = {};
         const batch = new BatchWrite(
             this.client,
-            await this.mapWriteBatch(items, state)
+            this.mapWriteBatch(items, state)
         );
 
         for await (const [tableName, {DeleteRequest, PutRequest}] of batch) {
@@ -1121,13 +1121,12 @@ export class DataMapper {
         return getTableName(item, this.tableNamePrefix);
     }
 
-    private async mapGetBatch<T extends StringToAnyObjectMap>(
+    private async *mapGetBatch<T extends StringToAnyObjectMap>(
         items: SyncOrAsyncIterable<T>,
         state: BatchState<T>,
         options: {[tableName: string]: BatchGetTableOptions},
         convertedOptions: PerTableOptions
-    ): Promise<Array<[string, AttributeMap]>> {
-        let marshalledItems: Array<[string, AttributeMap]> = [];
+    ): AsyncIterableIterator<[string, AttributeMap]> {
         for await (const item of items) {
             const unprefixed = getTableName(item);
             const tableName = this.tableNamePrefix + unprefixed;
@@ -1154,16 +1153,14 @@ export class DataMapper {
                 schema,
             };
 
-            marshalledItems.push([tableName, marshalled]);
+            yield [tableName, marshalled];
         }
-        return marshalledItems;
     }
 
-    private async mapWriteBatch<T extends StringToAnyObjectMap>(
+    private async *mapWriteBatch<T extends StringToAnyObjectMap>(
         items: SyncOrAsyncIterable<[WriteType, T]>,
         state: BatchState<T>
-    ): Promise<Array<[string, WriteRequest]>> {
-        let marshalledItems: Array<[string, WriteRequest]> = [];
+    ): AsyncIterableIterator<[string, WriteRequest]> {
         for await (const [type, item] of items) {
             const unprefixed = getTableName(item);
             const tableName = this.tableNamePrefix + unprefixed;
@@ -1188,9 +1185,8 @@ export class DataMapper {
                 schema,
             };
 
-            marshalledItems.push([tableName, marshalled]);
+            yield [tableName, marshalled];
         }
-        return marshalledItems;
     }
 }
 

@@ -437,9 +437,10 @@ describe('DataMapper', () => {
                     },
                 ];
 
+                let currentRequest = 0;
                 for (let i = 0; i < 325; i++) {
                     gets.push(new Item(i));
-                    expected[Math.floor(i / 100)][0].RequestItems.foo.Keys
+                    expected[currentRequest][0].RequestItems.foo.Keys
                         .push({fizz: {N: String(i)}});
 
                     const response = {
@@ -447,13 +448,17 @@ describe('DataMapper', () => {
                         buzz: {BOOL: i % 2 === 0},
                         pop: {S: 'Goes the weasel'}
                     };
+
                     if (failures.has(String(i))) {
-                        responses[Math.floor(i / 100)].UnprocessedKeys.foo.Keys
+                        responses[currentRequest].UnprocessedKeys.foo.Keys
                             .push({fizz: {N: String(i)}});
-                        responses[3].Responses.foo.push(response);
-                    } else {
-                        responses[Math.floor(i / 100)].Responses.foo
-                            .push(response);
+                        responses[currentRequest + 1].Responses.foo.push(response);
+                    }
+                    else {
+                        responses[currentRequest].Responses.foo.push(response);
+                        if (responses[currentRequest].Responses.foo.length === 99) {
+                            currentRequest++;
+                        }
                     }
                 }
 
