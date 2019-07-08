@@ -512,6 +512,27 @@ export class DataMapper {
     }
 
     /**
+     * Perform a UpdateTimeToLive on provided table.
+     *
+     * According to AWS documentation, applying across all partitions can take 1 hour.
+     * That's why this feature doesn't wait for complete process.
+     *
+     * @param valueConstructor  The constructor used for values in the table.
+     * @param Enabled           Boolean value that represents desired state of TTL
+     * @param AttributeName     "Expiration" attribute which is used for TTL mechanism
+     *                          Must be type of Number and contain unix epoch time of record's expiration
+     * @throws Throws exception if TTL is currently set to desired state or when you exceed maximum number of commands
+     *         in some period of time
+     */
+    async updateTimeToLive(valueConstructor: ZeroArgumentsConstructor<any>, Enabled: boolean, AttributeName: string) {
+        const TableName = this.getTableName(valueConstructor.prototype);
+        await this.client.updateTimeToLive({
+            TableName,
+            TimeToLiveSpecification: { Enabled, AttributeName }
+        }).promise();
+    }
+
+    /**
      * If the table does not already exist, perform a CreateTable operation
      * using the schema accessible via the {DynamoDbSchema} property and the
      * table name accessible via the {DynamoDbTable} property on the prototype
