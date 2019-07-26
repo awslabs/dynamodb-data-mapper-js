@@ -225,7 +225,7 @@ const aRecord = Object.assign(new MyRecord(), {
     verifyToken: token,
 });
 mapper.put(aRecord, { 
-    condition: new FunctionExpression('attribute_not_exists', new AttributePath('email') 
+    condition: new FunctionExpression('attribute_not_exists', new AttributePath('email')) 
 }).then( /* result handler */ );
 ``` 
 
