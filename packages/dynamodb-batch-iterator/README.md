@@ -21,7 +21,7 @@ object stream wrapped with [async-iter-stream](https://github.com/calvinmetcalf/
 
 ```typescript
 import { BatchGet } from '@aws/dynamodb-batch-iterator';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const dynamoDb = new DynamoDB({region: 'us-west-2'});
 const keys = [
@@ -60,7 +60,7 @@ key as described [in the Amazon DynamoDB API reference](http://docs.aws.amazon.c
 
 ```typescript
 import { BatchWrite } from '@aws/dynamodb-batch-iterator';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const dynamoDb = new DynamoDB({region: 'us-west-2'});
 const keys = [

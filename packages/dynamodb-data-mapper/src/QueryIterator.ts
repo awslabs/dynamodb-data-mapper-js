@@ -6,7 +6,7 @@ import {
     ConditionExpression,
     ConditionExpressionPredicate,
 } from '@aws/dynamodb-expressions';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 /**
  * Iterates over each item returned by a DynamoDB query until no more pages are

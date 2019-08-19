@@ -1,4 +1,4 @@
-import DynamoDB = require("aws-sdk/clients/dynamodb");
+const DynamoDB = require("aws-sdk/clients/dynamodb");
 import { ReadConsistency } from '../constants';
 
 export interface DataMapperConfiguration {

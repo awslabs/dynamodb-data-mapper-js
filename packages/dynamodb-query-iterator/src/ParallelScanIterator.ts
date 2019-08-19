@@ -4,7 +4,7 @@ import {
     ParallelScanPaginator,
     ParallelScanState,
 } from './ParallelScanPaginator';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 export class ParallelScanIterator extends ItemIterator<ParallelScanPaginator> {
     constructor(

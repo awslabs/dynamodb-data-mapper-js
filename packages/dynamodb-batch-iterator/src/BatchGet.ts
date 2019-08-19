@@ -2,7 +2,7 @@ import { BatchGetOptions, PerTableOptions } from './BatchGetOptions';
 import { BatchOperation } from './BatchOperation';
 import { SyncOrAsyncIterable, TableState } from './types';
 import { AttributeMap, BatchGetItemInput } from 'aws-sdk/clients/dynamodb';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 export const MAX_READ_BATCH_SIZE = 100;
 
