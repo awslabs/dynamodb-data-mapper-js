@@ -40,7 +40,7 @@ instance of `DataMapper`:
 
 ```typescript
 import {DataMapper} from '@aws/dynamodb-data-mapper';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const mapper = new DataMapper({
     client: new DynamoDB({region: 'us-west-2'}), // the SDK client used to execute operations

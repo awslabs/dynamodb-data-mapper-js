@@ -18,7 +18,7 @@ import {
     unmarshallItem,
     ZeroArgumentsConstructor,
 } from '@aws/dynamodb-data-marshaller';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 /**
  * Iterates over each page of items returned by a parallel DynamoDB scan until

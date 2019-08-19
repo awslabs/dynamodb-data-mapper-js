@@ -87,7 +87,7 @@ import {
     PutItemInput,
     UpdateItemInput,
 } from 'aws-sdk/clients/dynamodb';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 require('./asyncIteratorSymbolPolyfill');
 

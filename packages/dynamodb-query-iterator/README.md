@@ -23,7 +23,7 @@ Retrieves all pages of a DynamoDB `query` in order.
 
 ```typescript
 import { QueryPaginator } from '@aws/dynamodb-query-iterator';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const paginator = new QueryPaginator(
     new DynamoDB({region: 'us-west-2'}),
@@ -62,7 +62,7 @@ as the `ExclusiveStartKey` for another `QueryPaginator` instance:
 ```typescript
 import { QueryPaginator } from '@aws/dynamodb-query-iterator';
 import { QueryInput } from 'aws-sdk/clients/dynamodb';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const dynamoDb = new DynamoDB({region: 'us-west-2'});
 const input: QueryInput = {
@@ -99,7 +99,7 @@ Retrieves all pages of a DynamoDB `scan` in order.
 
 ```typescript
 import { ScanPaginator } from '@aws/dynamodb-query-iterator';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const paginator = new ScanPaginator(
     new DynamoDB({region: 'us-west-2'}),
@@ -134,7 +134,7 @@ as the `ExclusiveStartKey` for another `ScanPaginator` instance:
 ```typescript
 import { ScanPaginator } from '@aws/dynamodb-query-iterator';
 import { ScanInput } from 'aws-sdk/clients/dynamodb';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const dynamoDb = new DynamoDB({region: 'us-west-2'});
 const input: ScanInput = {
@@ -171,7 +171,7 @@ provided.
 
 ```typescript
 import { ParallelScanPaginator } from '@aws/dynamodb-query-iterator';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const paginator = new ParallelScanPaginator(
     new DynamoDB({region: 'us-west-2'}),
@@ -209,7 +209,7 @@ import {
     ParallelScanInput,
     ParallelScanPaginator,
 } from '@aws/dynamodb-query-iterator';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const client = new DynamoDB({region: 'us-west-2'});
 const input: ParallelScanInput = {
@@ -251,7 +251,7 @@ Retrieves all records of a DynamoDB `query` in order.
 
 ```typescript
 import { QueryIterator } from '@aws/dynamodb-query-iterator';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const iterator = new QueryIterator(
     new DynamoDB({region: 'us-west-2'}),
@@ -289,7 +289,7 @@ Retrieves all records of a DynamoDB `scan` in order.
 
 ```typescript
 import { ScanIterator } from '@aws/dynamodb-query-iterator';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const iterator = new ScanIterator(
     new DynamoDB({region: 'us-west-2'}),
@@ -327,7 +327,7 @@ provided.
 
 ```typescript
 import { ParallelScanIterator} from '@aws/dynamodb-query-iterator';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const iterator = new ParallelScanIterator(
     new DynamoDB({region: 'us-west-2'}),

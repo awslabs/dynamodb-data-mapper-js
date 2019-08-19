@@ -5,7 +5,7 @@ import {
     TableStateElement,
     ThrottledTableConfiguration,
 } from './types';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 if (Symbol && !Symbol.asyncIterator) {
     (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");

@@ -75,7 +75,7 @@ import {
     DynamoDbSchema,
     DynamoDbTable,
 } from '@aws/dynamodb-data-mapper';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+const DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const client = new DynamoDB({region: 'us-west-2'});
 const mapper = new DataMapper({client});
