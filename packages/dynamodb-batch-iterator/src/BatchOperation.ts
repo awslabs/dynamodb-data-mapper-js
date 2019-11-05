@@ -211,7 +211,7 @@ export abstract class BatchOperation<
                 ]);
 
             if (isIteratorResult(toProcess)) {
-                this.sourceDone = toProcess.done;
+                this.sourceDone = Boolean(toProcess.done);
                 if (!this.sourceDone) {
                     this.addToSendQueue(toProcess.value);
                     this.sourceNext = this.iterator.next();
