@@ -90,8 +90,10 @@ export abstract class Paginator<T> implements AsyncIterableIterator<Array<T>> {
                     this.valueConstructor
                 );
 
+                const items: any[] = value.Items || [];
+
                 return {
-                    value: (value.Items || []).map(item => unmarshallItem(
+                    value: (items).map(item => unmarshallItem(
                         this.itemSchema,
                         item,
                         this.valueConstructor
