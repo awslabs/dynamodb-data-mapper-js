@@ -8,11 +8,15 @@ import {GetItemInput} from "aws-sdk/clients/dynamodb";
 export class ItemNotFoundException extends Error {
     readonly name = 'ItemNotFoundException';
 
+    __proto__: Error;
     constructor(
         public readonly itemSought: GetItemInput,
         message: string = defaultErrorMessage(itemSought)
     ) {
         super(message);
+
+        // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+        this.__proto__ = ItemNotFoundException.prototype;
     }
 }
 
