@@ -20,6 +20,16 @@ describe('ItemNotFoundException', () => {
         expect(exception.name).toBe('ItemNotFoundException');
     });
 
+    it('should be an instance of ItemNotFoundException', () => {
+        const exception = new ItemNotFoundException({} as any, 'message');
+        expect(exception).toBeInstanceOf(ItemNotFoundException);
+    });
+
+    it('should be an instance of Error', () => {
+        const exception = new ItemNotFoundException({} as any, 'message');
+        expect(exception).toBeInstanceOf(Error);
+    });
+
     it(
         'should construct a default message from the item sought if no message supplied',
         () => {
