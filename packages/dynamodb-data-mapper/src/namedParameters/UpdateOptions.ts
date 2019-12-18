@@ -8,6 +8,12 @@ export interface UpdateOptions {
      */
     condition?: ConditionExpression;
 
+
+    /**
+     * A customExpression overwrite Value attribute of UpdateExpression if specfied
+     */
+    customExpression?: AttributeValue | FunctionExpression | MathematicalExpression | any;
+
     /**
      * Whether the absence of a value defined in the schema should be treated as
      * a directive to remove the property from the item.

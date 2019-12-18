@@ -956,6 +956,7 @@ export class DataMapper {
         }
         let {
             condition,
+            customExpression,
             onMissing = 'remove',
             skipVersionCheck = this.skipVersionCheck,
         } = options;
@@ -986,6 +987,8 @@ export class DataMapper {
                 if (onMissing === 'remove') {
                     expr.remove(key);
                 }
+            } else if (customExpression) {
+                expr.set(key, customExpression)
             } else {
                 const marshalled = marshallValue(fieldSchema, inputMember);
                 if (marshalled) {
