@@ -56,7 +56,7 @@ const marshalled = marshaller.marshallItem(original);
 
 // the output of `.marshallItem` can be converted back to a JavaScript type with
 // `.unmarshallItem`
-const unmarshalled = marshaller.unmarshallItem(original);
+const unmarshalled = marshaller.unmarshallItem(marshalled);
 
 // With a few caveats (listed below), the unmarshalled value should have the
 // same structure and data as the original value.
