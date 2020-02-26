@@ -694,7 +694,7 @@ describe('DataMapper', () => {
 
         const mapper = new DataMapper({
             client: mockDynamoDbClient as any,
-        });    
+        });
 
         class Item {
             get [DynamoDbTable]() { return 'foo' }
@@ -1800,7 +1800,7 @@ describe('DataMapper', () => {
         const describeTablePromiseFunc = jest.fn(() => Promise.resolve({
             Table: {
                 TableStatus: 'ACTIVE',
-                GlobalSecondaryIndexes: [ 
+                GlobalSecondaryIndexes: [
                     {
                         IndexName: 'DescriptionIndex'
                     }
@@ -3892,7 +3892,7 @@ describe('DataMapper', () => {
                         };
                     }
                 },
-                {startKey: {fizz: 100}}
+                {startKey: {fizz: 100, pop: 20}}
             );
 
             await results.next();
