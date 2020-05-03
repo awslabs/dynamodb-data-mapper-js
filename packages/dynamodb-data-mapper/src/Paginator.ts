@@ -91,7 +91,7 @@ export abstract class Paginator<T> implements AsyncIterableIterator<Array<T>> {
                 );
 
                 return {
-                    value: (value.Items || []).map(item => unmarshallItem(
+                    value: (value.Items || []).map((item: typeof value.Items) => unmarshallItem(
                         this.itemSchema,
                         item,
                         this.valueConstructor
