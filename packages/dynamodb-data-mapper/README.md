@@ -703,3 +703,6 @@ Takes four parameters:
         order for the update operation to be executed. Please refer to the
         documentation for the `@aws/dynamodb-expressions` package for guidance
         on creating condition expression objects.
+
+    * `returnValues` - One of the values: `ALL_NEW` | `ALL_OLD` | `UPDATED_NEW`
+        | `UPDATED_OLD` | `NONE`

@@ -1041,7 +1041,7 @@ export class DataMapper {
      * @param options           Options with which to customize the UpdateItem
      *                          request.
      *
-     * @returns The updated item.
+     * @returns The updated item in accordance to returnValue.
      */
     async executeUpdateExpression<
         T extends StringToAnyObjectMap = StringToAnyObjectMap
@@ -1073,7 +1073,7 @@ export class DataMapper {
     ): Promise<T> {
         const req: UpdateItemInput = {
             TableName: this.tableNamePrefix + tableName,
-            ReturnValues: 'ALL_NEW',
+            ReturnValues: options.returnValues || 'ALL_NEW',
             Key: marshallKey(schema, key),
         };
 
