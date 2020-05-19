@@ -6,4 +6,5 @@ export interface ExecuteUpdateExpressionOptions {
      * predicated.
      */
     condition?: ConditionExpression;
+    returnValues?: 'ALL_NEW' | 'ALL_OLD' | 'UPDATED_NEW' | 'UPDATED_ALL' | 'NONE';
 }
