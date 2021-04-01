@@ -1,4 +1,4 @@
-import {AttributeValue as BaseAttributeValue} from 'aws-sdk/clients/dynamodb';
+import {AttributeValue as BaseAttributeValue} from '@aws-sdk/client-dynamodb';
 
 const MARSHALLED_ATTRIBUTE_VALUE_TAG = 'AmazonDynamoDbAttributeValue';
 const EXPECTED_TOSTRING = `[object ${MARSHALLED_ATTRIBUTE_VALUE_TAG}]`;

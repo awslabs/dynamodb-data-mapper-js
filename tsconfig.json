@@ -1,19 +1,31 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "es5"
+    "moduleResolution": "node",
+    "target": "es6",
+    "module":"es2020",
+    "lib": ["es2020"],
+    "strictNullChecks": true,
+    "sourceMap": true,
+    "declaration": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "declarationDir": "dist/types",
+    "outDir": "dist/lib/esm",
+    "typeRoots": [
+      "node_modules/@types"
     ],
-    "module": "commonjs",
-    "strict": true
+
+    "skipLibCheck": true
   },
-  "typedocOptions": {
-    "mode": "file",
-    "out": "./docs",
-    "excludeNotExported": true,
-    "excludePrivate": true,
-    "hideGenerator": true,
-    "name": "Amazon DynamoDB DataMapper For JavaScript"
+  "include": [
+    "src"
+  ],
+  "exclude": ["node_modules", "./**/*.spec.ts", "dist"],
+  "typeAcquisition": {
+    "include": [
+      "jest"
+    ]
   }
 }

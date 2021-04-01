@@ -5,7 +5,7 @@ import {
     TableStateElement,
     ThrottledTableConfiguration,
 } from './types';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+import DynamoDB = require('@aws-sdk/client-dynamodb');
 
 if (Symbol && !Symbol.asyncIterator) {
     (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
@@ -37,7 +37,7 @@ export abstract class BatchOperation<
 
     private readonly throttled = new Set<Promise<ThrottledTableConfiguration<Element>>>();
     private readonly iterator: Iterator<[string, Element]>|AsyncIterator<[string, Element]>;
-    private sourceDone: boolean = false;
+    private sourceDone?: boolean = false;
     private sourceNext: IteratorResult<[string, Element]>|Promise<IteratorResult<[string, Element]>>;
     private lastResolved?: Promise<IteratorResult<[string, Element]>>;
 

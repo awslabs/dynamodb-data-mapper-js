@@ -3,7 +3,7 @@ import {ItemNotFoundException} from './ItemNotFoundException';
 import {DynamoDbSchema, DynamoDbTable} from './protocols';
 import {hostname} from 'os';
 import {hrtime} from 'process';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+import DynamoDB = require('@aws-sdk/client-dynamodb');
 import {DocumentType} from "@aws/dynamodb-data-marshaller";
 import {Schema} from "@aws/dynamodb-data-marshaller";
 import {equals} from "@aws/dynamodb-expressions";

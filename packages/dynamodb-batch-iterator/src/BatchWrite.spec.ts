@@ -1,6 +1,6 @@
 import { BatchWrite, MAX_WRITE_BATCH_SIZE } from './BatchWrite';
 import { WriteRequest } from './types';
-import {BatchWriteItemInput, BatchWriteItemOutput} from 'aws-sdk/clients/dynamodb';
+import {BatchWriteItemInput, BatchWriteItemOutput} from '@aws-sdk/client-dynamodb';
 
 describe('BatchWrite', () => {
     const promiseFunc = jest.fn(() => Promise.resolve({

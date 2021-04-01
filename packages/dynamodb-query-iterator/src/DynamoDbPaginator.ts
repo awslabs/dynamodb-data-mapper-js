@@ -1,7 +1,7 @@
 import { DynamoDbPaginatorInterface } from './DynamoDbPaginatorInterface';
 import { DynamoDbResultsPage } from './DynamoDbResultsPage';
 import { mergeConsumedCapacities } from './mergeConsumedCapacities';
-import { ConsumedCapacity, Key } from 'aws-sdk/clients/dynamodb';
+import {AttributeValue, ConsumedCapacity} from '@aws-sdk/client-dynamodb';
 
 if (Symbol && !Symbol.asyncIterator) {
     (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
@@ -10,7 +10,7 @@ if (Symbol && !Symbol.asyncIterator) {
 export abstract class DynamoDbPaginator implements DynamoDbPaginatorInterface {
     private _consumedCapacity?: ConsumedCapacity;
     private _count = 0;
-    private _lastKey?: Key;
+    private _lastKey?: {[key: string]: AttributeValue};
     private _scannedCount = 0;
     private lastResolved: Promise<IteratorResult<DynamoDbResultsPage>>
         = <any>Promise.resolve();
@@ -42,7 +42,7 @@ export abstract class DynamoDbPaginator implements DynamoDbPaginatorInterface {
      * Get the LastEvaluatedKey of the last result page yielded by this
      * paginator or undefined if the scan has already been exhausted.
      */
-    get lastEvaluatedKey(): Key|undefined {
+    get lastEvaluatedKey(): {[key: string]: AttributeValue}|undefined {
         return this._lastKey;
     }
 

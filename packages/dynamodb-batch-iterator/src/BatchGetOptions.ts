@@ -2,7 +2,7 @@ import {
     ConsistentRead,
     ExpressionAttributeNameMap,
     ProjectionExpression,
-} from "aws-sdk/clients/dynamodb";
+} from "@aws-sdk/client-dynamodb";
 
 export interface BatchGetOptions {
     /**

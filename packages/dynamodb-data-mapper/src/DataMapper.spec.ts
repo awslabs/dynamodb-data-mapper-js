@@ -20,7 +20,7 @@ import {
     DescribeTableOutput,
     GetItemOutput,
     PutItemOutput
-} from "aws-sdk/clients/dynamodb";
+} from "@aws-sdk/client-dynamodb";
 
 type BinaryValue = ArrayBuffer|ArrayBufferView;
 

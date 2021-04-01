@@ -6,7 +6,7 @@ import {
     ProjectionExpression,
     PutRequest,
     WriteRequest as DynamoDbWriteRequest
-} from "aws-sdk/clients/dynamodb";
+} from "@aws-sdk/client-dynamodb";
 
 /**
  * A synchronous or asynchronous iterable.

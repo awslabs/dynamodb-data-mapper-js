@@ -5,7 +5,7 @@ import {
     AttributeValue as AttributeValueModel,
     ExpressionAttributeNameMap,
     ExpressionAttributeValueMap,
-} from 'aws-sdk/clients/dynamodb';
+} from '@aws-sdk/client-dynamodb';
 
 /**
  * An object that manages expression attribute name and value substitution.

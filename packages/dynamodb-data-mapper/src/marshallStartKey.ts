@@ -1,5 +1,5 @@
 import { marshallValue, Schema } from '@aws/dynamodb-data-marshaller';
-import { Key } from 'aws-sdk/clients/dynamodb';
+import { Key } from '@aws-sdk/client-dynamodb';
 
 /**
  * @internal

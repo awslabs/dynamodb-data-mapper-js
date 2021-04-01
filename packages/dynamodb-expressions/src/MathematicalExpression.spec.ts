@@ -5,7 +5,7 @@ import { MathematicalExpression } from './MathematicalExpression';
 import {
     ExpressionAttributeNameMap,
     ExpressionAttributeValueMap
-} from 'aws-sdk/clients/dynamodb';
+} from '@aws-sdk/client-dynamodb';
 
 describe('MathematicalExpression', () => {
     const validExpressions: Array<[

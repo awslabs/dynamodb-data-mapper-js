@@ -2,7 +2,7 @@ import { Schema } from './Schema';
 import { SchemaType } from './SchemaType';
 import { InvalidValueError } from './InvalidValueError';
 import { InvalidSchemaError } from './InvalidSchemaError';
-import { AttributeMap, AttributeValue } from 'aws-sdk/clients/dynamodb';
+import { AttributeMap, AttributeValue } from '@aws-sdk/client-dynamodb';
 import {
     BinarySet,
     BinaryValue,

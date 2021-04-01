@@ -1,8 +1,7 @@
 import { BatchGetOptions, PerTableOptions } from './BatchGetOptions';
 import { BatchOperation } from './BatchOperation';
 import { SyncOrAsyncIterable, TableState } from './types';
-import { AttributeMap, BatchGetItemInput } from 'aws-sdk/clients/dynamodb';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+import {AttributeValue, BatchGetItemInput, DynamoDB} from '@aws-sdk/client-dynamodb';
 
 export const MAX_READ_BATCH_SIZE = 100;
 
@@ -14,7 +13,7 @@ export const MAX_READ_BATCH_SIZE = 100;
  * unprocessed. Exponential backoff on unprocessed items is employed on a
  * per-table basis.
  */
-export class BatchGet extends BatchOperation<AttributeMap> {
+export class BatchGet extends BatchOperation<{[key: string]: AttributeValue}> {
     protected readonly batchSize = MAX_READ_BATCH_SIZE;
 
     private readonly consistentRead?: boolean;
@@ -31,7 +30,7 @@ export class BatchGet extends BatchOperation<AttributeMap> {
      */
     constructor(
         client: DynamoDB,
-        items: SyncOrAsyncIterable<[string, AttributeMap]>,
+        items: SyncOrAsyncIterable<[string, {[key: string]: AttributeValue}]>,
         {
             ConsistentRead,
             PerTableOptions = {},
@@ -47,7 +46,7 @@ export class BatchGet extends BatchOperation<AttributeMap> {
         let batchSize = 0;
 
         while (this.toSend.length > 0) {
-            const [tableName, item] = this.toSend.shift() as [string, AttributeMap];
+            const [tableName, item] = this.toSend.shift() as [string, {[key: string]: AttributeValue}];
             if (operationInput.RequestItems[tableName] === undefined) {
                 const {
                     projection,
@@ -91,7 +90,7 @@ export class BatchGet extends BatchOperation<AttributeMap> {
         }
     }
 
-    protected getInitialTableState(tableName: string): TableState<AttributeMap> {
+    protected getInitialTableState(tableName: string): TableState<{[key: string]: AttributeValue}> {
         const {
             ExpressionAttributeNames,
             ProjectionExpression,

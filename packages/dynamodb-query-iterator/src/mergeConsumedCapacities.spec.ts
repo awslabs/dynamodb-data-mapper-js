@@ -1,5 +1,5 @@
 import { mergeConsumedCapacities } from './mergeConsumedCapacities';
-import { ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
+import { ConsumedCapacity } from '@aws-sdk/client-dynamodb';
 
 describe('mergeConsumedCapacities', () => {
     it('should return undefined when called two undefined arguments', () => {

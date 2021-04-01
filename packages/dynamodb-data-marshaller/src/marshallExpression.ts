@@ -3,7 +3,7 @@ import { toSchemaName } from './toSchemaName';
 import {
     ExpressionAttributeNameMap,
     ExpressionAttributeValueMap,
-} from 'aws-sdk/clients/dynamodb';
+} from '@aws-sdk/client-dynamodb';
 import {
     AttributePath,
     ConditionExpression,

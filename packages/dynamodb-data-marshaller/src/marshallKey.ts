@@ -1,7 +1,7 @@
 import {isKey} from './isKey';
 import {marshallValue} from './marshallItem';
 import {Schema} from './Schema';
-import {AttributeMap} from 'aws-sdk/clients/dynamodb';
+import {AttributeMap} from '@aws-sdk/client-dynamodb';
 
 export function marshallKey(
     schema: Schema,

@@ -1,8 +1,10 @@
-import {AttributeMap, AttributeValue} from "aws-sdk/clients/dynamodb";
+// import {AttributeTypeMap, AttributeValue} from "@aws-sdk/client-dynamodb";
 import {BinarySet, BinaryValue} from "./BinarySet";
 import {isArrayBuffer} from "./isArrayBuffer";
 import {NumberValue} from "./NumberValue";
 import {NumberValueSet} from "./NumberValueSet";
+import {AttributeValue} from "@aws-sdk/client-dynamodb";
+import {AttributeTypeMap} from "../../dynamodb-data-marshaller";
 
 export const EmptyHandlingStrategies = {
     omit: 'omit',
@@ -120,7 +122,7 @@ export class Marshaller {
      * Convert a JavaScript object with string keys and arbitrary values into an
      * object with string keys and DynamoDB AttributeValue objects as values.
      */
-    public marshallItem(item: {[key: string]: any}): AttributeMap {
+    public marshallItem(item: {[key: string]: any}): { [key: string]: AttributeValue } {
         const value = this.marshallValue(item);
         if (!(value && value.M) && this.onInvalid === 'throw') {
             throw new Error(
@@ -165,7 +167,7 @@ export class Marshaller {
      * AttributeValue values) to an object with string keys and native
      * JavaScript values.
      */
-    public unmarshallItem(item: AttributeMap): UnmarshalledMapAttributeValue {
+    public unmarshallItem(item: { [key: string]: AttributeValue }): UnmarshalledMapAttributeValue {
         return this.unmarshallValue({M: item}) as UnmarshalledMapAttributeValue;
     }
 
@@ -318,7 +320,7 @@ export class Marshaller {
     private marshallObject(object: {[key: string]: any}): AttributeValue {
         return {
             M: Object.keys(object).reduce(
-                (map: AttributeMap, key: string): AttributeMap => {
+                (map: { [key: string]: AttributeValue }, key: string): { [key: string]: AttributeValue } => {
                     const marshalled = this.marshallValue(object[key]);
                     if (marshalled) {
                         map[key] = marshalled;
@@ -379,6 +381,8 @@ export class Marshaller {
         }
 
         if (values.length > 0 || this.onEmpty === 'leave') {
+            // I get the idea but there's an issue here where it's possible we are missing some required fields.
+            // @ts-ignore
             return {[tag]: values};
         }
 

@@ -14,7 +14,7 @@ import {
     AttributeValueList,
     NumberSetAttributeValue,
     StringSetAttributeValue,
-} from "aws-sdk/clients/dynamodb";
+} from "@aws-sdk/client-dynamodb";
 
 /**
  * Unmarshall a DynamoDB item into a JavaScript value.

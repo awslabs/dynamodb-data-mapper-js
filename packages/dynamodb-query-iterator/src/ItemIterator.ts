@@ -1,5 +1,5 @@
 import { DynamoDbPaginatorInterface } from './DynamoDbPaginatorInterface';
-import { AttributeMap, ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
+import {AttributeValue, ConsumedCapacity} from '@aws-sdk/client-dynamodb';
 
 if (Symbol && !Symbol.asyncIterator) {
     (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
@@ -7,18 +7,18 @@ if (Symbol && !Symbol.asyncIterator) {
 
 export abstract class ItemIterator<
     Paginator extends DynamoDbPaginatorInterface
-> implements AsyncIterableIterator<AttributeMap> {
+> implements AsyncIterableIterator<{[key: string]: AttributeValue}> {
 
     private _iteratedCount = 0;
-    private lastResolved: Promise<IteratorResult<AttributeMap>> = <any>Promise.resolve();
-    private readonly pending: Array<AttributeMap> = [];
+    private lastResolved: Promise<IteratorResult<{[key: string]: AttributeValue}>> = <any>Promise.resolve();
+    private readonly pending: Array<{[key: string]: AttributeValue}> = [];
 
     protected constructor(private readonly paginator: Paginator) {}
 
     /**
      * @inheritDoc
      */
-    [Symbol.asyncIterator](): AsyncIterableIterator<AttributeMap> {
+    [Symbol.asyncIterator](): AsyncIterableIterator<{[key: string]: AttributeValue}> {
         return this;
     }
 
@@ -42,7 +42,7 @@ export abstract class ItemIterator<
     /**
      * @inheritDoc
      */
-    next(): Promise<IteratorResult<AttributeMap>> {
+    next(): Promise<IteratorResult<{[key: string]: AttributeValue}>> {
         this.lastResolved = this.lastResolved.then(() => this.getNext());
         return this.lastResolved;
     }
@@ -70,7 +70,7 @@ export abstract class ItemIterator<
     /**
      * @inheritDoc
      */
-    return(): Promise<IteratorResult<AttributeMap>> {
+    return(): Promise<IteratorResult<{[key: string]: AttributeValue}>> {
         // Prevent any further use of this iterator
         this.lastResolved = Promise.reject(new Error(
             'Iteration has been manually interrupted and may not be resumed'
@@ -92,7 +92,7 @@ export abstract class ItemIterator<
         return this.paginator.scannedCount;
     }
 
-    private getNext(): Promise<IteratorResult<AttributeMap>> {
+    private getNext(): Promise<IteratorResult<{[key: string]: AttributeValue}>> {
         if (this.pending.length > 0) {
             this._iteratedCount++;
             return Promise.resolve({
@@ -103,7 +103,7 @@ export abstract class ItemIterator<
 
         return this.paginator.next().then(({done, value}) => {
             if (done) {
-                return {done} as IteratorResult<AttributeMap>;
+                return {done} as IteratorResult<{[key: string]: AttributeValue}>;
             }
 
             this.pending.push(...value.Items || []);

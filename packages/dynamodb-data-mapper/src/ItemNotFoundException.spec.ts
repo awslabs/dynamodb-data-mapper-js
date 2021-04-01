@@ -1,5 +1,5 @@
 import {ItemNotFoundException} from "./ItemNotFoundException";
-import {GetItemInput} from "aws-sdk/clients/dynamodb";
+import {GetItemInput} from "@aws-sdk/client-dynamodb";
 
 describe('ItemNotFoundException', () => {
     it('should include the request sent as part of the error', () => {

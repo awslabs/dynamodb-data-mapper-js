@@ -1,5 +1,5 @@
 import { BatchGet, MAX_READ_BATCH_SIZE } from './BatchGet';
-import {AttributeMap, BatchGetItemInput, BatchGetItemOutput} from 'aws-sdk/clients/dynamodb';
+import {AttributeMap, BatchGetItemInput, BatchGetItemOutput} from '@aws-sdk/client-dynamodb';
 
 describe('BatchGet', () => {
     const promiseFunc = jest.fn(() => Promise.resolve({

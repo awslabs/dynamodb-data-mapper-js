@@ -1,4 +1,4 @@
-import { ScanInput } from 'aws-sdk/clients/dynamodb';
+import { ScanInput } from '@aws-sdk/client-dynamodb';
 
 export interface ParallelScanInput extends ScanInput {
     /**

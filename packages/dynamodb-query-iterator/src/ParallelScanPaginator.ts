@@ -3,8 +3,8 @@ import { DynamoDbResultsPage } from './DynamoDbResultsPage';
 import { mergeConsumedCapacities } from './mergeConsumedCapacities';
 import { ParallelScanInput } from './ParallelScanInput';
 import { ScanPaginator } from './ScanPaginator';
-import { ConsumedCapacity, Key } from 'aws-sdk/clients/dynamodb';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+import { ConsumedCapacity, Key } from '@aws-sdk/client-dynamodb';
+import DynamoDB = require('@aws-sdk/client-dynamodb');
 
 /**
  * Pagination state for a scan segment for which the first page has not yet been

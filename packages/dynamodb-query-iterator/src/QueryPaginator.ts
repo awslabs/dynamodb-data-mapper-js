@@ -1,7 +1,7 @@
 import { DynamoDbPaginator } from './DynamoDbPaginator';
 import { DynamoDbResultsPage } from './DynamoDbResultsPage';
-import { QueryInput } from 'aws-sdk/clients/dynamodb';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+import { QueryInput } from '@aws-sdk/client-dynamodb';
+import DynamoDB = require('@aws-sdk/client-dynamodb');
 
 export class QueryPaginator extends DynamoDbPaginator {
     private nextRequest?: QueryInput;

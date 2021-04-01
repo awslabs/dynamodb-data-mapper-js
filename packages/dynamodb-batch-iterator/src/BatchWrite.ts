@@ -1,7 +1,7 @@
 import { BatchOperation } from './BatchOperation';
 import { itemIdentifier } from './itemIdentifier';
 import { WriteRequest } from './types';
-import { BatchWriteItemInput } from 'aws-sdk/clients/dynamodb';
+import { BatchWriteItemInput } from '@aws-sdk/client-dynamodb';
 
 export const MAX_WRITE_BATCH_SIZE = 25;
 
