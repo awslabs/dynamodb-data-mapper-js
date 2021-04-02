@@ -3,7 +3,7 @@ import {ItemNotFoundException} from './ItemNotFoundException';
 import {DynamoDbSchema, DynamoDbTable} from './protocols';
 import {hostname} from 'os';
 import {hrtime} from 'process';
-import DynamoDB = require('@aws-sdk/client-dynamodb');
+import { DynamoDB } from "@aws-sdk/client-dynamodb";
 import {DocumentType} from "@aws/dynamodb-data-marshaller";
 import {Schema} from "@aws/dynamodb-data-marshaller";
 import {equals} from "@aws/dynamodb-expressions";
@@ -56,7 +56,7 @@ Object.defineProperties(TestRecord.prototype, {
 
 describe('DataMapper', () => {
     let idx = 0;
-    const ddbClient = new DynamoDB();
+    const ddbClient = new DynamoDB({});
     const mapper = new DataMapper({client: ddbClient});
     jest.setTimeout(60000);
 

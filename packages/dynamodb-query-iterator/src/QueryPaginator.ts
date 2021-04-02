@@ -1,7 +1,6 @@
 import { DynamoDbPaginator } from './DynamoDbPaginator';
 import { DynamoDbResultsPage } from './DynamoDbResultsPage';
-import { QueryInput } from '@aws-sdk/client-dynamodb';
-import DynamoDB = require('@aws-sdk/client-dynamodb');
+import {DynamoDB, QueryInput} from '@aws-sdk/client-dynamodb';
 
 export class QueryPaginator extends DynamoDbPaginator {
     private nextRequest?: QueryInput;
@@ -21,7 +20,6 @@ export class QueryPaginator extends DynamoDbPaginator {
                 ...this.nextRequest,
                 Limit: this.getNextPageSize(this.nextRequest.Limit)
             })
-                .promise()
                 .then(output => {
                     if (this.nextRequest && output.LastEvaluatedKey) {
                         this.nextRequest = {

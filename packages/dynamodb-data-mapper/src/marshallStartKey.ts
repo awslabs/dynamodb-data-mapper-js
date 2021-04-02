@@ -1,5 +1,5 @@
 import { marshallValue, Schema } from '@aws/dynamodb-data-marshaller';
-import { Key } from '@aws-sdk/client-dynamodb';
+import {AttributeValue} from "@aws-sdk/client-dynamodb";
 
 /**
  * @internal
@@ -7,8 +7,8 @@ import { Key } from '@aws-sdk/client-dynamodb';
 export function marshallStartKey(
     schema: Schema,
     startKey: {[key: string]: any}
-): Key {
-    const key: Key = {};
+): {[key: string]: AttributeValue} {
+    const key: {[key: string]: AttributeValue} = {};
     for (const propertyName of Object.keys(startKey)) {
         const propSchema = schema[propertyName];
         const { attributeName = propertyName } = propSchema;

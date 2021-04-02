@@ -5,7 +5,7 @@ import {
     TableStateElement,
     ThrottledTableConfiguration,
 } from './types';
-import DynamoDB = require('@aws-sdk/client-dynamodb');
+import {DynamoDB} from "@aws-sdk/client-dynamodb";
 
 if (Symbol && !Symbol.asyncIterator) {
     (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
@@ -174,7 +174,8 @@ export abstract class BatchOperation<
         }
 
         this.throttled.delete(backoffWaiter);
-        delete table.tableThrottling;
+        // todo: I think we can delete this
+        //delete table.tableThrottling;
     }
 
     private async getNext(): Promise<IteratorResult<[string, Element]>> {

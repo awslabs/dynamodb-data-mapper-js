@@ -14,15 +14,15 @@
     "url": "https://github.com/awslabs/dynamodb-data-mapper-js/issues"
   },
   "homepage": "https://awslabs.github.io/dynamodb-data-mapper-js/packages/dynamodb-data-marshaller/",
-  "main": "./build/index.js",
-  "types": "./build/index.d.ts",
+  "module": "./dist/lib/esm/index.js",
+  "main": "./dist/lib/cjs/index.js",
+  "types": "./dist/types/index.d.ts",
   "scripts": {
     "docs": "typedoc src",
     "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
     "prepublish": "npm run build",
     "prepublishOnly": "tsc",
-    "pretest": "tsc -p tsconfig.test.json",
-    "test": "jest \"build/(.+).spec.js\""
+    "test": "jest"
   },
   "author": {
     "name": "AWS SDK for JavaScript Team",
@@ -45,5 +45,39 @@
   },
   "peerDependencies": {
     "@aws-sdk/client-dynamodb": "^3.10.0"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsconfig": {
+          "strictNullChecks": false
+        }
+      }
+    },
+    "testEnvironment": "node",
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/test/"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 90,
+        "functions": 95,
+        "lines": 95,
+        "statements": 95
+      }
+    },
+    "collectCoverageFrom": [
+      "src/*.{js,ts}"
+    ]
   }
 }

@@ -9,11 +9,7 @@ import {
 import {InvalidSchemaError} from "./InvalidSchemaError";
 import {BinarySet, Marshaller} from "@aws/dynamodb-auto-marshaller";
 import {
-    AttributeMap,
     AttributeValue,
-    AttributeValueList,
-    NumberSetAttributeValue,
-    StringSetAttributeValue,
 } from "@aws-sdk/client-dynamodb";
 
 /**
@@ -27,7 +23,7 @@ import {
  */
 export function unmarshallItem<T = {[key: string]: any}>(
     schema: Schema,
-    input: AttributeMap,
+    input: {[key: string]: AttributeValue},
     valueConstructor?: ZeroArgumentsConstructor<T>
 ): T {
     const unmarshalled: T = valueConstructor
@@ -111,7 +107,7 @@ function unmarshallValue(schemaType: SchemaType, input: AttributeValue): any {
                 default:
                     throw new InvalidSchemaError(
                         schemaType,
-                        `Unrecognized set member type: ${schemaType.memberType}`
+                        `Unrecognized set member type: ${schemaType}`
                     );
             }
         case 'String':
@@ -125,7 +121,7 @@ function unmarshallValue(schemaType: SchemaType, input: AttributeValue): any {
 
 function unmarshallList(
     schemaType: ListType,
-    input: AttributeValueList
+    input: AttributeValue[]
 ): Array<any> {
     const list: Array<any> = [];
     for (const element of input) {
@@ -137,7 +133,7 @@ function unmarshallList(
 
 function unmarshallMap(
     schemaType: MapType,
-    input: AttributeMap
+    input: {[key: string]: AttributeValue}
 ): Map<string, any> {
     const map = new Map<string, any>();
     for (const key of Object.keys(input)) {
@@ -147,7 +143,7 @@ function unmarshallMap(
     return map;
 }
 
-function unmarshallNumberSet(input: NumberSetAttributeValue): Set<number> {
+function unmarshallNumberSet(input: string[]): Set<number> {
     const set = new Set<number>();
     for (const number of input) {
         set.add(Number(number));
@@ -156,7 +152,7 @@ function unmarshallNumberSet(input: NumberSetAttributeValue): Set<number> {
     return set;
 }
 
-function unmarshallStringSet(input: StringSetAttributeValue): Set<string> {
+function unmarshallStringSet(input: string[]): Set<string> {
     const set = new Set<string>();
     for (const string of input) {
         set.add(string);
@@ -167,7 +163,7 @@ function unmarshallStringSet(input: StringSetAttributeValue): Set<string> {
 
 function unmarshallTuple(
     schemaType: TupleType,
-    input: AttributeValueList
+    input: AttributeValue[]
 ): Array<any> {
     const {members} = schemaType;
     const tuple: Array<any> = [];

@@ -1,28 +1,28 @@
 import { WriteRequest } from './types';
-import { AttributeMap, BinaryAttributeValue } from '@aws-sdk/client-dynamodb';
+import {AttributeValue} from "@aws-sdk/client-dynamodb";
 const bytes = require('utf8-bytes');
 
 /**
  * @internal
  */
 export function itemIdentifier(
-    tableName: string, 
+    tableName: string,
     {DeleteRequest, PutRequest}: WriteRequest
 ): string {
-    if (DeleteRequest) {
+    if (DeleteRequest && DeleteRequest.Key) {
         return `${tableName}::delete::${
             serializeKeyTypeAttributes(DeleteRequest.Key)
         }`;
-    } else if (PutRequest) {
+    } else if (PutRequest && PutRequest.Item) {
         return `${tableName}::put::${
             serializeKeyTypeAttributes(PutRequest.Item)
         }`;
     }
-    
+
     throw new Error(`Invalid write request provided`);
 }
 
-function serializeKeyTypeAttributes(attributes: AttributeMap): string {
+function serializeKeyTypeAttributes(attributes: {[key: string]: AttributeValue}): string {
     const keyTypeProperties: Array<string> = [];
     for (const property of Object.keys(attributes).sort()) {
         const attribute = attributes[property];
@@ -38,7 +38,7 @@ function serializeKeyTypeAttributes(attributes: AttributeMap): string {
     return keyTypeProperties.join('&');
 }
 
-function toByteArray(value: BinaryAttributeValue): Uint8Array {
+function toByteArray(value: Uint8Array): Uint8Array {
     if (ArrayBuffer.isView(value)) {
         return new Uint8Array(
             value.buffer,

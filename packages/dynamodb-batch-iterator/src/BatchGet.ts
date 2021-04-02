@@ -42,11 +42,15 @@ export class BatchGet extends BatchOperation<{[key: string]: AttributeValue}> {
     }
 
     protected async doBatchRequest() {
-        const operationInput: BatchGetItemInput = {RequestItems: {}};
+        let operationInput: BatchGetItemInput = {RequestItems: {}};
         let batchSize = 0;
 
         while (this.toSend.length > 0) {
             const [tableName, item] = this.toSend.shift() as [string, {[key: string]: AttributeValue}];
+            if(operationInput.RequestItems === undefined) {
+                operationInput.RequestItems = {};
+            }
+
             if (operationInput.RequestItems[tableName] === undefined) {
                 const {
                     projection,
@@ -61,6 +65,8 @@ export class BatchGet extends BatchOperation<{[key: string]: AttributeValue}> {
                     ExpressionAttributeNames: attributeNames,
                 };
             }
+
+            // @ts-ignore I can't see why operationInput.RequestItems[tableName].Keys can be undefined
             operationInput.RequestItems[tableName].Keys.push(item);
 
             if (++batchSize === this.batchSize) {
@@ -71,12 +77,16 @@ export class BatchGet extends BatchOperation<{[key: string]: AttributeValue}> {
         const {
             Responses = {},
             UnprocessedKeys = {},
-        } = await this.client.batchGetItem(operationInput).promise();
+        } = await this.client.batchGetItem(operationInput);
 
         const unprocessedTables = new Set<string>();
         for (const table of Object.keys(UnprocessedKeys)) {
             unprocessedTables.add(table);
-            this.handleThrottled(table, UnprocessedKeys[table].Keys);
+            if(UnprocessedKeys[table].Keys === undefined) {
+                continue;
+            }
+
+            this.handleThrottled(table, UnprocessedKeys[table].Keys!);
         }
 
         this.movePendingToThrottled(unprocessedTables);

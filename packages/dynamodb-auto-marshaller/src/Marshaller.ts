@@ -4,7 +4,6 @@ import {isArrayBuffer} from "./isArrayBuffer";
 import {NumberValue} from "./NumberValue";
 import {NumberValueSet} from "./NumberValueSet";
 import {AttributeValue} from "@aws-sdk/client-dynamodb";
-import {AttributeTypeMap} from "../../dynamodb-data-marshaller";
 
 export const EmptyHandlingStrategies = {
     omit: 'omit',

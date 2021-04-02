@@ -2,7 +2,7 @@ import { Schema } from './Schema';
 import { SchemaType } from './SchemaType';
 import { InvalidValueError } from './InvalidValueError';
 import { InvalidSchemaError } from './InvalidSchemaError';
-import { AttributeMap, AttributeValue } from '@aws-sdk/client-dynamodb';
+import { AttributeValue } from '@aws-sdk/client-dynamodb';
 import {
     BinarySet,
     BinaryValue,
@@ -20,8 +20,8 @@ const bytes = require('utf8-bytes');
 export function marshallItem(
     schema: Schema,
     input: {[key: string]: any}
-): AttributeMap {
-    const marshalled: AttributeMap = {};
+): {[key: string]: AttributeValue} {
+    const marshalled: {[key: string]: AttributeValue} = {};
 
     for (const key of Object.keys(schema)) {
         const value = input[key];
@@ -134,7 +134,7 @@ export function marshallValue(
     }
 
     if (schemaType.type === 'List') {
-        const elements = [];
+        const elements: AttributeValue[] = [];
         for (const member of input) {
             const marshalled = marshallValue(schemaType.memberType, member);
             if (marshalled) {
@@ -145,7 +145,7 @@ export function marshallValue(
     }
 
     if (schemaType.type === 'Map') {
-        const marshalled: AttributeMap = {};
+        const marshalled: {[key: string]: AttributeValue} = {};
         if (typeof input[Symbol.iterator] === 'function') {
             for (let [key, value] of input) {
                 const marshalledValue = marshallValue(
@@ -305,7 +305,8 @@ function marshallSet<InputType, MarshalledElementType>(
         return {NULL: true};
     }
 
-    return {[setTag]: collected};
+    // todo: Might be a hack
+    return ({[setTag]: collected} as unknown) as AttributeValue;
 }
 
 function isArrayBuffer(arg: any): arg is ArrayBuffer {
