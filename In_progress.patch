@@ -1,0 +1,1806 @@
+Index: .gitignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.gitignore b/.gitignore
+--- a/.gitignore	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/.gitignore	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -30,3 +30,5 @@
+ *.tgz
+ .yarn-integrity
+ .env
++
++dist
+\ No newline at end of file
+Index: lerna.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/lerna.json b/lerna.json
+--- a/lerna.json	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/lerna.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,5 +1,7 @@
+ {
+-  "lerna": "2.11.0",
+-  "version": "0.7.3",
+-  "hoist": true
++  "packages": [
++    "packages/*"
++  ],
++  "hoist": true,
++  "version": "0.7.3"
+ }
+Index: package.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/package.json b/package.json
+--- a/package.json	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/package.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -18,16 +18,19 @@
+     "jest": "^24",
+     "lerna": "^3.13",
+     "typedoc": "^0.14.0",
+-    "typescript": "^3.4"
++    "typescript": "^4.2"
+   },
+   "dependencies": {
+-    "aws-sdk": "^2.7.0"
++    "@aws-sdk/client-dynamodb": "^3.10.0"
+   },
+   "workspaces": [
+     "packages/*"
+   ],
+   "jest": {
+     "testEnvironment": "node",
+-    "testPathIgnorePatterns": ["/node_modules/", ".ts"]
++    "testPathIgnorePatterns": [
++      "/node_modules/",
++      ".ts"
++    ]
+   }
+ }
+Index: packages/dynamodb-auto-marshaller/package.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-auto-marshaller/package.json b/packages/dynamodb-auto-marshaller/package.json
+--- a/packages/dynamodb-auto-marshaller/package.json	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-auto-marshaller/package.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -18,6 +18,8 @@
+   "types": "./build/index.d.ts",
+   "scripts": {
+     "docs": "typedoc src",
++    "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
++    "prepublish": "npm run build",
+     "prepublishOnly": "tsc",
+     "pretest": "tsc -p tsconfig.test.json",
+     "test": "jest \"build/(.+).spec.js\""
+@@ -30,13 +32,13 @@
+   "devDependencies": {
+     "@types/jest": "^24",
+     "@types/node": "^8.0.4",
+-    "aws-sdk": "^2.7.0",
++    "@aws-sdk/client-dynamodb": "^3.10.0",
+     "jest": "^24",
+     "typedoc": "^0.14.0",
+-    "typescript": "^3.4"
++    "typescript": "^4.2"
+   },
+   "peerDependencies": {
+-    "aws-sdk": "^2.7.0"
++     "@aws-sdk/client-dynamodb": "^3.10.0"
+   },
+   "dependencies": {
+     "tslib": "^1.9"
+Index: packages/dynamodb-auto-marshaller/src/BinarySet.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-auto-marshaller/src/BinarySet.ts b/packages/dynamodb-auto-marshaller/src/BinarySet.ts
+--- a/packages/dynamodb-auto-marshaller/src/BinarySet.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-auto-marshaller/src/BinarySet.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,6 +1,6 @@
+ import {ObjectSet} from "./ObjectSet";
+ 
+-export type BinaryValue = ArrayBuffer|ArrayBufferView;
++export type BinaryValue = Uint8Array;
+ 
+ /**
+  * A set of binary values represented as either ArrayBuffer objects or
+Index: packages/dynamodb-auto-marshaller/src/Marshaller.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-auto-marshaller/src/Marshaller.ts b/packages/dynamodb-auto-marshaller/src/Marshaller.ts
+--- a/packages/dynamodb-auto-marshaller/src/Marshaller.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-auto-marshaller/src/Marshaller.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,8 +1,10 @@
+-import {AttributeMap, AttributeValue} from "aws-sdk/clients/dynamodb";
++// import {AttributeTypeMap, AttributeValue} from "@aws-sdk/client-dynamodb";
+ import {BinarySet, BinaryValue} from "./BinarySet";
+ import {isArrayBuffer} from "./isArrayBuffer";
+ import {NumberValue} from "./NumberValue";
+ import {NumberValueSet} from "./NumberValueSet";
++import {AttributeValue} from "@aws-sdk/client-dynamodb";
++import {AttributeTypeMap} from "../../dynamodb-data-marshaller";
+ 
+ export const EmptyHandlingStrategies = {
+     omit: 'omit',
+@@ -120,7 +122,7 @@
+      * Convert a JavaScript object with string keys and arbitrary values into an
+      * object with string keys and DynamoDB AttributeValue objects as values.
+      */
+-    public marshallItem(item: {[key: string]: any}): AttributeMap {
++    public marshallItem(item: {[key: string]: any}): { [key: string]: AttributeValue } {
+         const value = this.marshallValue(item);
+         if (!(value && value.M) && this.onInvalid === 'throw') {
+             throw new Error(
+@@ -165,7 +167,7 @@
+      * AttributeValue values) to an object with string keys and native
+      * JavaScript values.
+      */
+-    public unmarshallItem(item: AttributeMap): UnmarshalledMapAttributeValue {
++    public unmarshallItem(item: { [key: string]: AttributeValue }): UnmarshalledMapAttributeValue {
+         return this.unmarshallValue({M: item}) as UnmarshalledMapAttributeValue;
+     }
+ 
+@@ -318,7 +320,7 @@
+     private marshallObject(object: {[key: string]: any}): AttributeValue {
+         return {
+             M: Object.keys(object).reduce(
+-                (map: AttributeMap, key: string): AttributeMap => {
++                (map: { [key: string]: AttributeValue }, key: string): { [key: string]: AttributeValue } => {
+                     const marshalled = this.marshallValue(object[key]);
+                     if (marshalled) {
+                         map[key] = marshalled;
+@@ -379,6 +381,8 @@
+         }
+ 
+         if (values.length > 0 || this.onEmpty === 'leave') {
++            // I get the idea but there's an issue here where it's possible we are missing some required fields.
++            // @ts-ignore
+             return {[tag]: values};
+         }
+ 
+Index: packages/dynamodb-auto-marshaller/tsconfig.cjs.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-auto-marshaller/tsconfig.cjs.json b/packages/dynamodb-auto-marshaller/tsconfig.cjs.json
+new file mode 100644
+--- /dev/null	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
++++ b/packages/dynamodb-auto-marshaller/tsconfig.cjs.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -0,0 +1,8 @@
++{
++  "extends": "./tsconfig.json",
++  "compilerOptions": {
++    "module": "CommonJS",
++    "declarationDir": "dist/types",
++    "outDir": "dist/lib/cjs"
++  },
++}
+\ No newline at end of file
+Index: packages/dynamodb-auto-marshaller/tsconfig.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-auto-marshaller/tsconfig.json b/packages/dynamodb-auto-marshaller/tsconfig.json
+--- a/packages/dynamodb-auto-marshaller/tsconfig.json	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-auto-marshaller/tsconfig.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,26 +1,11 @@
+ {
++  "extends": "../../tsconfig.json",
++  "include": [
++    "src"
++  ],
+   "compilerOptions": {
+-    "target": "es5",
+-    "lib": [
+-      "es5",
+-      "es2015.iterable",
+-      "es2015.promise",
+-      "es2015.collection",
+-      "es2015.symbol.wellknown"
+-    ],
+-    "downlevelIteration": true,
+-    "importHelpers": true,
+-    "module": "commonjs",
+-    "strict": true,
+-    "declaration": true,
+-    "rootDir": "./src",
+-    "outDir": "./build"
++    "declarationDir": "dist/types",
++    "outDir": "dist/lib/esm"
+   },
+-  "typedocOptions": {
+-    "mode": "file",
+-    "out": "../../docs/packages/dynamodb-auto-marshaller",
+-    "excludeNotExported": true,
+-    "excludePrivate": true,
+-    "hideGenerator": true
+-  }
++  "exclude": ["./**/*.spec.ts", "dist"]
+ }
+Index: packages/dynamodb-batch-iterator/package.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-batch-iterator/package.json b/packages/dynamodb-batch-iterator/package.json
+--- a/packages/dynamodb-batch-iterator/package.json	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-batch-iterator/package.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -18,6 +18,8 @@
+   "types": "./build/index.d.ts",
+   "scripts": {
+     "docs": "typedoc src",
++    "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
++    "prepublish": "npm run build",
+     "prepublishOnly": "tsc",
+     "pretest": "tsc -p tsconfig.test.json",
+     "test": "jest \"build/(.+).spec.js\""
+@@ -30,13 +32,13 @@
+   "devDependencies": {
+     "@types/jest": "^24",
+     "@types/node": "^8.0.4",
+-    "aws-sdk": "^2.7.0",
++    "@aws-sdk/client-dynamodb": "^3.10.0",
+     "jest": "^24",
+     "typedoc": "^0.14.0",
+-    "typescript": "^3.4"
++    "typescript": "^4.2"
+   },
+   "peerDependencies": {
+-    "aws-sdk": "^2.7.0"
++    "@aws-sdk/client-dynamodb": "^3.10.0"
+   },
+   "dependencies": {
+     "tslib": "^1.9",
+Index: packages/dynamodb-batch-iterator/src/BatchGet.spec.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-batch-iterator/src/BatchGet.spec.ts b/packages/dynamodb-batch-iterator/src/BatchGet.spec.ts
+--- a/packages/dynamodb-batch-iterator/src/BatchGet.spec.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-batch-iterator/src/BatchGet.spec.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,5 +1,5 @@
+ import { BatchGet, MAX_READ_BATCH_SIZE } from './BatchGet';
+-import {AttributeMap, BatchGetItemInput, BatchGetItemOutput} from 'aws-sdk/clients/dynamodb';
++import {AttributeMap, BatchGetItemInput, BatchGetItemOutput} from '@aws-sdk/client-dynamodb';
+ 
+ describe('BatchGet', () => {
+     const promiseFunc = jest.fn(() => Promise.resolve({
+Index: packages/dynamodb-batch-iterator/src/BatchGet.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-batch-iterator/src/BatchGet.ts b/packages/dynamodb-batch-iterator/src/BatchGet.ts
+--- a/packages/dynamodb-batch-iterator/src/BatchGet.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-batch-iterator/src/BatchGet.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,8 +1,7 @@
+ import { BatchGetOptions, PerTableOptions } from './BatchGetOptions';
+ import { BatchOperation } from './BatchOperation';
+ import { SyncOrAsyncIterable, TableState } from './types';
+-import { AttributeMap, BatchGetItemInput } from 'aws-sdk/clients/dynamodb';
+-import DynamoDB = require('aws-sdk/clients/dynamodb');
++import {AttributeValue, BatchGetItemInput, DynamoDB} from '@aws-sdk/client-dynamodb';
+ 
+ export const MAX_READ_BATCH_SIZE = 100;
+ 
+@@ -14,7 +13,7 @@
+  * unprocessed. Exponential backoff on unprocessed items is employed on a
+  * per-table basis.
+  */
+-export class BatchGet extends BatchOperation<AttributeMap> {
++export class BatchGet extends BatchOperation<{[key: string]: AttributeValue}> {
+     protected readonly batchSize = MAX_READ_BATCH_SIZE;
+ 
+     private readonly consistentRead?: boolean;
+@@ -31,7 +30,7 @@
+      */
+     constructor(
+         client: DynamoDB,
+-        items: SyncOrAsyncIterable<[string, AttributeMap]>,
++        items: SyncOrAsyncIterable<[string, {[key: string]: AttributeValue}]>,
+         {
+             ConsistentRead,
+             PerTableOptions = {},
+@@ -47,7 +46,7 @@
+         let batchSize = 0;
+ 
+         while (this.toSend.length > 0) {
+-            const [tableName, item] = this.toSend.shift() as [string, AttributeMap];
++            const [tableName, item] = this.toSend.shift() as [string, {[key: string]: AttributeValue}];
+             if (operationInput.RequestItems[tableName] === undefined) {
+                 const {
+                     projection,
+@@ -91,7 +90,7 @@
+         }
+     }
+ 
+-    protected getInitialTableState(tableName: string): TableState<AttributeMap> {
++    protected getInitialTableState(tableName: string): TableState<{[key: string]: AttributeValue}> {
+         const {
+             ExpressionAttributeNames,
+             ProjectionExpression,
+Index: packages/dynamodb-batch-iterator/src/BatchGetOptions.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-batch-iterator/src/BatchGetOptions.ts b/packages/dynamodb-batch-iterator/src/BatchGetOptions.ts
+--- a/packages/dynamodb-batch-iterator/src/BatchGetOptions.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-batch-iterator/src/BatchGetOptions.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -2,7 +2,7 @@
+     ConsistentRead,
+     ExpressionAttributeNameMap,
+     ProjectionExpression,
+-} from "aws-sdk/clients/dynamodb";
++} from "@aws-sdk/client-dynamodb";
+ 
+ export interface BatchGetOptions {
+     /**
+Index: packages/dynamodb-batch-iterator/src/BatchOperation.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-batch-iterator/src/BatchOperation.ts b/packages/dynamodb-batch-iterator/src/BatchOperation.ts
+--- a/packages/dynamodb-batch-iterator/src/BatchOperation.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-batch-iterator/src/BatchOperation.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -5,7 +5,7 @@
+     TableStateElement,
+     ThrottledTableConfiguration,
+ } from './types';
+-import DynamoDB = require('aws-sdk/clients/dynamodb');
++import DynamoDB = require('@aws-sdk/client-dynamodb');
+ 
+ if (Symbol && !Symbol.asyncIterator) {
+     (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
+@@ -37,7 +37,7 @@
+ 
+     private readonly throttled = new Set<Promise<ThrottledTableConfiguration<Element>>>();
+     private readonly iterator: Iterator<[string, Element]>|AsyncIterator<[string, Element]>;
+-    private sourceDone: boolean = false;
++    private sourceDone?: boolean = false;
+     private sourceNext: IteratorResult<[string, Element]>|Promise<IteratorResult<[string, Element]>>;
+     private lastResolved?: Promise<IteratorResult<[string, Element]>>;
+ 
+Index: packages/dynamodb-batch-iterator/src/BatchWrite.spec.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-batch-iterator/src/BatchWrite.spec.ts b/packages/dynamodb-batch-iterator/src/BatchWrite.spec.ts
+--- a/packages/dynamodb-batch-iterator/src/BatchWrite.spec.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-batch-iterator/src/BatchWrite.spec.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,6 +1,6 @@
+ import { BatchWrite, MAX_WRITE_BATCH_SIZE } from './BatchWrite';
+ import { WriteRequest } from './types';
+-import {BatchWriteItemInput, BatchWriteItemOutput} from 'aws-sdk/clients/dynamodb';
++import {BatchWriteItemInput, BatchWriteItemOutput} from '@aws-sdk/client-dynamodb';
+ 
+ describe('BatchWrite', () => {
+     const promiseFunc = jest.fn(() => Promise.resolve({
+Index: packages/dynamodb-batch-iterator/src/BatchWrite.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-batch-iterator/src/BatchWrite.ts b/packages/dynamodb-batch-iterator/src/BatchWrite.ts
+--- a/packages/dynamodb-batch-iterator/src/BatchWrite.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-batch-iterator/src/BatchWrite.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,7 +1,7 @@
+ import { BatchOperation } from './BatchOperation';
+ import { itemIdentifier } from './itemIdentifier';
+ import { WriteRequest } from './types';
+-import { BatchWriteItemInput } from 'aws-sdk/clients/dynamodb';
++import { BatchWriteItemInput } from '@aws-sdk/client-dynamodb';
+ 
+ export const MAX_WRITE_BATCH_SIZE = 25;
+ 
+Index: packages/dynamodb-batch-iterator/src/itemIdentifier.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-batch-iterator/src/itemIdentifier.ts b/packages/dynamodb-batch-iterator/src/itemIdentifier.ts
+--- a/packages/dynamodb-batch-iterator/src/itemIdentifier.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-batch-iterator/src/itemIdentifier.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,5 +1,5 @@
+ import { WriteRequest } from './types';
+-import { AttributeMap, BinaryAttributeValue } from 'aws-sdk/clients/dynamodb';
++import { AttributeMap, BinaryAttributeValue } from '@aws-sdk/client-dynamodb';
+ const bytes = require('utf8-bytes');
+ 
+ /**
+Index: packages/dynamodb-batch-iterator/src/types.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-batch-iterator/src/types.ts b/packages/dynamodb-batch-iterator/src/types.ts
+--- a/packages/dynamodb-batch-iterator/src/types.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-batch-iterator/src/types.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -6,7 +6,7 @@
+     ProjectionExpression,
+     PutRequest,
+     WriteRequest as DynamoDbWriteRequest
+-} from "aws-sdk/clients/dynamodb";
++} from "@aws-sdk/client-dynamodb";
+ 
+ /**
+  * A synchronous or asynchronous iterable.
+Index: packages/dynamodb-batch-iterator/tsconfig.cjs.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-batch-iterator/tsconfig.cjs.json b/packages/dynamodb-batch-iterator/tsconfig.cjs.json
+new file mode 100644
+--- /dev/null	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
++++ b/packages/dynamodb-batch-iterator/tsconfig.cjs.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -0,0 +1,8 @@
++{
++  "extends": "./tsconfig.json",
++  "compilerOptions": {
++    "module": "CommonJS",
++    "declarationDir": "dist/types",
++    "outDir": "dist/lib/cjs"
++  },
++}
+\ No newline at end of file
+Index: packages/dynamodb-batch-iterator/tsconfig.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-batch-iterator/tsconfig.json b/packages/dynamodb-batch-iterator/tsconfig.json
+--- a/packages/dynamodb-batch-iterator/tsconfig.json	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-batch-iterator/tsconfig.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,29 +1,11 @@
+ {
++  "extends": "../../tsconfig.json",
++  "include": [
++    "src"
++  ],
+   "compilerOptions": {
+-    "target": "es5",
+-    "lib": [
+-      "es5",
+-      "es2015.iterable",
+-      "es2015.promise",
+-      "es2015.collection",
+-      "es2015.symbol.wellknown",
+-      "esnext.asynciterable"
+-    ],
+-    "downlevelIteration": true,
+-    "importHelpers": true,
+-    "module": "commonjs",
+-    "noUnusedLocals": true,
+-    "strict": true,
+-    "declaration": true,
+-    "sourceMap": true,
+-    "rootDir": "./src",
+-    "outDir": "./build"
++    "declarationDir": "dist/types",
++    "outDir": "dist/lib/esm"
+   },
+-  "typedocOptions": {
+-    "mode": "file",
+-    "out": "../../docs/packages/dynamodb-batch-iterator",
+-    "excludeNotExported": true,
+-    "excludePrivate": true,
+-    "hideGenerator": true
+-  }
++  "exclude": ["./**/*.spec.ts", "dist"]
+ }
+Index: packages/dynamodb-data-mapper-annotations/package.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper-annotations/package.json b/packages/dynamodb-data-mapper-annotations/package.json
+--- a/packages/dynamodb-data-mapper-annotations/package.json	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper-annotations/package.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -17,7 +17,8 @@
+   "main": "./build/index.js",
+   "types": "./build/index.d.ts",
+   "scripts": {
+-    "build": "tsc",
++    "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
++    "prepublish": "npm run build",
+     "docs": "typedoc src",
+     "integ": "npm run pretest && jest --config=jest.integration.js",
+     "prepublishOnly": "npm run build",
+@@ -33,10 +34,10 @@
+     "@types/jest": "^24",
+     "@types/node": "^8.0.4",
+     "@types/uuid": "^3.0.0",
+-    "aws-sdk": "^2.7.0",
++    "@aws-sdk/client-dynamodb": "^3.10.0",
+     "jest": "^24",
+     "typedoc": "^0.14.0",
+-    "typescript": "^3.4"
++    "typescript": "^4.2"
+   },
+   "dependencies": {
+     "@aws/dynamodb-auto-marshaller": "^0.7.1",
+Index: packages/dynamodb-data-mapper-annotations/tsconfig.cjs.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper-annotations/tsconfig.cjs.json b/packages/dynamodb-data-mapper-annotations/tsconfig.cjs.json
+new file mode 100644
+--- /dev/null	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
++++ b/packages/dynamodb-data-mapper-annotations/tsconfig.cjs.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -0,0 +1,8 @@
++{
++  "extends": "./tsconfig.json",
++  "compilerOptions": {
++    "module": "CommonJS",
++    "declarationDir": "dist/types",
++    "outDir": "dist/lib/cjs"
++  },
++}
+\ No newline at end of file
+Index: packages/dynamodb-data-mapper-annotations/tsconfig.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper-annotations/tsconfig.json b/packages/dynamodb-data-mapper-annotations/tsconfig.json
+--- a/packages/dynamodb-data-mapper-annotations/tsconfig.json	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper-annotations/tsconfig.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,31 +1,11 @@
+ {
++  "extends": "../../tsconfig.json",
++  "include": [
++    "src"
++  ],
+   "compilerOptions": {
+-    "target": "es5",
+-    "lib": [
+-      "es5",
+-      "es2015.iterable",
+-      "es2015.promise",
+-      "es2015.collection",
+-      "es2015.symbol.wellknown",
+-      "esnext.asynciterable"
+-    ],
+-    "downlevelIteration": true,
+-    "importHelpers": true,
+-    "module": "commonjs",
+-    "strict": true,
+-    "noUnusedLocals": true,
+-    "declaration": true,
+-    "sourceMap": true,
+-    "experimentalDecorators": true,
+-    "emitDecoratorMetadata": true,
+-    "rootDir": "./src",
+-    "outDir": "./build"
++    "declarationDir": "dist/types",
++    "outDir": "dist/lib/esm"
+   },
+-  "typedocOptions": {
+-    "mode": "file",
+-    "out": "../../docs/packages/dynamodb-data-mapper-annotations",
+-    "excludeNotExported": true,
+-    "excludePrivate": true,
+-    "hideGenerator": true
+-  }
++  "exclude": ["./**/*.spec.ts", "dist"]
+ }
+Index: packages/dynamodb-data-mapper/package.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/package.json b/packages/dynamodb-data-mapper/package.json
+--- a/packages/dynamodb-data-mapper/package.json	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/package.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -17,7 +17,8 @@
+   "main": "./build/index.js",
+   "types": "./build/index.d.ts",
+   "scripts": {
+-    "build": "tsc",
++    "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
++    "prepublish": "npm run build",
+     "docs": "typedoc src",
+     "integ": "npm run pretest && jest --config=jest.integration.js",
+     "prepublishOnly": "npm run build",
+@@ -32,10 +33,10 @@
+   "devDependencies": {
+     "@types/jest": "^24",
+     "@types/node": "^8.0.4",
+-    "aws-sdk": "^2.7.0",
++     "@aws-sdk/client-dynamodb": "^3.10.0",
+     "jest": "^24",
+     "typedoc": "^0.14.0",
+-    "typescript": "^3.4"
++    "typescript": "^4.2"
+   },
+   "dependencies": {
+     "@aws/dynamodb-auto-marshaller": "^0.7.1",
+@@ -46,6 +47,6 @@
+     "tslib": "^1.9"
+   },
+   "peerDependencies": {
+-    "aws-sdk": "^2.7.0"
++     "@aws-sdk/client-dynamodb": "^3.10.0"
+   }
+ }
+Index: packages/dynamodb-data-mapper/src/DataMapper.integ.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/src/DataMapper.integ.ts b/packages/dynamodb-data-mapper/src/DataMapper.integ.ts
+--- a/packages/dynamodb-data-mapper/src/DataMapper.integ.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/src/DataMapper.integ.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -3,7 +3,7 @@
+ import {DynamoDbSchema, DynamoDbTable} from './protocols';
+ import {hostname} from 'os';
+ import {hrtime} from 'process';
+-import DynamoDB = require('aws-sdk/clients/dynamodb');
++import DynamoDB = require('@aws-sdk/client-dynamodb');
+ import {DocumentType} from "@aws/dynamodb-data-marshaller";
+ import {Schema} from "@aws/dynamodb-data-marshaller";
+ import {equals} from "@aws/dynamodb-expressions";
+Index: packages/dynamodb-data-mapper/src/DataMapper.spec.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/src/DataMapper.spec.ts b/packages/dynamodb-data-mapper/src/DataMapper.spec.ts
+--- a/packages/dynamodb-data-mapper/src/DataMapper.spec.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/src/DataMapper.spec.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -20,7 +20,7 @@
+     DescribeTableOutput,
+     GetItemOutput,
+     PutItemOutput
+-} from "aws-sdk/clients/dynamodb";
++} from "@aws-sdk/client-dynamodb";
+ 
+ type BinaryValue = ArrayBuffer|ArrayBufferView;
+ 
+Index: packages/dynamodb-data-mapper/src/DataMapper.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/src/DataMapper.ts b/packages/dynamodb-data-mapper/src/DataMapper.ts
+--- a/packages/dynamodb-data-mapper/src/DataMapper.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/src/DataMapper.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -86,8 +86,8 @@
+     ProvisionedThroughput,
+     PutItemInput,
+     UpdateItemInput,
+-} from 'aws-sdk/clients/dynamodb';
+-import DynamoDB = require('aws-sdk/clients/dynamodb');
++} from '@aws-sdk/client-dynamodb';
++import DynamoDB = require('@aws-sdk/client-dynamodb');
+ 
+ require('./asyncIteratorSymbolPolyfill');
+ 
+Index: packages/dynamodb-data-mapper/src/ItemNotFoundException.spec.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/src/ItemNotFoundException.spec.ts b/packages/dynamodb-data-mapper/src/ItemNotFoundException.spec.ts
+--- a/packages/dynamodb-data-mapper/src/ItemNotFoundException.spec.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/src/ItemNotFoundException.spec.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,5 +1,5 @@
+ import {ItemNotFoundException} from "./ItemNotFoundException";
+-import {GetItemInput} from "aws-sdk/clients/dynamodb";
++import {GetItemInput} from "@aws-sdk/client-dynamodb";
+ 
+ describe('ItemNotFoundException', () => {
+     it('should include the request sent as part of the error', () => {
+Index: packages/dynamodb-data-mapper/src/ItemNotFoundException.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/src/ItemNotFoundException.ts b/packages/dynamodb-data-mapper/src/ItemNotFoundException.ts
+--- a/packages/dynamodb-data-mapper/src/ItemNotFoundException.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/src/ItemNotFoundException.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,4 +1,4 @@
+-import {GetItemInput} from "aws-sdk/clients/dynamodb";
++import {GetItemInput} from "@aws-sdk/client-dynamodb";
+ 
+ /**
+  * An exception thrown when an item was sought with a DynamoDB::GetItem
+Index: packages/dynamodb-data-mapper/src/Iterator.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/src/Iterator.ts b/packages/dynamodb-data-mapper/src/Iterator.ts
+--- a/packages/dynamodb-data-mapper/src/Iterator.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/src/Iterator.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,5 +1,5 @@
+ import { Paginator as AbstractPaginator } from './Paginator';
+-import { ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
++import { ConsumedCapacity } from '@aws-sdk/client-dynamodb';
+ 
+ require('./asyncIteratorSymbolPolyfill');
+ 
+Index: packages/dynamodb-data-mapper/src/Paginator.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/src/Paginator.ts b/packages/dynamodb-data-mapper/src/Paginator.ts
+--- a/packages/dynamodb-data-mapper/src/Paginator.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/src/Paginator.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -5,7 +5,7 @@
+     unmarshallItem,
+     ZeroArgumentsConstructor,
+ } from '@aws/dynamodb-data-marshaller';
+-import { ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
++import { ConsumedCapacity } from '@aws-sdk/client-dynamodb';
+ 
+ require('./asyncIteratorSymbolPolyfill');
+ 
+@@ -91,7 +91,7 @@
+                 );
+ 
+                 return {
+-                    value: (value.Items || []).map(item => unmarshallItem(
++                    value: (value.Items || []).map( (item: any) => unmarshallItem(
+                         this.itemSchema,
+                         item,
+                         this.valueConstructor
+Index: packages/dynamodb-data-mapper/src/ParallelScanIterator.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/src/ParallelScanIterator.ts b/packages/dynamodb-data-mapper/src/ParallelScanIterator.ts
+--- a/packages/dynamodb-data-mapper/src/ParallelScanIterator.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/src/ParallelScanIterator.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -2,7 +2,7 @@
+ import { ParallelScanOptions } from './namedParameters';
+ import { ParallelScanPaginator } from './ParallelScanPaginator';
+ import { ZeroArgumentsConstructor } from '@aws/dynamodb-data-marshaller';
+-import DynamoDB = require('aws-sdk/clients/dynamodb');
++import DynamoDB = require('@aws-sdk/client-dynamodb');
+ 
+ /**
+  * Iterates over each item returned by a parallel DynamoDB scan until no more
+Index: packages/dynamodb-data-mapper/src/ParallelScanPaginator.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/src/ParallelScanPaginator.ts b/packages/dynamodb-data-mapper/src/ParallelScanPaginator.ts
+--- a/packages/dynamodb-data-mapper/src/ParallelScanPaginator.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/src/ParallelScanPaginator.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -18,7 +18,7 @@
+     unmarshallItem,
+     ZeroArgumentsConstructor,
+ } from '@aws/dynamodb-data-marshaller';
+-import DynamoDB = require('aws-sdk/clients/dynamodb');
++import DynamoDB = require('@aws-sdk/client-dynamodb');
+ 
+ /**
+  * Iterates over each page of items returned by a parallel DynamoDB scan until
+Index: packages/dynamodb-data-mapper/src/QueryIterator.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/src/QueryIterator.ts b/packages/dynamodb-data-mapper/src/QueryIterator.ts
+--- a/packages/dynamodb-data-mapper/src/QueryIterator.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/src/QueryIterator.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -6,7 +6,7 @@
+     ConditionExpression,
+     ConditionExpressionPredicate,
+ } from '@aws/dynamodb-expressions';
+-import DynamoDB = require('aws-sdk/clients/dynamodb');
++import DynamoDB = require('@aws-sdk/client-dynamodb');
+ 
+ /**
+  * Iterates over each item returned by a DynamoDB query until no more pages are
+Index: packages/dynamodb-data-mapper/src/QueryPaginator.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/src/QueryPaginator.ts b/packages/dynamodb-data-mapper/src/QueryPaginator.ts
+--- a/packages/dynamodb-data-mapper/src/QueryPaginator.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/src/QueryPaginator.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -15,8 +15,8 @@
+     isConditionExpression,
+     isConditionExpressionPredicate,
+ } from '@aws/dynamodb-expressions';
+-import { QueryInput } from 'aws-sdk/clients/dynamodb';
+-import DynamoDB = require('aws-sdk/clients/dynamodb');
++import { QueryInput } from '@aws-sdk/client-dynamodb';
++import DynamoDB = require('@aws-sdk/client-dynamodb');
+ 
+ /**
+  * Iterates over each page of items returned by a DynamoDB query until no more
+Index: packages/dynamodb-data-mapper/src/ScanIterator.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/src/ScanIterator.ts b/packages/dynamodb-data-mapper/src/ScanIterator.ts
+--- a/packages/dynamodb-data-mapper/src/ScanIterator.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/src/ScanIterator.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -2,7 +2,7 @@
+ import { SequentialScanOptions } from './namedParameters';
+ import { ScanPaginator } from './ScanPaginator';
+ import { ZeroArgumentsConstructor } from '@aws/dynamodb-data-marshaller';
+-import DynamoDB = require('aws-sdk/clients/dynamodb');
++import DynamoDB = require('@aws-sdk/client-dynamodb');
+ 
+ /**
+  * Iterates over each item returned by a DynamoDB scan until no more pages are
+Index: packages/dynamodb-data-mapper/src/ScanPaginator.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/src/ScanPaginator.ts b/packages/dynamodb-data-mapper/src/ScanPaginator.ts
+--- a/packages/dynamodb-data-mapper/src/ScanPaginator.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/src/ScanPaginator.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -3,7 +3,7 @@
+ import { Paginator } from './Paginator';
+ import { ScanPaginator as BasePaginator } from '@aws/dynamodb-query-iterator';
+ import { ZeroArgumentsConstructor } from '@aws/dynamodb-data-marshaller';
+-import DynamoDB = require('aws-sdk/clients/dynamodb');
++import DynamoDB = require('@aws-sdk/client-dynamodb');
+ 
+ /**
+  * Iterates over each page of items returned by a DynamoDB scan until no more
+Index: packages/dynamodb-data-mapper/src/buildScanInput.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/src/buildScanInput.ts b/packages/dynamodb-data-mapper/src/buildScanInput.ts
+--- a/packages/dynamodb-data-mapper/src/buildScanInput.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/src/buildScanInput.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -7,7 +7,7 @@
+     ZeroArgumentsConstructor,
+ } from '@aws/dynamodb-data-marshaller';
+ import { ExpressionAttributes } from '@aws/dynamodb-expressions';
+-import { ScanInput } from 'aws-sdk/clients/dynamodb';
++import { ScanInput } from '@aws-sdk/client-dynamodb';
+ 
+ /**
+  * @internal
+Index: packages/dynamodb-data-mapper/src/marshallStartKey.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/src/marshallStartKey.ts b/packages/dynamodb-data-mapper/src/marshallStartKey.ts
+--- a/packages/dynamodb-data-mapper/src/marshallStartKey.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/src/marshallStartKey.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,5 +1,5 @@
+ import { marshallValue, Schema } from '@aws/dynamodb-data-marshaller';
+-import { Key } from 'aws-sdk/clients/dynamodb';
++import { Key } from '@aws-sdk/client-dynamodb';
+ 
+ /**
+  * @internal
+Index: packages/dynamodb-data-mapper/src/namedParameters/DataMapperConfiguration.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/src/namedParameters/DataMapperConfiguration.ts b/packages/dynamodb-data-mapper/src/namedParameters/DataMapperConfiguration.ts
+--- a/packages/dynamodb-data-mapper/src/namedParameters/DataMapperConfiguration.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/src/namedParameters/DataMapperConfiguration.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,4 +1,4 @@
+-import DynamoDB = require("aws-sdk/clients/dynamodb");
++import DynamoDB = require("@aws-sdk/client-dynamodb");
+ import { ReadConsistency } from '../constants';
+ 
+ export interface DataMapperConfiguration {
+Index: packages/dynamodb-data-mapper/tsconfig.cjs.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/tsconfig.cjs.json b/packages/dynamodb-data-mapper/tsconfig.cjs.json
+new file mode 100644
+--- /dev/null	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
++++ b/packages/dynamodb-data-mapper/tsconfig.cjs.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -0,0 +1,8 @@
++{
++  "extends": "./tsconfig.json",
++  "compilerOptions": {
++    "module": "CommonJS",
++    "declarationDir": "dist/types",
++    "outDir": "dist/lib/cjs"
++  },
++}
+\ No newline at end of file
+Index: packages/dynamodb-data-mapper/tsconfig.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-mapper/tsconfig.json b/packages/dynamodb-data-mapper/tsconfig.json
+--- a/packages/dynamodb-data-mapper/tsconfig.json	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-mapper/tsconfig.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,29 +1,11 @@
+ {
++  "extends": "../../tsconfig.json",
++  "include": [
++    "src"
++  ],
+   "compilerOptions": {
+-    "target": "es5",
+-    "lib": [
+-      "es5",
+-      "es2015.iterable",
+-      "es2015.promise",
+-      "es2015.collection",
+-      "es2015.symbol.wellknown",
+-      "esnext.asynciterable"
+-    ],
+-    "downlevelIteration": true,
+-    "importHelpers": true,
+-    "module": "commonjs",
+-    "noUnusedLocals": true,
+-    "strict": true,
+-    "declaration": true,
+-    "sourceMap": true,
+-    "rootDir": "./src",
+-    "outDir": "./build"
++    "declarationDir": "dist/types",
++    "outDir": "dist/lib/esm"
+   },
+-  "typedocOptions": {
+-    "mode": "file",
+-    "out": "../../docs/packages/dynamodb-data-mapper",
+-    "excludeNotExported": true,
+-    "excludePrivate": true,
+-    "hideGenerator": true
+-  }
++  "exclude": ["./**/*.spec.ts", "dist"]
+ }
+Index: packages/dynamodb-data-marshaller/package.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-marshaller/package.json b/packages/dynamodb-data-marshaller/package.json
+--- a/packages/dynamodb-data-marshaller/package.json	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-marshaller/package.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -18,6 +18,8 @@
+   "types": "./build/index.d.ts",
+   "scripts": {
+     "docs": "typedoc src",
++    "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
++    "prepublish": "npm run build",
+     "prepublishOnly": "tsc",
+     "pretest": "tsc -p tsconfig.test.json",
+     "test": "jest \"build/(.+).spec.js\""
+@@ -30,10 +32,10 @@
+   "devDependencies": {
+     "@types/jest": "^24",
+     "@types/node": "^8.0.4",
+-    "aws-sdk": "^2.7.0",
++    "@aws-sdk/client-dynamodb": "^3.10.0",
+     "jest": "^24",
+     "typedoc": "^0.14.0",
+-    "typescript": "^3.4"
++    "typescript": "^4.2"
+   },
+   "dependencies": {
+     "@aws/dynamodb-auto-marshaller": "^0.7.1",
+@@ -42,6 +44,6 @@
+     "utf8-bytes": "^0.0.1"
+   },
+   "peerDependencies": {
+-    "aws-sdk": "^2.7.0"
++    "@aws-sdk/client-dynamodb": "^3.10.0"
+   }
+ }
+Index: packages/dynamodb-data-marshaller/src/SchemaType.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-marshaller/src/SchemaType.ts b/packages/dynamodb-data-marshaller/src/SchemaType.ts
+--- a/packages/dynamodb-data-marshaller/src/SchemaType.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-marshaller/src/SchemaType.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,7 +1,7 @@
+ import { ScalarAttributeType } from './KeySchema';
+ import { Schema } from './Schema';
+ import { BinaryValue, MarshallingOptions } from "@aws/dynamodb-auto-marshaller";
+-import { AttributeValue } from 'aws-sdk/clients/dynamodb';
++import { AttributeValue } from '@aws-sdk/client-dynamodb';
+ 
+ /**
+  * The enumeration of types supported by this marshaller package.
+Index: packages/dynamodb-data-marshaller/src/marshallExpression.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-marshaller/src/marshallExpression.ts b/packages/dynamodb-data-marshaller/src/marshallExpression.ts
+--- a/packages/dynamodb-data-marshaller/src/marshallExpression.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-marshaller/src/marshallExpression.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -3,7 +3,7 @@
+ import {
+     ExpressionAttributeNameMap,
+     ExpressionAttributeValueMap,
+-} from 'aws-sdk/clients/dynamodb';
++} from '@aws-sdk/client-dynamodb';
+ import {
+     AttributePath,
+     ConditionExpression,
+Index: packages/dynamodb-data-marshaller/src/marshallItem.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-marshaller/src/marshallItem.ts b/packages/dynamodb-data-marshaller/src/marshallItem.ts
+--- a/packages/dynamodb-data-marshaller/src/marshallItem.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-marshaller/src/marshallItem.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -2,7 +2,7 @@
+ import { SchemaType } from './SchemaType';
+ import { InvalidValueError } from './InvalidValueError';
+ import { InvalidSchemaError } from './InvalidSchemaError';
+-import { AttributeMap, AttributeValue } from 'aws-sdk/clients/dynamodb';
++import { AttributeMap, AttributeValue } from '@aws-sdk/client-dynamodb';
+ import {
+     BinarySet,
+     BinaryValue,
+Index: packages/dynamodb-data-marshaller/src/marshallKey.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-marshaller/src/marshallKey.ts b/packages/dynamodb-data-marshaller/src/marshallKey.ts
+--- a/packages/dynamodb-data-marshaller/src/marshallKey.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-marshaller/src/marshallKey.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,7 +1,7 @@
+ import {isKey} from './isKey';
+ import {marshallValue} from './marshallItem';
+ import {Schema} from './Schema';
+-import {AttributeMap} from 'aws-sdk/clients/dynamodb';
++import {AttributeMap} from '@aws-sdk/client-dynamodb';
+ 
+ export function marshallKey(
+     schema: Schema,
+Index: packages/dynamodb-data-marshaller/src/unmarshallItem.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-marshaller/src/unmarshallItem.ts b/packages/dynamodb-data-marshaller/src/unmarshallItem.ts
+--- a/packages/dynamodb-data-marshaller/src/unmarshallItem.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-marshaller/src/unmarshallItem.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -14,7 +14,7 @@
+     AttributeValueList,
+     NumberSetAttributeValue,
+     StringSetAttributeValue,
+-} from "aws-sdk/clients/dynamodb";
++} from "@aws-sdk/client-dynamodb";
+ 
+ /**
+  * Unmarshall a DynamoDB item into a JavaScript value.
+Index: packages/dynamodb-data-marshaller/tsconfig.cjs.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-marshaller/tsconfig.cjs.json b/packages/dynamodb-data-marshaller/tsconfig.cjs.json
+new file mode 100644
+--- /dev/null	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
++++ b/packages/dynamodb-data-marshaller/tsconfig.cjs.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -0,0 +1,8 @@
++{
++  "extends": "./tsconfig.json",
++  "compilerOptions": {
++    "module": "CommonJS",
++    "declarationDir": "dist/types",
++    "outDir": "dist/lib/cjs"
++  },
++}
+\ No newline at end of file
+Index: packages/dynamodb-data-marshaller/tsconfig.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-data-marshaller/tsconfig.json b/packages/dynamodb-data-marshaller/tsconfig.json
+--- a/packages/dynamodb-data-marshaller/tsconfig.json	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-data-marshaller/tsconfig.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,28 +1,11 @@
+ {
++  "extends": "../../tsconfig.json",
++  "include": [
++    "src"
++  ],
+   "compilerOptions": {
+-    "target": "es5",
+-    "lib": [
+-      "es5",
+-      "es2015.iterable",
+-      "es2015.promise",
+-      "es2015.collection",
+-      "es2015.symbol.wellknown"
+-    ],
+-    "downlevelIteration": true,
+-    "importHelpers": true,
+-    "module": "commonjs",
+-    "strict": true,
+-    "noUnusedLocals": true,
+-    "declaration": true,
+-    "sourceMap": true,
+-    "rootDir": "./src",
+-    "outDir": "./build"
++    "declarationDir": "dist/types",
++    "outDir": "dist/lib/esm"
+   },
+-  "typedocOptions": {
+-    "mode": "file",
+-    "out": "../../docs/packages/dynamodb-data-marshaller",
+-    "excludeNotExported": true,
+-    "excludePrivate": true,
+-    "hideGenerator": true
+-  }
++  "exclude": ["./**/*.spec.ts", "dist"]
+ }
+Index: packages/dynamodb-expressions/package.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-expressions/package.json b/packages/dynamodb-expressions/package.json
+--- a/packages/dynamodb-expressions/package.json	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-expressions/package.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -18,6 +18,8 @@
+   "types": "./build/index.d.ts",
+   "scripts": {
+     "docs": "typedoc src",
++    "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
++    "prepublish": "npm run build",
+     "prepublishOnly": "tsc",
+     "pretest": "tsc -p tsconfig.test.json",
+     "test": "jest \"build/(.+).spec.js\""
+@@ -30,13 +32,13 @@
+   "devDependencies": {
+     "@types/jest": "^24",
+     "@types/node": "^8.0.4",
+-    "aws-sdk": "^2.7.0",
++     "@aws-sdk/client-dynamodb": "^3.10.0",
+     "jest": "^24",
+     "typedoc": "^0.14.0",
+-    "typescript": "^3.4"
++    "typescript": "^4.2"
+   },
+   "peerDependencies": {
+-    "aws-sdk": "^2.7.0"
++     "@aws-sdk/client-dynamodb": "^3.10.0"
+   },
+   "dependencies": {
+     "@aws/dynamodb-auto-marshaller": "^0.7.1",
+Index: packages/dynamodb-expressions/src/AttributeValue.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-expressions/src/AttributeValue.ts b/packages/dynamodb-expressions/src/AttributeValue.ts
+--- a/packages/dynamodb-expressions/src/AttributeValue.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-expressions/src/AttributeValue.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,4 +1,4 @@
+-import {AttributeValue as BaseAttributeValue} from 'aws-sdk/clients/dynamodb';
++import {AttributeValue as BaseAttributeValue} from '@aws-sdk/client-dynamodb';
+ 
+ const MARSHALLED_ATTRIBUTE_VALUE_TAG = 'AmazonDynamoDbAttributeValue';
+ const EXPECTED_TOSTRING = `[object ${MARSHALLED_ATTRIBUTE_VALUE_TAG}]`;
+Index: packages/dynamodb-expressions/src/ExpressionAttributes.spec.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-expressions/src/ExpressionAttributes.spec.ts b/packages/dynamodb-expressions/src/ExpressionAttributes.spec.ts
+--- a/packages/dynamodb-expressions/src/ExpressionAttributes.spec.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-expressions/src/ExpressionAttributes.spec.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,5 +1,5 @@
+ import {ExpressionAttributes} from "./ExpressionAttributes";
+-import {ExpressionAttributeValueMap} from 'aws-sdk/clients/dynamodb';
++import {ExpressionAttributeValueMap} from '@aws-sdk/client-dynamodb';
+ import {AttributePath} from "./AttributePath";
+ 
+ describe('ExpressionAttributes', () => {
+Index: packages/dynamodb-expressions/src/ExpressionAttributes.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-expressions/src/ExpressionAttributes.ts b/packages/dynamodb-expressions/src/ExpressionAttributes.ts
+--- a/packages/dynamodb-expressions/src/ExpressionAttributes.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-expressions/src/ExpressionAttributes.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -5,7 +5,7 @@
+     AttributeValue as AttributeValueModel,
+     ExpressionAttributeNameMap,
+     ExpressionAttributeValueMap,
+-} from 'aws-sdk/clients/dynamodb';
++} from '@aws-sdk/client-dynamodb';
+ 
+ /**
+  * An object that manages expression attribute name and value substitution.
+Index: packages/dynamodb-expressions/src/MathematicalExpression.spec.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-expressions/src/MathematicalExpression.spec.ts b/packages/dynamodb-expressions/src/MathematicalExpression.spec.ts
+--- a/packages/dynamodb-expressions/src/MathematicalExpression.spec.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-expressions/src/MathematicalExpression.spec.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -5,7 +5,7 @@
+ import {
+     ExpressionAttributeNameMap,
+     ExpressionAttributeValueMap
+-} from 'aws-sdk/clients/dynamodb';
++} from '@aws-sdk/client-dynamodb';
+ 
+ describe('MathematicalExpression', () => {
+     const validExpressions: Array<[
+Index: packages/dynamodb-expressions/tsconfig.cjs.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-expressions/tsconfig.cjs.json b/packages/dynamodb-expressions/tsconfig.cjs.json
+new file mode 100644
+--- /dev/null	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
++++ b/packages/dynamodb-expressions/tsconfig.cjs.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -0,0 +1,8 @@
++{
++  "extends": "./tsconfig.json",
++  "compilerOptions": {
++    "module": "CommonJS",
++    "declarationDir": "dist/types",
++    "outDir": "dist/lib/cjs"
++  },
++}
+\ No newline at end of file
+Index: packages/dynamodb-expressions/tsconfig.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-expressions/tsconfig.json b/packages/dynamodb-expressions/tsconfig.json
+--- a/packages/dynamodb-expressions/tsconfig.json	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-expressions/tsconfig.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,27 +1,11 @@
+ {
++  "extends": "../../tsconfig.json",
++  "include": [
++    "src"
++  ],
+   "compilerOptions": {
+-    "target": "es5",
+-    "lib": [
+-      "es5",
+-      "es2015.iterable",
+-      "es2015.promise",
+-      "es2015.collection",
+-      "es2015.symbol.wellknown"
+-    ],
+-    "downlevelIteration": true,
+-    "importHelpers": true,
+-    "module": "commonjs",
+-    "strict": true,
+-    "declaration": true,
+-    "sourceMap": true,
+-    "rootDir": "./src",
+-    "outDir": "./build"
++    "declarationDir": "dist/types",
++    "outDir": "dist/lib/esm"
+   },
+-  "typedocOptions": {
+-    "mode": "file",
+-    "out": "../../docs/packages/dynamodb-expressions",
+-    "excludeNotExported": true,
+-    "excludePrivate": true,
+-    "hideGenerator": true
+-  }
++  "exclude": ["./**/*.spec.ts", "dist"]
+ }
+Index: packages/dynamodb-query-iterator/package.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-query-iterator/package.json b/packages/dynamodb-query-iterator/package.json
+--- a/packages/dynamodb-query-iterator/package.json	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-query-iterator/package.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -18,6 +18,8 @@
+   "types": "./build/index.d.ts",
+   "scripts": {
+     "docs": "typedoc src",
++    "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
++    "prepublish": "npm run build",
+     "prepublishOnly": "tsc",
+     "pretest": "tsc -p tsconfig.test.json",
+     "test": "jest \"build/(.+).spec.js\""
+@@ -30,13 +32,13 @@
+   "devDependencies": {
+     "@types/jest": "^24",
+     "@types/node": "^8.0.4",
+-    "aws-sdk": "^2.7.0",
++     "@aws-sdk/client-dynamodb": "^3.10.0",
+     "jest": "^24",
+     "typedoc": "^0.14.0",
+-    "typescript": "^3.4"
++    "typescript": "^4.2"
+   },
+   "peerDependencies": {
+-    "aws-sdk": "^2.7.0"
++     "@aws-sdk/client-dynamodb": "^3.10.0"
+   },
+   "dependencies": {
+     "tslib": "^1.9"
+Index: packages/dynamodb-query-iterator/src/DynamoDbPaginator.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-query-iterator/src/DynamoDbPaginator.ts b/packages/dynamodb-query-iterator/src/DynamoDbPaginator.ts
+--- a/packages/dynamodb-query-iterator/src/DynamoDbPaginator.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-query-iterator/src/DynamoDbPaginator.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,7 +1,7 @@
+ import { DynamoDbPaginatorInterface } from './DynamoDbPaginatorInterface';
+ import { DynamoDbResultsPage } from './DynamoDbResultsPage';
+ import { mergeConsumedCapacities } from './mergeConsumedCapacities';
+-import { ConsumedCapacity, Key } from 'aws-sdk/clients/dynamodb';
++import {AttributeValue, ConsumedCapacity} from '@aws-sdk/client-dynamodb';
+ 
+ if (Symbol && !Symbol.asyncIterator) {
+     (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
+@@ -10,7 +10,7 @@
+ export abstract class DynamoDbPaginator implements DynamoDbPaginatorInterface {
+     private _consumedCapacity?: ConsumedCapacity;
+     private _count = 0;
+-    private _lastKey?: Key;
++    private _lastKey?: {[key: string]: AttributeValue};
+     private _scannedCount = 0;
+     private lastResolved: Promise<IteratorResult<DynamoDbResultsPage>>
+         = <any>Promise.resolve();
+@@ -42,7 +42,7 @@
+      * Get the LastEvaluatedKey of the last result page yielded by this
+      * paginator or undefined if the scan has already been exhausted.
+      */
+-    get lastEvaluatedKey(): Key|undefined {
++    get lastEvaluatedKey(): {[key: string]: AttributeValue}|undefined {
+         return this._lastKey;
+     }
+ 
+Index: packages/dynamodb-query-iterator/src/DynamoDbPaginatorInterface.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-query-iterator/src/DynamoDbPaginatorInterface.ts b/packages/dynamodb-query-iterator/src/DynamoDbPaginatorInterface.ts
+--- a/packages/dynamodb-query-iterator/src/DynamoDbPaginatorInterface.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-query-iterator/src/DynamoDbPaginatorInterface.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,5 +1,5 @@
+ import { DynamoDbResultsPage } from './DynamoDbResultsPage';
+-import { ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
++import { ConsumedCapacity } from '@aws-sdk/client-dynamodb';
+ 
+ export interface DynamoDbPaginatorInterface extends
+     AsyncIterableIterator<DynamoDbResultsPage>
+Index: packages/dynamodb-query-iterator/src/DynamoDbResultsPage.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-query-iterator/src/DynamoDbResultsPage.ts b/packages/dynamodb-query-iterator/src/DynamoDbResultsPage.ts
+--- a/packages/dynamodb-query-iterator/src/DynamoDbResultsPage.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-query-iterator/src/DynamoDbResultsPage.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,14 +1,13 @@
+ import {
+-    AttributeMap,
++    AttributeValue,
+     ConsumedCapacity,
+-    Key,
+-} from "aws-sdk/clients/dynamodb";
++} from "@aws-sdk/client-dynamodb";
+ 
+ export interface DynamoDbResultsPage {
+     /**
+      * An array of retrieved items.
+      */
+-    Items?: Array<AttributeMap>;
++    Items?: Array<{[key: string]: AttributeValue}>;
+ 
+     /**
+      * The number of items in the response. If you used a filter in the request,
+@@ -37,7 +36,7 @@
+      * that there is more data in the result set. The only way to know when you
+      * have reached the end of the result set is when LastEvaluatedKey is empty.
+      */
+-    LastEvaluatedKey?: Key;
++    LastEvaluatedKey?: {[key: string]: AttributeValue};
+ 
+     /**
+      * The capacity units consumed by the operation. The data returned includes
+Index: packages/dynamodb-query-iterator/src/ItemIterator.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-query-iterator/src/ItemIterator.ts b/packages/dynamodb-query-iterator/src/ItemIterator.ts
+--- a/packages/dynamodb-query-iterator/src/ItemIterator.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-query-iterator/src/ItemIterator.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,5 +1,5 @@
+ import { DynamoDbPaginatorInterface } from './DynamoDbPaginatorInterface';
+-import { AttributeMap, ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
++import {AttributeValue, ConsumedCapacity} from '@aws-sdk/client-dynamodb';
+ 
+ if (Symbol && !Symbol.asyncIterator) {
+     (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
+@@ -7,18 +7,18 @@
+ 
+ export abstract class ItemIterator<
+     Paginator extends DynamoDbPaginatorInterface
+-> implements AsyncIterableIterator<AttributeMap> {
++> implements AsyncIterableIterator<{[key: string]: AttributeValue}> {
+ 
+     private _iteratedCount = 0;
+-    private lastResolved: Promise<IteratorResult<AttributeMap>> = <any>Promise.resolve();
+-    private readonly pending: Array<AttributeMap> = [];
++    private lastResolved: Promise<IteratorResult<{[key: string]: AttributeValue}>> = <any>Promise.resolve();
++    private readonly pending: Array<{[key: string]: AttributeValue}> = [];
+ 
+     protected constructor(private readonly paginator: Paginator) {}
+ 
+     /**
+      * @inheritDoc
+      */
+-    [Symbol.asyncIterator](): AsyncIterableIterator<AttributeMap> {
++    [Symbol.asyncIterator](): AsyncIterableIterator<{[key: string]: AttributeValue}> {
+         return this;
+     }
+ 
+@@ -42,7 +42,7 @@
+     /**
+      * @inheritDoc
+      */
+-    next(): Promise<IteratorResult<AttributeMap>> {
++    next(): Promise<IteratorResult<{[key: string]: AttributeValue}>> {
+         this.lastResolved = this.lastResolved.then(() => this.getNext());
+         return this.lastResolved;
+     }
+@@ -70,7 +70,7 @@
+     /**
+      * @inheritDoc
+      */
+-    return(): Promise<IteratorResult<AttributeMap>> {
++    return(): Promise<IteratorResult<{[key: string]: AttributeValue}>> {
+         // Prevent any further use of this iterator
+         this.lastResolved = Promise.reject(new Error(
+             'Iteration has been manually interrupted and may not be resumed'
+@@ -92,7 +92,7 @@
+         return this.paginator.scannedCount;
+     }
+ 
+-    private getNext(): Promise<IteratorResult<AttributeMap>> {
++    private getNext(): Promise<IteratorResult<{[key: string]: AttributeValue}>> {
+         if (this.pending.length > 0) {
+             this._iteratedCount++;
+             return Promise.resolve({
+@@ -103,7 +103,7 @@
+ 
+         return this.paginator.next().then(({done, value}) => {
+             if (done) {
+-                return {done} as IteratorResult<AttributeMap>;
++                return {done} as IteratorResult<{[key: string]: AttributeValue}>;
+             }
+ 
+             this.pending.push(...value.Items || []);
+Index: packages/dynamodb-query-iterator/src/ParallelScanInput.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-query-iterator/src/ParallelScanInput.ts b/packages/dynamodb-query-iterator/src/ParallelScanInput.ts
+--- a/packages/dynamodb-query-iterator/src/ParallelScanInput.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-query-iterator/src/ParallelScanInput.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,4 +1,4 @@
+-import { ScanInput } from 'aws-sdk/clients/dynamodb';
++import { ScanInput } from '@aws-sdk/client-dynamodb';
+ 
+ export interface ParallelScanInput extends ScanInput {
+     /**
+Index: packages/dynamodb-query-iterator/src/ParallelScanIterator.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-query-iterator/src/ParallelScanIterator.ts b/packages/dynamodb-query-iterator/src/ParallelScanIterator.ts
+--- a/packages/dynamodb-query-iterator/src/ParallelScanIterator.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-query-iterator/src/ParallelScanIterator.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -4,7 +4,7 @@
+     ParallelScanPaginator,
+     ParallelScanState,
+ } from './ParallelScanPaginator';
+-import DynamoDB = require('aws-sdk/clients/dynamodb');
++import {DynamoDB} from "@aws-sdk/client-dynamodb";
+ 
+ export class ParallelScanIterator extends ItemIterator<ParallelScanPaginator> {
+     constructor(
+Index: packages/dynamodb-query-iterator/src/ParallelScanPaginator.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-query-iterator/src/ParallelScanPaginator.ts b/packages/dynamodb-query-iterator/src/ParallelScanPaginator.ts
+--- a/packages/dynamodb-query-iterator/src/ParallelScanPaginator.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-query-iterator/src/ParallelScanPaginator.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -3,8 +3,8 @@
+ import { mergeConsumedCapacities } from './mergeConsumedCapacities';
+ import { ParallelScanInput } from './ParallelScanInput';
+ import { ScanPaginator } from './ScanPaginator';
+-import { ConsumedCapacity, Key } from 'aws-sdk/clients/dynamodb';
+-import DynamoDB = require('aws-sdk/clients/dynamodb');
++import { ConsumedCapacity, Key } from '@aws-sdk/client-dynamodb';
++import DynamoDB = require('@aws-sdk/client-dynamodb');
+ 
+ /**
+  * Pagination state for a scan segment for which the first page has not yet been
+Index: packages/dynamodb-query-iterator/src/QueryIterator.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-query-iterator/src/QueryIterator.ts b/packages/dynamodb-query-iterator/src/QueryIterator.ts
+--- a/packages/dynamodb-query-iterator/src/QueryIterator.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-query-iterator/src/QueryIterator.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,7 +1,7 @@
+ import { ItemIterator } from './ItemIterator';
+ import { QueryPaginator } from './QueryPaginator';
+-import { QueryInput } from 'aws-sdk/clients/dynamodb';
+-import DynamoDB = require('aws-sdk/clients/dynamodb');
++import { QueryInput } from '@aws-sdk/client-dynamodb';
++import DynamoDB = require('@aws-sdk/client-dynamodb');
+ 
+ export class QueryIterator extends ItemIterator<QueryPaginator> {
+     constructor(client: DynamoDB, input: QueryInput, limit?: number) {
+Index: packages/dynamodb-query-iterator/src/QueryPaginator.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-query-iterator/src/QueryPaginator.ts b/packages/dynamodb-query-iterator/src/QueryPaginator.ts
+--- a/packages/dynamodb-query-iterator/src/QueryPaginator.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-query-iterator/src/QueryPaginator.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,7 +1,7 @@
+ import { DynamoDbPaginator } from './DynamoDbPaginator';
+ import { DynamoDbResultsPage } from './DynamoDbResultsPage';
+-import { QueryInput } from 'aws-sdk/clients/dynamodb';
+-import DynamoDB = require('aws-sdk/clients/dynamodb');
++import { QueryInput } from '@aws-sdk/client-dynamodb';
++import DynamoDB = require('@aws-sdk/client-dynamodb');
+ 
+ export class QueryPaginator extends DynamoDbPaginator {
+     private nextRequest?: QueryInput;
+Index: packages/dynamodb-query-iterator/src/ScanIterator.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-query-iterator/src/ScanIterator.ts b/packages/dynamodb-query-iterator/src/ScanIterator.ts
+--- a/packages/dynamodb-query-iterator/src/ScanIterator.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-query-iterator/src/ScanIterator.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,7 +1,7 @@
+ import { ItemIterator } from './ItemIterator';
+ import { ScanPaginator } from './ScanPaginator';
+-import { ScanInput } from 'aws-sdk/clients/dynamodb';
+-import DynamoDB = require('aws-sdk/clients/dynamodb');
++import { ScanInput } from '@aws-sdk/client-dynamodb';
++import DynamoDB = require('@aws-sdk/client-dynamodb');
+ 
+ export class ScanIterator extends ItemIterator<ScanPaginator> {
+     constructor(client: DynamoDB, input: ScanInput, limit?: number) {
+Index: packages/dynamodb-query-iterator/src/ScanPaginator.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-query-iterator/src/ScanPaginator.ts b/packages/dynamodb-query-iterator/src/ScanPaginator.ts
+--- a/packages/dynamodb-query-iterator/src/ScanPaginator.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-query-iterator/src/ScanPaginator.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,7 +1,7 @@
+ import { DynamoDbPaginator } from './DynamoDbPaginator';
+ import { DynamoDbResultsPage } from './DynamoDbResultsPage';
+-import { ScanInput } from 'aws-sdk/clients/dynamodb';
+-import DynamoDB = require('aws-sdk/clients/dynamodb');
++import { ScanInput } from '@aws-sdk/client-dynamodb';
++import DynamoDB = require('@aws-sdk/client-dynamodb');
+ 
+ export class ScanPaginator extends DynamoDbPaginator {
+     private nextRequest?: ScanInput;
+Index: packages/dynamodb-query-iterator/src/mergeConsumedCapacities.spec.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-query-iterator/src/mergeConsumedCapacities.spec.ts b/packages/dynamodb-query-iterator/src/mergeConsumedCapacities.spec.ts
+--- a/packages/dynamodb-query-iterator/src/mergeConsumedCapacities.spec.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-query-iterator/src/mergeConsumedCapacities.spec.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,5 +1,5 @@
+ import { mergeConsumedCapacities } from './mergeConsumedCapacities';
+-import { ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
++import { ConsumedCapacity } from '@aws-sdk/client-dynamodb';
+ 
+ describe('mergeConsumedCapacities', () => {
+     it('should return undefined when called two undefined arguments', () => {
+Index: packages/dynamodb-query-iterator/src/mergeConsumedCapacities.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-query-iterator/src/mergeConsumedCapacities.ts b/packages/dynamodb-query-iterator/src/mergeConsumedCapacities.ts
+--- a/packages/dynamodb-query-iterator/src/mergeConsumedCapacities.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-query-iterator/src/mergeConsumedCapacities.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,8 +1,7 @@
+ import {
+     Capacity,
+     ConsumedCapacity,
+-    SecondaryIndexesCapacityMap,
+-} from 'aws-sdk/clients/dynamodb';
++} from '@aws-sdk/client-dynamodb';
+ 
+ /**
+  * @internal
+@@ -47,11 +46,11 @@
+ }
+ 
+ function mergeCapacityMaps(
+-    a?: SecondaryIndexesCapacityMap,
+-    b?: SecondaryIndexesCapacityMap
+-): SecondaryIndexesCapacityMap|undefined {
++    a?: {[key: string]: Capacity},
++    b?: {[key: string]: Capacity}
++): {[key: string]: Capacity}|undefined {
+     if (a || b) {
+-        const out: SecondaryIndexesCapacityMap = {};
++        const out: {[key: string]: Capacity} = {};
+ 
+         a = a || {};
+         b = b || {};
+Index: packages/dynamodb-query-iterator/tsconfig.cjs.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-query-iterator/tsconfig.cjs.json b/packages/dynamodb-query-iterator/tsconfig.cjs.json
+new file mode 100644
+--- /dev/null	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
++++ b/packages/dynamodb-query-iterator/tsconfig.cjs.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -0,0 +1,8 @@
++{
++  "extends": "./tsconfig.json",
++  "compilerOptions": {
++    "module": "CommonJS",
++    "declarationDir": "dist/types",
++    "outDir": "dist/lib/cjs"
++  },
++}
+\ No newline at end of file
+Index: packages/dynamodb-query-iterator/tsconfig.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/dynamodb-query-iterator/tsconfig.json b/packages/dynamodb-query-iterator/tsconfig.json
+--- a/packages/dynamodb-query-iterator/tsconfig.json	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/packages/dynamodb-query-iterator/tsconfig.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,29 +1,11 @@
+ {
++  "extends": "../../tsconfig.json",
++  "include": [
++    "src"
++  ],
+   "compilerOptions": {
+-    "target": "es5",
+-    "lib": [
+-      "es5",
+-      "es2015.iterable",
+-      "es2015.promise",
+-      "es2015.collection",
+-      "es2015.symbol.wellknown",
+-      "esnext.asynciterable"
+-    ],
+-    "downlevelIteration": true,
+-    "importHelpers": true,
+-    "module": "commonjs",
+-    "noUnusedLocals": true,
+-    "strict": true,
+-    "declaration": true,
+-    "sourceMap": true,
+-    "rootDir": "./src",
+-    "outDir": "./build"
++    "declarationDir": "dist/types",
++    "outDir": "dist/lib/esm"
+   },
+-  "typedocOptions": {
+-    "mode": "file",
+-    "out": "../../docs/packages/dynamodb-query-iterator",
+-    "excludeNotExported": true,
+-    "excludePrivate": true,
+-    "hideGenerator": true
+-  }
++  "exclude": ["./**/*.spec.ts", "dist"]
+ }
+Index: tsconfig.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tsconfig.json b/tsconfig.json
+--- a/tsconfig.json	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
++++ b/tsconfig.json	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
+@@ -1,19 +1,31 @@
+ {
+   "compilerOptions": {
+-    "target": "es5",
+-    "lib": [
+-      "dom",
+-      "es5"
++    "moduleResolution": "node",
++    "target": "es6",
++    "module":"es2020",
++    "lib": ["es2020"],
++    "strictNullChecks": true,
++    "sourceMap": true,
++    "declaration": true,
++    "allowSyntheticDefaultImports": true,
++    "experimentalDecorators": true,
++    "emitDecoratorMetadata": true,
++    "esModuleInterop": true,
++    "declarationDir": "dist/types",
++    "outDir": "dist/lib/esm",
++    "typeRoots": [
++      "node_modules/@types"
+     ],
+-    "module": "commonjs",
+-    "strict": true
++
++    "skipLibCheck": true
+   },
+-  "typedocOptions": {
+-    "mode": "file",
+-    "out": "./docs",
+-    "excludeNotExported": true,
+-    "excludePrivate": true,
+-    "hideGenerator": true,
+-    "name": "Amazon DynamoDB DataMapper For JavaScript"
++  "include": [
++    "src"
++  ],
++  "exclude": ["node_modules", "./**/*.spec.ts", "dist"],
++  "typeAcquisition": {
++    "include": [
++      "jest"
++    ]
+   }
+ }

@@ -101,17 +101,17 @@ export class BatchGet extends BatchOperation<{[key: string]: AttributeValue}> {
     }
 
     protected getInitialTableState(tableName: string): TableState<{[key: string]: AttributeValue}> {
-        let options = this.options[tableName];
-
-        if(options === undefined) {
-            options = {};
-        }
+        const {
+            ExpressionAttributeNames,
+            ProjectionExpression,
+            ConsistentRead = this.consistentRead,
+        } = this.options[tableName] || {} as PerTableOptions;
 
         return {
             ...super.getInitialTableState(tableName),
-            attributeNames: options.ExpressionAttributeNames,
-            projection: options.ProjectionExpression,
-            consistentRead: options.ConsistentRead || this.consistentRead
+            attributeNames: ExpressionAttributeNames,
+            projection: ProjectionExpression,
+            consistentRead: ConsistentRead
         };
     }
 }

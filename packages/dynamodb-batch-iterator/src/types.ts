@@ -48,7 +48,7 @@ export interface TableThrottlingTracker<Element extends TableStateElement> {
 export interface ThrottledTableConfiguration<
     Element extends TableStateElement
 > extends TableState<Element> {
-    tableThrottling: TableThrottlingTracker<Element>;
+    tableThrottling?: TableThrottlingTracker<Element>;
 }
 
 /**

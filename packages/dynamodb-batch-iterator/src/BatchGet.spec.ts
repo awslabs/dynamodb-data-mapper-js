@@ -8,7 +8,7 @@ describe('BatchGet', () => {
     } as BatchGetItemOutput));
     const mockDynamoDbClient = {
         config: {},
-        batchGetItem: jest.fn(() => Promise.resolve(promiseFunc)),
+        batchGetItem: jest.fn(promiseFunc),
     } as any;
 
     beforeEach(() => {

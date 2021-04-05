@@ -2,7 +2,7 @@ import {
     BatchState,
     SyncOrAsyncIterable,
     TableState,
-    TableStateElement,
+    TableStateElement, TableThrottlingTracker,
     ThrottledTableConfiguration,
 } from './types';
 import {DynamoDB} from "@aws-sdk/client-dynamodb";
@@ -141,8 +141,7 @@ export abstract class BatchOperation<
         for (let i = this.toSend.length - 1; i > -1; i--) {
             const [table, attributes] = this.toSend[i];
             if (unprocessedTables.has(table)) {
-                (this.state[table] as ThrottledTableConfiguration<Element>)
-                    .tableThrottling.unprocessed.push(attributes);
+                (this.state[table] as ThrottledTableConfiguration<Element>).tableThrottling?.unprocessed.push(attributes);
                 this.toSend.splice(i, 1);
             }
         }
@@ -164,9 +163,15 @@ export abstract class BatchOperation<
     private enqueueThrottled(
         table: ThrottledTableConfiguration<Element>
     ): void {
+
+        if(table.tableThrottling === undefined) {
+            return;
+        }
+
         const {
-            tableThrottling: {backoffWaiter, unprocessed}
+            tableThrottling: {backoffWaiter, unprocessed},
         } = table;
+
         if (unprocessed.length > 0) {
             this.toSend.push(...unprocessed.map(
                 attr => [table.name, attr] as [string, Element]
@@ -174,8 +179,7 @@ export abstract class BatchOperation<
         }
 
         this.throttled.delete(backoffWaiter);
-        // todo: I think we can delete this
-        //delete table.tableThrottling;
+        delete table.tableThrottling;
     }
 
     private async getNext(): Promise<IteratorResult<[string, Element]>> {

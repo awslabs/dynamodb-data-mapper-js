@@ -4,7 +4,7 @@ import {BatchWriteItemInput, BatchWriteItemOutput} from '@aws-sdk/client-dynamod
 import {TextEncoder} from "util";
 
 describe('BatchWrite', () => {
-    const promiseFunc = jest.fn(() => Promise.resolve({
+    const promiseFunc = jest.fn((operationInput) => Promise.resolve({
         UnprocessedItems: {}
     } as BatchWriteItemOutput));
     const mockDynamoDbClient = {
@@ -235,12 +235,17 @@ describe('BatchWrite', () => {
             }
         }
 
-        promiseFunc.mockImplementation(async () => {
+        let a = 0;
+
+        promiseFunc.mockImplementation(async (operationInput) => {
+
             const response: BatchWriteItemOutput = {};
 
-            const {RequestItems} = (mockDynamoDbClient.batchWriteItem.mock.calls.slice(-1)[0] as any)[0];
+            const {RequestItems} = operationInput;
+            const numberOfRequestItems = Object.keys(RequestItems).length;
             for (const tableName of Object.keys(RequestItems)) {
                 for (const {DeleteRequest, PutRequest} of RequestItems[tableName]) {
+                    a++;
                     const item = DeleteRequest ? DeleteRequest.Key : PutRequest.Item;
                     if (unprocessed.has(item.fizz.N)) {
                         if (!response.UnprocessedItems) {
@@ -275,7 +280,8 @@ describe('BatchWrite', () => {
             : writes;
 
         const seen = new Set<number>();
-        for await (const [tableName, req] of new BatchWrite(mockDynamoDbClient as any, input)) {
+        const batchWriteIterator = new BatchWrite(mockDynamoDbClient as any, input);
+        for await (const [tableName, req] of batchWriteIterator) {
             const id = req.DeleteRequest
                 ? parseInt(req.DeleteRequest.Key.fizz.N as string)
                 : parseInt((req.PutRequest as any).Item.fizz.N as string);
