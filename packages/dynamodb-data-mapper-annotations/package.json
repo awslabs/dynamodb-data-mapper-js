@@ -30,21 +30,12 @@
     "email": "aws-sdk-js@amazon.com"
   },
   "license": "Apache-2.0",
-  "devDependencies": {
-    "@types/jest": "^24",
-    "@types/node": "^8.0.4",
-    "@types/uuid": "^3.0.0",
-    "@aws-sdk/client-dynamodb": "^3.10.0",
-    "jest": "^24",
-    "typedoc": "^0.14.0",
-    "typescript": "^4.2"
-  },
   "dependencies": {
     "@aws/dynamodb-auto-marshaller": "^0.7.1",
     "@aws/dynamodb-data-mapper": "^0.7.3",
     "@aws/dynamodb-data-marshaller": "^0.7.3",
-    "reflect-metadata": "^0.1.10",
-    "tslib": "^1.9",
+    "reflect-metadata": "^0.1.13",
+    "tslib": "^2.1.0",
     "uuid": "^3.0.0"
   },
   "jest": {
@@ -54,7 +45,8 @@
     "globals": {
       "ts-jest": {
         "tsconfig": {
-          "strictNullChecks": false
+          "strictNullChecks": false,
+          "target": "es6"
         }
       }
     },

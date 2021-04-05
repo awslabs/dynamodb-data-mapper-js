@@ -34,13 +34,12 @@ export class BatchWrite extends BatchOperation<WriteRequest> {
 
             inFlight.push([tableName, marshalled]);
 
-            if(operationInput.RequestItems === undefined) {
-                operationInput.RequestItems = {};
-            }
-
+            // @ts-ignore
             if (operationInput.RequestItems[tableName] === undefined) {
+                // @ts-ignore
                 operationInput.RequestItems[tableName] = [];
             }
+            // @ts-ignore
             operationInput.RequestItems[tableName].push(marshalled);
 
             if (++batchSize === this.batchSize) {

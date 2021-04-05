@@ -1,4 +1,5 @@
-import { itemIdentifier } from './itemIdentifier';
+import {itemIdentifier} from './itemIdentifier';
+import {TextEncoder} from "util";
 
 describe('itemIdentifier', () => {
     it('should serialize all top-level string attributes', () => {
@@ -36,25 +37,13 @@ describe('itemIdentifier', () => {
         () => {
             expect(
                 itemIdentifier(
-                    'table', 
-                    {DeleteRequest: {Key: {foo: {B: '🐎👱❤'}}}}
+                    'table',
+                    {DeleteRequest: {Key: {foo: {B: new TextEncoder().encode('🐎👱❤')}}}}
                 )
             ).toBe(
                 itemIdentifier(
-                    'table', 
+                    'table',
                     {DeleteRequest: {Key: {foo: {B: Uint8Array.from([240, 159, 144, 142, 240, 159, 145, 177, 226, 157, 164])}}}}
-                )
-            );
-
-            expect(
-                itemIdentifier(
-                    'table', 
-                    {DeleteRequest: {Key: {foo: {B: '🐎👱❤'}}}}
-                )
-            ).toBe(
-                itemIdentifier(
-                    'table', 
-                    {DeleteRequest: {Key: {foo: {B: Uint8Array.from([240, 159, 144, 142, 240, 159, 145, 177, 226, 157, 164]).buffer}}}}
                 )
             );
         }
@@ -62,12 +51,23 @@ describe('itemIdentifier', () => {
 
     it('should throw when an invalid binary value is provided', () => {
         expect(
-            () => itemIdentifier('table', {PutRequest: {Item: {foo: {B: []}}}})
+            () => {
+                itemIdentifier('table', {
+                    PutRequest: {
+                        Item: {
+                            foo: {
+                                // @ts-ignore
+                                B: []
+                            }
+                        }
+                    }
+                })
+            }
         ).toThrow();
     });
 
     it(
-        'should throw when neither a PutRequest nor a DeleteRequest is provided', 
+        'should throw when neither a PutRequest nor a DeleteRequest is provided',
         () => {
             expect(
                 () => itemIdentifier('table', {} as any)

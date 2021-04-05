@@ -1,5 +1,6 @@
 import { BatchGet, MAX_READ_BATCH_SIZE } from './BatchGet';
-import {AttributeMap, BatchGetItemInput, BatchGetItemOutput} from '@aws-sdk/client-dynamodb';
+import {AttributeValue, BatchGetItemInput, BatchGetItemOutput} from '@aws-sdk/client-dynamodb';
+import {SyncOrAsyncIterable} from "./types";
 
 describe('BatchGet', () => {
     const promiseFunc = jest.fn(() => Promise.resolve({
@@ -7,7 +8,7 @@ describe('BatchGet', () => {
     } as BatchGetItemOutput));
     const mockDynamoDbClient = {
         config: {},
-        batchGetItem: jest.fn(() => ({promise: promiseFunc})),
+        batchGetItem: jest.fn(() => Promise.resolve(promiseFunc)),
     } as any;
 
     beforeEach(() => {
@@ -21,9 +22,11 @@ describe('BatchGet', () => {
     });
 
     it('should allow setting an overall read consistency', async () => {
+        const iterable: SyncOrAsyncIterable<[string, {[key: string]: AttributeValue}]> = [['foo', {fizz: {N: '0'}}]] as SyncOrAsyncIterable<[string, {[key: string]: AttributeValue}]>;
+
         const batchGet = new BatchGet(
             mockDynamoDbClient as any,
-            [['foo', {fizz: {N: '0'}}]],
+            iterable,
             {ConsistentRead: true}
         );
         for await (const _ of batchGet) {
@@ -50,6 +53,7 @@ describe('BatchGet', () => {
     it('should allow setting per-table read consistency', async () => {
         const batchGet = new BatchGet(
             mockDynamoDbClient as any,
+            // @ts-ignore
             [
                 ['foo', {fizz: {N: '0'}}],
                 ['bar', {quux: {N: '1'}}],
@@ -91,6 +95,7 @@ describe('BatchGet', () => {
     it('should allow specifying per-table projection expressions', async () => {
         const batchGet = new BatchGet(
             mockDynamoDbClient as any,
+            // @ts-ignore
             [
                 ['foo', {fizz: {N: '0'}}],
                 ['bar', {quux: {N: '1'}}],
@@ -133,7 +138,7 @@ describe('BatchGet', () => {
         it(
             `should should partition get batches into requests with ${MAX_READ_BATCH_SIZE} or fewer items`,
             async () => {
-                const gets: Array<[string, AttributeMap]> = [];
+                const gets: Array<[string, {[key: string]: AttributeValue}]> = [];
                 const expected: any = [
                     [
                         {
@@ -265,7 +270,7 @@ describe('BatchGet', () => {
 
         it('should should retry unprocessed items', async () => {
             const failures = new Set(['24', '66', '99', '103', '142', '178', '204', '260', '288']);
-            const gets: Array<[string, AttributeMap]> = [];
+            const gets: Array<[string, {[key: string]: AttributeValue}]> = [];
 
             for (let i = 0; i < 325; i++) {
                 const table = i % 3 === 0
