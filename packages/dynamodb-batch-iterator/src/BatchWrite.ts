@@ -1,7 +1,7 @@
 import { BatchOperation } from './BatchOperation';
 import { itemIdentifier } from './itemIdentifier';
 import { WriteRequest } from './types';
-import { BatchWriteItemInput } from 'aws-sdk/clients/dynamodb';
+import { BatchWriteItemInput } from '@aws-sdk/client-dynamodb';
 
 export const MAX_WRITE_BATCH_SIZE = 25;
 
@@ -34,6 +34,10 @@ export class BatchWrite extends BatchOperation<WriteRequest> {
 
             inFlight.push([tableName, marshalled]);
 
+            if(operationInput.RequestItems === undefined) {
+                operationInput.RequestItems = {};
+            }
+
             if (operationInput.RequestItems[tableName] === undefined) {
                 operationInput.RequestItems[tableName] = [];
             }
@@ -46,7 +50,7 @@ export class BatchWrite extends BatchOperation<WriteRequest> {
 
         const {
             UnprocessedItems = {}
-        } = await this.client.batchWriteItem(operationInput).promise();
+        } = await this.client.batchWriteItem(operationInput);
         const unprocessedTables = new Set<string>();
 
         for (const table of Object.keys(UnprocessedItems)) {

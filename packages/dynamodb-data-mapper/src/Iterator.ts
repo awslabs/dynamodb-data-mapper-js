@@ -1,5 +1,5 @@
 import { Paginator as AbstractPaginator } from './Paginator';
-import { ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
+import { ConsumedCapacity } from '@aws-sdk/client-dynamodb';
 
 require('./asyncIteratorSymbolPolyfill');
 

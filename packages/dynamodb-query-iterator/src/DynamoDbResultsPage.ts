@@ -1,14 +1,13 @@
 import {
-    AttributeMap,
+    AttributeValue,
     ConsumedCapacity,
-    Key,
-} from "aws-sdk/clients/dynamodb";
+} from "@aws-sdk/client-dynamodb";
 
 export interface DynamoDbResultsPage {
     /**
      * An array of retrieved items.
      */
-    Items?: Array<AttributeMap>;
+    Items?: Array<{[key: string]: AttributeValue}>;
 
     /**
      * The number of items in the response. If you used a filter in the request,
@@ -37,7 +36,7 @@ export interface DynamoDbResultsPage {
      * that there is more data in the result set. The only way to know when you
      * have reached the end of the result set is when LastEvaluatedKey is empty.
      */
-    LastEvaluatedKey?: Key;
+    LastEvaluatedKey?: {[key: string]: AttributeValue};
 
     /**
      * The capacity units consumed by the operation. The data returned includes

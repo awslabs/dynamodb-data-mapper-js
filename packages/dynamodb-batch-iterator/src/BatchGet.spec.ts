@@ -1,13 +1,14 @@
 import { BatchGet, MAX_READ_BATCH_SIZE } from './BatchGet';
-import {AttributeMap, BatchGetItemInput, BatchGetItemOutput} from 'aws-sdk/clients/dynamodb';
+import {AttributeValue, BatchGetItemInput, BatchGetItemOutput} from '@aws-sdk/client-dynamodb';
+import {SyncOrAsyncIterable} from "./types";
 
 describe('BatchGet', () => {
-    const promiseFunc = jest.fn(() => Promise.resolve({
+    const promiseFunc = jest.fn((operationInput) => Promise.resolve({
         UnprocessedKeys: {}
     } as BatchGetItemOutput));
     const mockDynamoDbClient = {
         config: {},
-        batchGetItem: jest.fn(() => ({promise: promiseFunc})),
+        batchGetItem: jest.fn(promiseFunc),
     } as any;
 
     beforeEach(() => {
@@ -23,6 +24,7 @@ describe('BatchGet', () => {
     it('should allow setting an overall read consistency', async () => {
         const batchGet = new BatchGet(
             mockDynamoDbClient as any,
+            //@ts-ignore
             [['foo', {fizz: {N: '0'}}]],
             {ConsistentRead: true}
         );
@@ -50,6 +52,7 @@ describe('BatchGet', () => {
     it('should allow setting per-table read consistency', async () => {
         const batchGet = new BatchGet(
             mockDynamoDbClient as any,
+            // @ts-ignore
             [
                 ['foo', {fizz: {N: '0'}}],
                 ['bar', {quux: {N: '1'}}],
@@ -91,6 +94,7 @@ describe('BatchGet', () => {
     it('should allow specifying per-table projection expressions', async () => {
         const batchGet = new BatchGet(
             mockDynamoDbClient as any,
+            // @ts-ignore
             [
                 ['foo', {fizz: {N: '0'}}],
                 ['bar', {quux: {N: '1'}}],
@@ -129,11 +133,11 @@ describe('BatchGet', () => {
         ]);
     });
 
-    for (const asyncInput of [true, false]) {
+    for (const asyncInput of [false, true]) {
         it(
             `should should partition get batches into requests with ${MAX_READ_BATCH_SIZE} or fewer items`,
             async () => {
-                const gets: Array<[string, AttributeMap]> = [];
+                const gets: Array<[string, {[key: string]: AttributeValue}]> = [];
                 const expected: any = [
                     [
                         {
@@ -265,7 +269,7 @@ describe('BatchGet', () => {
 
         it('should should retry unprocessed items', async () => {
             const failures = new Set(['24', '66', '99', '103', '142', '178', '204', '260', '288']);
-            const gets: Array<[string, AttributeMap]> = [];
+            const gets: Array<[string, {[key: string]: AttributeValue}]> = [];
 
             for (let i = 0; i < 325; i++) {
                 const table = i % 3 === 0
@@ -275,14 +279,21 @@ describe('BatchGet', () => {
             }
 
             const toBeFailed = new Set(failures);
-            promiseFunc.mockImplementation(() => {
+            let a = 0;
+            let numberOfFailures = 0;
+            let numberOfResponsesReturned = 0;
+            promiseFunc.mockImplementation(async (operationInput) => {
                 const buzz = { S: 'Static string' };
                 const response: BatchGetItemOutput = {};
 
-                const {RequestItems} = (mockDynamoDbClient.batchGetItem.mock.calls.slice(-1)[0] as any)[0];
+                const {RequestItems} = operationInput;
+                const numberOfRequestItems = Object.keys(RequestItems).length;
+                const b = 0;
                 for (const tableName of Object.keys(RequestItems)) {
                     for (const item of RequestItems[tableName].Keys) {
+                        a++;
                         if (toBeFailed.has(item.fizz.N)) {
+                            numberOfFailures++;
                             if (!response.UnprocessedKeys) {
                                 response.UnprocessedKeys = {};
                             }
@@ -291,6 +302,11 @@ describe('BatchGet', () => {
                                 response.UnprocessedKeys[tableName] = {Keys: []};
                             }
 
+                            if(response.UnprocessedKeys[tableName].Keys === undefined) {
+                                response.UnprocessedKeys[tableName].Keys = [];
+                            }
+
+                            // @ts-ignore
                             response.UnprocessedKeys[tableName].Keys.push(item);
                             toBeFailed.delete(item.fizz.N);
                         } else {
@@ -310,6 +326,12 @@ describe('BatchGet', () => {
                     }
                 }
 
+                for (let key in response.Responses) {
+                    if(response.Responses.hasOwnProperty(key)) {
+                        numberOfResponsesReturned += response.Responses[key].length;
+                    }
+                }
+
                 return Promise.resolve(response);
             });
 
@@ -326,7 +348,12 @@ describe('BatchGet', () => {
                 : gets;
 
             let idsReturned = new Set<number>();
-            for await (const [table, item] of new BatchGet(mockDynamoDbClient as any, input)) {
+
+            console.log(numberOfFailures);
+            console.log(numberOfResponsesReturned);
+
+            const batchGetIterator = new BatchGet(mockDynamoDbClient as any, input);
+            for await (const [table, item] of batchGetIterator) {
                 const id = parseInt(item.fizz.N as string);
                 expect(idsReturned.has(id)).toBe(false);
                 idsReturned.add(id);
@@ -353,8 +380,11 @@ describe('BatchGet', () => {
                     keyUseCount: {[key: string]: number},
                     [{RequestItems}]
                 ) => {
-                    const keys = [];
+                    const keys: { [key: string]: AttributeValue }[] = [];
+
+                    // @ts-ignore
                     for (const table of Object.keys(RequestItems)) {
+                        // @ts-ignore
                         keys.push(...RequestItems[table].Keys);
                     }
                     for (const {fizz: {N: key}} of keys) {
@@ -376,5 +406,5 @@ describe('BatchGet', () => {
                 expect(callCount[i]).toBe(failures.has(String(i)) ? 2 : 1);
             }
         });
-    }
+   }
 });

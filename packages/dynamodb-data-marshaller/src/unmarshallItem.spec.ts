@@ -79,6 +79,7 @@ describe('unmarshallItem', () => {
                 }
             };
 
+            // @ts-ignore
             expect(unmarshallItem(schema, input)).toEqual({
                 mixedList: [
                     'string',
@@ -113,6 +114,7 @@ describe('unmarshallItem', () => {
               }
           };
 
+            // @ts-ignore
           expect(unmarshallItem(schema, input)).toEqual({
               mixedList: [
                   'string',
@@ -187,6 +189,7 @@ describe('unmarshallItem', () => {
                 },
             };
 
+            // @ts-ignore
             expect(unmarshallItem(schema, input)).toEqual({
                 mixedList: [
                     'string',
@@ -336,6 +339,7 @@ describe('unmarshallItem', () => {
                 },
             };
 
+            // @ts-ignore
             expect(unmarshallItem(schema, input)).toEqual({
                 mixedHash: {
                     foo: 'string',

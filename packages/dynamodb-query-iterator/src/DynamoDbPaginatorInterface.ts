@@ -1,5 +1,5 @@
 import { DynamoDbResultsPage } from './DynamoDbResultsPage';
-import { ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
+import { ConsumedCapacity } from '@aws-sdk/client-dynamodb';
 
 export interface DynamoDbPaginatorInterface extends
     AsyncIterableIterator<DynamoDbResultsPage>

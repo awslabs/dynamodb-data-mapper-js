@@ -30,7 +30,7 @@ describe('BinarySet', () => {
         it('should be a no-op if the value is already in the set', () => {
             const set = new BinarySet([new Uint8Array(1)]);
             expect(set.size).toBe(1);
-            set.add(new ArrayBuffer(1));
+            set.add(new Uint8Array(1));
             expect(set.size).toBe(1);
         });
     });
@@ -67,8 +67,7 @@ describe('BinarySet', () => {
                     new Uint8Array([0xde, 0xad]),
                     new Uint8Array([0xbe, 0xef]),
                 ]);
-                expect(set.delete(
-                    new Int16Array(new Uint8Array([0xde, 0xad]).buffer)
+                expect(set.delete(new Uint8Array([0xde, 0xad])
                 )).toBe(true);
                 expect(set.size).toBe(1);
             }

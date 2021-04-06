@@ -1,6 +1,6 @@
 import {ObjectSet} from "./ObjectSet";
 
-export type BinaryValue = ArrayBuffer|ArrayBufferView;
+export type BinaryValue = Uint8Array;
 
 /**
  * A set of binary values represented as either ArrayBuffer objects or

@@ -1,14 +1,14 @@
 import {isKey} from './isKey';
 import {marshallValue} from './marshallItem';
 import {Schema} from './Schema';
-import {AttributeMap} from 'aws-sdk/clients/dynamodb';
+import {AttributeValue} from "@aws-sdk/client-dynamodb";
 
 export function marshallKey(
     schema: Schema,
     input: {[key: string]: any},
     indexName?: string
-): AttributeMap {
-    const marshalled: AttributeMap = {};
+): {[key: string]: AttributeValue} {
+    const marshalled: {[key: string]: AttributeValue} = {};
 
     for (const propertyKey of Object.keys(schema)) {
         const fieldSchema = schema[propertyKey];

@@ -11,9 +11,7 @@ describe('ScanPaginator', () => {
         promiseFunc.mockClear();
         promiseFunc.mockImplementation(() => Promise.resolve({Items: []}));
         mockDynamoDbClient.scan.mockClear();
-        mockDynamoDbClient.scan.mockImplementation(() => {
-            return {promise: promiseFunc};
-        });
+        mockDynamoDbClient.scan.mockImplementation(promiseFunc);
     });
 
     it(

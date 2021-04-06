@@ -1,8 +1,7 @@
 import { BatchGetOptions, PerTableOptions } from './BatchGetOptions';
 import { BatchOperation } from './BatchOperation';
 import { SyncOrAsyncIterable, TableState } from './types';
-import { AttributeMap, BatchGetItemInput } from 'aws-sdk/clients/dynamodb';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+import {AttributeValue, BatchGetItemInput, DynamoDB} from '@aws-sdk/client-dynamodb';
 
 export const MAX_READ_BATCH_SIZE = 100;
 
@@ -14,11 +13,14 @@ export const MAX_READ_BATCH_SIZE = 100;
  * unprocessed. Exponential backoff on unprocessed items is employed on a
  * per-table basis.
  */
-export class BatchGet extends BatchOperation<AttributeMap> {
+export class BatchGet extends BatchOperation<{[key: string]: AttributeValue}> {
     protected readonly batchSize = MAX_READ_BATCH_SIZE;
 
     private readonly consistentRead?: boolean;
     private readonly options: PerTableOptions;
+
+    private error = 0;
+    private success = 0;
 
     /**
      * @param client    The AWS SDK client with which to communicate with
@@ -31,7 +33,7 @@ export class BatchGet extends BatchOperation<AttributeMap> {
      */
     constructor(
         client: DynamoDB,
-        items: SyncOrAsyncIterable<[string, AttributeMap]>,
+        items: SyncOrAsyncIterable<[string, {[key: string]: AttributeValue}]>,
         {
             ConsistentRead,
             PerTableOptions = {},
@@ -43,11 +45,15 @@ export class BatchGet extends BatchOperation<AttributeMap> {
     }
 
     protected async doBatchRequest() {
-        const operationInput: BatchGetItemInput = {RequestItems: {}};
+        let operationInput: BatchGetItemInput = {RequestItems: {}};
         let batchSize = 0;
 
         while (this.toSend.length > 0) {
-            const [tableName, item] = this.toSend.shift() as [string, AttributeMap];
+            const [tableName, item] = this.toSend.shift() as [string, {[key: string]: AttributeValue}];
+            if(operationInput.RequestItems === undefined) {
+                operationInput.RequestItems = {};
+            }
+
             if (operationInput.RequestItems[tableName] === undefined) {
                 const {
                     projection,
@@ -62,6 +68,8 @@ export class BatchGet extends BatchOperation<AttributeMap> {
                     ExpressionAttributeNames: attributeNames,
                 };
             }
+
+            // @ts-ignore I can't see why operationInput.RequestItems[tableName].Keys can be undefined
             operationInput.RequestItems[tableName].Keys.push(item);
 
             if (++batchSize === this.batchSize) {
@@ -72,12 +80,15 @@ export class BatchGet extends BatchOperation<AttributeMap> {
         const {
             Responses = {},
             UnprocessedKeys = {},
-        } = await this.client.batchGetItem(operationInput).promise();
+        } = await this.client.batchGetItem(operationInput);
 
         const unprocessedTables = new Set<string>();
+
         for (const table of Object.keys(UnprocessedKeys)) {
             unprocessedTables.add(table);
-            this.handleThrottled(table, UnprocessedKeys[table].Keys);
+
+            this.error += UnprocessedKeys[table].Keys!.length;
+            this.handleThrottled(table, UnprocessedKeys[table].Keys!);
         }
 
         this.movePendingToThrottled(unprocessedTables);
@@ -86,12 +97,14 @@ export class BatchGet extends BatchOperation<AttributeMap> {
             const tableData = this.state[table];
             tableData.backoffFactor = Math.max(0, tableData.backoffFactor - 1);
             for (const item of Responses[table]) {
+                this.success++;
                 this.pending.push([table, item]);
             }
         }
+        const a = 0;
     }
 
-    protected getInitialTableState(tableName: string): TableState<AttributeMap> {
+    protected getInitialTableState(tableName: string): TableState<{[key: string]: AttributeValue}> {
         const {
             ExpressionAttributeNames,
             ProjectionExpression,
