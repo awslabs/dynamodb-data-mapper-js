@@ -1,6 +1,6 @@
 {
   "name": "@awslabs-community-fork/dynamodb-auto-marshaller",
-  "version": "0.7.1",
+  "version": "0.7.4",
   "description": "A data marshaller that converts JavaScript types into Amazon DynamoDB AttributeValues",
   "keywords": [
     "aws",
@@ -37,8 +37,7 @@
       ".(ts|tsx)": "ts-jest"
     },
     "globals": {
-      "ts-jest": {
-      }
+      "ts-jest": {}
     },
     "testEnvironment": "node",
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",

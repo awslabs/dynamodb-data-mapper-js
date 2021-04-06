@@ -1,6 +1,6 @@
 {
   "name": "@awslabs-community-fork/dynamodb-expressions",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "Composable expression objects for Amazon DynamoDB",
   "keywords": [
     "aws",
@@ -30,7 +30,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@awslabs-community-fork/dynamodb-auto-marshaller": "^0.7.1",
+    "@awslabs-community-fork/dynamodb-auto-marshaller": "^0.7.4",
     "tslib": "^2.1.0"
   },
   "jest": {
