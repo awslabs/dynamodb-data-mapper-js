@@ -3,7 +3,7 @@ import {AttributeValue, BatchGetItemInput, BatchGetItemOutput} from '@aws-sdk/cl
 import {SyncOrAsyncIterable} from "./types";
 
 describe('BatchGet', () => {
-    const promiseFunc = jest.fn(() => Promise.resolve({
+    const promiseFunc = jest.fn((operationInput) => Promise.resolve({
         UnprocessedKeys: {}
     } as BatchGetItemOutput));
     const mockDynamoDbClient = {
@@ -22,11 +22,10 @@ describe('BatchGet', () => {
     });
 
     it('should allow setting an overall read consistency', async () => {
-        const iterable: SyncOrAsyncIterable<[string, {[key: string]: AttributeValue}]> = [['foo', {fizz: {N: '0'}}]] as SyncOrAsyncIterable<[string, {[key: string]: AttributeValue}]>;
-
         const batchGet = new BatchGet(
             mockDynamoDbClient as any,
-            iterable,
+            //@ts-ignore
+            [['foo', {fizz: {N: '0'}}]],
             {ConsistentRead: true}
         );
         for await (const _ of batchGet) {
@@ -134,7 +133,8 @@ describe('BatchGet', () => {
         ]);
     });
 
-    for (const asyncInput of [true, false]) {
+    const asyncInput = false;
+    //for (const asyncInput of [false, true]) {
         it(
             `should should partition get batches into requests with ${MAX_READ_BATCH_SIZE} or fewer items`,
             async () => {
@@ -282,11 +282,14 @@ describe('BatchGet', () => {
             const toBeFailed = new Set(failures);
             let a = 0;
             let numberOfFailures = 0;
-            promiseFunc.mockImplementation(() => {
+            let numberOfResponsesReturned = 0;
+            promiseFunc.mockImplementation(async (operationInput) => {
                 const buzz = { S: 'Static string' };
                 const response: BatchGetItemOutput = {};
 
-                const {RequestItems} = (mockDynamoDbClient.batchGetItem.mock.calls.slice(-1)[0] as any)[0];
+                const {RequestItems} = operationInput;
+                const numberOfRequestItems = Object.keys(RequestItems).length;
+                const b = 0;
                 for (const tableName of Object.keys(RequestItems)) {
                     for (const item of RequestItems[tableName].Keys) {
                         a++;
@@ -300,7 +303,7 @@ describe('BatchGet', () => {
                                 response.UnprocessedKeys[tableName] = {Keys: []};
                             }
 
-                            if(response.UnprocessedKeys[tableName].Keys) {
+                            if(response.UnprocessedKeys[tableName].Keys === undefined) {
                                 response.UnprocessedKeys[tableName].Keys = [];
                             }
 
@@ -324,6 +327,12 @@ describe('BatchGet', () => {
                     }
                 }
 
+                for (let key in response.Responses) {
+                    if(response.Responses.hasOwnProperty(key)) {
+                        numberOfResponsesReturned += response.Responses[key].length;
+                    }
+                }
+
                 return Promise.resolve(response);
             });
 
@@ -342,6 +351,7 @@ describe('BatchGet', () => {
             let idsReturned = new Set<number>();
 
             console.log(numberOfFailures);
+            console.log(numberOfResponsesReturned);
 
             const batchGetIterator = new BatchGet(mockDynamoDbClient as any, input);
             for await (const [table, item] of batchGetIterator) {
@@ -397,5 +407,5 @@ describe('BatchGet', () => {
                 expect(callCount[i]).toBe(failures.has(String(i)) ? 2 : 1);
             }
         });
-    }
+   // }
 });

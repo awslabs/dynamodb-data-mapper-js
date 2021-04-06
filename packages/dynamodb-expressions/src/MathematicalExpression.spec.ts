@@ -3,16 +3,16 @@ import { ExpressionAttributes } from './ExpressionAttributes';
 import { FunctionExpression } from './FunctionExpression';
 import { MathematicalExpression } from './MathematicalExpression';
 import {
-    ExpressionAttributeNameMap,
-    ExpressionAttributeValueMap
+    AttributeValue,
+
 } from '@aws-sdk/client-dynamodb';
 
 describe('MathematicalExpression', () => {
     const validExpressions: Array<[
         MathematicalExpression,
         string,
-        ExpressionAttributeNameMap,
-        ExpressionAttributeValueMap
+        {[key: string]: string},
+        {[key: string]: AttributeValue}
     ]> = [
         [
             new MathematicalExpression(new AttributePath('foo'), '+', 1),

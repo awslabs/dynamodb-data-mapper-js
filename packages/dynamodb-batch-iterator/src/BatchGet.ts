@@ -19,6 +19,9 @@ export class BatchGet extends BatchOperation<{[key: string]: AttributeValue}> {
     private readonly consistentRead?: boolean;
     private readonly options: PerTableOptions;
 
+    private error = 0;
+    private success = 0;
+
     /**
      * @param client    The AWS SDK client with which to communicate with
      *                  DynamoDB.
@@ -80,9 +83,11 @@ export class BatchGet extends BatchOperation<{[key: string]: AttributeValue}> {
         } = await this.client.batchGetItem(operationInput);
 
         const unprocessedTables = new Set<string>();
+
         for (const table of Object.keys(UnprocessedKeys)) {
             unprocessedTables.add(table);
 
+            this.error += UnprocessedKeys[table].Keys!.length;
             this.handleThrottled(table, UnprocessedKeys[table].Keys!);
         }
 
@@ -92,9 +97,11 @@ export class BatchGet extends BatchOperation<{[key: string]: AttributeValue}> {
             const tableData = this.state[table];
             tableData.backoffFactor = Math.max(0, tableData.backoffFactor - 1);
             for (const item of Responses[table]) {
+                this.success++;
                 this.pending.push([table, item]);
             }
         }
+        const a = 0;
     }
 
     protected getInitialTableState(tableName: string): TableState<{[key: string]: AttributeValue}> {
