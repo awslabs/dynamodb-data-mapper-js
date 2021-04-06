@@ -1,6 +1,6 @@
 {
   "name": "@awslabs-community-fork/dynamodb-data-mapper-annotations",
-  "version": "0.7.7",
+  "version": "0.7.8",
   "description": "Annotations providing easy integration between TypeScript domain objects and the @awslabs-community-fork/dynamodb-data-mapper library",
   "keywords": [
     "aws",
@@ -31,9 +31,9 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@awslabs-community-fork/dynamodb-auto-marshaller": "^0.7.7",
-    "@awslabs-community-fork/dynamodb-data-mapper": "^0.7.7",
-    "@awslabs-community-fork/dynamodb-data-marshaller": "^0.7.7",
+    "@awslabs-community-fork/dynamodb-auto-marshaller": "^0.7.8",
+    "@awslabs-community-fork/dynamodb-data-mapper": "^0.7.8",
+    "@awslabs-community-fork/dynamodb-data-marshaller": "^0.7.8",
     "reflect-metadata": "^0.1.13",
     "tslib": "^2.1.0",
     "uuid": "^3.0.0"
