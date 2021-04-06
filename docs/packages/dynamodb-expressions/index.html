@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>@aws/dynamodb-expressions</title>
+	<title>@awslabs-community-fork/dynamodb-expressions</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">@aws/dynamodb-expressions</a>
+					<a href="index.html" class="title">@awslabs-community-fork/dynamodb-expressions</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -54,7 +54,7 @@
 					<a href="globals.html">Globals</a>
 				</li>
 			</ul>
-			<h1> @aws/dynamodb-expressions</h1>
+			<h1> @awslabs-community-fork/dynamodb-expressions</h1>
 		</div>
 	</div>
 </header>
@@ -96,7 +96,7 @@
 				expressions are:</p>
 				<h4 id="and-expressions"><code>And</code> expressions</h4>
 				<p>Asserts that all of the subexpressions&#39; conditions are satisfied.</p>
-				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {ConditionExpression} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {ConditionExpression} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 <span class="hljs-keyword">const</span> andExpression: ConditionExpression = {
     <span class="hljs-keyword">type</span>: <span class="hljs-string">'And'</span>,
@@ -107,7 +107,7 @@
 </code></pre>
 				<h4 id="or-expressions"><code>Or</code> expressions</h4>
 				<p>Asserts that at least one of the subexpressions&#39; conditions are satisfied.</p>
-				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {ConditionExpression} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {ConditionExpression} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 <span class="hljs-keyword">const</span> orExpression: ConditionExpression = {
     <span class="hljs-keyword">type</span>: <span class="hljs-string">'Or'</span>,
@@ -118,7 +118,7 @@
 </code></pre>
 				<h4 id="not-expressions"><code>Not</code> expressions</h4>
 				<p>Asserts that the subexpression&#39;s condition is not satisfied.</p>
-				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {ConditionExpression} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {ConditionExpression} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 <span class="hljs-keyword">const</span> notExpression: ConditionExpression = {
     <span class="hljs-keyword">type</span>: <span class="hljs-string">'Not'</span>,
@@ -144,7 +144,7 @@
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
     ConditionExpression,
     ConditionExpressionPredicate,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 <span class="hljs-keyword">let</span> equalsExpressionPredicate: ConditionExpressionPredicate = {
     <span class="hljs-keyword">type</span>: <span class="hljs-string">'Equals'</span>,
@@ -152,7 +152,7 @@
 };
 
 <span class="hljs-comment">// you can also define an equality predicate with the `equals` helper method</span>
-<span class="hljs-keyword">import</span> {equals} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+<span class="hljs-keyword">import</span> {equals} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 equalsExpressionPredicate = equals(<span class="hljs-string">'bar'</span>);
 
@@ -164,7 +164,7 @@ equalsExpressionPredicate = equals(<span class="hljs-string">'bar'</span>);
 </code></pre>
 				<p><code>object</code> may be an <a href="#attribute-paths">attribute path</a>, an <a href="#attribute-values">attribute
 					value</a>, or another type. If the lattermost type is received,
-				it will be serialized using the <code>@aws/dynamodb-auto-marshaller</code> package.</p>
+				it will be serialized using the <code>@awslabs-community-fork/dynamodb-auto-marshaller</code> package.</p>
 				<h4 id="notequals-expression-predicate"><code>NotEquals</code> expression predicate</h4>
 				<p>Creates a condition which is true if the defined <code>subject</code> is NOT equal to the
 					defined <code>object</code>. For example, the following predicate object asserts that the
@@ -172,7 +172,7 @@ equalsExpressionPredicate = equals(<span class="hljs-string">'bar'</span>);
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
     ConditionExpression,
     ConditionExpressionPredicate,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 <span class="hljs-keyword">let</span> equalsExpressionPredicate: ConditionExpressionPredicate = {
     <span class="hljs-keyword">type</span>: <span class="hljs-string">'NotEquals'</span>,
@@ -180,7 +180,7 @@ equalsExpressionPredicate = equals(<span class="hljs-string">'bar'</span>);
 };
 
 <span class="hljs-comment">// you can also define an equality predicate with the `equals` helper method</span>
-<span class="hljs-keyword">import</span> {notEquals} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+<span class="hljs-keyword">import</span> {notEquals} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 equalsExpressionPredicate = notEquals(<span class="hljs-string">'bar'</span>);
 
@@ -192,7 +192,7 @@ equalsExpressionPredicate = notEquals(<span class="hljs-string">'bar'</span>);
 </code></pre>
 				<p><code>object</code> may be an <a href="#attribute-paths">attribute path</a>, an <a href="#attribute-values">attribute
 					value</a>, or another type. If the lattermost type is received,
-				it will be serialized using the <code>@aws/dynamodb-auto-marshaller</code> package.</p>
+				it will be serialized using the <code>@awslabs-community-fork/dynamodb-auto-marshaller</code> package.</p>
 				<h4 id="lessthan-expression-predicate"><code>LessThan</code> expression predicate</h4>
 				<p>Creates a condition which is true if the defined <code>subject</code> is less than the
 					defined <code>object</code>. For example, the following predicate object asserts that the
@@ -200,7 +200,7 @@ equalsExpressionPredicate = notEquals(<span class="hljs-string">'bar'</span>);
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
     ConditionExpression,
     ConditionExpressionPredicate,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 <span class="hljs-keyword">let</span> equalsExpressionPredicate: ConditionExpressionPredicate = {
     <span class="hljs-keyword">type</span>: <span class="hljs-string">'LessThan'</span>,
@@ -208,7 +208,7 @@ equalsExpressionPredicate = notEquals(<span class="hljs-string">'bar'</span>);
 };
 
 <span class="hljs-comment">// you can also define an equality predicate with the `equals` helper method</span>
-<span class="hljs-keyword">import</span> {lessThan} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+<span class="hljs-keyword">import</span> {lessThan} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 equalsExpressionPredicate = lessThan(<span class="hljs-number">10</span>);
 
@@ -220,7 +220,7 @@ equalsExpressionPredicate = lessThan(<span class="hljs-number">10</span>);
 </code></pre>
 				<p><code>object</code> may be an <a href="#attribute-paths">attribute path</a>, an <a href="#attribute-values">attribute
 					value</a>, or another type. If the lattermost type is received,
-				it will be serialized using the <code>@aws/dynamodb-auto-marshaller</code> package.</p>
+				it will be serialized using the <code>@awslabs-community-fork/dynamodb-auto-marshaller</code> package.</p>
 				<h4 id="lessthanorequalto-expression-predicate"><code>LessThanOrEqualTo</code> expression predicate</h4>
 				<p>Creates a condition which is true if the defined <code>subject</code> is less than or equal
 					to the defined <code>object</code>. For example, the following predicate object asserts
@@ -228,7 +228,7 @@ equalsExpressionPredicate = lessThan(<span class="hljs-number">10</span>);
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
     ConditionExpression,
     ConditionExpressionPredicate,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 <span class="hljs-keyword">let</span> equalsExpressionPredicate: ConditionExpressionPredicate = {
     <span class="hljs-keyword">type</span>: <span class="hljs-string">'LessThanOrEqualTo'</span>,
@@ -236,7 +236,7 @@ equalsExpressionPredicate = lessThan(<span class="hljs-number">10</span>);
 };
 
 <span class="hljs-comment">// you can also define an equality predicate with the `equals` helper method</span>
-<span class="hljs-keyword">import</span> {lessThanOrEqualTo} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+<span class="hljs-keyword">import</span> {lessThanOrEqualTo} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 equalsExpressionPredicate = lessThanOrEqualTo(<span class="hljs-number">10</span>);
 
@@ -248,7 +248,7 @@ equalsExpressionPredicate = lessThanOrEqualTo(<span class="hljs-number">10</span
 </code></pre>
 				<p><code>object</code> may be an <a href="#attribute-paths">attribute path</a>, an <a href="#attribute-values">attribute
 					value</a>, or another type. If the lattermost type is received,
-				it will be serialized using the <code>@aws/dynamodb-auto-marshaller</code> package.</p>
+				it will be serialized using the <code>@awslabs-community-fork/dynamodb-auto-marshaller</code> package.</p>
 				<h4 id="greaterthan-expression-predicate"><code>GreaterThan</code> expression predicate</h4>
 				<p>Creates a condition which is true if the defined <code>subject</code> is greater than the
 					defined <code>object</code>. For example, the following predicate object asserts that the
@@ -256,7 +256,7 @@ equalsExpressionPredicate = lessThanOrEqualTo(<span class="hljs-number">10</span
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
     ConditionExpression,
     ConditionExpressionPredicate,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 <span class="hljs-keyword">let</span> equalsExpressionPredicate: ConditionExpressionPredicate = {
     <span class="hljs-keyword">type</span>: <span class="hljs-string">'GreaterThan'</span>,
@@ -264,7 +264,7 @@ equalsExpressionPredicate = lessThanOrEqualTo(<span class="hljs-number">10</span
 };
 
 <span class="hljs-comment">// you can also define an equality predicate with the `equals` helper method</span>
-<span class="hljs-keyword">import</span> {greaterThan} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+<span class="hljs-keyword">import</span> {greaterThan} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 equalsExpressionPredicate = greaterThan(<span class="hljs-number">10</span>);
 
@@ -276,7 +276,7 @@ equalsExpressionPredicate = greaterThan(<span class="hljs-number">10</span>);
 </code></pre>
 				<p><code>object</code> may be an <a href="#attribute-paths">attribute path</a>, an <a href="#attribute-values">attribute
 					value</a>, or another type. If the lattermost type is received,
-				it will be serialized using the <code>@aws/dynamodb-auto-marshaller</code> package.</p>
+				it will be serialized using the <code>@awslabs-community-fork/dynamodb-auto-marshaller</code> package.</p>
 				<h4 id="greaterthanorequalto-expression-predicate"><code>GreaterThanOrEqualTo</code> expression predicate</h4>
 				<p>Creates a condition which is true if the defined <code>subject</code> is greater than or
 					equal to the defined <code>object</code>. For example, the following predicate object
@@ -284,7 +284,7 @@ equalsExpressionPredicate = greaterThan(<span class="hljs-number">10</span>);
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
     ConditionExpression,
     ConditionExpressionPredicate,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 <span class="hljs-keyword">let</span> equalsExpressionPredicate: ConditionExpressionPredicate = {
     <span class="hljs-keyword">type</span>: <span class="hljs-string">'GreaterThanOrEqualTo'</span>,
@@ -292,7 +292,7 @@ equalsExpressionPredicate = greaterThan(<span class="hljs-number">10</span>);
 };
 
 <span class="hljs-comment">// you can also define an equality predicate with the `equals` helper method</span>
-<span class="hljs-keyword">import</span> {greaterThanOrEqualTo} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+<span class="hljs-keyword">import</span> {greaterThanOrEqualTo} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 equalsExpressionPredicate = greaterThanOrEqualTo(<span class="hljs-number">10</span>);
 
@@ -304,7 +304,7 @@ equalsExpressionPredicate = greaterThanOrEqualTo(<span class="hljs-number">10</s
 </code></pre>
 				<p><code>object</code> may be an <a href="#attribute-paths">attribute path</a>, an <a href="#attribute-values">attribute
 					value</a>, or another type. If the lattermost type is received,
-				it will be serialized using the <code>@aws/dynamodb-auto-marshaller</code> package.</p>
+				it will be serialized using the <code>@awslabs-community-fork/dynamodb-auto-marshaller</code> package.</p>
 				<h4 id="between-expression-predicate"><code>Between</code> expression predicate</h4>
 				<p>Creates a condition which is true if the defined <code>subject</code> is between a defined
 					<code>lowerBound</code> and <code>upperBound</code>. For example, the following predicate object
@@ -313,7 +313,7 @@ equalsExpressionPredicate = greaterThanOrEqualTo(<span class="hljs-number">10</s
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
     ConditionExpression,
     ConditionExpressionPredicate,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 <span class="hljs-keyword">let</span> equalsExpressionPredicate: ConditionExpressionPredicate = {
     <span class="hljs-keyword">type</span>: <span class="hljs-string">'Between'</span>,
@@ -322,7 +322,7 @@ equalsExpressionPredicate = greaterThanOrEqualTo(<span class="hljs-number">10</s
 };
 
 <span class="hljs-comment">// you can also define an equality predicate with the `equals` helper method</span>
-<span class="hljs-keyword">import</span> {between} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+<span class="hljs-keyword">import</span> {between} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 equalsExpressionPredicate = between(<span class="hljs-number">10</span>, <span class="hljs-number">99</span>);
 
@@ -334,7 +334,7 @@ equalsExpressionPredicate = between(<span class="hljs-number">10</span>, <span c
 </code></pre>
 				<p><code>lowerBound</code> and <code>upperBound</code> may both be an <a href="#attribute-paths">attribute path</a>,
 					an <a href="#attribute-values">attribute value</a>, or another type. If the lattermost type
-					is received, it will be serialized using the <code>@aws/dynamodb-auto-marshaller</code>
+					is received, it will be serialized using the <code>@awslabs-community-fork/dynamodb-auto-marshaller</code>
 				package.</p>
 				<h4 id="membership-expression-predicate"><code>Membership</code> expression predicate</h4>
 				<p>Creates a condition which is true if the defined <code>subject</code> is equal to a member
@@ -343,7 +343,7 @@ equalsExpressionPredicate = between(<span class="hljs-number">10</span>, <span c
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
     ConditionExpression,
     ConditionExpressionPredicate,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 <span class="hljs-keyword">let</span> equalsExpressionPredicate: ConditionExpressionPredicate = {
     <span class="hljs-keyword">type</span>: <span class="hljs-string">'Membership'</span>,
@@ -351,7 +351,7 @@ equalsExpressionPredicate = between(<span class="hljs-number">10</span>, <span c
 };
 
 <span class="hljs-comment">// you can also define an equality predicate with the `equals` helper method</span>
-<span class="hljs-keyword">import</span> {inList} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+<span class="hljs-keyword">import</span> {inList} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 equalsExpressionPredicate = inList(<span class="hljs-string">'fizz'</span>, <span class="hljs-string">'buzz'</span>, <span class="hljs-string">'fizzbuzz'</span>);
 
@@ -363,7 +363,7 @@ equalsExpressionPredicate = inList(<span class="hljs-string">'fizz'</span>, <spa
 </code></pre>
 				<p>Each value in the <code>values</code> array may be an <a href="#attribute-paths">attribute path</a>,
 					an <a href="#attribute-values">attribute value</a>, or another type. If the lattermost type
-					is received, it will be serialized using the <code>@aws/dynamodb-auto-marshaller</code>
+					is received, it will be serialized using the <code>@awslabs-community-fork/dynamodb-auto-marshaller</code>
 				package.</p>
 				<h3 id="serializing-condition-expressions">Serializing condition expressions</h3>
 				<p>To serialize a condition expression, pass a <code>ConditionExpression</code> object and an
@@ -379,7 +379,7 @@ equalsExpressionPredicate = inList(<span class="hljs-string">'fizz'</span>, <spa
     AttributePath,
     AttributeValue,
     ExpressionAttributes,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 <span class="hljs-keyword">const</span> DynamoDb = <span class="hljs-built_in">require</span>(<span class="hljs-string">'aws-sdk/clients/dynamodb'</span>);
 
 <span class="hljs-keyword">const</span> attributes = <span class="hljs-keyword">new</span> ExpressionAttributes();
@@ -412,15 +412,15 @@ client.query({
 					<code>AttributePath</code> (to have the function evaluate part of the DynamoDB document to
 					which the function applies), <code>AttributeValue</code> (for already-marshalled
 					AttributeValue objects), or arbitrary JavaScript values (these will be converted
-				by the <code>@aws/dynamodb-auto-marshaller</code> package&#39;s <code>Marshaller</code>):</p>
+				by the <code>@awslabs-community-fork/dynamodb-auto-marshaller</code> package&#39;s <code>Marshaller</code>):</p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
     AttributePath,
     ExpressionAttributes,
     FunctionExpression,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 <span class="hljs-keyword">const</span> expr = <span class="hljs-keyword">new</span> FunctionExpression(
-    <span class="hljs-string">'list_append'</span>, 
+    <span class="hljs-string">'list_append'</span>,
     <span class="hljs-keyword">new</span> AttributePath(<span class="hljs-string">'path.to.list'</span>),
     <span class="hljs-string">'foo'</span>
 );
@@ -433,7 +433,7 @@ client.query({
 				<h2 id="mathematical-expressions">Mathematical expressions</h2>
 				<p>Mathematical expressions are used in the <code>SET</code> clause of update expressions to
 				add or subtract numbers from attribute properties containing number values:</p>
-				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {MathematicalExpression} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {MathematicalExpression} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 <span class="hljs-keyword">const</span> expr = <span class="hljs-keyword">new</span> MathematicalExpression(<span class="hljs-string">'version'</span>, <span class="hljs-string">'+'</span>, <span class="hljs-number">1</span>);
 </code></pre>
@@ -452,7 +452,7 @@ client.query({
     AttributePath,
     FunctionExpression,
     UpdateExpression,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
 <span class="hljs-keyword">const</span> expr = <span class="hljs-keyword">new</span> UpdateExpression();
 
@@ -464,7 +464,7 @@ expr.set(
     <span class="hljs-keyword">new</span> FunctionExpression(
         <span class="hljs-string">'list_append'</span>,
         <span class="hljs-keyword">new</span> AttributePath(<span class="hljs-string">'path.to.my.desired[2].property'</span>),
-        <span class="hljs-string">'baz'</span>   
+        <span class="hljs-string">'baz'</span>
     )
 );
 

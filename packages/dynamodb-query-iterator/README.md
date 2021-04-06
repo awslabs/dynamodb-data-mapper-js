@@ -22,7 +22,7 @@ Retrieves all pages of a DynamoDB `query` in order.
 #### Example usage
 
 ```typescript
-import { QueryPaginator } from '@aws/dynamodb-query-iterator';
+import { QueryPaginator } from '@awslabs-community-fork/dynamodb-query-iterator';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const paginator = new QueryPaginator(
@@ -60,7 +60,7 @@ You can suspend any running query from within the `for` loop by using the
 as the `ExclusiveStartKey` for another `QueryPaginator` instance:
 
 ```typescript
-import { QueryPaginator } from '@aws/dynamodb-query-iterator';
+import { QueryPaginator } from '@awslabs-community-fork/dynamodb-query-iterator';
 import { QueryInput } from 'aws-sdk/clients/dynamodb';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
@@ -98,7 +98,7 @@ Retrieves all pages of a DynamoDB `scan` in order.
 #### Example usage
 
 ```typescript
-import { ScanPaginator } from '@aws/dynamodb-query-iterator';
+import { ScanPaginator } from '@awslabs-community-fork/dynamodb-query-iterator';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const paginator = new ScanPaginator(
@@ -132,7 +132,7 @@ keyword. If there are still pages that have not been fetched, the
 as the `ExclusiveStartKey` for another `ScanPaginator` instance:
 
 ```typescript
-import { ScanPaginator } from '@aws/dynamodb-query-iterator';
+import { ScanPaginator } from '@awslabs-community-fork/dynamodb-query-iterator';
 import { ScanInput } from 'aws-sdk/clients/dynamodb';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
@@ -170,7 +170,7 @@ provided.
 #### Example usage
 
 ```typescript
-import { ParallelScanPaginator } from '@aws/dynamodb-query-iterator';
+import { ParallelScanPaginator } from '@awslabs-community-fork/dynamodb-query-iterator';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const paginator = new ParallelScanPaginator(
@@ -208,7 +208,7 @@ property of interrupted paginator can be provided to the constructor of another
 import { 
     ParallelScanInput,
     ParallelScanPaginator,
-} from '@aws/dynamodb-query-iterator';
+} from '@awslabs-community-fork/dynamodb-query-iterator';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const client = new DynamoDB({region: 'us-west-2'});
@@ -250,7 +250,7 @@ Retrieves all records of a DynamoDB `query` in order.
 #### Example usage
 
 ```typescript
-import { QueryIterator } from '@aws/dynamodb-query-iterator';
+import { QueryIterator } from '@awslabs-community-fork/dynamodb-query-iterator';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const iterator = new QueryIterator(
@@ -288,7 +288,7 @@ Retrieves all records of a DynamoDB `scan` in order.
 #### Example usage
 
 ```typescript
-import { ScanIterator } from '@aws/dynamodb-query-iterator';
+import { ScanIterator } from '@awslabs-community-fork/dynamodb-query-iterator';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const iterator = new ScanIterator(
@@ -326,7 +326,7 @@ provided.
 #### Example usage
 
 ```typescript
-import { ParallelScanIterator} from '@aws/dynamodb-query-iterator';
+import { ParallelScanIterator} from '@awslabs-community-fork/dynamodb-query-iterator';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const iterator = new ParallelScanIterator(

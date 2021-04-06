@@ -1,15 +1,15 @@
 import 'reflect-metadata';
 import { PropertyAnnotation } from './annotationShapes';
 import { METADATA_TYPE_KEY } from './constants';
-import { BinarySet, NumberValueSet } from "@aws/dynamodb-auto-marshaller";
-import { DynamoDbSchema } from '@aws/dynamodb-data-mapper';
+import { BinarySet, NumberValueSet } from "@awslabs-community-fork/dynamodb-auto-marshaller";
+import { DynamoDbSchema } from '@awslabs-community-fork/dynamodb-data-mapper';
 import {
     DocumentType,
     KeyableType,
     Schema,
     SchemaType,
     SetType
-} from "@aws/dynamodb-data-marshaller";
+} from "@awslabs-community-fork/dynamodb-data-marshaller";
 
 /**
  * Declare a property in a TypeScript class to be part of a DynamoDB schema.

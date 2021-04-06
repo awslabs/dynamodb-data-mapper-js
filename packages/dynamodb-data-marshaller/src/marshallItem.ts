@@ -8,7 +8,7 @@ import {
     BinaryValue,
     Marshaller,
     NumberValueSet,
-} from '@aws/dynamodb-auto-marshaller';
+} from '@awslabs-community-fork/dynamodb-auto-marshaller';
 const bytes = require('utf8-bytes');
 
 /**

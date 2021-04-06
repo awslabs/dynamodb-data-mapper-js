@@ -107,10 +107,10 @@ diff --git a/packages/dynamodb-auto-marshaller/src/BinarySet.ts b/packages/dynam
 +++ b/packages/dynamodb-auto-marshaller/src/BinarySet.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
 @@ -1,6 +1,6 @@
  import {ObjectSet} from "./ObjectSet";
- 
+
 -export type BinaryValue = ArrayBuffer|ArrayBufferView;
 +export type BinaryValue = Uint8Array;
- 
+
  /**
   * A set of binary values represented as either ArrayBuffer objects or
 Index: packages/dynamodb-auto-marshaller/src/Marshaller.ts
@@ -130,7 +130,7 @@ diff --git a/packages/dynamodb-auto-marshaller/src/Marshaller.ts b/packages/dyna
  import {NumberValueSet} from "./NumberValueSet";
 +import {AttributeValue} from "@aws-sdk/client-dynamodb";
 +import {AttributeTypeMap} from "../../dynamodb-data-marshaller";
- 
+
  export const EmptyHandlingStrategies = {
      omit: 'omit',
 @@ -120,7 +122,7 @@
@@ -150,7 +150,7 @@ diff --git a/packages/dynamodb-auto-marshaller/src/Marshaller.ts b/packages/dyna
 +    public unmarshallItem(item: { [key: string]: AttributeValue }): UnmarshalledMapAttributeValue {
          return this.unmarshallValue({M: item}) as UnmarshalledMapAttributeValue;
      }
- 
+
 @@ -318,7 +320,7 @@
      private marshallObject(object: {[key: string]: any}): AttributeValue {
          return {
@@ -162,13 +162,13 @@ diff --git a/packages/dynamodb-auto-marshaller/src/Marshaller.ts b/packages/dyna
                          map[key] = marshalled;
 @@ -379,6 +381,8 @@
          }
- 
+
          if (values.length > 0 || this.onEmpty === 'leave') {
 +            // I get the idea but there's an issue here where it's possible we are missing some required fields.
 +            // @ts-ignore
              return {[tag]: values};
          }
- 
+
 Index: packages/dynamodb-auto-marshaller/tsconfig.cjs.json
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
@@ -276,7 +276,7 @@ diff --git a/packages/dynamodb-batch-iterator/src/BatchGet.spec.ts b/packages/dy
  import { BatchGet, MAX_READ_BATCH_SIZE } from './BatchGet';
 -import {AttributeMap, BatchGetItemInput, BatchGetItemOutput} from 'aws-sdk/clients/dynamodb';
 +import {AttributeMap, BatchGetItemInput, BatchGetItemOutput} from '@aws-sdk/client-dynamodb';
- 
+
  describe('BatchGet', () => {
      const promiseFunc = jest.fn(() => Promise.resolve({
 Index: packages/dynamodb-batch-iterator/src/BatchGet.ts
@@ -294,9 +294,9 @@ diff --git a/packages/dynamodb-batch-iterator/src/BatchGet.ts b/packages/dynamod
 -import { AttributeMap, BatchGetItemInput } from 'aws-sdk/clients/dynamodb';
 -import DynamoDB = require('aws-sdk/clients/dynamodb');
 +import {AttributeValue, BatchGetItemInput, DynamoDB} from '@aws-sdk/client-dynamodb';
- 
+
  export const MAX_READ_BATCH_SIZE = 100;
- 
+
 @@ -14,7 +13,7 @@
   * unprocessed. Exponential backoff on unprocessed items is employed on a
   * per-table basis.
@@ -304,7 +304,7 @@ diff --git a/packages/dynamodb-batch-iterator/src/BatchGet.ts b/packages/dynamod
 -export class BatchGet extends BatchOperation<AttributeMap> {
 +export class BatchGet extends BatchOperation<{[key: string]: AttributeValue}> {
      protected readonly batchSize = MAX_READ_BATCH_SIZE;
- 
+
      private readonly consistentRead?: boolean;
 @@ -31,7 +30,7 @@
       */
@@ -317,7 +317,7 @@ diff --git a/packages/dynamodb-batch-iterator/src/BatchGet.ts b/packages/dynamod
              PerTableOptions = {},
 @@ -47,7 +46,7 @@
          let batchSize = 0;
- 
+
          while (this.toSend.length > 0) {
 -            const [tableName, item] = this.toSend.shift() as [string, AttributeMap];
 +            const [tableName, item] = this.toSend.shift() as [string, {[key: string]: AttributeValue}];
@@ -327,7 +327,7 @@ diff --git a/packages/dynamodb-batch-iterator/src/BatchGet.ts b/packages/dynamod
 @@ -91,7 +90,7 @@
          }
      }
- 
+
 -    protected getInitialTableState(tableName: string): TableState<AttributeMap> {
 +    protected getInitialTableState(tableName: string): TableState<{[key: string]: AttributeValue}> {
          const {
@@ -347,7 +347,7 @@ diff --git a/packages/dynamodb-batch-iterator/src/BatchGetOptions.ts b/packages/
      ProjectionExpression,
 -} from "aws-sdk/clients/dynamodb";
 +} from "@aws-sdk/client-dynamodb";
- 
+
  export interface BatchGetOptions {
      /**
 Index: packages/dynamodb-batch-iterator/src/BatchOperation.ts
@@ -364,18 +364,18 @@ diff --git a/packages/dynamodb-batch-iterator/src/BatchOperation.ts b/packages/d
  } from './types';
 -import DynamoDB = require('aws-sdk/clients/dynamodb');
 +import DynamoDB = require('@aws-sdk/client-dynamodb');
- 
+
  if (Symbol && !Symbol.asyncIterator) {
      (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
 @@ -37,7 +37,7 @@
- 
+
      private readonly throttled = new Set<Promise<ThrottledTableConfiguration<Element>>>();
      private readonly iterator: Iterator<[string, Element]>|AsyncIterator<[string, Element]>;
 -    private sourceDone: boolean = false;
 +    private sourceDone?: boolean = false;
      private sourceNext: IteratorResult<[string, Element]>|Promise<IteratorResult<[string, Element]>>;
      private lastResolved?: Promise<IteratorResult<[string, Element]>>;
- 
+
 Index: packages/dynamodb-batch-iterator/src/BatchWrite.spec.ts
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
@@ -389,7 +389,7 @@ diff --git a/packages/dynamodb-batch-iterator/src/BatchWrite.spec.ts b/packages/
  import { WriteRequest } from './types';
 -import {BatchWriteItemInput, BatchWriteItemOutput} from 'aws-sdk/clients/dynamodb';
 +import {BatchWriteItemInput, BatchWriteItemOutput} from '@aws-sdk/client-dynamodb';
- 
+
  describe('BatchWrite', () => {
      const promiseFunc = jest.fn(() => Promise.resolve({
 Index: packages/dynamodb-batch-iterator/src/BatchWrite.ts
@@ -406,9 +406,9 @@ diff --git a/packages/dynamodb-batch-iterator/src/BatchWrite.ts b/packages/dynam
  import { WriteRequest } from './types';
 -import { BatchWriteItemInput } from 'aws-sdk/clients/dynamodb';
 +import { BatchWriteItemInput } from '@aws-sdk/client-dynamodb';
- 
+
  export const MAX_WRITE_BATCH_SIZE = 25;
- 
+
 Index: packages/dynamodb-batch-iterator/src/itemIdentifier.ts
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
@@ -422,7 +422,7 @@ diff --git a/packages/dynamodb-batch-iterator/src/itemIdentifier.ts b/packages/d
 -import { AttributeMap, BinaryAttributeValue } from 'aws-sdk/clients/dynamodb';
 +import { AttributeMap, BinaryAttributeValue } from '@aws-sdk/client-dynamodb';
  const bytes = require('utf8-bytes');
- 
+
  /**
 Index: packages/dynamodb-batch-iterator/src/types.ts
 IDEA additional info:
@@ -438,7 +438,7 @@ diff --git a/packages/dynamodb-batch-iterator/src/types.ts b/packages/dynamodb-b
      WriteRequest as DynamoDbWriteRequest
 -} from "aws-sdk/clients/dynamodb";
 +} from "@aws-sdk/client-dynamodb";
- 
+
  /**
   * A synchronous or asynchronous iterable.
 Index: packages/dynamodb-batch-iterator/tsconfig.cjs.json
@@ -535,7 +535,7 @@ diff --git a/packages/dynamodb-data-mapper-annotations/package.json b/packages/d
 +    "typescript": "^4.2"
    },
    "dependencies": {
-     "@aws/dynamodb-auto-marshaller": "^0.7.1",
+     "@awslabs-community-fork/dynamodb-auto-marshaller": "^0.7.1",
 Index: packages/dynamodb-data-mapper-annotations/tsconfig.cjs.json
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
@@ -632,7 +632,7 @@ diff --git a/packages/dynamodb-data-mapper/package.json b/packages/dynamodb-data
 +    "typescript": "^4.2"
    },
    "dependencies": {
-     "@aws/dynamodb-auto-marshaller": "^0.7.1",
+     "@awslabs-community-fork/dynamodb-auto-marshaller": "^0.7.1",
 @@ -46,6 +47,6 @@
      "tslib": "^1.9"
    },
@@ -655,9 +655,9 @@ diff --git a/packages/dynamodb-data-mapper/src/DataMapper.integ.ts b/packages/dy
  import {hrtime} from 'process';
 -import DynamoDB = require('aws-sdk/clients/dynamodb');
 +import DynamoDB = require('@aws-sdk/client-dynamodb');
- import {DocumentType} from "@aws/dynamodb-data-marshaller";
- import {Schema} from "@aws/dynamodb-data-marshaller";
- import {equals} from "@aws/dynamodb-expressions";
+ import {DocumentType} from "@awslabs-community-fork/dynamodb-data-marshaller";
+ import {Schema} from "@awslabs-community-fork/dynamodb-data-marshaller";
+ import {equals} from "@awslabs-community-fork/dynamodb-expressions";
 Index: packages/dynamodb-data-mapper/src/DataMapper.spec.ts
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
@@ -672,9 +672,9 @@ diff --git a/packages/dynamodb-data-mapper/src/DataMapper.spec.ts b/packages/dyn
      PutItemOutput
 -} from "aws-sdk/clients/dynamodb";
 +} from "@aws-sdk/client-dynamodb";
- 
+
  type BinaryValue = ArrayBuffer|ArrayBufferView;
- 
+
 Index: packages/dynamodb-data-mapper/src/DataMapper.ts
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
@@ -691,9 +691,9 @@ diff --git a/packages/dynamodb-data-mapper/src/DataMapper.ts b/packages/dynamodb
 -import DynamoDB = require('aws-sdk/clients/dynamodb');
 +} from '@aws-sdk/client-dynamodb';
 +import DynamoDB = require('@aws-sdk/client-dynamodb');
- 
+
  require('./asyncIteratorSymbolPolyfill');
- 
+
 Index: packages/dynamodb-data-mapper/src/ItemNotFoundException.spec.ts
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
@@ -706,7 +706,7 @@ diff --git a/packages/dynamodb-data-mapper/src/ItemNotFoundException.spec.ts b/p
  import {ItemNotFoundException} from "./ItemNotFoundException";
 -import {GetItemInput} from "aws-sdk/clients/dynamodb";
 +import {GetItemInput} from "@aws-sdk/client-dynamodb";
- 
+
  describe('ItemNotFoundException', () => {
      it('should include the request sent as part of the error', () => {
 Index: packages/dynamodb-data-mapper/src/ItemNotFoundException.ts
@@ -720,7 +720,7 @@ diff --git a/packages/dynamodb-data-mapper/src/ItemNotFoundException.ts b/packag
 @@ -1,4 +1,4 @@
 -import {GetItemInput} from "aws-sdk/clients/dynamodb";
 +import {GetItemInput} from "@aws-sdk/client-dynamodb";
- 
+
  /**
   * An exception thrown when an item was sought with a DynamoDB::GetItem
 Index: packages/dynamodb-data-mapper/src/Iterator.ts
@@ -735,9 +735,9 @@ diff --git a/packages/dynamodb-data-mapper/src/Iterator.ts b/packages/dynamodb-d
  import { Paginator as AbstractPaginator } from './Paginator';
 -import { ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
 +import { ConsumedCapacity } from '@aws-sdk/client-dynamodb';
- 
+
  require('./asyncIteratorSymbolPolyfill');
- 
+
 Index: packages/dynamodb-data-mapper/src/Paginator.ts
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
@@ -749,15 +749,15 @@ diff --git a/packages/dynamodb-data-mapper/src/Paginator.ts b/packages/dynamodb-
 @@ -5,7 +5,7 @@
      unmarshallItem,
      ZeroArgumentsConstructor,
- } from '@aws/dynamodb-data-marshaller';
+ } from '@awslabs-community-fork/dynamodb-data-marshaller';
 -import { ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
 +import { ConsumedCapacity } from '@aws-sdk/client-dynamodb';
- 
+
  require('./asyncIteratorSymbolPolyfill');
- 
+
 @@ -91,7 +91,7 @@
                  );
- 
+
                  return {
 -                    value: (value.Items || []).map(item => unmarshallItem(
 +                    value: (value.Items || []).map( (item: any) => unmarshallItem(
@@ -775,10 +775,10 @@ diff --git a/packages/dynamodb-data-mapper/src/ParallelScanIterator.ts b/package
 @@ -2,7 +2,7 @@
  import { ParallelScanOptions } from './namedParameters';
  import { ParallelScanPaginator } from './ParallelScanPaginator';
- import { ZeroArgumentsConstructor } from '@aws/dynamodb-data-marshaller';
+ import { ZeroArgumentsConstructor } from '@awslabs-community-fork/dynamodb-data-marshaller';
 -import DynamoDB = require('aws-sdk/clients/dynamodb');
 +import DynamoDB = require('@aws-sdk/client-dynamodb');
- 
+
  /**
   * Iterates over each item returned by a parallel DynamoDB scan until no more
 Index: packages/dynamodb-data-mapper/src/ParallelScanPaginator.ts
@@ -792,10 +792,10 @@ diff --git a/packages/dynamodb-data-mapper/src/ParallelScanPaginator.ts b/packag
 @@ -18,7 +18,7 @@
      unmarshallItem,
      ZeroArgumentsConstructor,
- } from '@aws/dynamodb-data-marshaller';
+ } from '@awslabs-community-fork/dynamodb-data-marshaller';
 -import DynamoDB = require('aws-sdk/clients/dynamodb');
 +import DynamoDB = require('@aws-sdk/client-dynamodb');
- 
+
  /**
   * Iterates over each page of items returned by a parallel DynamoDB scan until
 Index: packages/dynamodb-data-mapper/src/QueryIterator.ts
@@ -809,10 +809,10 @@ diff --git a/packages/dynamodb-data-mapper/src/QueryIterator.ts b/packages/dynam
 @@ -6,7 +6,7 @@
      ConditionExpression,
      ConditionExpressionPredicate,
- } from '@aws/dynamodb-expressions';
+ } from '@awslabs-community-fork/dynamodb-expressions';
 -import DynamoDB = require('aws-sdk/clients/dynamodb');
 +import DynamoDB = require('@aws-sdk/client-dynamodb');
- 
+
  /**
   * Iterates over each item returned by a DynamoDB query until no more pages are
 Index: packages/dynamodb-data-mapper/src/QueryPaginator.ts
@@ -826,12 +826,12 @@ diff --git a/packages/dynamodb-data-mapper/src/QueryPaginator.ts b/packages/dyna
 @@ -15,8 +15,8 @@
      isConditionExpression,
      isConditionExpressionPredicate,
- } from '@aws/dynamodb-expressions';
+ } from '@awslabs-community-fork/dynamodb-expressions';
 -import { QueryInput } from 'aws-sdk/clients/dynamodb';
 -import DynamoDB = require('aws-sdk/clients/dynamodb');
 +import { QueryInput } from '@aws-sdk/client-dynamodb';
 +import DynamoDB = require('@aws-sdk/client-dynamodb');
- 
+
  /**
   * Iterates over each page of items returned by a DynamoDB query until no more
 Index: packages/dynamodb-data-mapper/src/ScanIterator.ts
@@ -845,10 +845,10 @@ diff --git a/packages/dynamodb-data-mapper/src/ScanIterator.ts b/packages/dynamo
 @@ -2,7 +2,7 @@
  import { SequentialScanOptions } from './namedParameters';
  import { ScanPaginator } from './ScanPaginator';
- import { ZeroArgumentsConstructor } from '@aws/dynamodb-data-marshaller';
+ import { ZeroArgumentsConstructor } from '@awslabs-community-fork/dynamodb-data-marshaller';
 -import DynamoDB = require('aws-sdk/clients/dynamodb');
 +import DynamoDB = require('@aws-sdk/client-dynamodb');
- 
+
  /**
   * Iterates over each item returned by a DynamoDB scan until no more pages are
 Index: packages/dynamodb-data-mapper/src/ScanPaginator.ts
@@ -861,11 +861,11 @@ diff --git a/packages/dynamodb-data-mapper/src/ScanPaginator.ts b/packages/dynam
 +++ b/packages/dynamodb-data-mapper/src/ScanPaginator.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
 @@ -3,7 +3,7 @@
  import { Paginator } from './Paginator';
- import { ScanPaginator as BasePaginator } from '@aws/dynamodb-query-iterator';
- import { ZeroArgumentsConstructor } from '@aws/dynamodb-data-marshaller';
+ import { ScanPaginator as BasePaginator } from '@awslabs-community-fork/dynamodb-query-iterator';
+ import { ZeroArgumentsConstructor } from '@awslabs-community-fork/dynamodb-data-marshaller';
 -import DynamoDB = require('aws-sdk/clients/dynamodb');
 +import DynamoDB = require('@aws-sdk/client-dynamodb');
- 
+
  /**
   * Iterates over each page of items returned by a DynamoDB scan until no more
 Index: packages/dynamodb-data-mapper/src/buildScanInput.ts
@@ -878,11 +878,11 @@ diff --git a/packages/dynamodb-data-mapper/src/buildScanInput.ts b/packages/dyna
 +++ b/packages/dynamodb-data-mapper/src/buildScanInput.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
 @@ -7,7 +7,7 @@
      ZeroArgumentsConstructor,
- } from '@aws/dynamodb-data-marshaller';
- import { ExpressionAttributes } from '@aws/dynamodb-expressions';
+ } from '@awslabs-community-fork/dynamodb-data-marshaller';
+ import { ExpressionAttributes } from '@awslabs-community-fork/dynamodb-expressions';
 -import { ScanInput } from 'aws-sdk/clients/dynamodb';
 +import { ScanInput } from '@aws-sdk/client-dynamodb';
- 
+
  /**
   * @internal
 Index: packages/dynamodb-data-mapper/src/marshallStartKey.ts
@@ -894,10 +894,10 @@ diff --git a/packages/dynamodb-data-mapper/src/marshallStartKey.ts b/packages/dy
 --- a/packages/dynamodb-data-mapper/src/marshallStartKey.ts	(revision 3ffe4bfb9187cf21bf87f72212526fa72172e555)
 +++ b/packages/dynamodb-data-mapper/src/marshallStartKey.ts	(revision cda3ff1665f65158fef7087744a6eb89d2db47a6)
 @@ -1,5 +1,5 @@
- import { marshallValue, Schema } from '@aws/dynamodb-data-marshaller';
+ import { marshallValue, Schema } from '@awslabs-community-fork/dynamodb-data-marshaller';
 -import { Key } from 'aws-sdk/clients/dynamodb';
 +import { Key } from '@aws-sdk/client-dynamodb';
- 
+
  /**
   * @internal
 Index: packages/dynamodb-data-mapper/src/namedParameters/DataMapperConfiguration.ts
@@ -912,7 +912,7 @@ diff --git a/packages/dynamodb-data-mapper/src/namedParameters/DataMapperConfigu
 -import DynamoDB = require("aws-sdk/clients/dynamodb");
 +import DynamoDB = require("@aws-sdk/client-dynamodb");
  import { ReadConsistency } from '../constants';
- 
+
  export interface DataMapperConfiguration {
 Index: packages/dynamodb-data-mapper/tsconfig.cjs.json
 IDEA additional info:
@@ -1007,7 +1007,7 @@ diff --git a/packages/dynamodb-data-marshaller/package.json b/packages/dynamodb-
 +    "typescript": "^4.2"
    },
    "dependencies": {
-     "@aws/dynamodb-auto-marshaller": "^0.7.1",
+     "@awslabs-community-fork/dynamodb-auto-marshaller": "^0.7.1",
 @@ -42,6 +44,6 @@
      "utf8-bytes": "^0.0.1"
    },
@@ -1027,10 +1027,10 @@ diff --git a/packages/dynamodb-data-marshaller/src/SchemaType.ts b/packages/dyna
 @@ -1,7 +1,7 @@
  import { ScalarAttributeType } from './KeySchema';
  import { Schema } from './Schema';
- import { BinaryValue, MarshallingOptions } from "@aws/dynamodb-auto-marshaller";
+ import { BinaryValue, MarshallingOptions } from "@awslabs-community-fork/dynamodb-auto-marshaller";
 -import { AttributeValue } from 'aws-sdk/clients/dynamodb';
 +import { AttributeValue } from '@aws-sdk/client-dynamodb';
- 
+
  /**
   * The enumeration of types supported by this marshaller package.
 Index: packages/dynamodb-data-marshaller/src/marshallExpression.ts
@@ -1081,7 +1081,7 @@ diff --git a/packages/dynamodb-data-marshaller/src/marshallKey.ts b/packages/dyn
  import {Schema} from './Schema';
 -import {AttributeMap} from 'aws-sdk/clients/dynamodb';
 +import {AttributeMap} from '@aws-sdk/client-dynamodb';
- 
+
  export function marshallKey(
      schema: Schema,
 Index: packages/dynamodb-data-marshaller/src/unmarshallItem.ts
@@ -1098,7 +1098,7 @@ diff --git a/packages/dynamodb-data-marshaller/src/unmarshallItem.ts b/packages/
      StringSetAttributeValue,
 -} from "aws-sdk/clients/dynamodb";
 +} from "@aws-sdk/client-dynamodb";
- 
+
  /**
   * Unmarshall a DynamoDB item into a JavaScript value.
 Index: packages/dynamodb-data-marshaller/tsconfig.cjs.json
@@ -1197,7 +1197,7 @@ diff --git a/packages/dynamodb-expressions/package.json b/packages/dynamodb-expr
 +     "@aws-sdk/client-dynamodb": "^3.10.0"
    },
    "dependencies": {
-     "@aws/dynamodb-auto-marshaller": "^0.7.1",
+     "@awslabs-community-fork/dynamodb-auto-marshaller": "^0.7.1",
 Index: packages/dynamodb-expressions/src/AttributeValue.ts
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
@@ -1209,7 +1209,7 @@ diff --git a/packages/dynamodb-expressions/src/AttributeValue.ts b/packages/dyna
 @@ -1,4 +1,4 @@
 -import {AttributeValue as BaseAttributeValue} from 'aws-sdk/clients/dynamodb';
 +import {AttributeValue as BaseAttributeValue} from '@aws-sdk/client-dynamodb';
- 
+
  const MARSHALLED_ATTRIBUTE_VALUE_TAG = 'AmazonDynamoDbAttributeValue';
  const EXPECTED_TOSTRING = `[object ${MARSHALLED_ATTRIBUTE_VALUE_TAG}]`;
 Index: packages/dynamodb-expressions/src/ExpressionAttributes.spec.ts
@@ -1225,7 +1225,7 @@ diff --git a/packages/dynamodb-expressions/src/ExpressionAttributes.spec.ts b/pa
 -import {ExpressionAttributeValueMap} from 'aws-sdk/clients/dynamodb';
 +import {ExpressionAttributeValueMap} from '@aws-sdk/client-dynamodb';
  import {AttributePath} from "./AttributePath";
- 
+
  describe('ExpressionAttributes', () => {
 Index: packages/dynamodb-expressions/src/ExpressionAttributes.ts
 IDEA additional info:
@@ -1241,7 +1241,7 @@ diff --git a/packages/dynamodb-expressions/src/ExpressionAttributes.ts b/package
      ExpressionAttributeValueMap,
 -} from 'aws-sdk/clients/dynamodb';
 +} from '@aws-sdk/client-dynamodb';
- 
+
  /**
   * An object that manages expression attribute name and value substitution.
 Index: packages/dynamodb-expressions/src/MathematicalExpression.spec.ts
@@ -1258,7 +1258,7 @@ diff --git a/packages/dynamodb-expressions/src/MathematicalExpression.spec.ts b/
      ExpressionAttributeValueMap
 -} from 'aws-sdk/clients/dynamodb';
 +} from '@aws-sdk/client-dynamodb';
- 
+
  describe('MathematicalExpression', () => {
      const validExpressions: Array<[
 Index: packages/dynamodb-expressions/tsconfig.cjs.json
@@ -1371,7 +1371,7 @@ diff --git a/packages/dynamodb-query-iterator/src/DynamoDbPaginator.ts b/package
  import { mergeConsumedCapacities } from './mergeConsumedCapacities';
 -import { ConsumedCapacity, Key } from 'aws-sdk/clients/dynamodb';
 +import {AttributeValue, ConsumedCapacity} from '@aws-sdk/client-dynamodb';
- 
+
  if (Symbol && !Symbol.asyncIterator) {
      (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
 @@ -10,7 +10,7 @@
@@ -1391,7 +1391,7 @@ diff --git a/packages/dynamodb-query-iterator/src/DynamoDbPaginator.ts b/package
 +    get lastEvaluatedKey(): {[key: string]: AttributeValue}|undefined {
          return this._lastKey;
      }
- 
+
 Index: packages/dynamodb-query-iterator/src/DynamoDbPaginatorInterface.ts
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
@@ -1404,7 +1404,7 @@ diff --git a/packages/dynamodb-query-iterator/src/DynamoDbPaginatorInterface.ts 
  import { DynamoDbResultsPage } from './DynamoDbResultsPage';
 -import { ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
 +import { ConsumedCapacity } from '@aws-sdk/client-dynamodb';
- 
+
  export interface DynamoDbPaginatorInterface extends
      AsyncIterableIterator<DynamoDbResultsPage>
 Index: packages/dynamodb-query-iterator/src/DynamoDbResultsPage.ts
@@ -1423,14 +1423,14 @@ diff --git a/packages/dynamodb-query-iterator/src/DynamoDbResultsPage.ts b/packa
 -    Key,
 -} from "aws-sdk/clients/dynamodb";
 +} from "@aws-sdk/client-dynamodb";
- 
+
  export interface DynamoDbResultsPage {
      /**
       * An array of retrieved items.
       */
 -    Items?: Array<AttributeMap>;
 +    Items?: Array<{[key: string]: AttributeValue}>;
- 
+
      /**
       * The number of items in the response. If you used a filter in the request,
 @@ -37,7 +36,7 @@
@@ -1439,7 +1439,7 @@ diff --git a/packages/dynamodb-query-iterator/src/DynamoDbResultsPage.ts b/packa
       */
 -    LastEvaluatedKey?: Key;
 +    LastEvaluatedKey?: {[key: string]: AttributeValue};
- 
+
      /**
       * The capacity units consumed by the operation. The data returned includes
 Index: packages/dynamodb-query-iterator/src/ItemIterator.ts
@@ -1454,24 +1454,24 @@ diff --git a/packages/dynamodb-query-iterator/src/ItemIterator.ts b/packages/dyn
  import { DynamoDbPaginatorInterface } from './DynamoDbPaginatorInterface';
 -import { AttributeMap, ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
 +import {AttributeValue, ConsumedCapacity} from '@aws-sdk/client-dynamodb';
- 
+
  if (Symbol && !Symbol.asyncIterator) {
      (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
 @@ -7,18 +7,18 @@
- 
+
  export abstract class ItemIterator<
      Paginator extends DynamoDbPaginatorInterface
 -> implements AsyncIterableIterator<AttributeMap> {
 +> implements AsyncIterableIterator<{[key: string]: AttributeValue}> {
- 
+
      private _iteratedCount = 0;
 -    private lastResolved: Promise<IteratorResult<AttributeMap>> = <any>Promise.resolve();
 -    private readonly pending: Array<AttributeMap> = [];
 +    private lastResolved: Promise<IteratorResult<{[key: string]: AttributeValue}>> = <any>Promise.resolve();
 +    private readonly pending: Array<{[key: string]: AttributeValue}> = [];
- 
+
      protected constructor(private readonly paginator: Paginator) {}
- 
+
      /**
       * @inheritDoc
       */
@@ -1479,7 +1479,7 @@ diff --git a/packages/dynamodb-query-iterator/src/ItemIterator.ts b/packages/dyn
 +    [Symbol.asyncIterator](): AsyncIterableIterator<{[key: string]: AttributeValue}> {
          return this;
      }
- 
+
 @@ -42,7 +42,7 @@
      /**
       * @inheritDoc
@@ -1501,20 +1501,20 @@ diff --git a/packages/dynamodb-query-iterator/src/ItemIterator.ts b/packages/dyn
 @@ -92,7 +92,7 @@
          return this.paginator.scannedCount;
      }
- 
+
 -    private getNext(): Promise<IteratorResult<AttributeMap>> {
 +    private getNext(): Promise<IteratorResult<{[key: string]: AttributeValue}>> {
          if (this.pending.length > 0) {
              this._iteratedCount++;
              return Promise.resolve({
 @@ -103,7 +103,7 @@
- 
+
          return this.paginator.next().then(({done, value}) => {
              if (done) {
 -                return {done} as IteratorResult<AttributeMap>;
 +                return {done} as IteratorResult<{[key: string]: AttributeValue}>;
              }
- 
+
              this.pending.push(...value.Items || []);
 Index: packages/dynamodb-query-iterator/src/ParallelScanInput.ts
 IDEA additional info:
@@ -1527,7 +1527,7 @@ diff --git a/packages/dynamodb-query-iterator/src/ParallelScanInput.ts b/package
 @@ -1,4 +1,4 @@
 -import { ScanInput } from 'aws-sdk/clients/dynamodb';
 +import { ScanInput } from '@aws-sdk/client-dynamodb';
- 
+
  export interface ParallelScanInput extends ScanInput {
      /**
 Index: packages/dynamodb-query-iterator/src/ParallelScanIterator.ts
@@ -1544,7 +1544,7 @@ diff --git a/packages/dynamodb-query-iterator/src/ParallelScanIterator.ts b/pack
  } from './ParallelScanPaginator';
 -import DynamoDB = require('aws-sdk/clients/dynamodb');
 +import {DynamoDB} from "@aws-sdk/client-dynamodb";
- 
+
  export class ParallelScanIterator extends ItemIterator<ParallelScanPaginator> {
      constructor(
 Index: packages/dynamodb-query-iterator/src/ParallelScanPaginator.ts
@@ -1563,7 +1563,7 @@ diff --git a/packages/dynamodb-query-iterator/src/ParallelScanPaginator.ts b/pac
 -import DynamoDB = require('aws-sdk/clients/dynamodb');
 +import { ConsumedCapacity, Key } from '@aws-sdk/client-dynamodb';
 +import DynamoDB = require('@aws-sdk/client-dynamodb');
- 
+
  /**
   * Pagination state for a scan segment for which the first page has not yet been
 Index: packages/dynamodb-query-iterator/src/QueryIterator.ts
@@ -1581,7 +1581,7 @@ diff --git a/packages/dynamodb-query-iterator/src/QueryIterator.ts b/packages/dy
 -import DynamoDB = require('aws-sdk/clients/dynamodb');
 +import { QueryInput } from '@aws-sdk/client-dynamodb';
 +import DynamoDB = require('@aws-sdk/client-dynamodb');
- 
+
  export class QueryIterator extends ItemIterator<QueryPaginator> {
      constructor(client: DynamoDB, input: QueryInput, limit?: number) {
 Index: packages/dynamodb-query-iterator/src/QueryPaginator.ts
@@ -1599,7 +1599,7 @@ diff --git a/packages/dynamodb-query-iterator/src/QueryPaginator.ts b/packages/d
 -import DynamoDB = require('aws-sdk/clients/dynamodb');
 +import { QueryInput } from '@aws-sdk/client-dynamodb';
 +import DynamoDB = require('@aws-sdk/client-dynamodb');
- 
+
  export class QueryPaginator extends DynamoDbPaginator {
      private nextRequest?: QueryInput;
 Index: packages/dynamodb-query-iterator/src/ScanIterator.ts
@@ -1617,7 +1617,7 @@ diff --git a/packages/dynamodb-query-iterator/src/ScanIterator.ts b/packages/dyn
 -import DynamoDB = require('aws-sdk/clients/dynamodb');
 +import { ScanInput } from '@aws-sdk/client-dynamodb';
 +import DynamoDB = require('@aws-sdk/client-dynamodb');
- 
+
  export class ScanIterator extends ItemIterator<ScanPaginator> {
      constructor(client: DynamoDB, input: ScanInput, limit?: number) {
 Index: packages/dynamodb-query-iterator/src/ScanPaginator.ts
@@ -1635,7 +1635,7 @@ diff --git a/packages/dynamodb-query-iterator/src/ScanPaginator.ts b/packages/dy
 -import DynamoDB = require('aws-sdk/clients/dynamodb');
 +import { ScanInput } from '@aws-sdk/client-dynamodb';
 +import DynamoDB = require('@aws-sdk/client-dynamodb');
- 
+
  export class ScanPaginator extends DynamoDbPaginator {
      private nextRequest?: ScanInput;
 Index: packages/dynamodb-query-iterator/src/mergeConsumedCapacities.spec.ts
@@ -1650,7 +1650,7 @@ diff --git a/packages/dynamodb-query-iterator/src/mergeConsumedCapacities.spec.t
  import { mergeConsumedCapacities } from './mergeConsumedCapacities';
 -import { ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
 +import { ConsumedCapacity } from '@aws-sdk/client-dynamodb';
- 
+
  describe('mergeConsumedCapacities', () => {
      it('should return undefined when called two undefined arguments', () => {
 Index: packages/dynamodb-query-iterator/src/mergeConsumedCapacities.ts
@@ -1668,12 +1668,12 @@ diff --git a/packages/dynamodb-query-iterator/src/mergeConsumedCapacities.ts b/p
 -    SecondaryIndexesCapacityMap,
 -} from 'aws-sdk/clients/dynamodb';
 +} from '@aws-sdk/client-dynamodb';
- 
+
  /**
   * @internal
 @@ -47,11 +46,11 @@
  }
- 
+
  function mergeCapacityMaps(
 -    a?: SecondaryIndexesCapacityMap,
 -    b?: SecondaryIndexesCapacityMap
@@ -1684,7 +1684,7 @@ diff --git a/packages/dynamodb-query-iterator/src/mergeConsumedCapacities.ts b/p
      if (a || b) {
 -        const out: SecondaryIndexesCapacityMap = {};
 +        const out: {[key: string]: Capacity} = {};
- 
+
          a = a || {};
          b = b || {};
 Index: packages/dynamodb-query-iterator/tsconfig.cjs.json

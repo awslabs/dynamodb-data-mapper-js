@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>@aws/dynamodb-batch-iterator</title>
+	<title>@awslabs-community-fork/dynamodb-batch-iterator</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">@aws/dynamodb-batch-iterator</a>
+					<a href="index.html" class="title">@awslabs-community-fork/dynamodb-batch-iterator</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -54,7 +54,7 @@
 					<a href="globals.html">Globals</a>
 				</li>
 			</ul>
-			<h1> @aws/dynamodb-batch-iterator</h1>
+			<h1> @awslabs-community-fork/dynamodb-batch-iterator</h1>
 		</div>
 	</div>
 </header>
@@ -77,7 +77,7 @@
 					iterable may be synchronous (such as an array) or asynchronous (such as an
 					object stream wrapped with <a href="https://github.com/calvinmetcalf/async-iter-stream">async-iter-stream</a>&#39;s
 				<code>wrap</code> method).</p>
-				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { BatchGet } <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-batch-iterator'</span>;
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { BatchGet } <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-batch-iterator'</span>;
 <span class="hljs-keyword">import</span> DynamoDB = <span class="hljs-built_in">require</span>(<span class="hljs-string">'aws-sdk/clients/dynamodb'</span>);
 
 <span class="hljs-keyword">const</span> dynamoDb = <span class="hljs-keyword">new</span> DynamoDB({region: <span class="hljs-string">'us-west-2'</span>});
@@ -109,7 +109,7 @@
 				<code>wrap</code> method).</p>
 				<p>Each write request should contain either a <code>DeleteRequest</code> key or a <code>PutRequest</code>
 				key as described <a href="http://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_WriteRequest.html#DDB-Type-WriteRequest-DeleteRequest">in the Amazon DynamoDB API reference</a>.</p>
-				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { BatchWrite } <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-batch-iterator'</span>;
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { BatchWrite } <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-batch-iterator'</span>;
 <span class="hljs-keyword">import</span> DynamoDB = <span class="hljs-built_in">require</span>(<span class="hljs-string">'aws-sdk/clients/dynamodb'</span>);
 
 <span class="hljs-keyword">const</span> dynamoDb = <span class="hljs-keyword">new</span> DynamoDB({region: <span class="hljs-string">'us-west-2'</span>});

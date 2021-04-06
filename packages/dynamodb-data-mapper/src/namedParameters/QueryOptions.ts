@@ -1,11 +1,11 @@
 import { ReadConsistencyConfiguration } from './ReadConsistencyConfiguration';
 import { StringToAnyObjectMap } from '../constants';
-import { ZeroArgumentsConstructor } from '@aws/dynamodb-data-marshaller';
+import { ZeroArgumentsConstructor } from '@awslabs-community-fork/dynamodb-data-marshaller';
 import {
     ConditionExpression,
     ConditionExpressionPredicate,
     ProjectionExpression,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
 
 export interface QueryOptions extends ReadConsistencyConfiguration {
     /**

@@ -2,19 +2,19 @@ import { marshallStartKey } from './marshallStartKey';
 import { QueryOptions } from './namedParameters';
 import { Paginator } from './Paginator';
 import { getSchema, getTableName } from './protocols';
-import { QueryPaginator as BasePaginator } from '@aws/dynamodb-query-iterator';
+import { QueryPaginator as BasePaginator } from '@awslabs-community-fork/dynamodb-query-iterator';
 import {
     marshallConditionExpression,
     marshallProjectionExpression,
     ZeroArgumentsConstructor,
-} from '@aws/dynamodb-data-marshaller';
+} from '@awslabs-community-fork/dynamodb-data-marshaller';
 import {
     ConditionExpression,
     ConditionExpressionPredicate,
     ExpressionAttributes,
     isConditionExpression,
     isConditionExpressionPredicate,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
 import { QueryInput } from '@aws-sdk/client-dynamodb';
 import { DynamoDB } from "@aws-sdk/client-dynamodb";
 

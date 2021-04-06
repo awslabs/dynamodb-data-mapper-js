@@ -3,7 +3,7 @@
 [![Apache 2 License](https://img.shields.io/github/license/awslabs/dynamodb-data-mapper-js.svg?style=flat)](http://aws.amazon.com/apache-2-0/)
 
 This library provides annotations to allow easy integration of domain classes
-with the `DataMapper` defined in `@aws/dynamodb-data-mapper`. These annotations
+with the `DataMapper` defined in `@awslabs-community-fork/dynamodb-data-mapper`. These annotations
 are provided in a separate NPM package because they rely on two experimental
 features of TypeScript (decorators and metadata decoration) and depend on the
 `reflect-metadata` package.
@@ -26,7 +26,7 @@ import {
     rangeKey,
     table,
     versionAttribute,
-} from '@aws/dynamodb-data-mapper-annotations';
+} from '@awslabs-community-fork/dynamodb-data-mapper-annotations';
 import uuidV4 = require('uuid/v4');
 
 @table('my_table')
@@ -65,8 +65,8 @@ import {
     attribute, 
     hashKey,
     table,
-} from '@aws/dynamodb-data-mapper-annotations';
-import {embed} from '@aws/dynamodb-data-mapper';
+} from '@awslabs-community-fork/dynamodb-data-mapper-annotations';
+import {embed} from '@awslabs-community-fork/dynamodb-data-mapper';
 
 class Comment {
     @attribute()
@@ -172,5 +172,5 @@ tuple or typed list, respectively.
 
 Member type declarations are required for maps and sets, though the member type
 will be automatically inferred if a property is declared as being of type
-`BinarySet` or `NumberValueSet` (from the `@aws/dynamodb-auto-marshaller`
+`BinarySet` or `NumberValueSet` (from the `@awslabs-community-fork/dynamodb-auto-marshaller`
 package).

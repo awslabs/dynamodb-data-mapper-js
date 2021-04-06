@@ -1,5 +1,5 @@
 {
-  "name": "@aws/dynamodb-auto-marshaller",
+  "name": "@awslabs-community-fork/dynamodb-auto-marshaller",
   "version": "0.7.1",
   "description": "A data marshaller that converts JavaScript types into Amazon DynamoDB AttributeValues",
   "keywords": [
@@ -8,12 +8,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/awslabs/dynamodb-data-mapper-js.git"
+    "url": "git+https://github.com/ima-tech/dynamodb-data-mapper-js.git"
   },
   "bugs": {
-    "url": "https://github.com/awslabs/dynamodb-data-mapper-js/issues"
+    "url": "https://github.com/ima-tech/dynamodb-data-mapper-js/issues"
   },
-  "homepage": "https://awslabs.github.io/dynamodb-data-mapper-js/packages/dynamodb-auto-marshaller/",
+  "homepage": "https://github.com/ima-tech/dynamodb-data-mapper-js/packages/dynamodb-auto-marshaller/",
   "module": "./dist/lib/esm/index.js",
   "main": "./dist/lib/cjs/index.js",
   "types": "./dist/types/index.d.ts",
