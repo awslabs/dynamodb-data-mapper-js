@@ -133,8 +133,7 @@ describe('BatchGet', () => {
         ]);
     });
 
-    const asyncInput = false;
-    //for (const asyncInput of [false, true]) {
+    for (const asyncInput of [false, true]) {
         it(
             `should should partition get batches into requests with ${MAX_READ_BATCH_SIZE} or fewer items`,
             async () => {
@@ -407,5 +406,5 @@ describe('BatchGet', () => {
                 expect(callCount[i]).toBe(failures.has(String(i)) ? 2 : 1);
             }
         });
-   // }
+   }
 });
