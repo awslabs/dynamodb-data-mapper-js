@@ -34,8 +34,6 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: npm run build
       - run: npm run test
-      - run: npm run e2e
-      - run: npm run perf
 
   publish:
     name: Publish
