@@ -1,9 +1,9 @@
-// import {AttributeTypeMap, AttributeValue} from "@aws-sdk/client-dynamodb";
 import {BinarySet, BinaryValue} from "./BinarySet";
 import {isArrayBuffer} from "./isArrayBuffer";
 import {NumberValue} from "./NumberValue";
 import {NumberValueSet} from "./NumberValueSet";
 import {AttributeValue} from "@aws-sdk/client-dynamodb";
+
 
 export const EmptyHandlingStrategies = {
     omit: 'omit',
@@ -203,28 +203,28 @@ export class Marshaller {
             }
             return set;
         }
-        //
-        // if (item.NS !== undefined) {
-        //     if (this.unwrapNumbers) {
-        //         const set = new Set<number>();
-        //         for (let member of item.NS) {
-        //             set.add(Number(member));
-        //         }
-        //         return set;
-        //     }
-        //
-        //     return new NumberValueSet(
-        //         item.NS.map(numberString => new NumberValue(numberString))
-        //     );
-        // }
-        //
-        // if (item.BS !== undefined) {
-        //     return new BinarySet(item.BS as Array<BinaryValue>);
-        // }
-        //
-        // if (item.L !== undefined) {
-        //     return item.L.map(this.unmarshallValue.bind(this));
-        // }
+
+        if (item.NS !== undefined) {
+            if (this.unwrapNumbers) {
+                const set = new Set<number>();
+                for (let member of item.NS) {
+                    set.add(Number(member));
+                }
+                return set;
+            }
+
+            return new NumberValueSet(
+                item.NS.map(numberString => new NumberValue(numberString))
+            );
+        }
+
+        if (item.BS !== undefined) {
+            return new BinarySet(item.BS as Array<BinaryValue>);
+        }
+
+        if (item.L !== undefined) {
+            return item.L.map(this.unmarshallValue.bind(this));
+        }
 
         const {M = {}} = item;
         return Object.keys(M).reduce(

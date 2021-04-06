@@ -280,6 +280,8 @@ describe('BatchGet', () => {
             }
 
             const toBeFailed = new Set(failures);
+            let a = 0;
+            let numberOfFailures = 0;
             promiseFunc.mockImplementation(() => {
                 const buzz = { S: 'Static string' };
                 const response: BatchGetItemOutput = {};
@@ -287,7 +289,9 @@ describe('BatchGet', () => {
                 const {RequestItems} = (mockDynamoDbClient.batchGetItem.mock.calls.slice(-1)[0] as any)[0];
                 for (const tableName of Object.keys(RequestItems)) {
                     for (const item of RequestItems[tableName].Keys) {
+                        a++;
                         if (toBeFailed.has(item.fizz.N)) {
+                            numberOfFailures++;
                             if (!response.UnprocessedKeys) {
                                 response.UnprocessedKeys = {};
                             }
@@ -296,6 +300,11 @@ describe('BatchGet', () => {
                                 response.UnprocessedKeys[tableName] = {Keys: []};
                             }
 
+                            if(response.UnprocessedKeys[tableName].Keys) {
+                                response.UnprocessedKeys[tableName].Keys = [];
+                            }
+
+                            // @ts-ignore
                             response.UnprocessedKeys[tableName].Keys.push(item);
                             toBeFailed.delete(item.fizz.N);
                         } else {
@@ -331,7 +340,11 @@ describe('BatchGet', () => {
                 : gets;
 
             let idsReturned = new Set<number>();
-            for await (const [table, item] of new BatchGet(mockDynamoDbClient as any, input)) {
+
+            console.log(numberOfFailures);
+
+            const batchGetIterator = new BatchGet(mockDynamoDbClient as any, input);
+            for await (const [table, item] of batchGetIterator) {
                 const id = parseInt(item.fizz.N as string);
                 expect(idsReturned.has(id)).toBe(false);
                 idsReturned.add(id);
@@ -358,8 +371,11 @@ describe('BatchGet', () => {
                     keyUseCount: {[key: string]: number},
                     [{RequestItems}]
                 ) => {
-                    const keys = [];
+                    const keys: { [key: string]: AttributeValue }[] = [];
+
+                    // @ts-ignore
                     for (const table of Object.keys(RequestItems)) {
+                        // @ts-ignore
                         keys.push(...RequestItems[table].Keys);
                     }
                     for (const {fizz: {N: key}} of keys) {

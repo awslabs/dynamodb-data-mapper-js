@@ -82,9 +82,6 @@ export class BatchGet extends BatchOperation<{[key: string]: AttributeValue}> {
         const unprocessedTables = new Set<string>();
         for (const table of Object.keys(UnprocessedKeys)) {
             unprocessedTables.add(table);
-            if(UnprocessedKeys[table].Keys === undefined) {
-                continue;
-            }
 
             this.handleThrottled(table, UnprocessedKeys[table].Keys!);
         }

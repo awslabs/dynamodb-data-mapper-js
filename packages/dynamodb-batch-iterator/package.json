@@ -39,10 +39,7 @@
     },
     "globals": {
       "ts-jest": {
-        "tsconfig": {
-          "strictNullChecks": false,
-          "target": "es6"
-        }
+        "tsconfig": "tsconfig.json"
       }
     },
     "testEnvironment": "node",

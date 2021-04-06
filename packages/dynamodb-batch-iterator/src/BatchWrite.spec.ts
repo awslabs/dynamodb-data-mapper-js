@@ -93,7 +93,9 @@ describe('BatchWrite', () => {
 
             for await (const [tableName, req] of new BatchWrite(mockDynamoDbClient as any, input)) {
                 const id = req.DeleteRequest
-                    ? parseInt(req.DeleteRequest.Key.fizz.N as string)
+                    ?
+                    // @ts-ignore
+                    parseInt(req.DeleteRequest.Key.fizz.N as string)
                     : parseInt((req.PutRequest as any).Item.fizz.N as string);
 
                 if (id % 3 === 0) {
@@ -183,7 +185,9 @@ describe('BatchWrite', () => {
 
         for await (const [tableName, req] of new BatchWrite(mockDynamoDbClient as any, input)) {
             const id = req.DeleteRequest
-                ? parseInt(req.DeleteRequest.Key.fizz.N as string)
+                ?
+                // @ts-ignore
+                parseInt(req.DeleteRequest.Key.fizz.N as string)
                 : parseInt((req.PutRequest as any).Item.fizz.N as string);
 
             if (id % 3 === 0) {
@@ -282,8 +286,11 @@ describe('BatchWrite', () => {
         const seen = new Set<number>();
         const batchWriteIterator = new BatchWrite(mockDynamoDbClient as any, input);
         for await (const [tableName, req] of batchWriteIterator) {
+            // @ts-ignore
             const id = req.DeleteRequest
-                ? parseInt(req.DeleteRequest.Key.fizz.N as string)
+                ?
+                // @ts-ignore
+                parseInt(req.DeleteRequest.Key.fizz.N as string)
                 : parseInt((req.PutRequest as any).Item.fizz.N as string);
 
             expect(seen.has(id)).toBeFalsy();
@@ -310,10 +317,14 @@ describe('BatchWrite', () => {
                 keyUseCount: { [key: string]: number },
                 [{RequestItems}]
             ) => {
+                // @ts-ignore
                 for (const table of Object.keys(RequestItems)) {
+                    // @ts-ignore
                     for (const {PutRequest, DeleteRequest} of RequestItems[table]) {
                         let key = DeleteRequest
-                            ? DeleteRequest.Key.fizz.N
+                            ?
+                            // @ts-ignore
+                            DeleteRequest.Key.fizz.N
                             : (PutRequest as any).Item.fizz.N;
                         if (key in keyUseCount) {
                             keyUseCount[key]++;
@@ -407,7 +418,9 @@ describe('BatchWrite', () => {
         const seen = new Set<number>();
         for await (const [tableName, req] of new BatchWrite(mockDynamoDbClient as any, input)) {
             const id = req.DeleteRequest
-                ? parseInt(req.DeleteRequest.Key.fizz.N as string)
+                ?
+                // @ts-ignore
+                parseInt(req.DeleteRequest.Key.fizz.N as string)
                 : parseInt((req.PutRequest as any).Item.fizz.N as string);
 
             expect(seen.has(id)).toBeFalsy();
@@ -434,10 +447,14 @@ describe('BatchWrite', () => {
                 keyUseCount: { [key: string]: number },
                 [{RequestItems}]
             ) => {
+                // @ts-ignore
                 for (const table of Object.keys(RequestItems)) {
+                    // @ts-ignore
                     for (const {PutRequest, DeleteRequest} of RequestItems[table]) {
                         let key = DeleteRequest
-                            ? DeleteRequest.Key.fizz.N
+                            ?
+                            // @ts-ignore
+                            DeleteRequest.Key.fizz.N
                             : (PutRequest as any).Item.fizz.N;
                         if (key in keyUseCount) {
                             keyUseCount[key]++;
