@@ -1,6 +1,6 @@
 {
   "name": "@awslabs-community-fork/dynamodb-data-marshaller",
-  "version": "0.7.8",
+  "version": "0.7.9",
   "description": "A schema-based data marshaller for Amazon DynamoDB",
   "keywords": [
     "aws",
@@ -30,8 +30,8 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@awslabs-community-fork/dynamodb-auto-marshaller": "^0.7.8",
-    "@awslabs-community-fork/dynamodb-expressions": "^0.7.8",
+    "@awslabs-community-fork/dynamodb-auto-marshaller": "^0.7.9",
+    "@awslabs-community-fork/dynamodb-expressions": "^0.7.9",
     "tslib": "^2.1.0",
     "utf8-bytes": "^0.0.1"
   },

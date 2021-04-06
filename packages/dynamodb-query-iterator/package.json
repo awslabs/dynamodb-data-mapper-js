@@ -1,6 +1,6 @@
 {
   "name": "@awslabs-community-fork/dynamodb-query-iterator",
-  "version": "0.7.8",
+  "version": "0.7.9",
   "description": "Abstraction for DynamoDB queries and scans that handles pagination and parallel worker coordination",
   "keywords": [
     "aws",
