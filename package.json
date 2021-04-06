@@ -3,9 +3,13 @@
   "private": true,
   "scripts": {
     "bootstrap": "lerna bootstrap",
+    "build": "lerna run build",
     "docs": "typedoc src && lerna run docs",
-    "pretest": "lerna run pretest",
-    "test": "jest"
+    "test": "lerna run test",
+    "e2e": "cd tests/e2e && jest && cd ..",
+    "perf": "cd tests/perf && jest && cd ..",
+    "bump-patch": "lerna version patch --yes",
+    "publish-ci": "lerna publish from-git --yes --no-verify-access"
   },
   "author": {
     "name": "AWS SDK for JavaScript Team",
