@@ -11,7 +11,7 @@ import {
     FunctionExpression,
     MathematicalExpression,
     UpdateExpression,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
 
 const schema: Schema = {
     foo: {

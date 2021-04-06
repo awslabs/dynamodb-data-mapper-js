@@ -47,7 +47,7 @@ expressions are:
 Asserts that all of the subexpressions' conditions are satisfied.
 
 ```typescript
-import {ConditionExpression} from '@aws/dynamodb-expressions';
+import {ConditionExpression} from '@awslabs-community-fork/dynamodb-expressions';
 
 const andExpression: ConditionExpression = {
     type: 'And',
@@ -62,7 +62,7 @@ const andExpression: ConditionExpression = {
 Asserts that at least one of the subexpressions' conditions are satisfied.
 
 ```typescript
-import {ConditionExpression} from '@aws/dynamodb-expressions';
+import {ConditionExpression} from '@awslabs-community-fork/dynamodb-expressions';
 
 const orExpression: ConditionExpression = {
     type: 'Or',
@@ -77,7 +77,7 @@ const orExpression: ConditionExpression = {
 Asserts that the subexpression's condition is not satisfied.
 
 ```typescript
-import {ConditionExpression} from '@aws/dynamodb-expressions';
+import {ConditionExpression} from '@awslabs-community-fork/dynamodb-expressions';
 
 const notExpression: ConditionExpression = {
     type: 'Not',
@@ -110,7 +110,7 @@ subject has a value of `'bar'`:
 import {
     ConditionExpression,
     ConditionExpressionPredicate,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
 
 let equalsExpressionPredicate: ConditionExpressionPredicate = {
     type: 'Equals',
@@ -118,7 +118,7 @@ let equalsExpressionPredicate: ConditionExpressionPredicate = {
 };
 
 // you can also define an equality predicate with the `equals` helper method
-import {equals} from '@aws/dynamodb-expressions';
+import {equals} from '@awslabs-community-fork/dynamodb-expressions';
 
 equalsExpressionPredicate = equals('bar');
 
@@ -131,7 +131,7 @@ const equalsExpression: ConditionExpression = {
 
 `object` may be an [attribute path](#attribute-paths), an [attribute
 value](#attribute-values), or another type. If the lattermost type is received,
-it will be serialized using the `@aws/dynamodb-auto-marshaller` package.
+it will be serialized using the `@awslabs-community-fork/dynamodb-auto-marshaller` package.
 
 #### `NotEquals` expression predicate
 
@@ -143,7 +143,7 @@ subject does not have a value of `'bar'`:
 import {
     ConditionExpression,
     ConditionExpressionPredicate,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
 
 let equalsExpressionPredicate: ConditionExpressionPredicate = {
     type: 'NotEquals',
@@ -151,7 +151,7 @@ let equalsExpressionPredicate: ConditionExpressionPredicate = {
 };
 
 // you can also define an equality predicate with the `equals` helper method
-import {notEquals} from '@aws/dynamodb-expressions';
+import {notEquals} from '@awslabs-community-fork/dynamodb-expressions';
 
 equalsExpressionPredicate = notEquals('bar');
 
@@ -164,7 +164,7 @@ const equalsExpression: ConditionExpression = {
 
 `object` may be an [attribute path](#attribute-paths), an [attribute
 value](#attribute-values), or another type. If the lattermost type is received,
-it will be serialized using the `@aws/dynamodb-auto-marshaller` package.
+it will be serialized using the `@awslabs-community-fork/dynamodb-auto-marshaller` package.
 
 #### `LessThan` expression predicate
 
@@ -176,7 +176,7 @@ subject is less than 10:
 import {
     ConditionExpression,
     ConditionExpressionPredicate,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
 
 let equalsExpressionPredicate: ConditionExpressionPredicate = {
     type: 'LessThan',
@@ -184,7 +184,7 @@ let equalsExpressionPredicate: ConditionExpressionPredicate = {
 };
 
 // you can also define an equality predicate with the `equals` helper method
-import {lessThan} from '@aws/dynamodb-expressions';
+import {lessThan} from '@awslabs-community-fork/dynamodb-expressions';
 
 equalsExpressionPredicate = lessThan(10);
 
@@ -197,7 +197,7 @@ const equalsExpression: ConditionExpression = {
 
 `object` may be an [attribute path](#attribute-paths), an [attribute
 value](#attribute-values), or another type. If the lattermost type is received,
-it will be serialized using the `@aws/dynamodb-auto-marshaller` package.
+it will be serialized using the `@awslabs-community-fork/dynamodb-auto-marshaller` package.
 
 #### `LessThanOrEqualTo` expression predicate
 
@@ -209,7 +209,7 @@ that the subject is less than or equal to 10:
 import {
     ConditionExpression,
     ConditionExpressionPredicate,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
 
 let equalsExpressionPredicate: ConditionExpressionPredicate = {
     type: 'LessThanOrEqualTo',
@@ -217,7 +217,7 @@ let equalsExpressionPredicate: ConditionExpressionPredicate = {
 };
 
 // you can also define an equality predicate with the `equals` helper method
-import {lessThanOrEqualTo} from '@aws/dynamodb-expressions';
+import {lessThanOrEqualTo} from '@awslabs-community-fork/dynamodb-expressions';
 
 equalsExpressionPredicate = lessThanOrEqualTo(10);
 
@@ -230,7 +230,7 @@ const equalsExpression: ConditionExpression = {
 
 `object` may be an [attribute path](#attribute-paths), an [attribute
 value](#attribute-values), or another type. If the lattermost type is received,
-it will be serialized using the `@aws/dynamodb-auto-marshaller` package.
+it will be serialized using the `@awslabs-community-fork/dynamodb-auto-marshaller` package.
 
 #### `GreaterThan` expression predicate
 
@@ -242,7 +242,7 @@ subject is greater than 10:
 import {
     ConditionExpression,
     ConditionExpressionPredicate,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
 
 let equalsExpressionPredicate: ConditionExpressionPredicate = {
     type: 'GreaterThan',
@@ -250,7 +250,7 @@ let equalsExpressionPredicate: ConditionExpressionPredicate = {
 };
 
 // you can also define an equality predicate with the `equals` helper method
-import {greaterThan} from '@aws/dynamodb-expressions';
+import {greaterThan} from '@awslabs-community-fork/dynamodb-expressions';
 
 equalsExpressionPredicate = greaterThan(10);
 
@@ -263,7 +263,7 @@ const equalsExpression: ConditionExpression = {
 
 `object` may be an [attribute path](#attribute-paths), an [attribute
 value](#attribute-values), or another type. If the lattermost type is received,
-it will be serialized using the `@aws/dynamodb-auto-marshaller` package.
+it will be serialized using the `@awslabs-community-fork/dynamodb-auto-marshaller` package.
 
 #### `GreaterThanOrEqualTo` expression predicate
 
@@ -275,7 +275,7 @@ asserts that the subject is greater than or equal to 10:
 import {
     ConditionExpression,
     ConditionExpressionPredicate,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
 
 let equalsExpressionPredicate: ConditionExpressionPredicate = {
     type: 'GreaterThanOrEqualTo',
@@ -283,7 +283,7 @@ let equalsExpressionPredicate: ConditionExpressionPredicate = {
 };
 
 // you can also define an equality predicate with the `equals` helper method
-import {greaterThanOrEqualTo} from '@aws/dynamodb-expressions';
+import {greaterThanOrEqualTo} from '@awslabs-community-fork/dynamodb-expressions';
 
 equalsExpressionPredicate = greaterThanOrEqualTo(10);
 
@@ -296,7 +296,7 @@ const equalsExpression: ConditionExpression = {
 
 `object` may be an [attribute path](#attribute-paths), an [attribute
 value](#attribute-values), or another type. If the lattermost type is received,
-it will be serialized using the `@aws/dynamodb-auto-marshaller` package.
+it will be serialized using the `@awslabs-community-fork/dynamodb-auto-marshaller` package.
 
 #### `Between` expression predicate
 
@@ -309,7 +309,7 @@ to 99:
 import {
     ConditionExpression,
     ConditionExpressionPredicate,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
 
 let equalsExpressionPredicate: ConditionExpressionPredicate = {
     type: 'Between',
@@ -318,7 +318,7 @@ let equalsExpressionPredicate: ConditionExpressionPredicate = {
 };
 
 // you can also define an equality predicate with the `equals` helper method
-import {between} from '@aws/dynamodb-expressions';
+import {between} from '@awslabs-community-fork/dynamodb-expressions';
 
 equalsExpressionPredicate = between(10, 99);
 
@@ -331,7 +331,7 @@ const equalsExpression: ConditionExpression = {
 
 `lowerBound` and `upperBound` may both be an [attribute path](#attribute-paths),
 an [attribute value](#attribute-values), or another type. If the lattermost type
-is received, it will be serialized using the `@aws/dynamodb-auto-marshaller`
+is received, it will be serialized using the `@awslabs-community-fork/dynamodb-auto-marshaller`
 package.
 
 #### `Membership` expression predicate
@@ -344,7 +344,7 @@ that the subject is one of `'fizz'`, `'buzz'`, or `'fizzbuzz'`:
 import {
     ConditionExpression,
     ConditionExpressionPredicate,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
 
 let equalsExpressionPredicate: ConditionExpressionPredicate = {
     type: 'Membership',
@@ -352,7 +352,7 @@ let equalsExpressionPredicate: ConditionExpressionPredicate = {
 };
 
 // you can also define an equality predicate with the `equals` helper method
-import {inList} from '@aws/dynamodb-expressions';
+import {inList} from '@awslabs-community-fork/dynamodb-expressions';
 
 equalsExpressionPredicate = inList('fizz', 'buzz', 'fizzbuzz');
 
@@ -365,7 +365,7 @@ const equalsExpression: ConditionExpression = {
 
 Each value in the `values` array may be an [attribute path](#attribute-paths),
 an [attribute value](#attribute-values), or another type. If the lattermost type
-is received, it will be serialized using the `@aws/dynamodb-auto-marshaller`
+is received, it will be serialized using the `@awslabs-community-fork/dynamodb-auto-marshaller`
 package.
 
 ### Serializing condition expressions
@@ -387,7 +387,7 @@ import {
     AttributePath,
     AttributeValue,
     ExpressionAttributes,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
 const DynamoDb = require('aws-sdk/clients/dynamodb');
 
 const attributes = new ExpressionAttributes();
@@ -422,14 +422,14 @@ arguments to pass to the function. These parameters may be instances of
 `AttributePath` (to have the function evaluate part of the DynamoDB document to
 which the function applies), `AttributeValue` (for already-marshalled
 AttributeValue objects), or arbitrary JavaScript values (these will be converted
-by the `@aws/dynamodb-auto-marshaller` package's `Marshaller`):
+by the `@awslabs-community-fork/dynamodb-auto-marshaller` package's `Marshaller`):
 
 ```typescript
 import {
     AttributePath,
     ExpressionAttributes,
     FunctionExpression,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
 
 const expr = new FunctionExpression(
     'list_append', 
@@ -449,7 +449,7 @@ Mathematical expressions are used in the `SET` clause of update expressions to
 add or subtract numbers from attribute properties containing number values:
 
 ```typescript
-import {MathematicalExpression} from '@aws/dynamodb-expressions';
+import {MathematicalExpression} from '@awslabs-community-fork/dynamodb-expressions';
 
 const expr = new MathematicalExpression('version', '+', 1);
 ```
@@ -474,7 +474,7 @@ import {
     AttributePath,
     FunctionExpression,
     UpdateExpression,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
 
 const expr = new UpdateExpression();
 

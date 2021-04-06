@@ -11,7 +11,7 @@ import {
     ExpressionAttributes,
     serializeConditionExpression,
     serializeProjectionExpression,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
 import {AttributeValue} from "@aws-sdk/client-dynamodb";
 
 /**

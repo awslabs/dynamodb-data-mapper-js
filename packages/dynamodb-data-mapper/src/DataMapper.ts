@@ -42,7 +42,7 @@ import {
     PerTableOptions,
     TableOptions,
     WriteRequest,
-} from '@aws/dynamodb-batch-iterator';
+} from '@awslabs-community-fork/dynamodb-batch-iterator';
 import {
     AttributeTypeMap,
     getSchemaName,
@@ -60,7 +60,7 @@ import {
     toSchemaName,
     unmarshallItem,
     ZeroArgumentsConstructor,
-} from '@aws/dynamodb-data-marshaller';
+} from '@awslabs-community-fork/dynamodb-data-marshaller';
 import {
     AttributePath,
     AttributeValue as AttributeValueClass,
@@ -72,7 +72,7 @@ import {
     PathElement,
     serializeProjectionExpression,
     UpdateExpression,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
 import {
     AttributeDefinition, AttributeValue,
     CreateGlobalSecondaryIndexAction,

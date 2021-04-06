@@ -67,10 +67,10 @@
 				<p>This repository hosts several packages that collectively make up an object to
 				document mapper for JavaScript applications using Amazon DynamoDB.</p>
 				<h2 id="getting-started">Getting started</h2>
-				<p><a href="packages/dynamodb-data-mapper">The <code>@aws/dynamodb-data-mapper</code> package</a> provides
+				<p><a href="packages/dynamodb-data-mapper">The <code>@awslabs-community-fork/dynamodb-data-mapper</code> package</a> provides
 					a simple way to persist and load an application&#39;s domain objects to and from
 					Amazon DynamoDB. When used together with the decorators provided by <a href="packages/dynamodb-data-mapper-annotations">the
-					<code>@aws/dynamodb-data-mapper-annotations</code> package</a>,
+					<code>@awslabs-community-fork/dynamodb-data-mapper-annotations</code> package</a>,
 					you can describe the relationship between a class and its representation in
 				DynamoDB by adding a few decorators:</p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
@@ -78,7 +78,7 @@
     hashKey,
     rangeKey,
     table,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-data-mapper-annotations'</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-data-mapper-annotations'</span>;
 
 <span class="hljs-meta">@table</span>(<span class="hljs-string">'table_name'</span>)
 <span class="hljs-keyword">class</span> MyDomainObject {
@@ -94,7 +94,7 @@
 </code></pre>
 				<p>With domain classes defined, you can interact with records in DynamoDB via an
 				instance of <code>DataMapper</code>:</p>
-				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {DataMapper} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-data-mapper'</span>;
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {DataMapper} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-data-mapper'</span>;
 <span class="hljs-keyword">import</span> DynamoDB = <span class="hljs-built_in">require</span>(<span class="hljs-string">'aws-sdk/clients/dynamodb'</span>);
 
 <span class="hljs-keyword">const</span> mapper = <span class="hljs-keyword">new</span> DataMapper({

@@ -4,9 +4,9 @@ import {DynamoDbSchema, DynamoDbTable} from './protocols';
 import {hostname} from 'os';
 import {hrtime} from 'process';
 import { DynamoDB } from "@aws-sdk/client-dynamodb";
-import {DocumentType} from "@aws/dynamodb-data-marshaller";
-import {Schema} from "@aws/dynamodb-data-marshaller";
-import {equals} from "@aws/dynamodb-expressions";
+import {DocumentType} from "@awslabs-community-fork/dynamodb-data-marshaller";
+import {Schema} from "@awslabs-community-fork/dynamodb-data-marshaller";
+import {equals} from "@awslabs-community-fork/dynamodb-expressions";
 
 const nestedDocumentDef: DocumentType = {
     type: 'Document',
