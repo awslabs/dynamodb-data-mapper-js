@@ -1,6 +1,6 @@
 {
   "name": "@awslabs-community-fork/dynamodb-data-mapper",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "description": "A schema-based data mapper for Amazon DynamoDB",
   "keywords": [
     "aws",
@@ -31,11 +31,11 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@awslabs-community-fork/dynamodb-auto-marshaller": "^0.7.5",
-    "@awslabs-community-fork/dynamodb-batch-iterator": "^0.7.5",
-    "@awslabs-community-fork/dynamodb-data-marshaller": "^0.7.5",
-    "@awslabs-community-fork/dynamodb-expressions": "^0.7.5",
-    "@awslabs-community-fork/dynamodb-query-iterator": "^0.7.5",
+    "@awslabs-community-fork/dynamodb-auto-marshaller": "^0.7.6",
+    "@awslabs-community-fork/dynamodb-batch-iterator": "^0.7.6",
+    "@awslabs-community-fork/dynamodb-data-marshaller": "^0.7.6",
+    "@awslabs-community-fork/dynamodb-expressions": "^0.7.6",
+    "@awslabs-community-fork/dynamodb-query-iterator": "^0.7.6",
     "tslib": "^2.1.0"
   },
   "jest": {
