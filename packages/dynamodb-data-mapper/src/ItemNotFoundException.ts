@@ -1,4 +1,4 @@
-import {GetItemInput} from "aws-sdk/clients/dynamodb";
+import {GetItemInput} from "@aws-sdk/client-dynamodb";
 
 /**
  * An exception thrown when an item was sought with a DynamoDB::GetItem

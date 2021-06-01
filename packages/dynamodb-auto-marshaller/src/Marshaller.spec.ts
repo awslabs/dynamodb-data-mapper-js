@@ -475,12 +475,12 @@ describe('Marshaller', () => {
                         const marshaller = new Marshaller();
                         const converted = marshaller.marshallValue(new BinarySet([
                             Uint8Array.from([0xde, 0xad]),
-                            Uint8Array.from([0xbe, 0xef]).buffer,
+                            Uint8Array.from([0xbe, 0xef]),
                             Uint8Array.from([0xfa, 0xce]),
                         ]));
                         expect(converted).toEqual({BS: [
                             Uint8Array.from([0xde, 0xad]),
-                            Uint8Array.from([0xbe, 0xef]).buffer,
+                            Uint8Array.from([0xbe, 0xef]),
                             Uint8Array.from([0xfa, 0xce]),
                         ]});
                     }
@@ -492,13 +492,13 @@ describe('Marshaller', () => {
                         const marshaller = new Marshaller({onEmpty: 'nullify'});
                         const converted = marshaller.marshallValue(new BinarySet([
                             Uint8Array.from([0xde, 0xad]),
-                            Uint8Array.from([0xbe, 0xef]).buffer,
+                            Uint8Array.from([0xbe, 0xef]),
                             Uint8Array.from([0xfa, 0xce]),
                             new Uint8Array(0),
                         ]));
                         expect(converted).toEqual({BS: [
                             Uint8Array.from([0xde, 0xad]),
-                            Uint8Array.from([0xbe, 0xef]).buffer,
+                            Uint8Array.from([0xbe, 0xef]),
                             Uint8Array.from([0xfa, 0xce]),
                         ]});
                     }
@@ -510,13 +510,13 @@ describe('Marshaller', () => {
                         const marshaller = new Marshaller({onEmpty: 'omit'});
                         const converted = marshaller.marshallValue(new BinarySet([
                             Uint8Array.from([0xde, 0xad]),
-                            Uint8Array.from([0xbe, 0xef]).buffer,
+                            Uint8Array.from([0xbe, 0xef]),
                             Uint8Array.from([0xfa, 0xce]),
                             new Uint8Array(0),
                         ]));
                         expect(converted).toEqual({BS: [
                             Uint8Array.from([0xde, 0xad]),
-                            Uint8Array.from([0xbe, 0xef]).buffer,
+                            Uint8Array.from([0xbe, 0xef]),
                             Uint8Array.from([0xfa, 0xce]),
                         ]});
                     }
@@ -526,13 +526,13 @@ describe('Marshaller', () => {
                     const marshaller = new Marshaller();
                     const converted = marshaller.marshallValue(new BinarySet([
                         Uint8Array.from([0xde, 0xad]),
-                        Uint8Array.from([0xbe, 0xef]).buffer,
+                        Uint8Array.from([0xbe, 0xef]),
                         Uint8Array.from([0xfa, 0xce]),
                         new Uint8Array(0),
                     ]));
                     expect(converted).toEqual({BS: [
                         Uint8Array.from([0xde, 0xad]),
-                        Uint8Array.from([0xbe, 0xef]).buffer,
+                        Uint8Array.from([0xbe, 0xef]),
                         Uint8Array.from([0xfa, 0xce]),
                         new Uint8Array(0),
                     ]});

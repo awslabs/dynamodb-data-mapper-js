@@ -1,12 +1,12 @@
 import { Iterator } from './Iterator';
 import { QueryOptions } from './namedParameters';
 import { QueryPaginator } from './QueryPaginator';
-import { ZeroArgumentsConstructor } from '@aws/dynamodb-data-marshaller';
+import { ZeroArgumentsConstructor } from '@awslabs-community-fork/dynamodb-data-marshaller';
 import {
     ConditionExpression,
     ConditionExpressionPredicate,
-} from '@aws/dynamodb-expressions';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+} from '@awslabs-community-fork/dynamodb-expressions';
+import {DynamoDB} from "@aws-sdk/client-dynamodb";
 
 /**
  * Iterates over each item returned by a DynamoDB query until no more pages are

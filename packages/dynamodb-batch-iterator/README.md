@@ -20,7 +20,7 @@ object stream wrapped with [async-iter-stream](https://github.com/calvinmetcalf/
 `wrap` method).
 
 ```typescript
-import { BatchGet } from '@aws/dynamodb-batch-iterator';
+import { BatchGet } from '@awslabs-community-fork/dynamodb-batch-iterator';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const dynamoDb = new DynamoDB({region: 'us-west-2'});
@@ -59,7 +59,7 @@ Each write request should contain either a `DeleteRequest` key or a `PutRequest`
 key as described [in the Amazon DynamoDB API reference](http://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_WriteRequest.html#DDB-Type-WriteRequest-DeleteRequest).
 
 ```typescript
-import { BatchWrite } from '@aws/dynamodb-batch-iterator';
+import { BatchWrite } from '@awslabs-community-fork/dynamodb-batch-iterator';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const dynamoDb = new DynamoDB({region: 'us-west-2'});

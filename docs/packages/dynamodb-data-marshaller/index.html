@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>@aws/dynamodb-data-marshaller</title>
+	<title>@awslabs-community-fork/dynamodb-data-marshaller</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">@aws/dynamodb-data-marshaller</a>
+					<a href="index.html" class="title">@awslabs-community-fork/dynamodb-data-marshaller</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -54,7 +54,7 @@
 					<a href="globals.html">Globals</a>
 				</li>
 			</ul>
-			<h1> @aws/dynamodb-data-marshaller</h1>
+			<h1> @awslabs-community-fork/dynamodb-data-marshaller</h1>
 		</div>
 	</div>
 </header>
@@ -101,7 +101,7 @@
 </code></pre>
 				<p>This schema may be used to marshall JavaScript values to DynamoDB attribute
 				values:</p>
-				<pre><code class="lang-javascript"><span class="hljs-keyword">import</span> {marshallItem} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-data-marshaller'</span>;
+				<pre><code class="lang-javascript"><span class="hljs-keyword">import</span> {marshallItem} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-data-marshaller'</span>;
 
 <span class="hljs-keyword">const</span> marshalled = marshallItem(schema, {
     <span class="hljs-attr">foo</span>: <span class="hljs-built_in">Uint8Array</span>.from([<span class="hljs-number">0xde</span>, <span class="hljs-number">0xad</span>, <span class="hljs-number">0xbe</span>, <span class="hljs-number">0xef</span>]),
@@ -125,7 +125,7 @@
 </code></pre>
 				<p>The schema can also be used to unmarshall DynamoDB attribute values back to
 				their original JavaScript representation:</p>
-				<pre><code class="lang-javascript"><span class="hljs-keyword">import</span> {unmarshallItem} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-data-marshaller'</span>;
+				<pre><code class="lang-javascript"><span class="hljs-keyword">import</span> {unmarshallItem} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-data-marshaller'</span>;
 
 <span class="hljs-keyword">const</span> unmarshalled = unmarshallItem(schema, {
     <span class="hljs-attr">foo</span>: {<span class="hljs-attr">B</span>: <span class="hljs-built_in">Uint8Array</span>.from([<span class="hljs-number">0xde</span>, <span class="hljs-number">0xad</span>, <span class="hljs-number">0xbe</span>, <span class="hljs-number">0xef</span>])},
@@ -220,13 +220,13 @@
 </code></pre>
 				<h2 id="supported-types">Supported types</h2>
 				<h3 id="any">Any</h3>
-				<p>Will be marshalled and unmarshalled using the <code>@aws/dynamodb-auto-marshaller</code>
+				<p>Will be marshalled and unmarshalled using the <code>@awslabs-community-fork/dynamodb-auto-marshaller</code>
 				package, which detects the type of a given value at runtime.</p>
 				<h4 id="example">Example</h4>
 				<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> anyProperty = {
     <span class="hljs-attr">type</span>: <span class="hljs-string">'Any'</span>,
     <span class="hljs-comment">// optionally, you may specify configuration options for the</span>
-    <span class="hljs-comment">// @aws/dynamodb-auto-marshaller package's Marshaller class:</span>
+    <span class="hljs-comment">// @awslabs-community-fork/dynamodb-auto-marshaller package's Marshaller class:</span>
     unwrapNumbers: <span class="hljs-literal">false</span>,
     <span class="hljs-attr">onInvalid</span>: <span class="hljs-string">'omit'</span>,
     <span class="hljs-attr">onEmpty</span>: <span class="hljs-string">'nullify'</span>,
@@ -246,12 +246,12 @@
 </code></pre>
 				<h3 id="collection">Collection</h3>
 				<p>Denotes a list of untyped items. The constituent items will be marshalled and
-				unmarshalled using the <code>@aws/dynamodb-auto-marshaller</code>.</p>
+				unmarshalled using the <code>@awslabs-community-fork/dynamodb-auto-marshaller</code>.</p>
 				<h4 id="example">Example</h4>
 				<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> collectionProperty = {
     <span class="hljs-attr">type</span>: <span class="hljs-string">'Collection'</span>,
     <span class="hljs-comment">// optionally, you may specify configuration options for the</span>
-    <span class="hljs-comment">// @aws/dynamodb-auto-marshaller package's Marshaller class:</span>
+    <span class="hljs-comment">// @awslabs-community-fork/dynamodb-auto-marshaller package's Marshaller class:</span>
     unwrapNumbers: <span class="hljs-literal">false</span>,
     <span class="hljs-attr">onInvalid</span>: <span class="hljs-string">'omit'</span>,
     <span class="hljs-attr">onEmpty</span>: <span class="hljs-string">'nullify'</span>,
@@ -318,7 +318,7 @@
 				<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> collectionProperty = {
     <span class="hljs-attr">type</span>: <span class="hljs-string">'Hash'</span>,
     <span class="hljs-comment">// optionally, you may specify configuration options for the</span>
-    <span class="hljs-comment">// @aws/dynamodb-auto-marshaller package's Marshaller class:</span>
+    <span class="hljs-comment">// @awslabs-community-fork/dynamodb-auto-marshaller package's Marshaller class:</span>
     unwrapNumbers: <span class="hljs-literal">false</span>,
     <span class="hljs-attr">onInvalid</span>: <span class="hljs-string">'omit'</span>,
     <span class="hljs-attr">onEmpty</span>: <span class="hljs-string">'nullify'</span>,

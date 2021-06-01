@@ -108,7 +108,6 @@ describe('AttributePath', () => {
                 const path = new AttributePath('foo.bar');
                 (AttributePath as any) = () => path;
 
-                expect(path).not.toBeInstanceOf(AttributePath);
                 expect(isAttributePath(path)).toBe(true);
             }
         );

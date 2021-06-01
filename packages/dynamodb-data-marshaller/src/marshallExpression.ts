@@ -1,9 +1,6 @@
 import { Schema } from './Schema';
 import { toSchemaName } from './toSchemaName';
-import {
-    ExpressionAttributeNameMap,
-    ExpressionAttributeValueMap,
-} from 'aws-sdk/clients/dynamodb';
+
 import {
     AttributePath,
     ConditionExpression,
@@ -14,7 +11,8 @@ import {
     ExpressionAttributes,
     serializeConditionExpression,
     serializeProjectionExpression,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
+import {AttributeValue} from "@aws-sdk/client-dynamodb";
 
 /**
  * A DynamoDB expression serialized to a string and accompanied by the name and
@@ -30,13 +28,13 @@ export interface MarshalledExpression {
      * A map of name tokens => the property name for which the token has been
      * substituted in the serialized expression.
      */
-    ExpressionAttributeNames: ExpressionAttributeNameMap;
+    ExpressionAttributeNames: {[key: string]: string};
 
     /**
      * A map of value tokens => the value for which the token has been
      * substituted in the serialized expression.
      */
-    ExpressionAttributeValues: ExpressionAttributeValueMap;
+    ExpressionAttributeValues: {[key: string]: AttributeValue};
 }
 
 /**

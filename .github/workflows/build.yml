@@ -1,0 +1,72 @@
+name: build
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  build:
+    name: Build
+    # Set the type of machine to run on
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [ 12.x, 14.x, 15.x ]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          always-auth: true
+          node-version: ${{ matrix.node-version }}
+          registry-url: https://registry.npmjs.org
+          scope: '@awslabs-community-fork'
+      - run: npm install -g npm@latest
+      - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm run bootstrap
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm run build
+      - run: npm run test
+
+  publish:
+    name: Publish
+    needs: build
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+
+    # Set the type of machine to run on
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v2
+        with:
+          always-auth: true
+          node-version: 14.x
+          registry-url: https://registry.npmjs.org
+          scope: '@awslabs-community-fork'
+      - run: npm install -g npm@latest
+      - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm run bootstrap
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm run build
+      - run: git config --global user.name 'ima-bot'
+      - run: git config --global user.email 'ima-bot@ima-tech.ca'
+      - run: npm run bump-patch
+      - run: npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm run publish-ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

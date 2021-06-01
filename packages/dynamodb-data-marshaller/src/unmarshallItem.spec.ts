@@ -4,7 +4,7 @@ import {
     BinarySet,
     NumberValue,
     NumberValueSet,
-} from "@aws/dynamodb-auto-marshaller";
+} from "@awslabs-community-fork/dynamodb-auto-marshaller";
 
 describe('unmarshallItem', () => {
     it('should unmarshall fields from their attributeName if provided', () => {
@@ -79,6 +79,7 @@ describe('unmarshallItem', () => {
                 }
             };
 
+            // @ts-ignore
             expect(unmarshallItem(schema, input)).toEqual({
                 mixedList: [
                     'string',
@@ -113,6 +114,7 @@ describe('unmarshallItem', () => {
               }
           };
 
+            // @ts-ignore
           expect(unmarshallItem(schema, input)).toEqual({
               mixedList: [
                   'string',
@@ -187,6 +189,7 @@ describe('unmarshallItem', () => {
                 },
             };
 
+            // @ts-ignore
             expect(unmarshallItem(schema, input)).toEqual({
                 mixedList: [
                     'string',
@@ -336,6 +339,7 @@ describe('unmarshallItem', () => {
                 },
             };
 
+            // @ts-ignore
             expect(unmarshallItem(schema, input)).toEqual({
                 mixedHash: {
                     foo: 'string',

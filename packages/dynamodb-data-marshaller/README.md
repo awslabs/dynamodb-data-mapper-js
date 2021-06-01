@@ -46,7 +46,7 @@ This schema may be used to marshall JavaScript values to DynamoDB attribute
 values:
 
 ```javascript
-import {marshallItem} from '@aws/dynamodb-data-marshaller';
+import {marshallItem} from '@awslabs-community-fork/dynamodb-data-marshaller';
 
 const marshalled = marshallItem(schema, {
     foo: Uint8Array.from([0xde, 0xad, 0xbe, 0xef]),
@@ -73,7 +73,7 @@ The schema can also be used to unmarshall DynamoDB attribute values back to
 their original JavaScript representation:
 
 ```javascript
-import {unmarshallItem} from '@aws/dynamodb-data-marshaller';
+import {unmarshallItem} from '@awslabs-community-fork/dynamodb-data-marshaller';
 
 const unmarshalled = unmarshallItem(schema, {
     foo: {B: Uint8Array.from([0xde, 0xad, 0xbe, 0xef])},
@@ -183,7 +183,7 @@ const schema = {
 
 ### Any
 
-Will be marshalled and unmarshalled using the `@aws/dynamodb-auto-marshaller`
+Will be marshalled and unmarshalled using the `@awslabs-community-fork/dynamodb-auto-marshaller`
 package, which detects the type of a given value at runtime.
 
 #### Example
@@ -192,7 +192,7 @@ package, which detects the type of a given value at runtime.
 const anyProperty = {
     type: 'Any',
     // optionally, you may specify configuration options for the
-    // @aws/dynamodb-auto-marshaller package's Marshaller class:
+    // @awslabs-community-fork/dynamodb-auto-marshaller package's Marshaller class:
     unwrapNumbers: false,
     onInvalid: 'omit',
     onEmpty: 'nullify',
@@ -225,7 +225,7 @@ const booleanProperty = {type: 'Boolean'};
 ### Collection
 
 Denotes a list of untyped items. The constituent items will be marshalled and
-unmarshalled using the `@aws/dynamodb-auto-marshaller`.
+unmarshalled using the `@awslabs-community-fork/dynamodb-auto-marshaller`.
 
 #### Example
 
@@ -233,7 +233,7 @@ unmarshalled using the `@aws/dynamodb-auto-marshaller`.
 const collectionProperty = {
     type: 'Collection',
     // optionally, you may specify configuration options for the
-    // @aws/dynamodb-auto-marshaller package's Marshaller class:
+    // @awslabs-community-fork/dynamodb-auto-marshaller package's Marshaller class:
     unwrapNumbers: false,
     onInvalid: 'omit',
     onEmpty: 'nullify',
@@ -322,7 +322,7 @@ Used for objects with string keys and untyped values.
 const collectionProperty = {
     type: 'Hash',
     // optionally, you may specify configuration options for the
-    // @aws/dynamodb-auto-marshaller package's Marshaller class:
+    // @awslabs-community-fork/dynamodb-auto-marshaller package's Marshaller class:
     unwrapNumbers: false,
     onInvalid: 'omit',
     onEmpty: 'nullify',

@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>@aws/dynamodb-data-mapper</title>
+	<title>@awslabs-community-fork/dynamodb-data-mapper</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">@aws/dynamodb-data-mapper</a>
+					<a href="index.html" class="title">@awslabs-community-fork/dynamodb-data-mapper</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -54,7 +54,7 @@
 					<a href="globals.html">Globals</a>
 				</li>
 			</ul>
-			<h1> @aws/dynamodb-data-mapper</h1>
+			<h1> @awslabs-community-fork/dynamodb-data-mapper</h1>
 		</div>
 	</div>
 </header>
@@ -66,8 +66,8 @@
 				<p><a href="http://aws.amazon.com/apache-2-0/"><img src="https://img.shields.io/github/license/awslabs/dynamodb-data-mapper-js.svg?style=flat" alt="Apache 2 License"></a></p>
 				<p>This library provides a <code>DataMapper</code> class that allows easy interoperability
 					between your application&#39;s domain classes and their persisted form in Amazon
-					DynamoDB. Powered by the <code>@aws/dynamodb-data-marshaller</code> and
-					<code>@aws/dynamodb-expressions</code> packages, using <code>DataMapper</code> lets you define each
+					DynamoDB. Powered by the <code>@awslabs-community-fork/dynamodb-data-marshaller</code> and
+					<code>@awslabs-community-fork/dynamodb-expressions</code> packages, using <code>DataMapper</code> lets you define each
 					object&#39;s persisted representation once and then load, save, scan, and query your
 					tables using the vocabulary of your application domain rather than its
 				representation in DynamoDB.</p>
@@ -76,7 +76,7 @@
 					couple properties to the prototype of the class you would like to map to a
 					DynamoDB table. Specifically, you will need to provide a schema and the name of
 				the table:</p>
-				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {DynamoDbSchema, DynamoDbTable} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-data-mapper'</span>;
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {DynamoDbSchema, DynamoDbTable} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-data-mapper'</span>;
 
 <span class="hljs-keyword">class</span> MyDomainModel {
     <span class="hljs-comment">// declare methods and properties as normal</span>
@@ -110,7 +110,7 @@
 </code></pre>
 				<p>The schema and table name may be declared as property accessors directly on the
 				class if the value should be determined dynamically:</p>
-				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {DynamoDbTable} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-data-mapper'</span>;
+				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {DynamoDbTable} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-data-mapper'</span>;
 
 <span class="hljs-keyword">class</span> MyOtherDomainClass {
     id: <span class="hljs-built_in">number</span>;
@@ -126,7 +126,7 @@
     DataMapper,
     DynamoDbSchema,
     DynamoDbTable,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-data-mapper'</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-data-mapper'</span>;
 <span class="hljs-keyword">import</span> DynamoDB = <span class="hljs-built_in">require</span>(<span class="hljs-string">'aws-sdk/clients/dynamodb'</span>);
 
 <span class="hljs-keyword">const</span> client = <span class="hljs-keyword">new</span> DynamoDB({region: <span class="hljs-string">'us-west-2'</span>});
@@ -244,7 +244,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 									</li>
 									<li><p><code>projection</code> - A projection expression directing DynamoDB to return a
 											subset of the fetched item&#39;s attributes. Please refer to the
-											documentation for the <code>@aws/dynamodb-expressions</code> package for
+											documentation for the <code>@awslabs-community-fork/dynamodb-expressions</code> package for
 										guidance on creating projection expression objects.</p>
 									</li>
 									<li><p><code>projectionSchema</code> - The schema to use when mapping the supplied
@@ -309,7 +309,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 						<ul>
 							<li><p><code>condition</code> - A condition expression whose assertion must be satisfied in
 									order for the delete operation to be executed. Please refer to the
-									documentation for the <code>@aws/dynamodb-expressions</code> package for guidance
+									documentation for the <code>@awslabs-community-fork/dynamodb-expressions</code> package for guidance
 								on creating condition expression objects.</p>
 							</li>
 							<li><p><code>returnValues</code> - Specify <code>&#39;ALL_OLD&#39;</code> to have the deleted item returned to
@@ -341,7 +341,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 							</li>
 							<li><p><code>projection</code> - A projection expression directing DynamoDB to return a
 									subset of the fetched item&#39;s attributes. Please refer to the
-									documentation for the <code>@aws/dynamodb-expressions</code> package for guidance
+									documentation for the <code>@awslabs-community-fork/dynamodb-expressions</code> package for guidance
 								on creating projection expression objects.</p>
 							</li>
 						</ul>
@@ -359,7 +359,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 						<ul>
 							<li><p><code>condition</code> - A condition expression whose assertion must be satisfied in
 									order for the put operation to be executed. Please refer to the
-									documentation for the <code>@aws/dynamodb-expressions</code> package for guidance
+									documentation for the <code>@awslabs-community-fork/dynamodb-expressions</code> package for guidance
 								on creating condition expression objects.</p>
 							</li>
 							<li><p><code>returnValues</code> - Specify <code>&#39;ALL_OLD&#39;</code> to have the overwritten item (if one
@@ -394,7 +394,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 							<code>ConditionExpressionPredicate</code>s, or a fully composed <code>ConditionExpression</code>.
 							If a hash is provided, it may contain a mixture of condition expression
 						predicates and exact value matches:</p>
-						<pre><code class="lang-typescript">  <span class="hljs-keyword">import</span> {between} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-expressions'</span>;
+						<pre><code class="lang-typescript">  <span class="hljs-keyword">import</span> {between} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-expressions'</span>;
 
   <span class="hljs-keyword">const</span> keyCondition = {
       partitionKey: <span class="hljs-string">'foo'</span>,
@@ -402,7 +402,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
   };
 </code></pre>
 						<p>  The key condition must target a single value for the partition key.</p>
-						<p>  Please refer to the documentation for the <code>@aws/dynamodb-expressions</code>
+						<p>  Please refer to the documentation for the <code>@awslabs-community-fork/dynamodb-expressions</code>
 						package for guidance on creating condition expression objects.</p>
 					</li>
 					<li><p>(Optional) An object specifying any of the following options:</p>
@@ -412,7 +412,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 								satisfy the <code>filter</code> criteria are not returned.</p>
 								<p>  You cannot define a filter expression based on a partition key or a sort
 								key.</p>
-								<p>  Please refer to the documentation for the <code>@aws/dynamodb-expressions</code>
+								<p>  Please refer to the documentation for the <code>@awslabs-community-fork/dynamodb-expressions</code>
 								package for guidance on creating condition expression objects.</p>
 							</li>
 							<li><p><code>indexName</code> - The name of the index against which to execute this query.
@@ -424,7 +424,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 							</li>
 							<li><p><code>projection</code> - A projection expression directing DynamoDB to return a
 									subset of any fetched item&#39;s attributes. Please refer to the
-									documentation for the <code>@aws/dynamodb-expressions</code> package for guidance
+									documentation for the <code>@awslabs-community-fork/dynamodb-expressions</code> package for guidance
 								on creating projection expression objects.</p>
 							</li>
 							<li><p><code>readConsistency</code> - Specify <code>&#39;strong&#39;</code> to perform a strongly consistent
@@ -445,7 +445,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 				<p>The iterator returned by <code>query</code> will keep track of the number of items yielded
 				and the number of items scanned via its <code>count</code> and <code>scannedCount</code> properties:</p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">const</span> iterator = mapper.query(
-    MyClass, 
+    MyClass,
     {partitionKey: <span class="hljs-string">'foo'</span>, rangeKey: between(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>)}
 );
 <span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> record of iterator) {
@@ -507,7 +507,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 								satisfy the <code>filter</code> criteria are not returned.</p>
 								<p>  You cannot define a filter expression based on a partition key or a sort
 								key.</p>
-								<p>  Please refer to the documentation for the <code>@aws/dynamodb-expressions</code>
+								<p>  Please refer to the documentation for the <code>@awslabs-community-fork/dynamodb-expressions</code>
 								package for guidance on creating condition expression objects.</p>
 							</li>
 							<li><p><code>indexName</code> - The name of the index against which to execute this query.
@@ -519,7 +519,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 							</li>
 							<li><p><code>projection</code> - A projection expression directing DynamoDB to return a
 									subset of any fetched item&#39;s attributes. Please refer to the
-									documentation for the <code>@aws/dynamodb-expressions</code> package for guidance
+									documentation for the <code>@awslabs-community-fork/dynamodb-expressions</code> package for guidance
 								on creating projection expression objects.</p>
 							</li>
 							<li><p><code>readConsistency</code> - Specify <code>&#39;strong&#39;</code> to perform a strongly consistent
@@ -602,7 +602,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 								satisfy the <code>filter</code> criteria are not returned.</p>
 								<p>  You cannot define a filter expression based on a partition key or a sort
 								key.</p>
-								<p>  Please refer to the documentation for the <code>@aws/dynamodb-expressions</code>
+								<p>  Please refer to the documentation for the <code>@awslabs-community-fork/dynamodb-expressions</code>
 								package for guidance on creating condition expression objects.</p>
 							</li>
 							<li><p><code>indexName</code> - The name of the index against which to execute this query.
@@ -612,7 +612,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 							</li>
 							<li><p><code>projection</code> - A projection expression directing DynamoDB to return a
 									subset of any fetched item&#39;s attributes. Please refer to the
-									documentation for the <code>@aws/dynamodb-expressions</code> package for guidance
+									documentation for the <code>@awslabs-community-fork/dynamodb-expressions</code> package for guidance
 								on creating projection expression objects.</p>
 							</li>
 							<li><p><code>readConsistency</code> - Specify <code>&#39;strong&#39;</code> to perform a strongly consistent
@@ -678,7 +678,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 						<ul>
 							<li><p><code>condition</code> - A condition expression whose assertion must be satisfied in
 									order for the update operation to be executed. Please refer to the
-									documentation for the <code>@aws/dynamodb-expressions</code> package for guidance
+									documentation for the <code>@awslabs-community-fork/dynamodb-expressions</code> package for guidance
 								on creating condition expression objects.</p>
 							</li>
 							<li><p><code>onMissing</code> - Specify <code>&#39;remove&#39;</code> (the default) to treat the absence of a
@@ -699,7 +699,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 				<p>Takes four parameters:</p>
 				<ul>
 					<li><p>The expression to execute. Please refer to the documentation for the
-							<code>@aws/dynamodb-expressions</code> package for guidance on creating update
+							<code>@awslabs-community-fork/dynamodb-expressions</code> package for guidance on creating update
 						expression objects.</p>
 					</li>
 					<li><p>The key of the item being updated.</p>
@@ -713,7 +713,7 @@ mapper.put(toPut).then(<span class="hljs-function">(<span class="hljs-params">pe
 						<ul>
 							<li><code>condition</code> - A condition expression whose assertion must be satisfied in
 								order for the update operation to be executed. Please refer to the
-								documentation for the <code>@aws/dynamodb-expressions</code> package for guidance
+								documentation for the <code>@awslabs-community-fork/dynamodb-expressions</code> package for guidance
 							on creating condition expression objects.</li>
 						</ul>
 					</li>

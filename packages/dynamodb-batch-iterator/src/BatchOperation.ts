@@ -2,10 +2,10 @@ import {
     BatchState,
     SyncOrAsyncIterable,
     TableState,
-    TableStateElement,
+    TableStateElement, TableThrottlingTracker,
     ThrottledTableConfiguration,
 } from './types';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+import {DynamoDB} from "@aws-sdk/client-dynamodb";
 
 if (Symbol && !Symbol.asyncIterator) {
     (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
@@ -37,7 +37,7 @@ export abstract class BatchOperation<
 
     private readonly throttled = new Set<Promise<ThrottledTableConfiguration<Element>>>();
     private readonly iterator: Iterator<[string, Element]>|AsyncIterator<[string, Element]>;
-    private sourceDone: boolean = false;
+    private sourceDone?: boolean = false;
     private sourceNext: IteratorResult<[string, Element]>|Promise<IteratorResult<[string, Element]>>;
     private lastResolved?: Promise<IteratorResult<[string, Element]>>;
 
@@ -141,8 +141,7 @@ export abstract class BatchOperation<
         for (let i = this.toSend.length - 1; i > -1; i--) {
             const [table, attributes] = this.toSend[i];
             if (unprocessedTables.has(table)) {
-                (this.state[table] as ThrottledTableConfiguration<Element>)
-                    .tableThrottling.unprocessed.push(attributes);
+                (this.state[table] as ThrottledTableConfiguration<Element>).tableThrottling?.unprocessed.push(attributes);
                 this.toSend.splice(i, 1);
             }
         }
@@ -164,9 +163,15 @@ export abstract class BatchOperation<
     private enqueueThrottled(
         table: ThrottledTableConfiguration<Element>
     ): void {
+
+        if(table.tableThrottling === undefined) {
+            return;
+        }
+
         const {
-            tableThrottling: {backoffWaiter, unprocessed}
+            tableThrottling: {backoffWaiter, unprocessed},
         } = table;
+
         if (unprocessed.length > 0) {
             this.toSend.push(...unprocessed.map(
                 attr => [table.name, attr] as [string, Element]

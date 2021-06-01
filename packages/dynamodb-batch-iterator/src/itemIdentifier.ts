@@ -1,28 +1,59 @@
 import { WriteRequest } from './types';
-import { AttributeMap, BinaryAttributeValue } from 'aws-sdk/clients/dynamodb';
-const bytes = require('utf8-bytes');
+import {AttributeValue} from "@aws-sdk/client-dynamodb";
+const convertToBytes = (str): any[] => {
+    var bytes: any[] = [];
+    for (var i = 0; i < str.length; i++) {
+        var c = str.charCodeAt(i);
+        if (c >= 0xd800 && c <= 0xdbff && i + 1 < str.length) {
+            var cn = str.charCodeAt(i + 1);
+            if (cn >= 0xdc00 && cn <= 0xdfff) {
+                var pt = (c - 0xd800) * 0x400 + cn - 0xdc00 + 0x10000;
 
+                bytes.push(
+                    0xf0 + Math.floor(pt / 64 / 64 / 64),
+                    0x80 + Math.floor(pt / 64 / 64) % 64,
+                    0x80 + Math.floor(pt / 64) % 64,
+                    0x80 + pt % 64
+                );
+                i += 1;
+                continue;
+            }
+        }
+        if (c >= 2048) {
+            bytes.push(
+                0xe0 + Math.floor(c / 64 / 64),
+                0x80 + Math.floor(c / 64) % 64,
+                0x80 + c % 64
+            );
+        }
+        else if (c >= 128) {
+            bytes.push(0xc0 + Math.floor(c / 64), 0x80 + c % 64);
+        }
+        else bytes.push(c);
+    }
+    return bytes;
+};
 /**
  * @internal
  */
 export function itemIdentifier(
-    tableName: string, 
+    tableName: string,
     {DeleteRequest, PutRequest}: WriteRequest
 ): string {
-    if (DeleteRequest) {
+    if (DeleteRequest && DeleteRequest.Key) {
         return `${tableName}::delete::${
             serializeKeyTypeAttributes(DeleteRequest.Key)
         }`;
-    } else if (PutRequest) {
+    } else if (PutRequest && PutRequest.Item) {
         return `${tableName}::put::${
             serializeKeyTypeAttributes(PutRequest.Item)
         }`;
     }
-    
+
     throw new Error(`Invalid write request provided`);
 }
 
-function serializeKeyTypeAttributes(attributes: AttributeMap): string {
+function serializeKeyTypeAttributes(attributes: {[key: string]: AttributeValue}): string {
     const keyTypeProperties: Array<string> = [];
     for (const property of Object.keys(attributes).sort()) {
         const attribute = attributes[property];
@@ -38,7 +69,7 @@ function serializeKeyTypeAttributes(attributes: AttributeMap): string {
     return keyTypeProperties.join('&');
 }
 
-function toByteArray(value: BinaryAttributeValue): Uint8Array {
+function toByteArray(value: Uint8Array): Uint8Array {
     if (ArrayBuffer.isView(value)) {
         return new Uint8Array(
             value.buffer,
@@ -48,7 +79,7 @@ function toByteArray(value: BinaryAttributeValue): Uint8Array {
     }
 
     if (typeof value === 'string') {
-        return Uint8Array.from(bytes(value));
+        return Uint8Array.from(convertToBytes(value));
     }
 
     if (isArrayBuffer(value)) {

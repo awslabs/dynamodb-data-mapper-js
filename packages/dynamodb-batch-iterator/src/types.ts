@@ -1,12 +1,9 @@
 import {
-    AttributeMap,
-    ConsistentRead,
+    AttributeValue,
     DeleteRequest,
-    ExpressionAttributeNameMap,
-    ProjectionExpression,
     PutRequest,
     WriteRequest as DynamoDbWriteRequest
-} from "aws-sdk/clients/dynamodb";
+} from "@aws-sdk/client-dynamodb";
 
 /**
  * A synchronous or asynchronous iterable.
@@ -24,18 +21,18 @@ export interface BatchState<Element extends TableStateElement> {
  * @internal
  */
 export interface TableState<Element extends TableStateElement> {
-    attributeNames?: ExpressionAttributeNameMap;
+    attributeNames?: {[key: string]: string};
     backoffFactor: number;
-    consistentRead?: ConsistentRead;
+    consistentRead?: boolean;
     name: string;
-    projection?: ProjectionExpression;
+    projection?: string;
     tableThrottling?: TableThrottlingTracker<Element>;
 }
 
 /**
  * @internal
  */
-export type TableStateElement = AttributeMap|WriteRequest;
+export type TableStateElement = {[key: string]: AttributeValue}|WriteRequest;
 
 /**
  * @internal
@@ -51,7 +48,7 @@ export interface TableThrottlingTracker<Element extends TableStateElement> {
 export interface ThrottledTableConfiguration<
     Element extends TableStateElement
 > extends TableState<Element> {
-    tableThrottling: TableThrottlingTracker<Element>;
+    tableThrottling?: TableThrottlingTracker<Element>;
 }
 
 /**

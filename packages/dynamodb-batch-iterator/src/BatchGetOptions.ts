@@ -1,14 +1,8 @@
-import {
-    ConsistentRead,
-    ExpressionAttributeNameMap,
-    ProjectionExpression,
-} from "aws-sdk/clients/dynamodb";
-
 export interface BatchGetOptions {
     /**
      * The default read consistency to apply to gets.
      */
-    ConsistentRead?: ConsistentRead;
+    ConsistentRead?: boolean;
 
     /**
      * Options to apply for all reads directed to a specific table.
@@ -24,16 +18,16 @@ export interface TableOptions {
     /**
      * The read consistency to apply to reads against this table.
      */
-    ConsistentRead?: ConsistentRead;
+    ConsistentRead?: boolean;
 
     /**
      * One or more substitution tokens for attribute names in an expression.
      */
-    ExpressionAttributeNames?: ExpressionAttributeNameMap;
+    ExpressionAttributeNames?: {[key: string]: string};
 
     /**
      * A string that identifies one or more attributes to retrieve from the
      * table.
      */
-    ProjectionExpression?: ProjectionExpression;
+    ProjectionExpression?: string;
 }

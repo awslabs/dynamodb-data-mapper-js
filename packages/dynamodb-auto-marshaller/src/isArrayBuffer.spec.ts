@@ -23,15 +23,4 @@ describe('isArrayBuffer', () => {
             expect(isArrayBuffer(scalar)).toBe(false);
         }
     });
-
-    it(
-        'should return true for ArrayBuffers created with a different instance of the ArrayBuffer constructor',
-        () => {
-            const buffer = new ArrayBuffer(0);
-            (ArrayBuffer as any) = () => buffer;
-
-            expect(buffer).not.toBeInstanceOf(ArrayBuffer);
-            expect(isArrayBuffer(buffer)).toBe(true);
-        }
-    );
 });

@@ -1,6 +1,6 @@
 {
-  "name": "@aws/dynamodb-batch-iterator",
-  "version": "0.7.1",
+  "name": "@awslabs-community-fork/dynamodb-batch-iterator",
+  "version": "0.7.10",
   "description": "Abstraction for DynamoDB batch reads and writes for that handles batch splitting and partial retries with exponential backoff",
   "keywords": [
     "aws",
@@ -8,38 +8,61 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/awslabs/dynamodb-data-mapper-js.git"
+    "url": "git+https://github.com/ima-tech/dynamodb-data-mapper-js.git"
   },
   "bugs": {
-    "url": "https://github.com/awslabs/dynamodb-data-mapper-js/issues"
+    "url": "https://github.com/ima-tech/dynamodb-data-mapper-js/issues"
   },
-  "homepage": "https://awslabs.github.io/dynamodb-data-mapper-js/packages/dynamodb-batch-iterator/",
-  "main": "./build/index.js",
-  "types": "./build/index.d.ts",
+  "homepage": "https://github.com/ima-tech/dynamodb-data-mapper-js/packages/dynamodb-batch-iterator/",
+  "module": "./dist/lib/esm/index.js",
+  "main": "./dist/lib/cjs/index.js",
+  "types": "./dist/types/index.d.ts",
   "scripts": {
     "docs": "typedoc src",
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
+    "prepublish": "npm run build",
     "prepublishOnly": "tsc",
-    "pretest": "tsc -p tsconfig.test.json",
-    "test": "jest \"build/(.+).spec.js\""
+    "test": "jest"
   },
   "author": {
     "name": "AWS SDK for JavaScript Team",
     "email": "aws-sdk-js@amazon.com"
   },
   "license": "Apache-2.0",
-  "devDependencies": {
-    "@types/jest": "^24",
-    "@types/node": "^8.0.4",
-    "aws-sdk": "^2.7.0",
-    "jest": "^24",
-    "typedoc": "^0.14.0",
-    "typescript": "^3.4"
-  },
-  "peerDependencies": {
-    "aws-sdk": "^2.7.0"
-  },
   "dependencies": {
-    "tslib": "^1.9",
-    "utf8-bytes": "^0.0.1"
-  }
+    "tslib": "^2.1.0"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsconfig": "tsconfig.json"
+      }
+    },
+    "testEnvironment": "node",
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/test/"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 90,
+        "functions": 95,
+        "lines": 95,
+        "statements": 95
+      }
+    },
+    "collectCoverageFrom": [
+      "src/*.{js,ts}"
+    ]
+  },
+  "gitHead": "9353a4eee200ff3b2c929205d8d8c2171b461daa"
 }

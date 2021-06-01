@@ -2,14 +2,48 @@ import { Schema } from './Schema';
 import { SchemaType } from './SchemaType';
 import { InvalidValueError } from './InvalidValueError';
 import { InvalidSchemaError } from './InvalidSchemaError';
-import { AttributeMap, AttributeValue } from 'aws-sdk/clients/dynamodb';
+import { AttributeValue } from '@aws-sdk/client-dynamodb';
 import {
     BinarySet,
     BinaryValue,
     Marshaller,
     NumberValueSet,
-} from '@aws/dynamodb-auto-marshaller';
-const bytes = require('utf8-bytes');
+} from '@awslabs-community-fork/dynamodb-auto-marshaller';
+
+const convertToBytes = (str): any[] => {
+    var bytes: any[] = [];
+    for (var i = 0; i < str.length; i++) {
+        var c = str.charCodeAt(i);
+        if (c >= 0xd800 && c <= 0xdbff && i + 1 < str.length) {
+            var cn = str.charCodeAt(i + 1);
+            if (cn >= 0xdc00 && cn <= 0xdfff) {
+                var pt = (c - 0xd800) * 0x400 + cn - 0xdc00 + 0x10000;
+
+                bytes.push(
+                    0xf0 + Math.floor(pt / 64 / 64 / 64),
+                    0x80 + Math.floor(pt / 64 / 64) % 64,
+                    0x80 + Math.floor(pt / 64) % 64,
+                    0x80 + pt % 64
+                );
+                i += 1;
+                continue;
+            }
+        }
+        if (c >= 2048) {
+            bytes.push(
+                0xe0 + Math.floor(c / 64 / 64),
+                0x80 + Math.floor(c / 64) % 64,
+                0x80 + c % 64
+            );
+        }
+        else if (c >= 128) {
+            bytes.push(0xc0 + Math.floor(c / 64), 0x80 + c % 64);
+        }
+        else bytes.push(c);
+    }
+    return bytes;
+};
+
 
 /**
  * Converts a JavaScript object into a DynamoDB Item.
@@ -20,8 +54,8 @@ const bytes = require('utf8-bytes');
 export function marshallItem(
     schema: Schema,
     input: {[key: string]: any}
-): AttributeMap {
-    const marshalled: AttributeMap = {};
+): {[key: string]: AttributeValue} {
+    const marshalled: {[key: string]: AttributeValue} = {};
 
     for (const key of Object.keys(schema)) {
         const value = input[key];
@@ -134,7 +168,7 @@ export function marshallValue(
     }
 
     if (schemaType.type === 'List') {
-        const elements = [];
+        const elements: AttributeValue[] = [];
         for (const member of input) {
             const marshalled = marshallValue(schemaType.memberType, member);
             if (marshalled) {
@@ -145,7 +179,7 @@ export function marshallValue(
     }
 
     if (schemaType.type === 'Map') {
-        const marshalled: AttributeMap = {};
+        const marshalled: {[key: string]: AttributeValue} = {};
         if (typeof input[Symbol.iterator] === 'function') {
             for (let [key, value] of input) {
                 const marshalledValue = marshallValue(
@@ -273,7 +307,7 @@ function marshallBinary(
         return new Uint8Array(input);
     }
 
-    return Uint8Array.from(bytes(input));
+    return Uint8Array.from(convertToBytes(input));
 }
 
 function marshallNumber(input: number): string {
@@ -305,7 +339,8 @@ function marshallSet<InputType, MarshalledElementType>(
         return {NULL: true};
     }
 
-    return {[setTag]: collected};
+    // todo: Might be a hack
+    return ({[setTag]: collected} as unknown) as AttributeValue;
 }
 
 function isArrayBuffer(arg: any): arg is ArrayBuffer {

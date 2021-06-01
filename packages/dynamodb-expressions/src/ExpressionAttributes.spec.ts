@@ -1,6 +1,6 @@
 import {ExpressionAttributes} from "./ExpressionAttributes";
-import {ExpressionAttributeValueMap} from 'aws-sdk/clients/dynamodb';
 import {AttributePath} from "./AttributePath";
+import {AttributeValue} from "@aws-sdk/client-dynamodb";
 
 describe('ExpressionAttributes', () => {
     describe('#addName', () => {
@@ -96,7 +96,7 @@ describe('ExpressionAttributes', () => {
         it(
             'should provide an ExpressionAttributeValueMap of all aliased values',
             () => {
-                const expected: ExpressionAttributeValueMap = {};
+                const expected: {[key: string]: AttributeValue} = {};
                 const ea = new ExpressionAttributes();
                 for (const reservedWord of DDB_RESERVED_WORDS) {
                     const alias = ea.addValue(reservedWord);

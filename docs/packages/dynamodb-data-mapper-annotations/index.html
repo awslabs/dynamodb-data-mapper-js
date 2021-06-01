@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>@aws/dynamodb-data-mapper-annotations</title>
+	<title>@awslabs-community-fork/dynamodb-data-mapper-annotations</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">@aws/dynamodb-data-mapper-annotations</a>
+					<a href="index.html" class="title">@awslabs-community-fork/dynamodb-data-mapper-annotations</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -54,7 +54,7 @@
 					<a href="globals.html">Globals</a>
 				</li>
 			</ul>
-			<h1> @aws/dynamodb-data-mapper-annotations</h1>
+			<h1> @awslabs-community-fork/dynamodb-data-mapper-annotations</h1>
 		</div>
 	</div>
 </header>
@@ -65,7 +65,7 @@
 				<h1 id="amazon-dynamodb-datamapper-annotations">Amazon DynamoDB DataMapper Annotations</h1>
 				<p><a href="http://aws.amazon.com/apache-2-0/"><img src="https://img.shields.io/github/license/awslabs/dynamodb-data-mapper-js.svg?style=flat" alt="Apache 2 License"></a></p>
 				<p>This library provides annotations to allow easy integration of domain classes
-					with the <code>DataMapper</code> defined in <code>@aws/dynamodb-data-mapper</code>. These annotations
+					with the <code>DataMapper</code> defined in <code>@awslabs-community-fork/dynamodb-data-mapper</code>. These annotations
 					are provided in a separate NPM package because they rely on two experimental
 					features of TypeScript (decorators and metadata decoration) and depend on the
 				<code>reflect-metadata</code> package.</p>
@@ -83,7 +83,7 @@
     rangeKey,
     table,
     versionAttribute,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-data-mapper-annotations'</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-data-mapper-annotations'</span>;
 <span class="hljs-keyword">import</span> uuidV4 = <span class="hljs-built_in">require</span>(<span class="hljs-string">'uuid/v4'</span>);
 
 <span class="hljs-meta">@table</span>(<span class="hljs-string">'my_table'</span>)
@@ -115,11 +115,11 @@
 				<p>To declare a class corresponding to a map attribute value in a DynamoDB record,
 				simply omit the <code>table</code> annotation:</p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> {
-    attribute, 
+    attribute,
     hashKey,
     table,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-data-mapper-annotations'</span>;
-<span class="hljs-keyword">import</span> {embed} <span class="hljs-keyword">from</span> <span class="hljs-string">'@aws/dynamodb-data-mapper'</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-data-mapper-annotations'</span>;
+<span class="hljs-keyword">import</span> {embed} <span class="hljs-keyword">from</span> <span class="hljs-string">'@awslabs-community-fork/dynamodb-data-mapper'</span>;
 
 <span class="hljs-keyword">class</span> Comment {
     <span class="hljs-meta">@attribute</span>()
@@ -200,7 +200,7 @@
 				tuple or typed list, respectively.</p>
 				<p>Member type declarations are required for maps and sets, though the member type
 					will be automatically inferred if a property is declared as being of type
-					<code>BinarySet</code> or <code>NumberValueSet</code> (from the <code>@aws/dynamodb-auto-marshaller</code>
+					<code>BinarySet</code> or <code>NumberValueSet</code> (from the <code>@awslabs-community-fork/dynamodb-auto-marshaller</code>
 				package).</p>
 			</div>
 		</div>

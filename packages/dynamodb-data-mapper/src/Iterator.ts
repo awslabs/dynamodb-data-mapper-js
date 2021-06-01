@@ -1,7 +1,9 @@
 import { Paginator as AbstractPaginator } from './Paginator';
-import { ConsumedCapacity } from 'aws-sdk/clients/dynamodb';
+import { ConsumedCapacity } from '@aws-sdk/client-dynamodb';
 
-require('./asyncIteratorSymbolPolyfill');
+if (Symbol && !Symbol.asyncIterator) {
+    (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
+}
 
 export abstract class Iterator<
     T,

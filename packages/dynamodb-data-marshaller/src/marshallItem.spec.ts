@@ -2,7 +2,7 @@ import {marshallItem} from "./marshallItem";
 import {Schema} from "./Schema";
 import {CustomType} from "./SchemaType";
 import objectContaining = jasmine.objectContaining;
-import {BinarySet} from "@aws/dynamodb-auto-marshaller";
+import {BinarySet} from "@awslabs-community-fork/dynamodb-auto-marshaller";
 
 describe('marshallItem', () => {
     it('should serialize fields to their attributeName if provided', () => {
@@ -192,11 +192,11 @@ describe('marshallItem', () => {
                 schema,
                 {
                     binSet: new BinarySet([
-                        new ArrayBuffer(0),
-                        new ArrayBuffer(1),
-                        new ArrayBuffer(2),
-                        new ArrayBuffer(3),
-                        new ArrayBuffer(0),
+                        new Uint8Array(0),
+                        new Uint8Array(1),
+                        new Uint8Array(2),
+                        new Uint8Array(3),
+                        new Uint8Array(0),
                     ])
                 }
             )).toEqual({

@@ -1,29 +1,11 @@
 {
+  "extends": "../../tsconfig.json",
+  "include": [
+    "src"
+  ],
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "es5",
-      "es2015.iterable",
-      "es2015.promise",
-      "es2015.collection",
-      "es2015.symbol.wellknown",
-      "esnext.asynciterable"
-    ],
-    "downlevelIteration": true,
-    "importHelpers": true,
-    "module": "commonjs",
-    "noUnusedLocals": true,
-    "strict": true,
-    "declaration": true,
-    "sourceMap": true,
-    "rootDir": "./src",
-    "outDir": "./build"
+    "declarationDir": "dist/types",
+    "outDir": "dist/lib/esm"
   },
-  "typedocOptions": {
-    "mode": "file",
-    "out": "../../docs/packages/dynamodb-query-iterator",
-    "excludeNotExported": true,
-    "excludePrivate": true,
-    "hideGenerator": true
-  }
+  "exclude": ["./**/*.spec.ts", "dist"]
 }

@@ -1,11 +1,14 @@
 {
   "name": "dynamodb-data-mapper-js",
-  "private": true,
   "scripts": {
     "bootstrap": "lerna bootstrap",
+    "build": "lerna run build",
     "docs": "typedoc src && lerna run docs",
-    "pretest": "lerna run pretest",
-    "test": "jest"
+    "test": "lerna run test",
+    "e2e": "cd tests/e2e && jest && cd ..",
+    "perf": "cd tests/perf && jest && cd ..",
+    "bump-patch": "lerna version patch --yes",
+    "publish-ci": "lerna publish from-git --yes --no-verify-access"
   },
   "author": {
     "name": "AWS SDK for JavaScript Team",
@@ -13,21 +16,30 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "@types/jest": "^24",
-    "@types/node": "^8.0.4",
-    "jest": "^24",
-    "lerna": "^3.13",
-    "typedoc": "^0.14.0",
-    "typescript": "^3.4"
+    "@aws-sdk/client-dynamodb": "^3.10.0",
+    "@types/jest": "^26.0.22",
+    "@types/node": "^14",
+    "jest": "^26.6.3",
+    "lerna": "^4.0.0",
+    "ts-jest": "^26.5.4",
+    "typedoc": "^0.20.35",
+    "typescript": "^4.2"
   },
   "dependencies": {
-    "aws-sdk": "^2.7.0"
+    "@aws-sdk/client-dynamodb": "^3.10.0",
+    "reflect-metadata": "^0.1.13"
+  },
+  "peerDependencies": {
+    "@aws-sdk/client-dynamodb": "^3.10.0"
   },
   "workspaces": [
     "packages/*"
   ],
   "jest": {
     "testEnvironment": "node",
-    "testPathIgnorePatterns": ["/node_modules/", ".ts"]
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      ".ts"
+    ]
   }
 }

@@ -1,3 +1,16 @@
+
+# This is a community fork
+We are planning to merge it back if AWS allows it. Meanwhile, enjoy:
+
+* SDK v3 support
+
+
+To install:
+
+```
+npm install aws-community-fork/dynamodb-data-mapper
+```
+
 # Amazon DynamoDB DataMapper For JavaScript
 
 [![Apache 2 License](https://img.shields.io/github/license/awslabs/dynamodb-data-mapper-js.svg?style=flat)](http://aws.amazon.com/apache-2-0/)
@@ -7,10 +20,10 @@ document mapper for JavaScript applications using Amazon DynamoDB.
 
 ## Getting started
 
-[The `@aws/dynamodb-data-mapper` package](packages/dynamodb-data-mapper) provides
+[The `@awslabs-community-fork/dynamodb-data-mapper` package](packages/dynamodb-data-mapper) provides
 a simple way to persist and load an application's domain objects to and from
 Amazon DynamoDB. When used together with the decorators provided by [the
-`@aws/dynamodb-data-mapper-annotations` package](packages/dynamodb-data-mapper-annotations),
+`@awslabs-community-fork/dynamodb-data-mapper-annotations` package](packages/dynamodb-data-mapper-annotations),
 you can describe the relationship between a class and its representation in
 DynamoDB by adding a few decorators:
 
@@ -20,7 +33,7 @@ import {
     hashKey,
     rangeKey,
     table,
-} from '@aws/dynamodb-data-mapper-annotations';
+} from '@awslabs-community-fork/dynamodb-data-mapper-annotations';
 
 @table('table_name')
 class MyDomainObject {
@@ -39,7 +52,7 @@ With domain classes defined, you can interact with records in DynamoDB via an
 instance of `DataMapper`:
 
 ```typescript
-import {DataMapper} from '@aws/dynamodb-data-mapper';
+import {DataMapper} from '@awslabs-community-fork/dynamodb-data-mapper';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 const mapper = new DataMapper({
@@ -193,7 +206,7 @@ import {
     AttributePath,
     FunctionExpression,
     UpdateExpression,
-} from '@aws/dynamodb-expressions';
+} from '@awslabs-community-fork/dynamodb-expressions';
 
 const expr = new UpdateExpression();
 

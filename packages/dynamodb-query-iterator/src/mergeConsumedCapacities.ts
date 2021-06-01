@@ -1,8 +1,7 @@
 import {
     Capacity,
     ConsumedCapacity,
-    SecondaryIndexesCapacityMap,
-} from 'aws-sdk/clients/dynamodb';
+} from '@aws-sdk/client-dynamodb';
 
 /**
  * @internal
@@ -47,11 +46,11 @@ function mergeCapacities(a?: Capacity, b?: Capacity): Capacity|undefined {
 }
 
 function mergeCapacityMaps(
-    a?: SecondaryIndexesCapacityMap,
-    b?: SecondaryIndexesCapacityMap
-): SecondaryIndexesCapacityMap|undefined {
+    a?: {[key: string]: Capacity},
+    b?: {[key: string]: Capacity}
+): {[key: string]: Capacity}|undefined {
     if (a || b) {
-        const out: SecondaryIndexesCapacityMap = {};
+        const out: {[key: string]: Capacity} = {};
 
         a = a || {};
         b = b || {};
