@@ -3,7 +3,9 @@
     "moduleResolution": "node",
     "target": "es6",
     "module":"es2020",
-    "lib": ["es2020"],
+    "lib": [
+      "es2020"
+    ],
     "strictNullChecks": true,
     "sourceMap": true,
     "declaration": true,
