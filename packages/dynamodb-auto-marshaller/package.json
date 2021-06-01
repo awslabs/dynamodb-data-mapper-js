@@ -1,6 +1,6 @@
 {
   "name": "@awslabs-community-fork/dynamodb-auto-marshaller",
-  "version": "0.7.9",
+  "version": "0.7.10",
   "description": "A data marshaller that converts JavaScript types into Amazon DynamoDB AttributeValues",
   "keywords": [
     "aws",
