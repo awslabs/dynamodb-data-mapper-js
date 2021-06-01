@@ -11,6 +11,7 @@ import {
 } from '@awslabs-community-fork/dynamodb-auto-marshaller';
 const bytes = require('utf8-bytes');
 
+
 /**
  * Converts a JavaScript object into a DynamoDB Item.
  *

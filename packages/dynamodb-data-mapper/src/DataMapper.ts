@@ -86,7 +86,10 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import { DynamoDB } from "@aws-sdk/client-dynamodb";
 
-require('./asyncIteratorSymbolPolyfill');
+if (Symbol && !Symbol.asyncIterator) {
+    (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
+}
+
 
 /**
  * Object mapper for domain object interaction with DynamoDB.

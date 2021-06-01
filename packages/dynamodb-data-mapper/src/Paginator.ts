@@ -7,7 +7,10 @@ import {
 } from '@awslabs-community-fork/dynamodb-data-marshaller';
 import { ConsumedCapacity } from '@aws-sdk/client-dynamodb';
 
-require('./asyncIteratorSymbolPolyfill');
+if (Symbol && !Symbol.asyncIterator) {
+    (Symbol as any).asyncIterator = Symbol.for("__@@asyncIterator__");
+}
+
 
 export abstract class Paginator<T> implements AsyncIterableIterator<Array<T>> {
     private readonly itemSchema: Schema;
