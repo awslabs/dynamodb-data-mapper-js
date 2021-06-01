@@ -32,8 +32,7 @@
   "dependencies": {
     "@awslabs-community-fork/dynamodb-auto-marshaller": "^0.7.1",
     "@awslabs-community-fork/dynamodb-expressions": "^0.7.3",
-    "tslib": "^2.1.0",
-    "utf8-bytes": "^0.0.1"
+    "tslib": "^2.1.0"
   },
   "jest": {
     "transform": {
