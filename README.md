@@ -197,7 +197,7 @@ import {
 
 const expr = new UpdateExpression();
 
-// given the anotation bellow
+// given the anotation below
 @table('tableName')
 class MyRecord {
     @hashKey()
