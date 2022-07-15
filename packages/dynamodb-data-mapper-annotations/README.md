@@ -98,6 +98,37 @@ class BlogPost {
 }
 ```
 
+To declare Global Secondary Index (GSI) you should use the `indexKeyConfigurations` property of the `attribute` annotation:
+
+```typescript
+import {
+    attribute, 
+    hashKey,
+    table,
+} from '@aws/dynamodb-data-mapper-annotations';
+
+@table('posts')
+class BlogPost {
+    @hashKey()
+    id: string;
+
+    // define a GSI index named `authorIndex` that uses `author`` as partition key
+    @attribute({indexKeyConfigurations: {
+        authorIndex: 'HASH'
+    }})
+    author?: string;
+
+    // define a GSI index named `postedAtIndex` that uses `postedAt`` as sort key
+    @attribute({indexKeyConfigurations: {
+        postedAtIndex: 'RANGE'
+    }})
+    postedAt?: Date;
+
+    @attribute()
+    text?: string;
+}
+```
+
 ## Supported Annotations
 
 ### `attribute`
