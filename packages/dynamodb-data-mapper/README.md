@@ -421,12 +421,14 @@ If you wish to perform a resumable query, you can use the `.pages()` method of
 the iterator returned by `query` to access the underlying paginator. The
 paginator differs from the iterator in that it yields arrays of unmarshalled
 records and has a `lastEvaluatedKey` property that may be provided to a new
-call to `mapper.query` to resume the query later or in a separate process:
+call to `mapper.query` to resume the query later or in a separate process. 
+Assuming you had a partition key of `id` and a sort key of `orderRank`, you 
+could query `id='1234567890ab'` and `orderRank` between 0-10 like so:
 
 ```typescript
 const paginator = mapper.query(
     MyClass,
-    {partitionKey: 'foo', rangeKey: between(0, 10)},
+    {id: '1234567890ab', orderRank: between(0, 10)},
     {
         // automatically stop after 25 items or the entire result set has been
         // fetched, whichever is smaller
